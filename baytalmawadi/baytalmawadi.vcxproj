@@ -72,11 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src\headers;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\dependencies\include;C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src\headers;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\dependencies\include;C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,6 +113,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,19 +141,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\config.cpp" />
+    <ClCompile Include="src\controller\App.cpp" />
+    <ClCompile Include="src\controller\InputHandler.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\headers\Camera.h" />
-    <ClInclude Include="src\headers\config.h" />
-    <ClInclude Include="src\headers\Cubemap.h" />
-    <ClInclude Include="src\headers\Mesh.h" />
-    <ClInclude Include="src\headers\Model.h" />
-    <ClInclude Include="src\headers\Object.h" />
-    <ClInclude Include="src\headers\pbrMaterial.h" />
-    <ClInclude Include="src\headers\Shader.h" />
-    <ClInclude Include="src\headers\Texture.h" />
+    <ClInclude Include="src\controller\App.h" />
+    <ClInclude Include="src\controller\InputHandler.h" />
+    <ClInclude Include="src\model\Camera.h" />
+    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\view\Cubemap.h" />
+    <ClInclude Include="src\view\Mesh.h" />
+    <ClInclude Include="src\model\Model.h" />
+    <ClInclude Include="src\model\Object.h" />
+    <ClInclude Include="src\view\pbrMaterial.h" />
+    <ClInclude Include="src\view\Shader.h" />
+    <ClInclude Include="src\view\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="dependencies\lib\glfw3.lib" />
