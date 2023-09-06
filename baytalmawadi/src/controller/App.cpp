@@ -68,7 +68,7 @@ App::~App()
 
 void App::setupGlSettings()
 {
-
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	// number of attributes we can set in the shader supported by hardware
 	bool Debug_PrintNumberOfAttributesToConsol = false;
 	if (Debug_PrintNumberOfAttributesToConsol) 
@@ -107,32 +107,34 @@ void App::run()
 	setupGlSettings();
 	setupScene();
 
-	// generate a texture
-	Texture albedoTexture;
-	Texture normalTexture;
-	Texture roughnessTexture;
-	Texture metallicTexture;
-	Texture emissiveTexture;
-	Texture aoTexture;
-
-	albedoTexture.generateFromFile("textures/panel_albedo.png", true, true);
-	normalTexture.generateFromFile("textures/panel_normal.png", true, true);
-	roughnessTexture.generateFromFile("textures/panel_roughness.png", true, true);
-	metallicTexture.generateFromFile("textures/panel_metallic.png", true, true);
-	emissiveTexture.generateFromFile("textures/panel_emissive.png", true, true);
-	aoTexture.generateFromFile("textures/panel_ao.png", true, true);
-
-
 	// cubemap
 
 
-	Cubemap cubemapTexture("textures/kloppenheim.hdr", 1024, true);
+	Cubemap cubemapTexture("textures/market.hdr", 1024, true);
 
 
 	Shader skyboxShader("src/shaders/skybox.vert", "src/shaders/skybox.frag");
 	Shader lightShader("src/shaders/textureVertex.vert", "src/shaders/unlit.frag");
 	Shader pbrShader("src/shaders/pbrVertex.vert", "src/shaders/pbrFragment.frag");
 
+
+	// material
+	PbrMaterial material;
+	material.assignShader(pbrShader);
+	material.assignTexture(ALBEDO, "textures/panel_albedo.png");
+	material.assignTexture(ROUGHNESS, "textures/panel_roughness.png");
+	material.assignTexture(METALLIC, "textures/panel_metallic.png");
+	material.assignTexture(NORMAL, "textures/panel_normal.png");
+	material.assignTexture(AMBIENTOCCLUSION, "textures/panel_ao.png");
+	material.assignTexture(EMISSION, "textures/panel_emissive.png");
+	
+	material.EmissionStrength = 0.0;
+	material.Albedo = glm::vec3(0.1f, 0.8f, 0.0f);
+	material.Emission = glm::vec3(0.0f, 0.3f, 0.7f);
+
+
+	material.removeTexture(EMISSION);
+	//material.removeTexture(ROUGHNESS);
 
 	//Object Suzanne("fbx/unitPlane.fbx");
 	Object Suzanne("fbx/SuzanneSmooth.fbx");
@@ -142,6 +144,8 @@ void App::run()
 	Light.scale = glm::vec3(0.7f, 0.7f, 0.7f);
 
 	Object skybox("fbx/skyboxMesh.fbx");
+
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -158,7 +162,6 @@ void App::run()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		
-
 		glm::mat4 viewMatrix = mainCamera->GetViewMatrix();
 		glm::mat4 projectionMatrix = mainCamera->GetProjectionMatrix();
 
@@ -181,20 +184,7 @@ void App::run()
 		pbrShader.setUniformInt("_brdfLUT", 9);
 
 
-
-		albedoTexture.BindToLocation(0);
-		pbrShader.setUniformInt("_albedoMap", 0);
-		normalTexture.BindToLocation(1);
-		pbrShader.setUniformInt("_normalMap", 1);
-		roughnessTexture.BindToLocation(2);
-		pbrShader.setUniformInt("_roughnessMap", 2);
-		metallicTexture.BindToLocation(3);
-		pbrShader.setUniformInt("_metallicMap", 3);
-		emissiveTexture.BindToLocation(6);
-		pbrShader.setUniformInt("_emissionMap", 6);
-		// ao location 4
-		// height map location 5
-		// emmission location 6
+		material.setMaterialUniforms();
 
 		Suzanne.Render(pbrShader, viewMatrix, projectionMatrix);
 

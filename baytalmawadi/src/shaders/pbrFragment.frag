@@ -21,15 +21,28 @@ uniform samplerCube _irradianceMap;
 uniform samplerCube _prefilterMap;
 uniform sampler2D _brdfLUT;
 
-//PBR maps inputs
+//PBR Value inputs
+// I am using the last parameter of each value vector to
+// lerp between the value and the sampled texture.
+// this is done so that if no texture is bound to a specific slot the shader will use the value
+// and if a texture is bound it will use the texture sample as the pbr value.
+uniform vec4 _albedoColorValue;
+uniform vec2 _roughnessValue;
+uniform vec2 _metallicValue;
+uniform vec4 _emissionColorValue;
+uniform float _ambientOcculusionValue;
+uniform float _normalValue;
+
+uniform float _normalStrength;
+uniform float _emissionStrength;
+
+//PBR Texture maps inputs
 uniform sampler2D _albedoMap;
 uniform sampler2D _normalMap;
 uniform sampler2D _roughnessMap;
 uniform sampler2D _metallicMap;
-uniform sampler2D _aoMap;
+uniform sampler2D _ambientOcculusionMap;
 uniform sampler2D _emissionMap;
-uniform float _normalStrength;
-uniform float _emissionStrength;
 
 //outputs
 out vec4 fragmentOutputColor;
@@ -40,16 +53,21 @@ void main()
 	//// ============================================================================================================ ////
 
 			// set pbr values
-			vec4 albedoAlphaMap = sampleAlbedoAlphaMap(_albedoMap,uv);
+			// if no albedo texture is bound alpha will probably be 0 which is not the nicest
+			vec4 albedoAlphaMap = sampleAlbedoAlphaMap(_albedoMap,uv,_albedoColorValue);
 
 			vec3 albedo = albedoAlphaMap.rgb;
 			float alpha = albedoAlphaMap.a;
-			float roughness = sampleRoughnessMap(_roughnessMap,uv);
-			float metallic = sampleMetallicMap(_metallicMap,uv);
-			float ambientOcclusion = 1.0f;
-			vec3 emission = sampleEmissionMap(_emissionMap,uv).rgb;
+			float roughness = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);
+			float metallic = sampleMetallicMap(_metallicMap,uv,_metallicValue);
+			float ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,uv,_ambientOcculusionValue);
+			vec3 emission = sampleEmissionMap(_emissionMap,uv,_emissionColorValue);
+
+			//vec3 outColor = vec3(0.0,0.0,0.0);
+		  //outColor = lerp(emission,_emissionColorValue.rgb,_emissionColorValue.w);
+
 			// Normal is in worldspace // everything is done is worldspace
-			vec3 normal = sampleNormalMap(_normalMap,uv,tangentToWorldMatrix);
+			vec3 normal = sampleNormalMap(_normalMap,uv,tangentToWorldMatrix,_normalValue);
 
 	////// LIGHTTING DATA =========================================================================================== ////
 	//// ============================================================================================================ ////
@@ -106,7 +124,7 @@ void main()
 	////// Emissive ================================================================================================= ////
 	//// ============================================================================================================ ////
 
-		vec3 emissive = emission * 4.0;//_emissionStrength;
+		vec3 emissive = emission * _emissionStrength;
 
 	////// COMBINED LIGHTING ======================================================================================== ////
 	//// ============================================================================================================ ////
@@ -122,6 +140,6 @@ void main()
 
 
 	fragmentOutputColor = postProcess(pixelColorLinear,0.0f);
-	//fragmentOutputColor.rgb = emissive;
+	//fragmentOutputColor.rgb = vec3(normal);
 
 }

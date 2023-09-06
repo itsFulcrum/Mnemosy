@@ -146,6 +146,7 @@
     <ClCompile Include="src\controller\InputHandler.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\view\PbrMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\controller\App.h" />
@@ -156,7 +157,7 @@
     <ClInclude Include="src\view\Mesh.h" />
     <ClInclude Include="src\model\Model.h" />
     <ClInclude Include="src\model\Object.h" />
-    <ClInclude Include="src\view\pbrMaterial.h" />
+    <ClInclude Include="src\view\PbrMaterial.h" />
     <ClInclude Include="src\view\Shader.h" />
     <ClInclude Include="src\view\Texture.h" />
   </ItemGroup>

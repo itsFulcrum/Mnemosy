@@ -23,6 +23,7 @@
 #include <view/Shader.h>
 #include <view/Texture.h>
 #include <view/Cubemap.h>
+#include <view/PbrMaterial.h>
 
 #include <controller/InputHandler.h>
 
@@ -57,6 +58,8 @@ public:
 
 private:
 	void setupGlSettings();
+	// this will eventually be move into its own class
+	void setupScene();
 
 	GLFWwindow* window;
 

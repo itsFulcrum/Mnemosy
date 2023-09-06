@@ -30,6 +30,9 @@
     <ClCompile Include="src\config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\view\PbrMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -50,7 +53,7 @@
     <ClInclude Include="src\model\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\view\pbrMaterial.h">
+    <ClInclude Include="src\view\PbrMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\view\Shader.h">

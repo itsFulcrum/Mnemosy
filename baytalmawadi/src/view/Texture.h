@@ -15,6 +15,7 @@ public:
 private:
 	bool m_hasAlphaChannel = false;
 	int m_channelsAmount = 0;
+	int m_lastBoundLocation = 0;
 
 public:
 
@@ -28,6 +29,7 @@ public:
 
 	void generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps)
 	{
+		clear();
 
 		glGenTextures(1, &ID);
 		glBindTexture(GL_TEXTURE_2D, ID);
@@ -88,12 +90,22 @@ public:
 	}
 
 
-	bool isInitialized()
+	bool containsData()
 	{
 		if (ID != NULL)
 			return true;
 
 		return false;
+	}
+
+	void clear()
+	{
+		if (containsData())
+		{
+			UnbindLocation(m_lastBoundLocation);
+			glDeleteTextures(1, &ID);
+			ID = NULL;
+		}
 	}
 
 	void BindToLocation(unsigned int activeTextureLocation)
@@ -107,13 +119,34 @@ public:
 		{
 			std::cout << "ERROR::TEXTURE::CANT_BIND_TEXTURE_TO_LOCATION: " << activeTextureLocation << " ONLY_RANGE_0_TO_16_ALLOWED\n" << "BOUND_TO_DEFAULT_LOCATION: 0\n" << "\n -- --------------------------------------------------- -- " << std::endl;
 			glActiveTexture(GL_TEXTURE0);
+			m_lastBoundLocation = 0;
+		}
+		else
+		{
+			glActiveTexture(GL_TEXTURE0 + activeTextureLocation);
+			m_lastBoundLocation = activeTextureLocation;
+		}
+		glBindTexture(GL_TEXTURE_2D, ID);
+
+	}
+	
+
+	void UnbindLocation(unsigned int activeTextureLocation)
+	{
+		
+		if (activeTextureLocation > 16 || activeTextureLocation < 0)
+		{
+			std::cout << "ERROR::TEXTURE::CANT_UNBIND_TEXTURE_LOCATION: " << activeTextureLocation << " ONLY_RANGE_0_TO_16_ALLOWED\n"  << " -- --------------------------------------------------- -- " << std::endl;
+			//glActiveTexture(GL_TEXTURE0);
 		}
 		else
 		{
 			glActiveTexture(GL_TEXTURE0 + activeTextureLocation);
 		}
 		glBindTexture(GL_TEXTURE_2D, ID);
+		
 	}
+
 
 	bool HasAlphaCannel()
 	{

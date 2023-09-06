@@ -9,58 +9,47 @@
 #include <view/Shader.h>
 #include <view/Texture.h>
 
+enum PBRTextureType
+{
+	ALBEDO,
+	ROUGHNESS,
+	METALLIC,
+	NORMAL,
+	AMBIENTOCCLUSION,
+	EMISSION
+};
 
 class PbrMaterial
 {
 public:
-	//Shader pbrShader;
+
+	PbrMaterial();
+	~PbrMaterial();
+
+	glm::vec3 Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 Emission = glm::vec3(1.0f, 0.0f, 0.0f);
+	float Roughness = 0.5f;
+	float Metallic = 1.0f;
+	float EmissionStrength = 1.0f;
+	// currently not supported by shader
+	float NormalStrength = 1.0f;
 
 
-	glm::vec3 baseColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	float baseRoughness = 0.5f;
-	float baseMetallic = 0.0f;
-	glm::vec3 baseEmission = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	float emissionStrength = 1.0f;
-	float normalStrength = 1.0f;
+	void assignShader(Shader& newShader);
+	void assignTexture(PBRTextureType pbrType, std::string Filepath);
+	void removeTexture(PBRTextureType pbrType);
+	void setMaterialUniforms();
 
-
-
+private:
+	Shader* pbrShader = nullptr;
+	
 	Texture albedoTexture;
 	Texture normalTexture;
 	Texture roughnessTexture;
 	Texture metallicTexture;
 	Texture emissiveTexture;
-	Texture aoTexture;
-
-
-
-	PbrMaterial()
-	{
-
-
-		albedoTexture.generateFromFile("textures/panel_albedo.png", true, true);
-		normalTexture.generateFromFile("textures/panel_normal.png", true, true);
-		roughnessTexture.generateFromFile("textures/panel_roughness.png", true, true);
-		metallicTexture.generateFromFile("textures/panel_metallic.png", true, true);
-		emissiveTexture.generateFromFile("textures/panel_emissive.png", true, true);
-		aoTexture.generateFromFile("textures/panel_ao.png", true, true);
-	}
-	~PbrMaterial()
-	{
-	}
-
-	void setUniforms()
-	{
-
-		
-	}
-
-private:
-
-
-
-
+	Texture ambientOcclusionTexture;
 
 
 };
