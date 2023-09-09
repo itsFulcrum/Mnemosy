@@ -73,11 +73,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\dependencies\include;C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\dependencies\include;C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,7 +113,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -130,7 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\fulcrum\Documents\cppProjects\Baytalmawadi\baytalmawadi\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -145,6 +145,7 @@
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\controller\App.cpp" />
     <ClCompile Include="src\controller\InputHandler.cpp" />
+    <ClCompile Include="src\controller\MeshRenderer.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\model\SceneObject.cpp" />
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="src\controller\App.h" />
     <ClInclude Include="src\controller\InputHandler.h" />
+    <ClInclude Include="src\controller\MeshRenderer.h" />
     <ClInclude Include="src\model\Camera.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\view\Cubemap.h" />

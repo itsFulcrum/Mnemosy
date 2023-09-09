@@ -2,21 +2,10 @@
 #define MODEL_H
 
 
-//#include <glad/glad.h> 
-
-//#include <glm/glm.hpp>
-//#include <glm/gtc/matrix_transform.hpp>
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-//#include <string>
-//#include <fstream>
-//#include <sstream>
-//#include <iostream>
-//#include <map>
-//#include <vector>
 
 //#include <view/Shader.h>
 #include <view/Mesh.h>
@@ -35,10 +24,6 @@ public:
 		M_LoadModel(path);
 	}
 	
-	/*
-		should replace shader here with a material object that holds
-		a refrence to a shader and its properties
-	*/
 	
 	void Load(std::string const& path)
 	{

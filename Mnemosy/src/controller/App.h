@@ -58,6 +58,7 @@ public:
 
 private:
 	void setupGlSettings();
+	void setupGLFWWindow(const char* WindowTitleName);
 	// this will eventually be move into its own class
 	void setupScene();
 

@@ -3,26 +3,8 @@
 
 App::App()
 {
-
-	// initialize glfw with opengl versions;
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
-
-
-	// create GLFW window
-	 window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Mnemosy Texture Library", NULL, NULL);
+	setupGLFWWindow("Mnemosy Texture library");
 	
-
-	if (window == NULL)
-	{
-		std::cout << "Warning!: Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		//return-1;
-	}
-	glfwMakeContextCurrent(window);
 
 	// initialize glad "We pass GLAD the function to load the address of the OpenGL function pointers which is OS-specific"
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -61,6 +43,30 @@ App::~App()
 	delete mainCamera;
 	delete inputHandler;
 	glfwTerminate();
+}
+
+
+void App::setupGLFWWindow(const char* WindowTileName)
+{
+	// initialize glfw with opengl versions;
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
+
+	// create GLFW window
+	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT,WindowTileName, NULL, NULL);
+
+
+	if (window == NULL)
+	{
+		std::cout << "Warning!: Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		//return-1;
+	}
+	glfwMakeContextCurrent(window);
 }
 
 void App::setupGlSettings()
@@ -119,10 +125,13 @@ void App::run()
 
 
 	Shader skyboxShader("src/shaders/skybox.vert", "src/shaders/skybox.frag");
-	Shader lightShader("src/shaders/textureVertex.vert", "src/shaders/unlit.frag");
+	//Shader lightShader("src/shaders/textureVertex.vert", "src/shaders/unlit.frag");
 	Shader pbrShader("src/shaders/pbrVertex.vert", "src/shaders/pbrFragment.frag");
 
 
+
+
+	Object Suzanne("fbx/SuzanneSmooth.fbx");
 	// material
 	PbrMaterial material;
 	material.assignShader(pbrShader);
@@ -138,18 +147,26 @@ void App::run()
 	material.Emission = glm::vec3(0.0f, 0.3f, 0.7f);
 
 
-	material.removeTexture(EMISSION);
-	//material.removeTexture(ROUGHNESS);
-
-	//Object Suzanne("fbx/unitPlane.fbx");
-	Object Suzanne("fbx/SuzanneSmooth.fbx");
-	// icoshere model
+	
 	Object Light("fbx/icoSphere.fbx");
+
+	PbrMaterial lightMaterial;
+	lightMaterial.assignShader(pbrShader);
+	lightMaterial.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightMaterial.Roughness = 1.0;
+	lightMaterial.Emission = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightMaterial.EmissionStrength = 2.0f;
+
 	Light.position = glm::vec3(6.0f, 4.0f, 0.0f);
 	Light.scale = glm::vec3(0.7f, 0.7f, 0.7f);
 
+
+
 	Object skybox("fbx/skyboxMesh.fbx");
 
+	
+	
+	
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 	while (!glfwWindowShouldClose(window))
@@ -190,15 +207,13 @@ void App::run()
 
 
 		material.setMaterialUniforms();
-
 		Suzanne.Render(pbrShader, viewMatrix, projectionMatrix);
 
 
-
-
 		// render light source ( as an object placeholder atm
-		lightShader.use();
-		Light.Render(lightShader, viewMatrix, projectionMatrix);
+		//lightShader.use();
+		lightMaterial.setMaterialUniforms();
+		Light.Render(pbrShader, viewMatrix, projectionMatrix);
 
 		// Render skybox last
 		// use a mesh that has faces point inwards to make this call obsolete
