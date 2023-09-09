@@ -24,6 +24,7 @@
     <ProjectGuid>{a9bf2a22-dc24-419d-91d2-a7cca982cb67}</ProjectGuid>
     <RootNamespace>baytalmawadi</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>mnemosy</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

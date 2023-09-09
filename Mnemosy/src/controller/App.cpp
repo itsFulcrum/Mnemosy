@@ -13,7 +13,7 @@ App::App()
 
 
 	// create GLFW window
-	 window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Baytalmawadi", NULL, NULL);
+	 window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Mnemosy Texture Library", NULL, NULL);
 	
 
 	if (window == NULL)
@@ -52,10 +52,6 @@ App::App()
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, mouse_scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_cursor_callback);
-
-	
-	// set openGl rendering viewport at position and width/height
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 	
 }
@@ -112,6 +108,8 @@ void App::setupScene()
 void App::run()
 {
 	setupGlSettings();
+
+
 	setupScene();
 
 	// cubemap
