@@ -9,6 +9,7 @@ App::App()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 
 	// create GLFW window
@@ -79,13 +80,19 @@ void App::setupGlSettings()
 	}
 	
 
-	
+	glEnable(GL_MULTISAMPLE);
 	//enable depth testing
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	// srgb is manually handled in the shaders
 	glDisable(GL_FRAMEBUFFER_SRGB);
 
 	// draw Polygons opaque (Fully shaded)
+
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CW);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	// wireframe mode
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -196,6 +203,8 @@ void App::run()
 		Light.Render(lightShader, viewMatrix, projectionMatrix);
 
 		// Render skybox last
+		// use a mesh that has faces point inwards to make this call obsolete
+		glCullFace(GL_BACK);
 		glDepthFunc(GL_LEQUAL);
 		skyboxShader.use();
 		cubemapTexture.BindColorCubemap(0);
@@ -203,9 +212,9 @@ void App::run()
 		glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(viewMatrix));
 		skybox.Render(skyboxShader, skyboxViewMatrix, projectionMatrix);
 		glDepthFunc(GL_LESS);
+		glCullFace(GL_FRONT);
+		
 
-
-		// swap buffers and display new frame
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

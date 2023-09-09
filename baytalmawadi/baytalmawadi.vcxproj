@@ -146,6 +146,7 @@
     <ClCompile Include="src\controller\InputHandler.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\model\SceneObject.cpp" />
     <ClCompile Include="src\view\PbrMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
