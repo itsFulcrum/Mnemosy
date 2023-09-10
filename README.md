@@ -9,11 +9,10 @@ Roadmap notes:
 - Im gui setup
 - camera and input behavior
 
-'''	
+```
 -> like substance painer
 -> also rotate environment light like in substance
-'''
-
+```
 - Propper scene and renderer classes
 
 
