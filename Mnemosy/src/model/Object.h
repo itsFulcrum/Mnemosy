@@ -1,12 +1,11 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <view/Shader.h>
-#include <model/Model.h>
+#include <view/ModelData.h>
 
 
 class Object
@@ -16,48 +15,17 @@ public:
 	glm::vec3 rotation	= glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 scale		= glm::vec3(1.0f, 1.0f, 1.0f);
 
-	
-	Object(std::string modelFilePath)
+	ModelData modelData;
+
+
+public:
+	Object(){}
+	~Object(){}
+
+	glm::mat4 GetTransformMatrix() 
 	{
-		// std::string const& modelFilePath
-
-		//std::string skyboxPathString = "fbx/skyboxMesh.fbx";
-		char* modelPathCstr = const_cast<char*>(modelFilePath.c_str());
-
-		m_model.Load(modelPathCstr);
-
-		// setting default values
-		position = glm::vec3(0.0f, 0.0f, 0.0f);
-		rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-		scale = glm::vec3(1.0f, 1.0f, 1.0f);
-	}
-	~Object()
-	{
-
-	}
-
-	void Render(Shader& shader, glm::mat4 viewMatrix, glm::mat4 projectionMatrix)
-	{
-		shader.use();
-
-
-
-
-		glm::mat4 modelMatrix = M_GetTransformMatrix();
-
-		shader.setUniformMatrix4("_modelMatrix", modelMatrix);
-		shader.setUniformMatrix4("_normalMatrix", M_GetNormalMatrix(modelMatrix));
-		shader.setUniformMatrix4("_viewMatrix", viewMatrix);
-		shader.setUniformMatrix4("_projectionMatrix", projectionMatrix);
-
-		m_model.Draw(shader);
-	}
-
-private:
-	Model m_model;
-
-	glm::mat4 M_GetTransformMatrix() 
-	{
+		// not super efficiant as we generate it every frame, 
+		// coud easily cache it and only update once it changes
 		glm::mat4 transformMatrix = glm::mat4(1.0f);
 		transformMatrix = glm::translate(transformMatrix,position);
 		transformMatrix = glm::rotate(transformMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // around z axis
@@ -68,11 +36,12 @@ private:
 		return transformMatrix;
 	}
 	
-	glm::mat4 M_GetNormalMatrix(glm::mat4 transformMatrix)
+	glm::mat4 GetNormalMatrix(glm::mat4 transformMatrix)
 	{
 		return glm::transpose(glm::inverse(transformMatrix));
 	}
 
+private:
 
 
 };

@@ -14,9 +14,6 @@ App::App()
 	}
 
 
-
-	// register GLFW window resize callback to adjust openGl viewport on window resizes
-
 	// hides mouse cursor and keeps it at center of the window
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -113,26 +110,32 @@ void App::setupScene()
 
 void App::run()
 {
+	
 	setupGlSettings();
-
-
 	setupScene();
 
-	// cubemap
+	SceneRenderer sceneRenderer;
 
+	ModelLoader modelLoader;
 
-	Cubemap cubemapTexture("textures/market.hdr", 1024, true);
 
 
 	Shader skyboxShader("src/shaders/skybox.vert", "src/shaders/skybox.frag");
 	//Shader lightShader("src/shaders/textureVertex.vert", "src/shaders/unlit.frag");
 	Shader pbrShader("src/shaders/pbrVertex.vert", "src/shaders/pbrFragment.frag");
 
+	// SKYBOX
+	Object skybox;
+	skybox.modelData = modelLoader.LoadModelDataFromFile("fbx/skyboxMesh.fbx");
+
+	Cubemap cubemapTexture("textures/spruit_sunrise.hdr", 1024, true);
 
 
+	// MESH OBJECT
+	Object Suzanne;
+	Suzanne.modelData = modelLoader.LoadModelDataFromFile("fbx/SuzanneSmooth.fbx");
+	Suzanne.rotation.x = -90.0f;
 
-	Object Suzanne("fbx/SuzanneSmooth.fbx");
-	// material
 	PbrMaterial material;
 	material.assignShader(pbrShader);
 	material.assignTexture(ALBEDO, "textures/panel_albedo.png");
@@ -147,8 +150,12 @@ void App::run()
 	material.Emission = glm::vec3(0.0f, 0.3f, 0.7f);
 
 
-	
-	Object Light("fbx/icoSphere.fbx");
+	// LIGHT OBJECT (as mesh)
+	Object Light;
+	Light.modelData = modelLoader.LoadModelDataFromFile("fbx/icoSphere.fbx");
+	Light.position = glm::vec3(6.0f, 4.0f, 0.0f);
+	Light.scale = glm::vec3(0.7f, 0.7f, 0.7f);
+
 
 	PbrMaterial lightMaterial;
 	lightMaterial.assignShader(pbrShader);
@@ -157,16 +164,7 @@ void App::run()
 	lightMaterial.Emission = glm::vec3(1.0f, 1.0f, 1.0f);
 	lightMaterial.EmissionStrength = 2.0f;
 
-	Light.position = glm::vec3(6.0f, 4.0f, 0.0f);
-	Light.scale = glm::vec3(0.7f, 0.7f, 0.7f);
 
-
-
-	Object skybox("fbx/skyboxMesh.fbx");
-
-	
-	
-	
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 	while (!glfwWindowShouldClose(window))
@@ -177,57 +175,27 @@ void App::run()
 		lastFrame = time;
 
 		inputHandler->update();
-
-		// rendering commands
-		glClearColor(0.02f, 0.08f, 0.14f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		
-		glm::mat4 viewMatrix = mainCamera->GetViewMatrix();
-		glm::mat4 projectionMatrix = mainCamera->GetProjectionMatrix();
+		sceneRenderer.ClearFrame(0.02f, 0.08f, 0.14f);
 
 
-		//Suzanne.rotation.x = (0.5 * sin(time * 0.1) +0.5)*360;
-		Suzanne.rotation.x = -90.0f;
-		//Suzanne.rotation.y = time * 5.0f;
-		Suzanne.rotation.z = 0.0f;
 
-		pbrShader.use();
-		pbrShader.setUniformFloat3("_lightPositionWS", Light.position.x, Light.position.y, Light.position.z);
-		pbrShader.setUniformFloat("_lightStrength", 1);
-		pbrShader.setUniformFloat3("_cameraPositionWS", mainCamera->position.x, mainCamera->position.y, mainCamera->position.z);
+		glm::vec3 lightPosition = glm::vec3(Light.position.x, Light.position.y, Light.position.z);
+		glm::vec3 cameraPosition = glm::vec3(mainCamera->position.x, mainCamera->position.y, mainCamera->position.z);
+		
+		sceneRenderer.SetProjectionMatrix(mainCamera->GetProjectionMatrix());
+		sceneRenderer.SetViewMatrix(mainCamera->GetViewMatrix());
+		// should probably treat camera position seperatly as the other variables dont need to be set each frame and can be updated on specific events
+		sceneRenderer.SetPbrShaderGlobalSceneUniforms(pbrShader, cubemapTexture, lightPosition, cameraPosition);
 
-		cubemapTexture.BindIrradianceCubemap(7);
-		pbrShader.setUniformInt("_irradianceMap", 7);
-		cubemapTexture.BindPrefilteredCubemap(8);
-		pbrShader.setUniformInt("_prefilterMap", 8);
-		cubemapTexture.BindBrdfLutTexture(9);
-		pbrShader.setUniformInt("_brdfLUT", 9);
-
-
-		material.setMaterialUniforms();
-		Suzanne.Render(pbrShader, viewMatrix, projectionMatrix);
-
-
+		// draw calls
+		sceneRenderer.RenderMesh(Suzanne,material);
 		// render light source ( as an object placeholder atm
-		//lightShader.use();
-		lightMaterial.setMaterialUniforms();
-		Light.Render(pbrShader, viewMatrix, projectionMatrix);
-
+		sceneRenderer.RenderMesh(Light,lightMaterial);
 		// Render skybox last
-		// use a mesh that has faces point inwards to make this call obsolete
-		glCullFace(GL_BACK);
-		glDepthFunc(GL_LEQUAL);
-		skyboxShader.use();
-		cubemapTexture.BindColorCubemap(0);
-		skyboxShader.setUniformInt("_skybox", 0);
-		glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(viewMatrix));
-		skybox.Render(skyboxShader, skyboxViewMatrix, projectionMatrix);
-		glDepthFunc(GL_LESS);
-		glCullFace(GL_FRONT);
-		
+		sceneRenderer.RenderSkybox(skybox, skyboxShader,cubemapTexture);
 
+	
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

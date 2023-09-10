@@ -26,6 +26,9 @@ public:
 	PbrMaterial();
 	~PbrMaterial();
 
+	Shader* pbrShader = nullptr;
+
+
 	glm::vec3 Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 	glm::vec3 Emission = glm::vec3(1.0f, 0.0f, 0.0f);
 	float Roughness = 0.5f;
@@ -42,7 +45,6 @@ public:
 	void setMaterialUniforms();
 
 private:
-	Shader* pbrShader = nullptr;
 	
 	Texture albedoTexture;
 	Texture normalTexture;

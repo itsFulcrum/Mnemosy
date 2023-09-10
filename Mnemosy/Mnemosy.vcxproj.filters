@@ -36,7 +36,7 @@
     <ClCompile Include="src\model\SceneObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\controller\MeshRenderer.cpp">
+    <ClCompile Include="src\controller\SceneRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,10 +50,7 @@
     <ClInclude Include="src\view\Cubemap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\view\Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\model\Model.h">
+    <ClInclude Include="src\view\MeshData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\model\Object.h">
@@ -74,7 +71,13 @@
     <ClInclude Include="src\controller\InputHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\controller\MeshRenderer.h">
+    <ClInclude Include="src\controller\SceneRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\controller\ModelLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\view\ModelData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

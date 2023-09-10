@@ -17,7 +17,6 @@
 #include <config.h>
 
 #include <model/Camera.h>
-#include <model/Model.h>
 #include <model/Object.h>
 
 #include <view/Shader.h>
@@ -26,7 +25,8 @@
 #include <view/PbrMaterial.h>
 
 #include <controller/InputHandler.h>
-
+#include <controller/SceneRenderer.h>
+#include <controller/ModelLoader.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

@@ -1,48 +1,41 @@
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef MODEL_LOADER_H
+#define MODEL_LOADER_H
+// std librarys
+#include <iostream>
+#include <vector>
 
+#include <glm/glm.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <view/MeshData.h>
+#include <view/ModelData.h>
 
-//#include <view/Shader.h>
-#include <view/Mesh.h>
 
-/* 
-	with this currentimplementation of a model it only allows to have one material 
+/*
+	with this currentimplementation of a model it only allows to have one material
 	so even if submeshes have different materials assigned to them this class will ignore it
 */
 
-class Model
+class ModelLoader
 {
 public:
-	Model() {}
-	Model(std::string const& path)
+	ModelLoader() {}
+
+	ModelData LoadModelDataFromFile(std::string const& path)
 	{
-		M_LoadModel(path);
+		return	M_LoadModel(path);
 	}
-	
-	
-	void Load(std::string const& path)
-	{
-		M_LoadModel(path);
-	}
-	void Draw(Shader& shader) 
-	{
-		for (unsigned int i = 0; i < m_meshes.size(); i++)
-		{
-			m_meshes[i].DrawMesh(shader);
-		}
-		
-	}
+
 private:
-	std::vector<Mesh> m_meshes;
 	std::string m_fileDirectory;
 
-	void M_LoadModel(std::string const &path)
+	ModelData M_LoadModel(std::string const& path)
 	{
+		ModelData modelData;
+
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace);
 		//const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -54,14 +47,18 @@ private:
 		{
 			// build linking erro when using importer.getErroString()
 			std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-			return;
+			return modelData;
 		}
 
 		m_fileDirectory = path.substr(0, path.find_first_of('/'));
-		M_ProcessNode(scene->mRootNode, scene);
+		M_ProcessNode(scene->mRootNode, scene, modelData);
+
+		return modelData;
+
 	}
-	void M_ProcessNode(aiNode* node, const aiScene* scene) 
+	void M_ProcessNode(aiNode* node, const aiScene* scene, ModelData& modelData)
 	{
+
 		// process all the node's meshes
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
@@ -69,15 +66,16 @@ private:
 			// !! Somthing broken with the import her.
 			// semes to work for at least single mesh files..
 			aiMesh* mesh = scene->mMeshes[i];
-			m_meshes.push_back(M_ProcessMesh(mesh, scene));
+			modelData.meshes.push_back(M_ProcessMesh(mesh, scene));
+			
 		}
 		// recursively call for all the childrens 
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
-			M_ProcessNode(node->mChildren[i], scene);
+			M_ProcessNode(node->mChildren[i], scene, modelData);
 		}
 	}
-	Mesh M_ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	MeshData M_ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
@@ -85,14 +83,14 @@ private:
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 		{
 			Vertex vertex;
-				// process data
+			// process data
 			glm::vec3 position;
 			position.x = mesh->mVertices[i].x;
 			position.y = mesh->mVertices[i].y;
 			position.z = mesh->mVertices[i].z;
 			vertex.position = position;
 
-			
+
 
 			glm::vec3 normal;
 			normal.x = mesh->mNormals[i].x;
@@ -122,12 +120,12 @@ private:
 				color.b = mesh->mColors[0][i].b;
 				vertex.color = color;
 			}
-			else 
+			else
 			{
 				vertex.color = glm::vec3(1.0f, 1.0f, 1.0f); // default white
 			}
 			// checking if texCoords Exist
-			if (mesh->mTextureCoords[0]) 
+			if (mesh->mTextureCoords[0])
 			{
 				glm::vec2 uv0;
 				uv0.x = mesh->mTextureCoords[0][i].x;
@@ -154,10 +152,10 @@ private:
 		}
 
 
-		return Mesh(vertices, indices);
+		return MeshData(vertices, indices);
 	}
 
 };
 
 
-#endif // !MODEL_H
+#endif // !MODEL_LOADER_H

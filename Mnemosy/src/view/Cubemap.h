@@ -6,12 +6,11 @@
 #include <iostream>
 #include <vector>
 
-
 #include<stb_image.h>
-
 
 #include <view/Shader.h>
 #include <model/Object.h>
+#include <controller/ModelLoader.h>
 
 
 class Cubemap
@@ -23,9 +22,11 @@ public:
 	unsigned int brdfLUTTextureID = NULL;
 
 private:
-	unsigned int equirectangularImageID;
+	unsigned int equirectangularImageID = NULL;
 	bool m_hasAlphaChannel = false;
 	int m_channelsAmount = 0;
+
+	
 
 public:
 
@@ -66,8 +67,9 @@ public:
 		
 		Shader equirectangularToCubemapShader("src/shaders/equirectangularToCubemap.vert", "src/shaders/equirectangularToCubemap.frag");
 		Shader brdfLUTShader("src/shaders/equirectangularToCubemap.vert", "src/shaders/cookTorranceBRDFLut.frag");
-		Object unitCube("fbx/skyboxMesh.fbx");
-
+		ModelLoader modelLoader;
+		Object unitCube;
+		unitCube.modelData = modelLoader.LoadModelDataFromFile("fbx/skyboxMesh.fbx");
 		
 		equirectangularToCubemap(colorCubemapID,textureResolution,false, equirectangularToCubemapShader, unitCube);
 		
@@ -80,6 +82,7 @@ public:
 			equirectangularToPrefilteredCubemap(prefilterMapID, 128, equirectangularToCubemapShader, unitCube);
 			// brdf Lut Texture // we could easily save this out on disk as it will not change unless we change lighting formulas
 			generateBrdfLUTTexture(brdfLUTShader, unitCube);
+
 		}
 		
 	
@@ -100,12 +103,7 @@ public:
 		
 		glViewport(0, 0, textureRes, textureRes);
 
-
-		// fill in filepath
-		//Shader equirectangularToCubemapShader("src/shaders/equirectangularToCubemap.vert","src/shaders/equirectangularToCubemap.frag");
-		//Object dummyObj("fbx/skyboxMesh.fbx");
-		
-		
+				
 		unsigned int fbo;
 		glGenFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -126,8 +124,6 @@ public:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-
-		
 
 		for(int i = 0;i < 6;i++)
 		{
@@ -167,9 +163,9 @@ public:
 				equirectangularToCubemapShader.setUniformInt("_mode", 0);
 
 
-
-			unitCubeObject.Render(equirectangularToCubemapShader, glm::mat4(0.0f), glm::mat4(0.0f));
-
+			DrawTextureToFramebuffer(unitCubeObject, equirectangularToCubemapShader);
+			
+			
 		}
 
 
@@ -244,21 +240,13 @@ public:
 
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, cubemapID, mip);
 
-				// check if framebuffer is initialize correctly
-				/*if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-				{
-					std::cout << "ERROR::CUBEMAP::FRAMEBUFFER_NOT_COMPLETE" << std::endl;
-					glDeleteFramebuffers(1, &fbo);
-					glBindFramebuffer(GL_FRAMEBUFFER, 0);
-					return;
-				}*/
 
 				glClearColor(1.0f, 0.0f, 1.0f, 1.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 				equirectangularToCubemapShader.setUniformInt("_currentFace", face);
-				unitCubeObject.Render(equirectangularToCubemapShader, glm::mat4(0.0f), glm::mat4(0.0f));
 
+				DrawTextureToFramebuffer(unitCubeObject, equirectangularToCubemapShader);
 			}
 		}
 
@@ -299,7 +287,8 @@ public:
 		
 		brdfLUTShader.use();
 
-		unitCubeObject.Render(brdfLUTShader, glm::mat4(0.0f), glm::mat4(0.0f));
+		DrawTextureToFramebuffer(unitCubeObject, brdfLUTShader);
+
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, brdfLUTTextureID);
@@ -367,6 +356,30 @@ public:
 	int GetChannelsAmount()
 	{
 		return m_channelsAmount;
+	}
+
+private:
+	void DrawTextureToFramebuffer(Object& object, Shader& shader)
+
+	{
+		//object.m_model.m_meshes.size();
+		shader.use();
+
+		// not sure if we actually need these, keep for debug in case we do
+		//glm::mat4 modelMatrix = object.GetTransformMatrix();
+		//shader.setUniformMatrix4("_modelMatrix", modelMatrix);
+
+		shader.setUniformMatrix4("_viewMatrix", glm::mat4(0.0f));
+		shader.setUniformMatrix4("_projectionMatrix", glm::mat4(0.0f));
+
+
+		for (unsigned int i = 0; i < object.modelData.meshes.size(); i++)
+		{
+			glBindVertexArray(object.modelData.meshes[i].vertexArrayObject);
+			glDrawElements(GL_TRIANGLES, object.modelData.meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+
 	}
 
 

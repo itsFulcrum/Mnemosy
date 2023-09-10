@@ -145,7 +145,7 @@
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\controller\App.cpp" />
     <ClCompile Include="src\controller\InputHandler.cpp" />
-    <ClCompile Include="src\controller\MeshRenderer.cpp" />
+    <ClCompile Include="src\controller\SceneRenderer.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\model\SceneObject.cpp" />
@@ -154,13 +154,14 @@
   <ItemGroup>
     <ClInclude Include="src\controller\App.h" />
     <ClInclude Include="src\controller\InputHandler.h" />
-    <ClInclude Include="src\controller\MeshRenderer.h" />
+    <ClInclude Include="src\controller\ModelLoader.h" />
+    <ClInclude Include="src\controller\SceneRenderer.h" />
     <ClInclude Include="src\model\Camera.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\view\Cubemap.h" />
-    <ClInclude Include="src\view\Mesh.h" />
-    <ClInclude Include="src\model\Model.h" />
+    <ClInclude Include="src\view\MeshData.h" />
     <ClInclude Include="src\model\Object.h" />
+    <ClInclude Include="src\view\ModelData.h" />
     <ClInclude Include="src\view\PbrMaterial.h" />
     <ClInclude Include="src\view\Shader.h" />
     <ClInclude Include="src\view\Texture.h" />

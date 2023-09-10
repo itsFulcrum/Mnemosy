@@ -1,17 +1,12 @@
 
-#ifndef Mesh_H
-#define MESH_H
+#ifndef MESH_DATA_H
+#define MESH_DATA_H
 
 
-#include <glad/glad.h> // holds all OpenGL type declarations
+#include <glad/glad.h> 
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <string>
 #include <vector>
 
-#include <view/Shader.h>
 
 struct Vertex 
 {
@@ -23,13 +18,15 @@ struct Vertex
 	glm::vec2 texCoords;
 };
 
-class Mesh 
+class MeshData
 {
 public:
 	std::vector<Vertex> vertecies;
 	std::vector<unsigned int> indecies;
+	unsigned int vertexArrayObject;
 
-	Mesh(std::vector<Vertex> Vertecies, std::vector<unsigned int> Indecies)
+
+	MeshData(std::vector<Vertex> Vertecies, std::vector<unsigned int> Indecies)
 	{
 		this->vertecies = Vertecies;
 		this->indecies = Indecies;
@@ -37,31 +34,18 @@ public:
 		M_SetupMesh();
 	}
 
-	// for future
-	/*
-		probabbly should instead pass a material object
-		material object then holds a refrence to a shader and parameters and textures for that shader.
-	*/
-	void DrawMesh(Shader& Shader) 
-	{
-
-		glBindVertexArray(m_vertexArrayObject);
-		glDrawElements(GL_TRIANGLES, indecies.size(), GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-	}
 
 private:
 	unsigned int m_vertexBufferObject;
-	unsigned int m_vertexArrayObject;
 	unsigned int m_elementBufferObject;
 
 	void M_SetupMesh() 
 	{
-		glGenVertexArrays(1, &m_vertexArrayObject);
+		glGenVertexArrays(1, &vertexArrayObject);
 		glGenBuffers(1, &m_vertexBufferObject);
 		glGenBuffers(1, &m_elementBufferObject);
 
-		glBindVertexArray(m_vertexArrayObject);
+		glBindVertexArray(vertexArrayObject);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferObject);
 		
 		glBufferData(GL_ARRAY_BUFFER, vertecies.size() * sizeof(Vertex), &vertecies[0], GL_STATIC_DRAW);
@@ -101,4 +85,4 @@ private:
 
 };
 
-#endif // !Mesh_H
+#endif // !Mesh_DATA_H
