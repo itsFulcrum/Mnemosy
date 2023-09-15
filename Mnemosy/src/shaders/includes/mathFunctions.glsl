@@ -49,6 +49,24 @@ vec4 lerp(vec4 a,vec4 b, float t)
     return result;
 }
 
+// rotate vector around an axis (by unity)
+/*
+float3 Unity_Rotate_About_Axis_Radians_float(float3 In, float3 Axis, float Rotation)
+{
+    float s = sin(Rotation);
+    float c = cos(Rotation);
+    float one_minus_c = 1.0 - c;
+
+    Axis = normalize(Axis);
+
+    float3x3 rot_mat = { one_minus_c * Axis.x * Axis.x + c,            one_minus_c * Axis.x * Axis.y - Axis.z * s,     one_minus_c * Axis.z * Axis.x + Axis.y * s,
+                              one_minus_c * Axis.x * Axis.y + Axis.z * s,   one_minus_c * Axis.y * Axis.y + c,              one_minus_c * Axis.y * Axis.z - Axis.x * s,
+                              one_minus_c * Axis.z * Axis.x - Axis.y * s,   one_minus_c * Axis.y * Axis.z + Axis.x * s,     one_minus_c * Axis.z * Axis.z + c
+                            };
+    return = mul(rot_mat,  In);
+}
+*/
+
 // random functions
 // bit shifting is not supported on all drivers but anything newer should be fine / webGL and GLES 2.0 wont work for example
 float RadicalInverse_VdC(uint bits)
