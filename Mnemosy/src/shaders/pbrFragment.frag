@@ -15,10 +15,12 @@ in mat3 tangentToWorldMatrix;
 uniform vec3 _lightColor;
 uniform float _lightStrength;
 uniform vec3 _lightPositionWS;
+uniform vec3 _lightDirectionWS;
 uniform vec3 _cameraPositionWS;
 
 uniform samplerCube _irradianceMap;
 uniform samplerCube _prefilterMap;
+uniform float _skyboxRotation;
 uniform sampler2D _brdfLUT;
 
 //PBR Value inputs
@@ -81,7 +83,7 @@ void main()
 
 			// Light values
 			// setting light color here for now but should be set from app via uniform
-			float lightStrength = 0.0f;
+			float lightStrength = _lightStrength;
 			vec3 lightColor = vec3(1.0f,1.0f,1.0f) * lightStrength;
 
 	////// PRECOMPUDED TERMS ======================================================================================== ////
@@ -110,16 +112,22 @@ void main()
 		vec3 R = reflect(viewDirection,normal);
 
 		// INDIRECT DIFFUSE
-		vec3 irradiance = texture(_irradianceMap, normal).rgb;
+		// better naming pls
+		vec3 rotatedNormal = Rotate_About_Axis_Radians_float(normal, vec3(0.0f,1.0f,0.0f), _skyboxRotation);
+		vec3 irradiance = texture(_irradianceMap, rotatedNormal).rgb;
 		vec3 diffuse = irradiance * albedo;
 
 		// INDIRECT SPECULAR
 		const float MAX_REFLECTION_LOD = 4.0;
-		vec3 prefilteredColor = textureLod(_prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;
+		vec3 rotatedReflect = Rotate_About_Axis_Radians_float(normal, vec3(0.0f,1.0f,0.0f), _skyboxRotation);
+		vec3 prefilteredColor = textureLod(_prefilterMap, rotatedReflect,  roughness * MAX_REFLECTION_LOD).rgb;
 		vec2 envBRDF  = texture(_brdfLUT, vec2(NdotV, roughness)).rg;
 		vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
 		vec3 indirectRadiance = (kD * diffuse + specular) * ambientOcclusion;
+
+		// debug only
+		//indirectRadiance = indirectRadiance * 0.3;
 
 	////// Emissive ================================================================================================= ////
 	//// ============================================================================================================ ////

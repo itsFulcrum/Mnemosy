@@ -3,15 +3,18 @@
 #define APPLICATION_H
 
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <stdio.h>
+
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-
 
 // internal
 #include <config.h>
@@ -56,14 +59,17 @@ public:
 	float deltaTime = 0.0;
 	float lastFrame = 0.0;
 
+	ImGuiIO io;// = ImGui::GetIO(); //(void)io;
 private:
 	void setupGlSettings();
 	void setupGLFWWindow(const char* WindowTitleName);
+	void setupImGui();
 	// this will eventually be move into its own class
 	void setupScene();
 
-	GLFWwindow* window;
 
+
+	GLFWwindow* window;
 	Camera* mainCamera;
 	InputHandler* inputHandler;
 	

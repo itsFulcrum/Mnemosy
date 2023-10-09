@@ -29,11 +29,11 @@ void SceneRenderer::ClearFrame(float r, float g,float b)
 }
 
 
-void SceneRenderer::SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& cubemap, glm::vec3 lightPosition,glm::vec3 cameraPosition)
+void SceneRenderer::SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& cubemap, glm::vec3 lightPosition, float lightStrength, glm::vec3 cameraPosition, float skyboxRotation)
 {
 	pbrShader.use();
 	pbrShader.setUniformFloat3("_lightPositionWS", lightPosition.x, lightPosition.y, lightPosition.z);
-	pbrShader.setUniformFloat("_lightStrength", 1);
+	pbrShader.setUniformFloat("_lightStrength",lightStrength);
 	pbrShader.setUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 	cubemap.BindIrradianceCubemap(7);
@@ -42,6 +42,9 @@ void SceneRenderer::SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& 
 	pbrShader.setUniformInt("_prefilterMap", 8);
 	cubemap.BindBrdfLutTexture(9);
 	pbrShader.setUniformInt("_brdfLUT", 9);
+
+	pbrShader.setUniformFloat("_skyboxRotation", skyboxRotation);
+	
 }
 
 void SceneRenderer::RenderMesh(Object& object, PbrMaterial& material)
@@ -73,7 +76,7 @@ void SceneRenderer::RenderMesh(Object& object, PbrMaterial& material)
 
 }
 
-void SceneRenderer::RenderSkybox(Object& object, Shader& skyboxShader,Cubemap& cubemap)
+void SceneRenderer::RenderSkybox(Object& object, Shader& skyboxShader,Cubemap& cubemap,float rotation, glm::vec3 colorTint)
 {
 	// consider using a mesh that has faces point inwards to make this call obsolete
 	glCullFace(GL_BACK);
@@ -81,13 +84,17 @@ void SceneRenderer::RenderSkybox(Object& object, Shader& skyboxShader,Cubemap& c
 
 	skyboxShader.use();
 
-
-	cubemap.BindColorCubemap(0);
-	skyboxShader.setUniformInt("_skybox", 0);
-	
 	glm::mat4 skyboxViewMatrix = glm::mat4(glm::mat3(m_viewMatrix));
 	skyboxShader.setUniformMatrix4("_viewMatrix", skyboxViewMatrix);
 	skyboxShader.setUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+
+	skyboxShader.setUniformFloat("_rotation", rotation);
+
+	// fragment
+	cubemap.BindColorCubemap(0);
+	skyboxShader.setUniformInt("_skybox", 0);
+	skyboxShader.setUniformFloat3("_tint", colorTint.r,colorTint.g,colorTint.b);
+	
 
 
 	for (unsigned int i = 0; i < object.modelData.meshes.size(); i++)

@@ -1,5 +1,6 @@
 
 #include "InputHandler.h"
+#include "iostream"
 
 InputHandler::InputHandler()
 {
@@ -51,16 +52,20 @@ void InputHandler::Init(GLFWwindow* window,unsigned int& currentWindowWidth, uns
 	this->lastFrame = &timeLastFrame;
 }
 
-void InputHandler::update()
+void InputHandler::update(float &rotation)
 {
 	proccessKeyboardInput();
+
+	ChangeEnvironmentRotation(rotation,mouseSensitivity);
 }
 
 void InputHandler::proccessKeyboardInput()
 {
+	// close window on escape
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
+	// camera WASD Movement
 	if (camera == nullptr)
 		return;
 
@@ -93,17 +98,37 @@ void InputHandler::On_framebuffer_size_callback(int width, int height)
 }
 void InputHandler::On_mouse_button_callback(int button, int action, int mods)
 {
+	// TODO: should stop moving if mouse doesnt move aswell
+	SHIFT_AND_RMB_isPressed = false;
+
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
 	{
-		camera->cameraMode = CAMERA_MODE_EDIT;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		{
+			SHIFT_AND_RMB_isPressed = true;
+		}
 	}
+
+
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
 	{
+
 		camera->cameraMode = CAMERA_MODE_FLY;
+
+
+
+		SHIFT_AND_RMB_isPressed = false;
 	}
+
+	std::cout << "mousel btn callback: IsPredded = " << SHIFT_AND_RMB_isPressed << std::endl;
+
 }
 void InputHandler::On_mouse_cursor_callback(double xpos, double ypos)
 {
+
+	mouseCurrentX = xpos;
+	mouseCurrentY = ypos;
+
 	if (firstMouseInput)
 	{
 		mouseLastX = (float)xpos;
@@ -112,15 +137,31 @@ void InputHandler::On_mouse_cursor_callback(double xpos, double ypos)
 	}
 
 	// called each time the mouse is moved
-	float mouseOffsetX = (float)xpos - mouseLastX;
-	float mouseOffsetY = mouseLastY - (float)ypos;
+	 mouseOffsetX = (float)xpos - mouseLastX;
+	 mouseOffsetY = mouseLastY - (float)ypos;
+
+
 	mouseLastX = (float)xpos;
 	mouseLastY = (float)ypos;
 
+	if(!SHIFT_AND_RMB_isPressed)
+		camera->ProessMouseInput(mouseOffsetX, mouseOffsetY);
 
-	camera->ProessMouseInput(mouseOffsetX, mouseOffsetY);
+
 }
 void InputHandler::On_mouse_scroll_callback(double offsetX, double offsetY)
 {
 	camera->ProcessMouseScrollInput((float)offsetY, *deltaTime);
+}
+
+
+void InputHandler::ChangeEnvironmentRotation(float &rotation,float sensitivity)
+{
+	if (!SHIFT_AND_RMB_isPressed)
+		return;
+
+	//float a = mouseCurrentX - mouseLastX;
+	//std::cout << "input handler: a: " << mouseOffsetX << std::endl;
+	// TODO: should stop moving if mouse doesnt move aswell
+	rotation += mouseOffsetX * sensitivity * *deltaTime;
 }

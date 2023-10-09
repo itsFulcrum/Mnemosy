@@ -50,8 +50,8 @@ vec4 lerp(vec4 a,vec4 b, float t)
 }
 
 // rotate vector around an axis (by unity)
-/*
-float3 Unity_Rotate_About_Axis_Radians_float(float3 In, float3 Axis, float Rotation)
+
+vec3 Rotate_About_Axis_Radians_float(vec3 In, vec3 Axis, float Rotation)
 {
     float s = sin(Rotation);
     float c = cos(Rotation);
@@ -59,13 +59,29 @@ float3 Unity_Rotate_About_Axis_Radians_float(float3 In, float3 Axis, float Rotat
 
     Axis = normalize(Axis);
 
-    float3x3 rot_mat = { one_minus_c * Axis.x * Axis.x + c,            one_minus_c * Axis.x * Axis.y - Axis.z * s,     one_minus_c * Axis.z * Axis.x + Axis.y * s,
-                              one_minus_c * Axis.x * Axis.y + Axis.z * s,   one_minus_c * Axis.y * Axis.y + c,              one_minus_c * Axis.y * Axis.z - Axis.x * s,
-                              one_minus_c * Axis.z * Axis.x - Axis.y * s,   one_minus_c * Axis.y * Axis.z + Axis.x * s,     one_minus_c * Axis.z * Axis.z + c
-                            };
-    return = mul(rot_mat,  In);
-}
+    mat3x3 rot_mat;
+
+/*
+one_minus_c * Axis.x * Axis.x + c,            one_minus_c * Axis.x * Axis.y - Axis.z * s,     one_minus_c * Axis.z * Axis.x + Axis.y * s,
+one_minus_c * Axis.x * Axis.y + Axis.z * s,   one_minus_c * Axis.y * Axis.y + c,              one_minus_c * Axis.y * Axis.z - Axis.x * s,
+one_minus_c * Axis.z * Axis.x - Axis.y * s,   one_minus_c * Axis.y * Axis.z + Axis.x * s,     one_minus_c * Axis.z * Axis.z + c
 */
+
+    rot_mat[0][0] = one_minus_c * Axis.x * Axis.x + c;
+    rot_mat[1][0] = one_minus_c * Axis.x * Axis.y - Axis.z * s;
+    rot_mat[2][0] = one_minus_c * Axis.z * Axis.x + Axis.y * s;
+
+    rot_mat[0][1] = one_minus_c * Axis.x * Axis.y + Axis.z * s;
+    rot_mat[1][1] = one_minus_c * Axis.y * Axis.y + c;
+    rot_mat[2][1] = one_minus_c * Axis.y * Axis.z - Axis.x * s;
+
+    rot_mat[0][2] = one_minus_c * Axis.z * Axis.x - Axis.y * s;
+    rot_mat[1][2] = one_minus_c * Axis.y * Axis.z + Axis.x * s;
+    rot_mat[2][2] = one_minus_c * Axis.z * Axis.z + c;
+
+    return rot_mat * In;
+}
+
 
 // random functions
 // bit shifting is not supported on all drivers but anything newer should be fine / webGL and GLES 2.0 wont work for example

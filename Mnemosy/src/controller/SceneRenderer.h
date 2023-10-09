@@ -16,14 +16,17 @@ public:
 	SceneRenderer();
 	~SceneRenderer();
 
-	void ClearFrame(float r, float g, float b);
-	void RenderMesh(Object& object,PbrMaterial& material);
-	void RenderSkybox(Object& object, Shader& skyboxShader, Cubemap& cubemap);
-	
-	void SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& cubemap, glm::vec3 lightPosition, glm::vec3 cameraPosition);
+
+
+	void SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& cubemap, glm::vec3 lightPosition,float lightStrength, glm::vec3 cameraPosition, float skyboxRotation);
 	void SetProjectionMatrix(glm::mat4 projectionMatrix);
 	void SetViewMatrix(glm::mat4 viewMatrix);
 
+
+	void ClearFrame(float r, float g, float b);
+	void RenderMesh(Object& object,PbrMaterial& material);
+	void RenderSkybox(Object& object, Shader& skyboxShader, Cubemap& cubemap,float rotation, glm::vec3 colorTint);
+	
 private:
 	glm::mat4 m_viewMatrix = glm::mat4(1.0f);
 	glm::mat4 m_projectionMatrix = glm::mat4(1.0f);

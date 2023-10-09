@@ -41,6 +41,20 @@ public:
 		return glm::transpose(glm::inverse(transformMatrix));
 	}
 
+	glm::vec3 GetForward()
+	{
+		glm::vec3 forward = glm::vec3(0.0f, 0.0f, 0.0f);
+		float Yaw =  glm::radians(rotation.y);
+		float Pitch = glm::radians(rotation.z);
+
+		forward.x = cos(Pitch) * sin(Yaw);
+		forward.y = -sin(Pitch);
+		forward.z = cos(Pitch) * cos(Yaw);
+
+		forward = glm::normalize(forward);
+		return forward;
+	}
+
 private:
 
 
