@@ -3,6 +3,15 @@
 
 PbrMaterial::PbrMaterial()
 {
+	setDefaults();
+}
+PbrMaterial::~PbrMaterial()
+{
+	//delete pbrShader;
+}
+
+void PbrMaterial::setDefaults()
+{
 	Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 	Roughness = 0.5f;
 	Metallic = 1.0f;
@@ -11,12 +20,6 @@ PbrMaterial::PbrMaterial()
 	EmissionStrength = 1.0f;
 	// currently not supported by shader
 	NormalStrength = 1.0f;
-
-	
-}
-PbrMaterial::~PbrMaterial()
-{
-	//delete pbrShader;
 }
 
 void PbrMaterial::assignShader(Shader& shader)

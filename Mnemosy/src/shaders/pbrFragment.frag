@@ -1,9 +1,14 @@
 #version 450 core
 // using third party "HASHTAG"include parser
+// +3
 #include includes/mathFunctions.glsl
+// 106
 #include includes/pbrLightingTerms.glsl
+// 235
 #include includes/colorFunctions.glsl
+// 462
 #include includes/samplePbrMaps.glsl
+// 526
 
 // Vertex shader inputs
 in vec2 uv;

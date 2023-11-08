@@ -29,10 +29,16 @@ private:
 	
 
 public:
+	Cubemap() = default;
 
 	Cubemap(std::string path, unsigned int textureResolution, bool GenerateConvolutedMaps)
 	{
+		loadFromFile(path, textureResolution, GenerateConvolutedMaps);
+	};
 
+
+	void loadFromFile(std::string path, unsigned int textureResolution, bool GenerateConvolutedMaps)
+	{
 		// generate normal opengl texture from the hdri panorama
 		glGenTextures(1, &equirectangularImageID);
 		glBindTexture(GL_TEXTURE_2D, equirectangularImageID);
@@ -62,19 +68,19 @@ public:
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		stbi_image_free(panoramaImageData);
-		
-		
-		
+
+
+
 		Shader equirectangularToCubemapShader("src/shaders/equirectangularToCubemap.vert", "src/shaders/equirectangularToCubemap.frag");
 		Shader brdfLUTShader("src/shaders/equirectangularToCubemap.vert", "src/shaders/cookTorranceBRDFLut.frag");
 		ModelLoader modelLoader;
 		Object unitCube;
 		unitCube.modelData = modelLoader.LoadModelDataFromFile("fbx/skyboxMesh.fbx");
-		
-		equirectangularToCubemap(colorCubemapID,textureResolution,false, equirectangularToCubemapShader, unitCube);
-		
 
-		if (GenerateConvolutedMaps) 
+		equirectangularToCubemap(colorCubemapID, textureResolution, false, equirectangularToCubemapShader, unitCube);
+
+
+		if (GenerateConvolutedMaps)
 		{
 			// irradiance map
 			equirectangularToCubemap(irradianceMapID, 32, true, equirectangularToCubemapShader, unitCube);
@@ -84,10 +90,7 @@ public:
 			generateBrdfLUTTexture(brdfLUTShader, unitCube);
 
 		}
-		
-	
-	};
-
+	}
 	// equirectangularToCubemap Shader has 3 modes configuragble via uniform int "_mode"
 	// 0 = crate normal cubemap from equirectangular map
 	// 1 = create a convoluted irradiance map from an equirectangular map

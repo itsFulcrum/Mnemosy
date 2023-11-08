@@ -7,14 +7,15 @@ vec4 sampleAlbedoAlphaMap(sampler2D albedoSampler, vec2 uv,vec4 albedoColorValue
 {
   vec4 albedoMap = texture(albedoSampler,uv);
   albedoMap = clamp(albedoMap,0.0,1.0);
-  albedoMap = sRGBToLinear (albedoMap);
+  albedoMap = sRGBToLinear(albedoMap);
 
-  vec3 albedoSolidColor = sRGBToLinear (albedoColorValue).rgb;
+  vec3 albedoSolidColor = sRGBToLinear(albedoColorValue).rgb;
 
   vec3 albedoOut =  lerp(albedoMap.rgb,albedoSolidColor.rgb,albedoColorValue.w);
 
   return vec4(albedoOut.rgb,albedoMap.a);
 }
+
 vec3 sampleEmissionMap(sampler2D emissionSampler, vec2 uv,vec4 emissionColorValue)
 {
   vec4 emissionMap = texture(emissionSampler,uv);
@@ -29,14 +30,15 @@ vec3 sampleEmissionMap(sampler2D emissionSampler, vec2 uv,vec4 emissionColorValu
 float sampleRoughnessMap(sampler2D roughnessSampler,vec2 uv,vec2 roughnessValue)
 {
   vec4 roughnessMap = texture(roughnessSampler,uv);
-  float roughness = desaturateLinear(roughnessMap.rgb);
+  float roughness = grayscaleLinear(roughnessMap.rgb);
   roughness = lerp(roughness,roughnessValue.x,roughnessValue.y);
   return clamp(roughness,0.0,1.0);
 }
+
 float sampleMetallicMap(sampler2D metallicSampler,vec2 uv,vec2 metallicValue)
 {
   vec4 metallicMap = texture(metallicSampler,uv);
-  float metallic = desaturateLinear(metallicMap.rgb);
+  float metallic = grayscaleLinear(metallicMap.rgb);
   metallic = lerp(metallic,metallicValue.x,metallicValue.y);
   return clamp(metallic,0.0,1.0);
 }
@@ -44,7 +46,7 @@ float sampleMetallicMap(sampler2D metallicSampler,vec2 uv,vec2 metallicValue)
 float sampleAmbientOcclusionMap(sampler2D ambientOcclusionSampler,vec2 uv,float aoValue)
 {
   vec4 ambientOcclusionMap = texture(ambientOcclusionSampler,uv);
-  float ao = desaturateLinear(ambientOcclusionMap.rgb);
+  float ao = grayscaleLinear(ambientOcclusionMap.rgb);
   ao = lerp(ao,1.0,aoValue);
   return clamp(ao,0.0,1.0);
 }

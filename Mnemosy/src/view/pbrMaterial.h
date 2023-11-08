@@ -38,7 +38,7 @@ public:
 	float NormalStrength = 1.0f;
 
 
-
+	void setDefaults();
 	void assignShader(Shader& newShader);
 	void assignTexture(PBRTextureType pbrType, std::string Filepath);
 	void removeTexture(PBRTextureType pbrType);

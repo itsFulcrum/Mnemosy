@@ -2,13 +2,6 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-#include <stdio.h>
-
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -27,9 +20,15 @@
 #include <view/Cubemap.h>
 #include <view/PbrMaterial.h>
 
+#include <view/GraphicalUserInterface.h>
+
+
 #include <controller/InputHandler.h>
 #include <controller/SceneRenderer.h>
 #include <controller/ModelLoader.h>
+
+//#include <view/scene/Scene.h>
+#include <view/scene/DefaultScene.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -45,7 +44,11 @@ public:
 	~App();
 	void run();
 
+private:
+	void setupGlSettings();
+	void setupGLFWWindow(const char* WindowTitleName);
 
+public:
 	//Settings
 	unsigned int SCR_WIDTH = 1024;
 	unsigned int SCR_HEIGHT = 800;
@@ -59,20 +62,13 @@ public:
 	float deltaTime = 0.0;
 	float lastFrame = 0.0;
 
-	ImGuiIO io;// = ImGui::GetIO(); //(void)io;
 private:
-	void setupGlSettings();
-	void setupGLFWWindow(const char* WindowTitleName);
-	void setupImGui();
-	// this will eventually be move into its own class
-	void setupScene();
-
-
-
 	GLFWwindow* window;
-	Camera* mainCamera;
 	InputHandler* inputHandler;
+	GraphicalUserInterface* userInterface;
 	
+
+	DefaultScene activeScene;
 };
 
 

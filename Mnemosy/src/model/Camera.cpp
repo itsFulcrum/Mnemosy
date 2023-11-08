@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+
 Camera::Camera()
 {
 	position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -22,9 +23,29 @@ Camera::~Camera()
 void Camera::Init(unsigned int renderScreenWidth, unsigned int renderScreenHeight)
 {
 	updateScreenSize(renderScreenWidth, renderScreenHeight);
+	
 	updateCameraVectors();
+
 }
 
+void Camera::ActivateControlls(GLFWwindow* window)
+{
+	if (!controllsActive) 
+	{
+		//std::cout << "Camera::ACTIVATE_Controlls: Cursor Disabled" << std::endl;
+		controllsActive = true;
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+}
+void Camera::DeactivateControlls(GLFWwindow* window)
+{
+	if (controllsActive)
+	{
+		//std::cout << "Camera::ACTIVATE_Controlls: Cursor Enabled" << std::endl;
+		controllsActive = false;
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+}
 
 void Camera::updateScreenSize(unsigned int width, unsigned int height)
 {
@@ -35,6 +56,9 @@ void Camera::updateScreenSize(unsigned int width, unsigned int height)
 // keyboard callback
 void Camera::ProcessKeyboardInput(Camera_Movement direction, float deltaTime)
 {
+	if (!controllsActive)
+		return;
+
 	if (cameraMode == CAMERA_MODE_FLY)
 	{
 		float speed = moveSpeed * deltaTime;
@@ -61,6 +85,9 @@ void Camera::ProcessKeyboardInput(Camera_Movement direction, float deltaTime)
 // mouse callback
 void Camera::ProessMouseInput(double xOffset, double yOffset)
 {
+	if (!controllsActive)
+		return;
+
 
 	float mouseOffsetX = (float)xOffset;
 	float mouseOffsetY = (float)yOffset;
@@ -87,6 +114,9 @@ void Camera::ProessMouseInput(double xOffset, double yOffset)
 // scroll callback
 void Camera::ProcessMouseScrollInput(float yOffset, float deltaTime)
 {
+	if (!controllsActive)
+		return;
+
 
 	if (cameraMode == CAMERA_MODE_EDIT)
 	{

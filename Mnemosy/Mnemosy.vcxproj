@@ -73,11 +73,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src;$(SolutionDir)dependencies\include\imgui;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src;$(SolutionDir)dependencies\include\imgui;$(IncludePath);$(SolutionDir)dependencies\include\imgui</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(SolutionDir)dependencies\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\include;$(SolutionDir)src;$(IncludePath);$(SolutionDir)dependencies\include\imgui</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -145,6 +145,8 @@
     <ClCompile Include="dependencies\include\imgui\imgui.cpp" />
     <ClCompile Include="dependencies\include\imgui\imgui_demo.cpp" />
     <ClCompile Include="dependencies\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="dependencies\include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="dependencies\include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="dependencies\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="dependencies\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\config.cpp" />
@@ -152,16 +154,18 @@
     <ClCompile Include="src\controller\InputHandler.cpp" />
     <ClCompile Include="src\controller\SceneRenderer.cpp" />
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\imgui_impl_glfw.cpp" />
-    <ClCompile Include="src\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\model\Camera.cpp" />
     <ClCompile Include="src\model\SceneObject.cpp" />
+    <ClCompile Include="src\view\GraphicalUserInterface.cpp" />
     <ClCompile Include="src\view\PbrMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dependencies\include\imgui\imconfig.h" />
     <ClInclude Include="dependencies\include\imgui\imgui.h" />
+    <ClInclude Include="dependencies\include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="dependencies\include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="dependencies\include\imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="dependencies\include\imgui\imgui_internal.h" />
     <ClInclude Include="dependencies\include\imgui\imstb_rectpack.h" />
     <ClInclude Include="dependencies\include\imgui\imstb_textedit.h" />
@@ -170,16 +174,19 @@
     <ClInclude Include="src\controller\InputHandler.h" />
     <ClInclude Include="src\controller\ModelLoader.h" />
     <ClInclude Include="src\controller\SceneRenderer.h" />
-    <ClInclude Include="src\imgui_impl_glfw.h" />
-    <ClInclude Include="src\imgui_impl_opengl3.h" />
-    <ClInclude Include="src\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="src\model\Camera.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\view\Cubemap.h" />
+    <ClInclude Include="src\view\GraphicalUserInterface.h" />
+    <ClInclude Include="src\view\gui\GuiPanel.h" />
+    <ClInclude Include="src\view\gui\GuiPanelSettings.h" />
+    <ClInclude Include="src\view\gui\GuiPanelViewport.h" />
     <ClInclude Include="src\view\MeshData.h" />
     <ClInclude Include="src\model\Object.h" />
     <ClInclude Include="src\view\ModelData.h" />
     <ClInclude Include="src\view\PbrMaterial.h" />
+    <ClInclude Include="src\view\scene\DefaultScene.h" />
+    <ClInclude Include="src\view\scene\Scene.h" />
     <ClInclude Include="src\view\Shader.h" />
     <ClInclude Include="src\view\Texture.h" />
   </ItemGroup>

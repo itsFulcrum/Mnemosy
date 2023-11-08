@@ -47,6 +47,7 @@ float NormalDistributionGGX(float NdotH, float roughness)
 // geometry
 float GeometrySchlickGGX(float NdotV, float k)
 {
+  // outcommented because I moved it into the GeometrySmith function
   //float r = (roughness +1.0f);
   //float k = (r*r) / 8.0f;
   float nom   = NdotV;
@@ -90,10 +91,10 @@ vec3 CookTorranceSpecularBRDF(vec3 position, vec3 normal,float NDOTV, vec3 viewD
     // for directional light we should keep light attentuation at 1;
     float lightDistance = length(lightPosition - position);
     // light attentuation using inverse squre law which is phisically correct.
-    // -> may want to use constant linea quadratic equation for more controll
+    // -> may want to use constant linear quadratic equation for more controll
     //	float attenuation = 1.0 / (constantValue + linearValue * distance + quadraticValue * (distance * distance));
     float lightAttentuation = 1.0f / (lightDistance * lightDistance);
-    lightAttentuation = 1.0f;
+    lightAttentuation = 1.0f; // currently force to 1 to simulate directional light behavior
     vec3 radiance = lightColor * lightAttentuation;
 
 

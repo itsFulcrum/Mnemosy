@@ -24,8 +24,18 @@ public:
 	std::string pathVertex;
 	std::string pathFragment;
 
-	// constructor that reads and compliles the shader
+	Shader() = default;
 	Shader(const char* vertexPath, const char* fragmentPath)
+	{
+		CreateShaderProgram(vertexPath, fragmentPath);
+	};
+
+	~Shader()
+	{
+		glDeleteProgram(ID);
+	}
+
+	void CreateShaderProgram(const char* vertexPath, const char* fragmentPath)
 	{
 		std::string vertexCode;
 		std::string fragmentCode;
@@ -35,7 +45,7 @@ public:
 			vertexCode = Shadinclude::load(vertexPath, "#include");
 			fragmentCode = Shadinclude::load(fragmentPath, "#include");
 		}
-		catch (std::ifstream::failure error) 
+		catch (std::ifstream::failure error)
 		{
 			std::cout << "ERROR::SHADER:: could not read shader code from file" << std::endl;
 		}
@@ -62,25 +72,18 @@ public:
 		glShaderSource(fragmentShader, 1, &fragmentShaderCode, NULL);
 		glCompileShader(fragmentShader);
 		checkCompileErrors(fragmentShader, "FRAGMENT");
-		
-		
+
+
 		ID = glCreateProgram();
 		glAttachShader(ID, vertexShader);
 		glAttachShader(ID, fragmentShader);
 		glLinkProgram(ID);
 		checkCompileErrors(ID, "PROGRAM");
-		
-		
+
+
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
-
-	};
-
-	~Shader()
-	{
-		glDeleteProgram(ID);
 	}
-
 	
 	// use / activate the shader
 	void use() 

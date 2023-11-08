@@ -1,9 +1,12 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <GLFW/glfw3.h>
 
 
 
@@ -53,6 +56,7 @@ public:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
+	bool controllsActive = false;
 	Camera_Mode cameraMode = CAMERA_MODE_EDIT;
 	
 	glm::vec3 focusPoint = glm::vec3(0.0f,0.0f,0.0f);
@@ -64,6 +68,8 @@ public:
 	void Init(unsigned int renderScreenWidth, unsigned int renderScreenHeight);
 	
 	void updateScreenSize(unsigned int width, unsigned int height);
+	void ActivateControlls(GLFWwindow* window);
+	void DeactivateControlls(GLFWwindow* window);
 
 	// Callbacks
 	void ProcessKeyboardInput(Camera_Movement direction, float deltaTime);

@@ -2,13 +2,67 @@
 
 
 
-SceneRenderer::SceneRenderer()
+SceneRenderer::SceneRenderer(unsigned int width, unsigned int height)
 {
-
+	CreateFramebuffer(width, height);
 }
 SceneRenderer::~SceneRenderer()
 {
 
+}
+
+void SceneRenderer::CreateFramebuffer(unsigned int width, unsigned int height)
+{
+	glGenFramebuffers(1, &FrameBufferObject);
+	glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferObject);
+
+	glGenTextures(1, &RenderTexture_Id);
+	glBindTexture(GL_TEXTURE_2D, RenderTexture_Id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTexture_Id, 0);
+
+	glGenRenderbuffers(1, &RenderBufferObject);
+	glBindRenderbuffer(GL_RENDERBUFFER, RenderBufferObject);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RenderBufferObject);
+
+	if (glad_glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "ERROR::SCENE_RENDERER::" << "createFramebuffer faild to complete." << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
+
+void SceneRenderer::BindFramebuffer()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, FrameBufferObject);
+}
+void SceneRenderer::UnbindFramebuffer() 
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void SceneRenderer::RescaleFramebuffer(unsigned int width, unsigned int height)
+{
+	glBindTexture(GL_TEXTURE_2D, RenderTexture_Id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,RenderTexture_Id, 0);
+
+	glBindRenderbuffer(GL_RENDERBUFFER, RenderBufferObject);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RenderBufferObject);
+}
+
+unsigned int SceneRenderer::GetRenderTextureId()
+{
+	return RenderTexture_Id;
 }
 
 void SceneRenderer::SetProjectionMatrix(glm::mat4 projectionMatrix)
@@ -20,6 +74,20 @@ void SceneRenderer::SetViewMatrix(glm::mat4 viewMatrix)
 	this->m_viewMatrix = viewMatrix;
 }
 
+
+void SceneRenderer::StarFrame(unsigned int width, unsigned int height)
+{
+	RescaleFramebuffer(width, height);
+	glViewport(0, 0, width, height);
+	BindFramebuffer();
+	glViewport(0, 0, width, height);
+	
+	ClearFrame(0.0f, 0.0f, 0.0f);
+}
+void SceneRenderer::EndFrame()
+{
+	UnbindFramebuffer();
+}
 void SceneRenderer::ClearFrame(float r, float g,float b)
 {
 	// rendering commands
@@ -27,7 +95,6 @@ void SceneRenderer::ClearFrame(float r, float g,float b)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
 
 void SceneRenderer::SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& cubemap, glm::vec3 lightPosition, float lightStrength, glm::vec3 cameraPosition, float skyboxRotation)
 {
@@ -75,7 +142,6 @@ void SceneRenderer::RenderMesh(Object& object, PbrMaterial& material)
 
 
 }
-
 void SceneRenderer::RenderSkybox(Object& object, Shader& skyboxShader,Cubemap& cubemap,float rotation, glm::vec3 colorTint)
 {
 	// consider using a mesh that has faces point inwards to make this call obsolete
@@ -108,3 +174,29 @@ void SceneRenderer::RenderSkybox(Object& object, Shader& skyboxShader,Cubemap& c
 	glDepthFunc(GL_LESS);
 	glCullFace(GL_FRONT);
 }
+void SceneRenderer::RenderScene(DefaultScene* activeScene, unsigned int viewportWidth, unsigned int viewportHeight)
+{
+	activeScene->camera.updateScreenSize(viewportWidth, viewportHeight);
+
+
+
+	SetProjectionMatrix(activeScene->camera.GetProjectionMatrix());
+	SetViewMatrix(activeScene->camera.GetViewMatrix());
+
+	StarFrame(viewportWidth,viewportHeight);
+
+	// Uniforms have to be set after start Frame
+	SetPbrShaderGlobalSceneUniforms(activeScene->pbrShader, activeScene->environmentTexture, -activeScene->lightObject.GetForward(), activeScene->lightMaterial.EmissionStrength, activeScene->camera.position, activeScene->environmentRotation);
+
+	// draw calls
+	RenderMesh(activeScene->baseObject, activeScene->pbrMaterial);
+	// render light source
+	RenderMesh(activeScene->lightObject, activeScene->lightMaterial);
+	// Render skybox last
+	RenderSkybox(activeScene->skyboxObject, activeScene->skyboxShader, activeScene->environmentTexture, activeScene->environmentRotation, activeScene->skyboxColorTint);
+
+
+	EndFrame();
+
+}
+
