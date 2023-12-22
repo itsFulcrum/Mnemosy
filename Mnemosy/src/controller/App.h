@@ -20,7 +20,7 @@
 #include <view/Cubemap.h>
 #include <view/PbrMaterial.h>
 
-#include <view/GraphicalUserInterface.h>
+//#include <view/GraphicalUserInterface.h>
 
 
 #include <controller/InputHandler.h>
@@ -65,7 +65,7 @@ public:
 private:
 	GLFWwindow* window;
 	InputHandler* inputHandler;
-	GraphicalUserInterface* userInterface;
+	//GraphicalUserInterface* userInterface;
 	
 
 	DefaultScene activeScene;

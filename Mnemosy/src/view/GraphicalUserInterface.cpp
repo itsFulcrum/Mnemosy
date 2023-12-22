@@ -91,9 +91,9 @@ void GraphicalUserInterface::Render()
 	// New frame after inputs are handled 
 	ImGuiIO& io = ImGui::GetIO();
 
-	
-	m_MousePosition = ImGui::GetMousePos();
 
+
+	m_MousePosition = ImGui::GetMousePos();
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -104,7 +104,6 @@ void GraphicalUserInterface::Render()
 	ImGui::DockSpaceOverViewport();
 	
 	
-
 	
 	// == Viewport == //
 

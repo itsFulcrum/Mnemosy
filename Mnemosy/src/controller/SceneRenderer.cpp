@@ -183,7 +183,9 @@ void SceneRenderer::RenderScene(DefaultScene* activeScene, unsigned int viewport
 	SetProjectionMatrix(activeScene->camera.GetProjectionMatrix());
 	SetViewMatrix(activeScene->camera.GetViewMatrix());
 
-	StarFrame(viewportWidth,viewportHeight);
+	//StarFrame(viewportWidth,viewportHeight);
+
+	ClearFrame(0.0f, 0.0f, 0.0f);
 
 	// Uniforms have to be set after start Frame
 	SetPbrShaderGlobalSceneUniforms(activeScene->pbrShader, activeScene->environmentTexture, -activeScene->lightObject.GetForward(), activeScene->lightMaterial.EmissionStrength, activeScene->camera.position, activeScene->environmentRotation);
@@ -196,7 +198,7 @@ void SceneRenderer::RenderScene(DefaultScene* activeScene, unsigned int viewport
 	RenderSkybox(activeScene->skyboxObject, activeScene->skyboxShader, activeScene->environmentTexture, activeScene->environmentRotation, activeScene->skyboxColorTint);
 
 
-	EndFrame();
+	//EndFrame();
 
 }
 

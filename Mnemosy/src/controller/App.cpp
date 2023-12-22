@@ -19,7 +19,7 @@ App::App()
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 
-	userInterface = new GraphicalUserInterface(window);
+	//userInterface = new GraphicalUserInterface(window);
 
 	
 	activeScene.Init(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
@@ -44,7 +44,7 @@ App::App()
 App::~App()
 {
 	delete inputHandler;
-	delete userInterface;
+	//delete userInterface;
 
 	glfwTerminate();
 }
@@ -116,16 +116,14 @@ void App::setupGlSettings()
 
 void App::run()
 {
-	ImGuiIO& io = ImGui::GetIO();
-
+	//ImGuiIO& io = ImGui::GetIO();
+	
 	setupGlSettings();
 
-
-	//ModelLoader modelLoader;
 	SceneRenderer sceneRenderer(SCR_WIDTH,SCR_HEIGHT);
 
 	// ImGui Needs a refrence to the openGl Texture id so that we can later draw the renderTexture into the ImGui Image of the viewport Window
-	userInterface->viewportRenderTextureID = sceneRenderer.GetRenderTextureId();
+	//userInterface->viewportRenderTextureID = sceneRenderer.GetRenderTextureId();
 	
 	
 
@@ -140,13 +138,17 @@ void App::run()
 
 
 
-		float sinTime = sin(time)+1;
-
-
-		// poll inputs from last frame
 		glfwPollEvents();
+		
+		//userInterface->UpdateWindowPosition(window);
+		
+
+		//  ImGui Needs to be rendered before OpenGl Scene
+		
+		
 		// proccess inputs
-		if (userInterface->IsMouseOverViewport())
+		bool processInput = true; //userInterface->IsMouseOverViewport();
+		if (processInput)
 		{
 			inputHandler->proccessInputs = true;
 			inputHandler->update(activeScene.environmentRotation);
@@ -157,21 +159,15 @@ void App::run()
 		}
 
 
-		userInterface->UpdateWindowPosition(window);
-		
-
-		//  ImGui Needs to be rendered before OpenGl Scene
-		userInterface->Render();
+		//userInterface->Render();
+		//std::cout << "imGui wantCaptureMouse: " << inputHandler->proccessInputs << std::endl;
 
 
 
 		
 		activeScene.Update();
-		
 
-
-
-		sceneRenderer.RenderScene(&activeScene, userInterface->viewportWidth, userInterface->viewportHeight);
+		sceneRenderer.RenderScene(&activeScene, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 
 
 		glfwSwapBuffers(window);
