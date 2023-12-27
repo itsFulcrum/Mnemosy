@@ -48,12 +48,12 @@ public:
 		skyboxObject.modelData = modelLoader.LoadModelDataFromFile("fbx/skyboxMesh.fbx");
 
 		//environmentTexture = new Cubemap("textures/market.hdr", 1024, true);
-		environmentTexture.loadFromFile("textures/market.hdr", 1024, true);
+		environmentTexture.loadFromFile("textures/kloppenheim.hdr", 1024, true);
 
 
 		// == Base Mesh
 		//baseObject = new Object();
-		baseObject.modelData = modelLoader.LoadModelDataFromFile("fbx/TestObj.fbx");
+		baseObject.modelData = modelLoader.LoadModelDataFromFile("fbx/testObj.fbx");
 		baseObject.position = glm::vec3(0.0f, 0.0f, 0.0f);
 		baseObject.rotation.x = -90.0f;
 
@@ -67,11 +67,11 @@ public:
 		pbrMaterial.assignTexture(AMBIENTOCCLUSION, "textures/panel_ao.png");
 		pbrMaterial.assignTexture(EMISSION, "textures/panel_emissive.png");
 
-		pbrMaterial.EmissionStrength = 1.0;
-		pbrMaterial.Albedo = glm::vec3(0.1f, 0.8f, 0.0f);
+		pbrMaterial.EmissionStrength = 12;
+		pbrMaterial.Albedo = glm::vec3(0.3f, 0.3f, 0.3f);
 		pbrMaterial.Emission = glm::vec3(0.0f, 0.3f, 0.7f);
 		pbrMaterial.Metallic = 1.0f;
-		pbrMaterial.Roughness = 0.1f;
+		pbrMaterial.Roughness = 1.0f;
 
 
 
@@ -89,7 +89,7 @@ public:
 		lightMaterial.Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 		lightMaterial.Roughness = 1.0;
 		lightMaterial.Emission = glm::vec3(1.0f, 1.0f, 1.0f);
-		lightMaterial.EmissionStrength = 10.0f;
+		lightMaterial.EmissionStrength = 8.0f;
 	}
 
 	void Update()

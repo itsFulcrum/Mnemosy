@@ -210,13 +210,14 @@ vec4 lightingPBR(SurfaceData sd, LightingData ld,samplerCube irradianceMap,sampl
     vec3 R = reflect(ld.viewDirection,sd.normal);
 
     // INDIRECT DIFFUSE
-    // better naming pls
-    vec3 rotatedNormal = Lighting_Math_Rotate_About_Axis_Radians_float(sd.normal, vec3(0.0f,1.0f,0.0f), ld.skyboxRotation);
+    vec3 rotatedNormal =  Lighting_Math_Rotate_About_Axis_Radians_float(sd.normal, vec3(0.0f,1.0f,0.0f), ld.skyboxRotation);
     vec3 irradiance = texture(irradianceMap, rotatedNormal).rgb;
     vec3 diffuse = irradiance * sd.albedo;
 
     // INDIRECT SPECULAR
-    vec3 rotatedReflect = Lighting_Math_Rotate_About_Axis_Radians_float(sd.normal, vec3(0.0f,1.0f,0.0f), ld.skyboxRotation);
+    vec3 reflectVec = reflect(ld.viewDirection, sd.normal);
+    vec3 rotatedReflect = Lighting_Math_Rotate_About_Axis_Radians_float(reflectVec, vec3(0.0f,1.0f,0.0f), ld.skyboxRotation);
+
     vec3 prefilteredColor = textureLod(prefilterMap, rotatedReflect,  sd.roughness * MAX_REFLECTION_LOD).rgb;
     vec2 envBRDF  = texture(brdfLUT, vec2(NdotV, sd.roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
@@ -233,7 +234,6 @@ vec4 lightingPBR(SurfaceData sd, LightingData ld,samplerCube irradianceMap,sampl
   //// ============================================================================================================ ////
 
     vec3 pbrShadedColor = directRadiance + indirectRadiance + emissionRadiance;
-
   ////// OUTPUT =================================================================================================== ////
   //// ============================================================================================================ ////
 
