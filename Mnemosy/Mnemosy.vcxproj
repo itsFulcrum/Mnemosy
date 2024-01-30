@@ -151,9 +151,11 @@
     <ClCompile Include="dependencies\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\controller\App.cpp" />
-    <ClCompile Include="src\controller\InputHandler.cpp" />
+    <ClCompile Include="src\controller\CameraController.cpp" />
     <ClCompile Include="src\controller\SceneRenderer.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\Input\InputSystem.cpp" />
+    <ClCompile Include="src\Input\SceneInputController.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\model\Camera.cpp" />
     <ClCompile Include="src\model\SceneObject.cpp" />
@@ -171,9 +173,11 @@
     <ClInclude Include="dependencies\include\imgui\imstb_textedit.h" />
     <ClInclude Include="dependencies\include\imgui\imstb_truetype.h" />
     <ClInclude Include="src\controller\App.h" />
-    <ClInclude Include="src\controller\InputHandler.h" />
+    <ClInclude Include="src\controller\CameraController.h" />
     <ClInclude Include="src\controller\ModelLoader.h" />
     <ClInclude Include="src\controller\SceneRenderer.h" />
+    <ClInclude Include="src\Input\InputSystem.h" />
+    <ClInclude Include="src\Input\SceneInputController.h" />
     <ClInclude Include="src\model\Camera.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\view\Cubemap.h" />

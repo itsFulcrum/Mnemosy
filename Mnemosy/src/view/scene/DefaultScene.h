@@ -29,10 +29,9 @@ public:
 		environmentRotation = 0.0f;
 		skyboxColorTint = glm::vec3(1, 1, 1);
 
-		//camera = new Camera();
-		camera.Init(ScreenWidth, ScreenHeight);
-		camera.cameraMode = CAMERA_MODE_FLY;
-		camera.position = glm::vec3(0.0f, 0.0f, 3.0f);
+		camera = new Camera(ScreenWidth,ScreenHeight);
+		camera->position = glm::vec3(0.0f, 0.0f, 3.0f);
+
 
 		ModelLoader modelLoader;
 
@@ -48,12 +47,12 @@ public:
 		skyboxObject.modelData = modelLoader.LoadModelDataFromFile("fbx/skyboxMesh.fbx");
 
 		//environmentTexture = new Cubemap("textures/market.hdr", 1024, true);
-		environmentTexture.loadFromFile("textures/kloppenheim.hdr", 1024, true);
+		environmentTexture.loadFromFile("textures/market.hdr", 1024, true);
 
 
 		// == Base Mesh
 		//baseObject = new Object();
-		baseObject.modelData = modelLoader.LoadModelDataFromFile("fbx/testObj.fbx");
+		baseObject.modelData = modelLoader.LoadModelDataFromFile("fbx/TestObj.fbx");
 		baseObject.position = glm::vec3(0.0f, 0.0f, 0.0f);
 		baseObject.rotation.x = -90.0f;
 
@@ -63,15 +62,15 @@ public:
 		pbrMaterial.assignTexture(ALBEDO, "textures/panel_albedo.png");
 		pbrMaterial.assignTexture(ROUGHNESS, "textures/panel_roughness.png");
 		pbrMaterial.assignTexture(METALLIC, "textures/panel_metallic.png");
-		pbrMaterial.assignTexture(NORMAL, "textures/panel_normal.png");
+		pbrMaterial.assignTexture(NORMAL, "textures/brick_normal.png");
 		pbrMaterial.assignTexture(AMBIENTOCCLUSION, "textures/panel_ao.png");
 		pbrMaterial.assignTexture(EMISSION, "textures/panel_emissive.png");
 
-		pbrMaterial.EmissionStrength = 12;
+		pbrMaterial.EmissionStrength = 0;
 		pbrMaterial.Albedo = glm::vec3(0.3f, 0.3f, 0.3f);
 		pbrMaterial.Emission = glm::vec3(0.0f, 0.3f, 0.7f);
-		pbrMaterial.Metallic = 1.0f;
-		pbrMaterial.Roughness = 1.0f;
+		pbrMaterial.Metallic = 0.0f;
+		pbrMaterial.Roughness = 0.4f;
 
 
 
@@ -101,7 +100,7 @@ public:
 	Shader pbrShader;
 	Shader skyboxShader;
 
-	Camera camera;
+	Camera* camera;
 
 	Object baseObject;
 	Object lightObject;

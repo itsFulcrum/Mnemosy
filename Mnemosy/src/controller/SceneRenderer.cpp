@@ -176,19 +176,19 @@ void SceneRenderer::RenderSkybox(Object& object, Shader& skyboxShader,Cubemap& c
 }
 void SceneRenderer::RenderScene(DefaultScene* activeScene, unsigned int viewportWidth, unsigned int viewportHeight)
 {
-	activeScene->camera.updateScreenSize(viewportWidth, viewportHeight);
+	//activeScene->camera.SetScreenSize(viewportWidth, viewportHeight);
 
 
 
-	SetProjectionMatrix(activeScene->camera.GetProjectionMatrix());
-	SetViewMatrix(activeScene->camera.GetViewMatrix());
+	SetProjectionMatrix(activeScene->camera->GetProjectionMatrix());
+	SetViewMatrix(activeScene->camera->GetViewMatrix());
 
 	//StarFrame(viewportWidth,viewportHeight);
 
 	ClearFrame(0.0f, 0.0f, 0.0f);
 
 	// Uniforms have to be set after start Frame
-	SetPbrShaderGlobalSceneUniforms(activeScene->pbrShader, activeScene->environmentTexture, -activeScene->lightObject.GetForward(), activeScene->lightMaterial.EmissionStrength, activeScene->camera.position, activeScene->environmentRotation);
+	SetPbrShaderGlobalSceneUniforms(activeScene->pbrShader, activeScene->environmentTexture, -activeScene->lightObject.GetForward(), activeScene->lightMaterial.EmissionStrength, activeScene->camera->position, activeScene->environmentRotation);
 
 	// draw calls
 	RenderMesh(activeScene->baseObject, activeScene->pbrMaterial);

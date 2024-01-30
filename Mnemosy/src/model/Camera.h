@@ -9,85 +9,59 @@
 #include <GLFW/glfw3.h>
 
 
-
-// using this to abstrct it from any window system
-enum Camera_Movement {
-	CAMERA_FORWARD,
-	CAMERA_BACKWARD,
-	CAMERA_LEFT,
-	CAMERA_RIGHT
-};
-
-
-enum Camera_Mode
+struct CameraSettings
 {
-	CAMERA_MODE_EDIT,
-	CAMERA_MODE_FLY
+	float fov = 45.0f;
+	float nearClip = 0.1f;
+	float farClip = 500.0f;
 };
 
-// Default camera values
-const float YAW = -90.0f;
-const float PITCH = 0.0f;
-const float MOVESPEED = 2.5f;
-const float MOUSESENSITIVITY = 0.1f;
-const float FOV = 45.0f;
 
 class Camera
 {
 
 public:
 	
-	float pitch = 0.0f;
-	float yaw = -90.0f;
 
-	// Settings
-	float fov;
-	float nearClip;
-	float farClip;
+	CameraSettings settings;
 
-	float moveSpeed;
-	float mouseSensitivity;
+	glm::vec3 position = glm::vec3(0.0f, 0.0f, -1.0f);
 
-
-
-	glm::vec3 position; 
-	glm::vec3 up;
-	glm::vec3 forward;
-	glm::vec3 right;
-	glm::vec3 worldUp;
-
-	bool controllsActive = false;
-	Camera_Mode cameraMode = CAMERA_MODE_EDIT;
 	
-	glm::vec3 focusPoint = glm::vec3(0.0f,0.0f,0.0f);
+
 
 	// constructor with glm vectors
-	Camera();
+	Camera(unsigned int renderScreenWidth, unsigned int renderScreenHeight);
 	~Camera();
 
-	void Init(unsigned int renderScreenWidth, unsigned int renderScreenHeight);
-	
-	void updateScreenSize(unsigned int width, unsigned int height);
-	void ActivateControlls(GLFWwindow* window);
-	void DeactivateControlls(GLFWwindow* window);
-
-	// Callbacks
-	void ProcessKeyboardInput(Camera_Movement direction, float deltaTime);
-	void ProessMouseInput(double xOffset, double yOffset);
-	void ProcessMouseScrollInput(float yOffset, float deltaTime);
-
+	void SetScreenSize(unsigned int width, unsigned int height);
 
 	glm::mat4 GetViewMatrix();
 	glm::mat4 GetProjectionMatrix();
 
+	float GetYaw() { return m_yaw; }
+	float GetPitch() { return m_pitch; }
+	void SetYawPitch(float yaw, float pitch);
+
+	void SetPosition(glm::vec3 Position);
+	glm::vec3 GetForward() { return m_forward; }
+	glm::vec3 GetRight() { return m_right; }
+	glm::vec3 GetUp() { return m_up; }
+	
+	void RecalculateLocalVectors(glm::vec3 forward);
 
 private:
-	unsigned int m_screenWidth;
-	unsigned int m_screenHeight;
+	unsigned int m_screenWidth = 0;
+	unsigned int m_screenHeight = 0;
+	
 
-	float ClampFloat(float input, float min, float max);
-	void updateCameraVectors();
+	glm::vec3 m_forward = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 m_right = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 m_up = glm::vec3(0.0f, 1.0f, 0.0f);;
 
+	float m_pitch = 0.0f;
+	float m_yaw = -90.0f;
+	glm::vec3 m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 };
 
 

@@ -24,9 +24,15 @@ App::App()
 	
 	activeScene.Init(CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT);
 	
-	inputHandler = new InputHandler();
-	inputHandler->Init(window, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT, &activeScene.camera, time, deltaTime, lastFrame);
-	glfwSetWindowUserPointer(window, inputHandler);
+	m_inputSystem = new InputSystem(window);
+	glfwSetWindowUserPointer(window, m_inputSystem);
+	
+	
+	m_cameraController = new CameraController(*m_inputSystem, *activeScene.camera);
+	m_sceneInputController = new SceneInputController(*m_inputSystem, activeScene.environmentRotation);
+	//inputHandler = new InputHandler();
+	//inputHandler->Init(window, CURRENT_WINDOW_WIDTH, CURRENT_WINDOW_HEIGHT, &activeScene.camera, time, deltaTime, lastFrame);
+	//glfwSetWindowUserPointer(window, inputHandler);
 
 
 
@@ -35,15 +41,11 @@ App::App()
 	glfwSetScrollCallback(window, mouse_scroll_callback);
 	glfwSetCursorPosCallback(window, mouse_cursor_callback);
 
-
-
-
-	
 }
 
 App::~App()
 {
-	delete inputHandler;
+	delete m_inputSystem;
 	//delete userInterface;
 
 	glfwTerminate();
@@ -78,6 +80,7 @@ void App::setupGLFWWindow(const char* WindowTileName)
 
 
 }
+
 
 void App::setupGlSettings()
 {
@@ -125,21 +128,21 @@ void App::run()
 	// ImGui Needs a refrence to the openGl Texture id so that we can later draw the renderTexture into the ImGui Image of the viewport Window
 	//userInterface->viewportRenderTextureID = sceneRenderer.GetRenderTextureId();
 	
-	
-
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 	while (!glfwWindowShouldClose(window))
 	{
 
 		float time = static_cast<float>(glfwGetTime());
-		deltaTime = time - lastFrame;
+		deltaSeconds = time - lastFrame;
 		lastFrame = time;
 
 
 
 		glfwPollEvents();
-		
+		//m_CameraController->UpdateTime(deltaTime); // idially forwarded by the input system
+		m_inputSystem->Update(deltaSeconds);
+		//m_inputSystem->UpdateKeyboardInputs();
 		//userInterface->UpdateWindowPosition(window);
 		
 
@@ -150,12 +153,12 @@ void App::run()
 		bool processInput = true; //userInterface->IsMouseOverViewport();
 		if (processInput)
 		{
-			inputHandler->proccessInputs = true;
-			inputHandler->update(activeScene.environmentRotation);
+		//	inputHandler->proccessInputs = true;
+		//	inputHandler->update(activeScene.environmentRotation);
 		}
 		else
 		{
-			inputHandler->proccessInputs = false;
+		//	inputHandler->proccessInputs = false;
 		}
 
 
@@ -175,34 +178,38 @@ void App::run()
 }
 
 
-// CALLSBACKS
+// GLFW CALLSBACKS
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) 
 {
-	//glViewport(0, 0, width, height);
-	InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
-	handler->On_framebuffer_size_callback(width, height);
+	glViewport(0, 0, width, height);
+	//InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
+	//handler->On_framebuffer_size_callback(width, height);
+
+	InputSystem* inputSystem = (InputSystem*)glfwGetWindowUserPointer(window);
+	inputSystem->UpdateWindowResizeInputs(width, height);
 }
 
-void mouse_cursor_callback(GLFWwindow* window, double posX, double posY)
-{
-	InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
-	handler->On_mouse_cursor_callback(posX, posY);
-
-
-	
-}
 void mouse_button_callback(GLFWwindow* window,int button, int action, int mods)
 {
-	InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
-	handler->On_mouse_button_callback(button, action,mods);
+	//InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
+	//handler->On_mouse_button_callback(button, action,mods);
 
+	InputSystem* inputSystem = (InputSystem*)glfwGetWindowUserPointer(window);
+	inputSystem->UpdateMouseButtonInputs(button, action, mods);
+}
+void mouse_cursor_callback(GLFWwindow* window, double posX, double posY)
+{
+	//InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
+	//handler->On_mouse_cursor_callback(posX, posY);
 
-	
+	InputSystem* inputSystem = (InputSystem*)glfwGetWindowUserPointer(window);
+	inputSystem->UpdateMouseCursorInputs(posX, posY);
 }
 void mouse_scroll_callback(GLFWwindow* window, double offsetX, double offsetY)
 {
-	InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
-	handler->On_mouse_scroll_callback(offsetX,offsetY);
+	//InputHandler* handler = (InputHandler*)glfwGetWindowUserPointer(window);
+	//handler->On_mouse_scroll_callback(offsetX,offsetY);
 
-
+	InputSystem* inputSystem = (InputSystem*)glfwGetWindowUserPointer(window);
+	inputSystem->UpdateMouseScrollInputs(offsetX, offsetY);
 }

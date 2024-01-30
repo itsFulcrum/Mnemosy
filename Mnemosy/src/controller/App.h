@@ -21,11 +21,12 @@
 #include <view/PbrMaterial.h>
 
 //#include <view/GraphicalUserInterface.h>
+#include "CameraController.h"
+#include "Input/SceneInputController.h"
 
-
-#include <controller/InputHandler.h>
 #include <controller/SceneRenderer.h>
 #include <controller/ModelLoader.h>
+#include "Input/InputSystem.h"
 
 //#include <view/scene/Scene.h>
 #include <view/scene/DefaultScene.h>
@@ -59,15 +60,17 @@ public:
 
 
 	float time = 0.0;
-	float deltaTime = 0.0;
+	float deltaSeconds = 0.0;
 	float lastFrame = 0.0;
 
 private:
 	GLFWwindow* window;
-	InputHandler* inputHandler;
-	//GraphicalUserInterface* userInterface;
-	
+	//InputHandler* inputHandler;
 
+	InputSystem* m_inputSystem;
+	//GraphicalUserInterface* userInterface;
+	CameraController* m_cameraController;
+	SceneInputController* m_sceneInputController;
 	DefaultScene activeScene;
 };
 

@@ -24,7 +24,9 @@ public:
 	std::string pathVertex;
 	std::string pathFragment;
 
-	Shader() = default;
+	Shader()
+	{
+	};
 	Shader(const char* vertexPath, const char* fragmentPath)
 	{
 		CreateShaderProgram(vertexPath, fragmentPath);
