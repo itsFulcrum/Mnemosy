@@ -1,0 +1,750 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineSystem.cmake:211 (message)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      The system is: Windows - 10.0.22631 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+      Der Buildvorgang wurde am 20.02.2024 14:27:36 gestartet.
+      
+      Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\3.27.4\\CompilerIdC\\CompilerIdC.vcxproj" auf Knoten "1" (Standardziele).
+      PrepareForBuild:
+        Das Verzeichnis "Debug\\" wird erstellt.
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Das Verzeichnis "Debug\\CompilerIdC.tlog\\" wird erstellt.
+      InitializeBuildStatus:
+        "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+        Aktualisieren des Timestamps von "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\3.27.4\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Die Datei "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" wird gel”scht.
+        Aktualisieren des Timestamps von "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\3.27.4\\CompilerIdC\\CompilerIdC.vcxproj" ist abgeschlossen (Standardziele).
+      
+      Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+          0 Warnung(en)
+          0 Fehler
+      
+      Verstrichene Zeit 00:00:00.44
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/3.27.4/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:7 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+      Der Buildvorgang wurde am 20.02.2024 14:27:37 gestartet.
+      
+      Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\3.27.4\\CompilerIdCXX\\CompilerIdCXX.vcxproj" auf Knoten "1" (Standardziele).
+      PrepareForBuild:
+        Das Verzeichnis "Debug\\" wird erstellt.
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Das Verzeichnis "Debug\\CompilerIdCXX.tlog\\" wird erstellt.
+      InitializeBuildStatus:
+        "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+        Aktualisieren des Timestamps von "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\3.27.4\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Die Datei "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" wird gel”scht.
+        Aktualisieren des Timestamps von "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\3.27.4\\CompilerIdCXX\\CompilerIdCXX.vcxproj" ist abgeschlossen (Standardziele).
+      
+      Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+          0 Warnung(en)
+          0 Fehler
+      
+      Verstrichene Zeit 00:00:00.43
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/3.27.4/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:7 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-antqtw"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-antqtw"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-antqtw'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_b82bb.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:37 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-antqtw\\cmTC_b82bb.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_b82bb.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-antqtw\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_b82bb.dir\\Debug\\cmTC_b82bb.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_b82bb.dir\\Debug\\cmTC_b82bb.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_b82bb.dir\\Debug\\cmTC_b82bb.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b82bb.dir\\Debug\\\\" /Fd"cmTC_b82bb.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.27\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_b82bb.dir\\Debug\\\\" /Fd"cmTC_b82bb.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.27\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-antqtw\\Debug\\cmTC_b82bb.exe" /INCREMENTAL /ILK:"cmTC_b82bb.dir\\Debug\\cmTC_b82bb.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-antqtw/Debug/cmTC_b82bb.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-antqtw/Debug/cmTC_b82bb.lib" /MACHINE:X64  /machine:x64 cmTC_b82bb.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_b82bb.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-antqtw\\Debug\\cmTC_b82bb.exe
+        FinalizeBuildStatus:
+          Die Datei "cmTC_b82bb.dir\\Debug\\cmTC_b82bb.tlog\\unsuccessfulbuild" wird gel”scht.
+          Aktualisieren des Timestamps von "cmTC_b82bb.dir\\Debug\\cmTC_b82bb.tlog\\cmTC_b82bb.lastbuildstate".
+        Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-antqtw\\cmTC_b82bb.vcxproj" ist abgeschlossen (Standardziele).
+        
+        Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+            0 Warnung(en)
+            0 Fehler
+        
+        Verstrichene Zeit 00:00:00.43
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:7 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-kkp5tl"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-kkp5tl"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /W3 /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-kkp5tl'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_19654.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:38 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-kkp5tl\\cmTC_19654.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_19654.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-kkp5tl\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_19654.dir\\Debug\\cmTC_19654.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_19654.dir\\Debug\\cmTC_19654.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_19654.dir\\Debug\\cmTC_19654.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++20 /Fo"cmTC_19654.dir\\Debug\\\\" /Fd"cmTC_19654.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.27\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /std:c++20 /Fo"cmTC_19654.dir\\Debug\\\\" /Fd"cmTC_19654.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.27\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-kkp5tl\\Debug\\cmTC_19654.exe" /INCREMENTAL /ILK:"cmTC_19654.dir\\Debug\\cmTC_19654.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-kkp5tl/Debug/cmTC_19654.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-kkp5tl/Debug/cmTC_19654.lib" /MACHINE:X64  /machine:x64 cmTC_19654.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_19654.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-kkp5tl\\Debug\\cmTC_19654.exe
+        FinalizeBuildStatus:
+          Die Datei "cmTC_19654.dir\\Debug\\cmTC_19654.tlog\\unsuccessfulbuild" wird gel”scht.
+          Aktualisieren des Timestamps von "cmTC_19654.dir\\Debug\\cmTC_19654.tlog\\cmTC_19654.lastbuildstate".
+        Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-kkp5tl\\cmTC_19654.vcxproj" ist abgeschlossen (Standardziele).
+        
+        Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+            0 Warnung(en)
+            0 Fehler
+        
+        Verstrichene Zeit 00:00:00.44
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "Code/Dependencies/glfw-3.3.9/CMakeLists.txt:61 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-b5006v"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-b5006v"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/glfw-3.3.9/CMake/modules"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-b5006v'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_fa6ad.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:39 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\cmTC_fa6ad.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_fa6ad.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_fa6ad.dir\\Debug\\cmTC_fa6ad.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_fa6ad.dir\\Debug\\cmTC_fa6ad.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_fa6ad.dir\\Debug\\cmTC_fa6ad.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fa6ad.dir\\Debug\\\\" /Fd"cmTC_fa6ad.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\src.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fa6ad.dir\\Debug\\\\" /Fd"cmTC_fa6ad.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\src.c"
+          src.c
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\src.c(1,10): error C1083: Cannot open include file: 'pthread.h': No such file or directory [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\cmTC_fa6ad.vcxproj]
+        Die Erstellung des Projekts "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\cmTC_fa6ad.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        
+        Fehler beim Buildvorgang.
+        
+        "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\cmTC_fa6ad.vcxproj" (Standardziel) (1) ->
+        (ClCompile Ziel) -> 
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\src.c(1,10): error C1083: Cannot open include file: 'pthread.h': No such file or directory [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-b5006v\\cmTC_fa6ad.vcxproj]
+        
+            0 Warnung(en)
+            1 Fehler
+        
+        Verstrichene Zeit 00:00:00.33
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/FindThreads.cmake:175 (_threads_check_lib)"
+      - "Code/Dependencies/glfw-3.3.9/CMakeLists.txt:61 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-p23zxg"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-p23zxg"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/glfw-3.3.9/CMake/modules"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-p23zxg'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_fb193.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:39 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\cmTC_fb193.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_fb193.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_fb193.dir\\Debug\\cmTC_fb193.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_fb193.dir\\Debug\\cmTC_fb193.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_fb193.dir\\Debug\\cmTC_fb193.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fb193.dir\\Debug\\\\" /Fd"cmTC_fb193.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fb193.dir\\Debug\\\\" /Fd"cmTC_fb193.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\Debug\\cmTC_fb193.exe" /INCREMENTAL /ILK:"cmTC_fb193.dir\\Debug\\cmTC_fb193.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-p23zxg/Debug/cmTC_fb193.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-p23zxg/Debug/cmTC_fb193.lib" /MACHINE:X64  /machine:x64 cmTC_fb193.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: cannot open file 'pthreads.lib' [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\cmTC_fb193.vcxproj]
+        Die Erstellung des Projekts "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\cmTC_fb193.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        
+        Fehler beim Buildvorgang.
+        
+        "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\cmTC_fb193.vcxproj" (Standardziel) (1) ->
+        (Link Ziel) -> 
+          LINK : fatal error LNK1104: cannot open file 'pthreads.lib' [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-p23zxg\\cmTC_fb193.vcxproj]
+        
+            0 Warnung(en)
+            1 Fehler
+        
+        Verstrichene Zeit 00:00:00.36
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/FindThreads.cmake:176 (_threads_check_lib)"
+      - "Code/Dependencies/glfw-3.3.9/CMakeLists.txt:61 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-81gdh1"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-81gdh1"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/glfw-3.3.9/CMake/modules"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-81gdh1'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_f9afb.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:40 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\cmTC_f9afb.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_f9afb.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_f9afb.dir\\Debug\\cmTC_f9afb.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_f9afb.dir\\Debug\\cmTC_f9afb.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_f9afb.dir\\Debug\\cmTC_f9afb.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f9afb.dir\\Debug\\\\" /Fd"cmTC_f9afb.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f9afb.dir\\Debug\\\\" /Fd"cmTC_f9afb.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\Debug\\cmTC_f9afb.exe" /INCREMENTAL /ILK:"cmTC_f9afb.dir\\Debug\\cmTC_f9afb.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-81gdh1/Debug/cmTC_f9afb.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-81gdh1/Debug/cmTC_f9afb.lib" /MACHINE:X64  /machine:x64 cmTC_f9afb.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: cannot open file 'pthread.lib' [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\cmTC_f9afb.vcxproj]
+        Die Erstellung des Projekts "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\cmTC_f9afb.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        
+        Fehler beim Buildvorgang.
+        
+        "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\cmTC_f9afb.vcxproj" (Standardziel) (1) ->
+        (Link Ziel) -> 
+          LINK : fatal error LNK1104: cannot open file 'pthread.lib' [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-81gdh1\\cmTC_f9afb.vcxproj]
+        
+            0 Warnung(en)
+            1 Fehler
+        
+        Verstrichene Zeit 00:00:00.37
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "Code/Dependencies/assimp-master/contrib/zlib/CMakeLists.txt:35 (check_include_file)"
+    checks:
+      - "Looking for sys/types.h"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-spz9xv"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-spz9xv"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/assimp-master/cmake-modules"
+    buildResult:
+      variable: "HAVE_SYS_TYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-spz9xv'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a000b.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:40 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\cmTC_a000b.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_a000b.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_a000b.dir\\Debug\\cmTC_a000b.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_a000b.dir\\Debug\\cmTC_a000b.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_a000b.dir\\Debug\\cmTC_a000b.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a000b.dir\\Debug\\\\" /Fd"cmTC_a000b.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a000b.dir\\Debug\\\\" /Fd"cmTC_a000b.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\Debug\\cmTC_a000b.exe" /INCREMENTAL /ILK:"cmTC_a000b.dir\\Debug\\cmTC_a000b.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-spz9xv/Debug/cmTC_a000b.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-spz9xv/Debug/cmTC_a000b.lib" /MACHINE:X64  /machine:x64 cmTC_a000b.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_a000b.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\Debug\\cmTC_a000b.exe
+        FinalizeBuildStatus:
+          Die Datei "cmTC_a000b.dir\\Debug\\cmTC_a000b.tlog\\unsuccessfulbuild" wird gel”scht.
+          Aktualisieren des Timestamps von "cmTC_a000b.dir\\Debug\\cmTC_a000b.tlog\\cmTC_a000b.lastbuildstate".
+        Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-spz9xv\\cmTC_a000b.vcxproj" ist abgeschlossen (Standardziele).
+        
+        Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+            0 Warnung(en)
+            0 Fehler
+        
+        Verstrichene Zeit 00:00:00.45
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "Code/Dependencies/assimp-master/contrib/zlib/CMakeLists.txt:36 (check_include_file)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ne8716"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ne8716"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/assimp-master/cmake-modules"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ne8716'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_95f17.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:41 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\cmTC_95f17.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_95f17.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_95f17.dir\\Debug\\cmTC_95f17.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_95f17.dir\\Debug\\cmTC_95f17.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_95f17.dir\\Debug\\cmTC_95f17.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_95f17.dir\\Debug\\\\" /Fd"cmTC_95f17.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_95f17.dir\\Debug\\\\" /Fd"cmTC_95f17.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\Debug\\cmTC_95f17.exe" /INCREMENTAL /ILK:"cmTC_95f17.dir\\Debug\\cmTC_95f17.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ne8716/Debug/cmTC_95f17.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ne8716/Debug/cmTC_95f17.lib" /MACHINE:X64  /machine:x64 cmTC_95f17.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_95f17.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\Debug\\cmTC_95f17.exe
+        FinalizeBuildStatus:
+          Die Datei "cmTC_95f17.dir\\Debug\\cmTC_95f17.tlog\\unsuccessfulbuild" wird gel”scht.
+          Aktualisieren des Timestamps von "cmTC_95f17.dir\\Debug\\cmTC_95f17.tlog\\cmTC_95f17.lastbuildstate".
+        Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ne8716\\cmTC_95f17.vcxproj" ist abgeschlossen (Standardziele).
+        
+        Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+            0 Warnung(en)
+            0 Fehler
+        
+        Verstrichene Zeit 00:00:00.42
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "Code/Dependencies/assimp-master/contrib/zlib/CMakeLists.txt:37 (check_include_file)"
+    checks:
+      - "Looking for stddef.h"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-l2vkw2"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-l2vkw2"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/assimp-master/cmake-modules"
+    buildResult:
+      variable: "HAVE_STDDEF_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-l2vkw2'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_988f8.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:42 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\cmTC_988f8.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_988f8.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_988f8.dir\\Debug\\cmTC_988f8.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_988f8.dir\\Debug\\cmTC_988f8.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_988f8.dir\\Debug\\cmTC_988f8.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_988f8.dir\\Debug\\\\" /Fd"cmTC_988f8.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_988f8.dir\\Debug\\\\" /Fd"cmTC_988f8.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\Debug\\cmTC_988f8.exe" /INCREMENTAL /ILK:"cmTC_988f8.dir\\Debug\\cmTC_988f8.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-l2vkw2/Debug/cmTC_988f8.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-l2vkw2/Debug/cmTC_988f8.lib" /MACHINE:X64  /machine:x64 cmTC_988f8.dir\\Debug\\CheckIncludeFile.obj
+          cmTC_988f8.vcxproj -> C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\Debug\\cmTC_988f8.exe
+        FinalizeBuildStatus:
+          Die Datei "cmTC_988f8.dir\\Debug\\cmTC_988f8.tlog\\unsuccessfulbuild" wird gel”scht.
+          Aktualisieren des Timestamps von "cmTC_988f8.dir\\Debug\\cmTC_988f8.tlog\\cmTC_988f8.lastbuildstate".
+        Die Erstellung von Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-l2vkw2\\cmTC_988f8.vcxproj" ist abgeschlossen (Standardziele).
+        
+        Der Buildvorgang wurde erfolgreich ausgef\xc2\x81hrt.
+            0 Warnung(en)
+            0 Fehler
+        
+        Verstrichene Zeit 00:00:00.42
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckTypeSize.cmake:146 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckTypeSize.cmake:271 (__check_type_size_impl)"
+      - "Code/Dependencies/assimp-master/contrib/zlib/CMakeLists.txt:55 (check_type_size)"
+    checks:
+      - "Check size of off64_t"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ttfm42"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ttfm42"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/assimp-master/cmake-modules"
+    buildResult:
+      variable: "HAVE_OFF64_T"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-ttfm42'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_4449c.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:42 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_4449c.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_4449c.dir\\Debug\\cmTC_4449c.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_4449c.dir\\Debug\\cmTC_4449c.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_4449c.dir\\Debug\\cmTC_4449c.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_4449c.dir\\Debug\\\\" /Fd"cmTC_4449c.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _LARGEFILE64_SOURCE=1 /D HAVE_SYS_TYPES_H /D HAVE_STDINT_H /D HAVE_STDDEF_H /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_4449c.dir\\Debug\\\\" /Fd"cmTC_4449c.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c"
+          OFF64_T.c
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(29,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(30,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(31,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(32,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(33,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+        Die Erstellung des Projekts "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        
+        Fehler beim Buildvorgang.
+        
+        "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj" (Standardziel) (1) ->
+        (ClCompile Ziel) -> 
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(29,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(30,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(31,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(32,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\OFF64_T.c(33,12): error C2065: 'off64_t': undeclared identifier [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-ttfm42\\cmTC_4449c.vcxproj]
+        
+            0 Warnung(en)
+            5 Fehler
+        
+        Verstrichene Zeit 00:00:00.30
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "Code/Dependencies/assimp-master/contrib/zlib/CMakeLists.txt:64 (check_function_exists)"
+    checks:
+      - "Looking for fseeko"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-sttx91"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-sttx91"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/assimp-master/cmake-modules"
+    buildResult:
+      variable: "HAVE_FSEEKO"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-sttx91'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_55052.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:43 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_55052.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_55052.dir\\Debug\\cmTC_55052.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_55052.dir\\Debug\\cmTC_55052.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_55052.dir\\Debug\\cmTC_55052.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_55052.dir\\Debug\\\\" /Fd"cmTC_55052.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\CheckFunctionExists.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=fseeko /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_55052.dir\\Debug\\\\" /Fd"cmTC_55052.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\Debug\\cmTC_55052.exe" /INCREMENTAL /ILK:"cmTC_55052.dir\\Debug\\cmTC_55052.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-sttx91/Debug/cmTC_55052.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-sttx91/Debug/cmTC_55052.lib" /MACHINE:X64  /machine:x64 cmTC_55052.dir\\Debug\\CheckFunctionExists.obj
+        CheckFunctionExists.obj : error LNK2019: unresolved external symbol fseeko referenced in function main [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj]
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\Debug\\cmTC_55052.exe : fatal error LNK1120: 1 unresolved externals [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj]
+        Die Erstellung des Projekts "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        
+        Fehler beim Buildvorgang.
+        
+        "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj" (Standardziel) (1) ->
+        (Link Ziel) -> 
+          CheckFunctionExists.obj : error LNK2019: unresolved external symbol fseeko referenced in function main [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj]
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\Debug\\cmTC_55052.exe : fatal error LNK1120: 1 unresolved externals [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-sttx91\\cmTC_55052.vcxproj]
+        
+            0 Warnung(en)
+            2 Fehler
+        
+        Verstrichene Zeit 00:00:00.40
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.27/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "Code/Dependencies/assimp-master/contrib/zlib/CMakeLists.txt:72 (check_include_file)"
+    checks:
+      - "Looking for unistd.h"
+    directories:
+      source: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-rejrx8"
+      binary: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-rejrx8"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/assimp-master/cmake-modules"
+    buildResult:
+      variable: "Z_HAVE_UNISTD_H"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/CMakeScratch/TryCompile-rejrx8'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_f38c1.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        MSBuild-Version 17.8.3+195e7f5a3 f\xc2\x81r .NET Framework
+        Der Buildvorgang wurde am 20.02.2024 14:27:43 gestartet.
+        
+        Projekt "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\cmTC_f38c1.vcxproj" auf Knoten "1" (Standardziele).
+        PrepareForBuild:
+          Das Verzeichnis "cmTC_f38c1.dir\\Debug\\" wird erstellt.
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Das Verzeichnis "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_f38c1.dir\\Debug\\cmTC_f38c1.tlog\\" wird erstellt.
+        InitializeBuildStatus:
+          "cmTC_f38c1.dir\\Debug\\cmTC_f38c1.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_f38c1.dir\\Debug\\cmTC_f38c1.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.38.33130\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f38c1.dir\\Debug\\\\" /Fd"cmTC_f38c1.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\CheckIncludeFile.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33134 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f38c1.dir\\Debug\\\\" /Fd"cmTC_f38c1.dir\\Debug\\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\CheckIncludeFile.c"
+          CheckIncludeFile.c
+        C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\CheckIncludeFile.c(1,10): error C1083: Cannot open include file: 'unistd.h': No such file or directory [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\cmTC_f38c1.vcxproj]
+        Die Erstellung des Projekts "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\cmTC_f38c1.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        
+        Fehler beim Buildvorgang.
+        
+        "C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\cmTC_f38c1.vcxproj" (Standardziel) (1) ->
+        (ClCompile Ziel) -> 
+          C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\CheckIncludeFile.c(1,10): error C1083: Cannot open include file: 'unistd.h': No such file or directory [C:\\Users\\fulcrum\\Documents\\cppProjects\\Mnemosy\\Mnemosy\\Solution\\CMakeFiles\\CMakeScratch\\TryCompile-rejrx8\\cmTC_f38c1.vcxproj]
+        
+            0 Warnung(en)
+            1 Fehler
+        
+        Verstrichene Zeit 00:00:00.32
+        
+      exitCode: 1
+...
