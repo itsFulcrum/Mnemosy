@@ -41,16 +41,27 @@ public:
 	{
 		std::string vertexCode;
 		std::string fragmentCode;
+
+		/*
+		std::ifstream vertexShaderFile;
+		std::ifstream fragmentShaderFile;
 		try
 		{
 
-			vertexCode = Shadinclude::load(vertexPath, "#include");
-			fragmentCode = Shadinclude::load(fragmentPath, "#include");
+
+
 		}
 		catch (std::ifstream::failure error)
 		{
 			std::cout << "ERROR::SHADER:: could not read shader code from file" << std::endl;
 		}
+		*/
+		
+
+		vertexCode = Shadinclude::load(vertexPath, "#include");
+		fragmentCode = Shadinclude::load(fragmentPath, "#include");
+
+
 		const char* vertexShaderCode = vertexCode.c_str();
 		const char* fragmentShaderCode = fragmentCode.c_str();
 

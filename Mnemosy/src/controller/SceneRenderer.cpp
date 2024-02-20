@@ -111,7 +111,6 @@ void SceneRenderer::SetPbrShaderGlobalSceneUniforms(Shader& pbrShader, Cubemap& 
 	pbrShader.setUniformInt("_brdfLUT", 9);
 
 	pbrShader.setUniformFloat("_skyboxRotation", skyboxRotation);
-	
 }
 
 void SceneRenderer::RenderMesh(Object& object, PbrMaterial& material)

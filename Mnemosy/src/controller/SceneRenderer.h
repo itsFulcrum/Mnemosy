@@ -36,6 +36,8 @@ public:
 
 	void RenderMesh(Object& object,PbrMaterial& material);
 	void RenderSkybox(Object& object, Shader& skyboxShader, Cubemap& cubemap,float rotation, glm::vec3 colorTint);
+	
+	
 	void RenderScene(DefaultScene* activeScene, unsigned int viewportWidth, unsigned int viewportHeight);
 	
 private:

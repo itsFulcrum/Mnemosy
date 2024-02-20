@@ -59,7 +59,7 @@ public:
 
 		//pbrMaterial = new PbrMaterial();
 		pbrMaterial.assignShader(pbrShader);
-		pbrMaterial.assignTexture(ALBEDO, "textures/panel_albedo.png");
+		pbrMaterial.assignTexture(ALBEDO, "textures/PikachuTexture.png");
 		pbrMaterial.assignTexture(ROUGHNESS, "textures/panel_roughness.png");
 		pbrMaterial.assignTexture(METALLIC, "textures/panel_metallic.png");
 		pbrMaterial.assignTexture(NORMAL, "textures/brick_normal.png");

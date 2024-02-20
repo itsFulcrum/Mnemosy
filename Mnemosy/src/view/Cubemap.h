@@ -26,19 +26,27 @@ private:
 	bool m_hasAlphaChannel = false;
 	int m_channelsAmount = 0;
 
-	
+	unsigned int fbo = 0;
 
 public:
+
 	Cubemap() = default;
 
 	Cubemap(std::string path, unsigned int textureResolution, bool GenerateConvolutedMaps)
 	{
 		loadFromFile(path, textureResolution, GenerateConvolutedMaps);
 	};
-
+	~Cubemap()
+	{
+		glDeleteFramebuffers(1, &fbo);
+	}
 
 	void loadFromFile(std::string path, unsigned int textureResolution, bool GenerateConvolutedMaps)
 	{
+		glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		// generate normal opengl texture from the hdri panorama
 		glGenTextures(1, &equirectangularImageID);
 		glBindTexture(GL_TEXTURE_2D, equirectangularImageID);
@@ -103,14 +111,6 @@ public:
 		// For this we need said shaders and a dummy object to make a drawcall but as i understad it it doesn't matter what the object is since it's all handled by the shader
 		// we just need to make some drawcall
 		
-		
-		glViewport(0, 0, textureRes, textureRes);
-
-				
-		unsigned int fbo;
-		glGenFramebuffers(1, &fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
 		glGenTextures(1, &cubemapID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
 
@@ -126,6 +126,14 @@ public:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		
+		glViewport(0, 0, textureRes, textureRes);
+
+				
+		//unsigned int fbo;
+		//glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
 
 
 		for(int i = 0;i < 6;i++)
@@ -138,7 +146,7 @@ public:
 			{
 				std::cout << "ERROR::CUBEMAP::FRAMEBUFFER_NOT_COMPLETE" << std::endl;
 				
-				glDeleteFramebuffers(1, &fbo);
+				//glDeleteFramebuffers(1, &fbo);
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				
 				return;
@@ -178,7 +186,7 @@ public:
 
 		
 		// return to default framebuffer
-		glDeleteFramebuffers(1, &fbo);
+		//glDeleteFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	}
@@ -188,24 +196,14 @@ public:
 		// to create a cubemap from an equirectangular panorama Hdri image I Create a framebuffer that renders to a texture.
 		// the using a clever shader by the khronos group we loop through all 6 sides of the cube/cubemap textures and render each directly to the cubemap object;
 		// For this we need said shaders and a dummy object to make a drawcall but as i understad it it doesn't matter what the object is since it's all handled by the shader
-		// we just need to make some drawcall
-
-		unsigned int textureResolution = textureRes;
-		glViewport(0, 0, textureResolution, textureResolution);
-
-
-		unsigned int fbo;
-		glGenFramebuffers(1, &fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
+		// create cubemap
 		glGenTextures(1, &cubemapID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
 
-		// create cubemap
 		for (int i = 0; i < 6; ++i)
 		{
 			auto data = std::vector<unsigned char>();
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, textureResolution, textureResolution, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, textureRes, textureRes, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -215,6 +213,19 @@ public:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+		
+		
+		// we just need to make some drawcall
+
+		unsigned int textureResolution = textureRes;
+		glViewport(0, 0, textureResolution, textureResolution);
+
+
+		//unsigned int fbo;
+		//glGenFramebuffers(1, &fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+
 
 		equirectangularToCubemapShader.use();
 
@@ -259,7 +270,7 @@ public:
 
 
 		// return to default framebuffer
-		glDeleteFramebuffers(1, &fbo);
+		//glDeleteFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	}
@@ -278,8 +289,8 @@ public:
 
 
 
-		unsigned int fbo;
-		glGenFramebuffers(1, &fbo);
+		//unsigned int fbo;
+		//glGenFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTextureID, 0);
 
@@ -297,7 +308,7 @@ public:
 		glBindTexture(GL_TEXTURE_2D, brdfLUTTextureID);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		glDeleteFramebuffers(1, &fbo);
+		//glDeleteFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 

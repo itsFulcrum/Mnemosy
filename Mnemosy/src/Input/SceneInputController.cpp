@@ -62,6 +62,7 @@ void SceneInputController::RegisterInputs()
 	m_onMouseButtonPressed_RIGHT_id = m_inputSystem->RegisterMouseButtonInput(GLFW_MOUSE_BUTTON_RIGHT, GLFW_RELEASE, std::bind(&SceneInputController::OnMouseButtonReleased_RIGHT, this, std::placeholders::_1));
 
 	m_onMouseMoved_id = m_inputSystem->RegisterMouseCursorInput(std::bind(&SceneInputController::OnMouseMoved, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
+
 }
 
 void SceneInputController::UnregisterInputs()

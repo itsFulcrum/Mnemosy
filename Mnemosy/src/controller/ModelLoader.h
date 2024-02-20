@@ -90,8 +90,6 @@ private:
 			position.z = mesh->mVertices[i].z;
 			vertex.position = position;
 
-
-
 			glm::vec3 normal;
 			normal.x = mesh->mNormals[i].x;
 			normal.y = mesh->mNormals[i].y;
