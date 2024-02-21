@@ -118,6 +118,11 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/Input/InputSystem.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/Input/InputSystem.cpp
 
+#Utils
+${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
+${ENGINE_SOURCE_PATH}/Src/Core/Utils/PlatfromUtils_Windows.cpp
+
+
 # Graphics
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/ShaderIncludeParser.h
 

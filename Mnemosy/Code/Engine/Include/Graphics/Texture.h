@@ -12,7 +12,7 @@ namespace mnemosy::graphics
 		Texture();
 		~Texture();
 
-		void generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps);
+		bool generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps);
 		bool containsData() const;
 		void clear();
 		void BindToLocation(unsigned int activeTextureLocation);

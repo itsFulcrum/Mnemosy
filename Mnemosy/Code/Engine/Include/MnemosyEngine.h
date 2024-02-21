@@ -53,7 +53,7 @@ namespace mnemosy
 		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		systems::InputSystem& GetInputSystem() { return *m_pInputSystem; }
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
-		graphics::Scene& GetScene() { return *m_scene; }
+		graphics::Scene& GetScene() { return *m_pScene; }
 
 
 		gui::UserInterface& GetUserInterface() { return *m_pUserInterface; }
@@ -70,7 +70,7 @@ namespace mnemosy
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
 		std::unique_ptr<graphics::Renderer> m_pRenderer;
 
-		std::unique_ptr<graphics::Scene> m_scene;
+		std::unique_ptr<graphics::Scene> m_pScene;
 
 		std::unique_ptr<gui::UserInterface> m_pUserInterface;
 

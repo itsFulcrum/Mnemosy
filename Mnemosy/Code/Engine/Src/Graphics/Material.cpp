@@ -73,10 +73,18 @@ namespace mnemosy::graphics
 
 		if (pbrType == ALBEDO)
 		{
+			
 			if(!m_pAlbedoTexture)
 				m_pAlbedoTexture = new Texture();
 			
-			m_pAlbedoTexture->generateFromFile(filePath.c_str(), true,true);
+			bool loaded  = m_pAlbedoTexture->generateFromFile(filePath.c_str(), true,true);
+			
+			if (!loaded)
+			{
+				m_pAlbedoTexture->clear();
+				delete m_pAlbedoTexture;
+				m_pAlbedoTexture = nullptr;
+			}
 			// probably better to handle it through an asset registry
 			// m_pAlbedoTexture = Engine::GetInstance()->GetAssetRegistry().LoadTextureGL(filePath);
 			return;
@@ -87,7 +95,16 @@ namespace mnemosy::graphics
 			if (!m_pRoughnessTexture)
 				m_pRoughnessTexture = new Texture();
 
-			m_pRoughnessTexture->generateFromFile(filePath.c_str(), true, true);
+			bool loaded =  m_pRoughnessTexture->generateFromFile(filePath.c_str(), true, true);
+			
+			if (!loaded)
+			{
+				m_pRoughnessTexture->clear();
+				delete m_pRoughnessTexture;
+				m_pRoughnessTexture = nullptr;
+			}
+
+			
 			return;
 		}
 	
@@ -96,7 +113,16 @@ namespace mnemosy::graphics
 			if (!m_pMetallicTexture)
 				m_pMetallicTexture = new Texture();
 
-			m_pMetallicTexture->generateFromFile(filePath.c_str(), true, true);
+			bool loaded = m_pMetallicTexture->generateFromFile(filePath.c_str(), true, true);
+
+			if (!loaded)
+			{
+				m_pMetallicTexture->clear();
+				delete m_pMetallicTexture;
+				m_pMetallicTexture = nullptr;
+
+			}
+
 			return;
 		}
 		if (pbrType == NORMAL)
@@ -104,7 +130,14 @@ namespace mnemosy::graphics
 			if (!m_pNormalTexture)
 				m_pNormalTexture = new Texture();
 
-			m_pNormalTexture->generateFromFile(filePath.c_str(), true, true);
+			bool loaded = m_pNormalTexture->generateFromFile(filePath.c_str(), true, true);
+			if (!loaded)
+			{
+				m_pNormalTexture->clear();
+				delete m_pNormalTexture;
+				m_pNormalTexture = nullptr;
+			}
+			
 			return;
 		}
 		if (pbrType == AMBIENTOCCLUSION)
@@ -112,7 +145,13 @@ namespace mnemosy::graphics
 			if (!m_pAmbientOcclusionTexture)
 				m_pAmbientOcclusionTexture = new Texture();
 
-			m_pAmbientOcclusionTexture->generateFromFile(filePath.c_str(), true, true);
+			bool loaded = m_pAmbientOcclusionTexture->generateFromFile(filePath.c_str(), true, true);
+			if (!loaded)
+			{
+				m_pAmbientOcclusionTexture->clear();
+				delete m_pAmbientOcclusionTexture;
+				m_pAmbientOcclusionTexture = nullptr;
+			}
 			return;
 		}
 		if (pbrType == EMISSION)
@@ -120,7 +159,14 @@ namespace mnemosy::graphics
 			if (!m_pEmissiveTexture)
 				m_pEmissiveTexture = new Texture();
 
-			m_pEmissiveTexture->generateFromFile(filePath.c_str(), true, true);
+			bool loaded = m_pEmissiveTexture->generateFromFile(filePath.c_str(), true, true);
+			if (!loaded)
+			{
+				m_pEmissiveTexture->clear();
+				delete m_pEmissiveTexture;
+				m_pEmissiveTexture = nullptr;
+
+			}
 			return;
 		}
 	}

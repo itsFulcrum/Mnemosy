@@ -83,7 +83,7 @@ namespace mnemosy
 		m_pRenderer = std::make_unique<graphics::Renderer>();
 		//MNEMOSY_TRACE("Renderer Initialized");
 
-		m_scene = std::make_unique<graphics::Scene>();
+		m_pScene = std::make_unique<graphics::Scene>();
 		//MNEMOSY_TRACE("Scene Initialized");
 
 
@@ -124,19 +124,16 @@ namespace mnemosy
 			m_pInputSystem->Update(m_clock->GetDeltaSeconds());
 
 
-			m_scene->Update();
-
+			m_pScene->Update();
 
 
 			// Rendering
-			m_pRenderer->RenderScene(*m_scene);
-
-
+			m_pRenderer->RenderScene(*m_pScene);
 
 			m_pUserInterface->Render();
 
+
 			glfwSwapBuffers(&m_pWindow->GetWindow());
-			
 		}
 
 	}

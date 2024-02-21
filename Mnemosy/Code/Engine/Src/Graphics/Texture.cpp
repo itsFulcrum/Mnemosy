@@ -16,7 +16,7 @@ namespace mnemosy::graphics
 		clear();
 	}
 
-	void Texture::generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps)
+	bool Texture::generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps)
 	{
 		clear();
 
@@ -62,7 +62,7 @@ namespace mnemosy::graphics
 				//img->FreeData();
 				delete img;
 				img = nullptr;
-				return;
+				return false;
 
 			}
 
@@ -74,7 +74,9 @@ namespace mnemosy::graphics
 			m_isInitialized = true;
 			MNEMOSY_INFO("Loaded Texture from file: {}", imagePath);
 
-
+			delete img;
+			img = nullptr;
+			return true;
 		}
 		else
 		{
@@ -87,6 +89,8 @@ namespace mnemosy::graphics
 		//img->FreeData();
 		delete img;
 		img = nullptr;
+
+		return false;
 
 	}
 

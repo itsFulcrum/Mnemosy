@@ -7,6 +7,8 @@
 #define MNEMOSY_CONFIG_DEBUG
 //#define MNEMOSY_CONFIG_RELEASE
 
+
+// only tested on widows so far
 #define MNEMOSY_PLATFORM_WINDOWS
 //#define MNEMOSY_PLATFORM_LINUX
 

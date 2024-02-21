@@ -6,6 +6,7 @@
 #include "Application/Include/Application.h"
 #include "Application/Include/GuiPanels/ViewportGuiPanel.h"
 #include "Application/Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Application/Include/GuiPanels/MaterialEditorGuiPanel.h"
 
 namespace mnemosy::gui
 {
@@ -13,24 +14,31 @@ namespace mnemosy::gui
 	{
 		UserInterface& userInterface = ENGINE_INSTANCE().GetUserInterface();
 		// gui panels
-		m_viewportPanel = new gui::ViewportGuiPanel();
-		userInterface.RegisterGuiPanel(m_viewportPanel);
-		m_sceneSettingsPanel = new gui::SceneSettingsGuiPanel();
-		userInterface.RegisterGuiPanel(m_sceneSettingsPanel);
+		m_pViewportPanel = new gui::ViewportGuiPanel();
+		userInterface.RegisterGuiPanel(m_pViewportPanel);
+		m_pSceneSettingsPanel = new gui::SceneSettingsGuiPanel();
+		userInterface.RegisterGuiPanel(m_pSceneSettingsPanel);
+		m_pMaterialEditorPanel = new gui::MaterialEditorGuiPanel();
+		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
+
+
 	}
 
 	GuiPanelManager::~GuiPanelManager()
 	{
 		UserInterface& userInterface = ENGINE_INSTANCE().GetUserInterface();
 
-		userInterface.UnregisterGuiPanel(m_viewportPanel);
-		delete m_viewportPanel;
-		m_viewportPanel = nullptr;
+		userInterface.UnregisterGuiPanel(m_pViewportPanel);
+		delete m_pViewportPanel;
+		m_pViewportPanel = nullptr;
 		
-		userInterface.UnregisterGuiPanel(m_sceneSettingsPanel);
-		delete m_sceneSettingsPanel;
-		m_sceneSettingsPanel = nullptr;
+		userInterface.UnregisterGuiPanel(m_pSceneSettingsPanel);
+		delete m_pSceneSettingsPanel;
+		m_pSceneSettingsPanel = nullptr;
 
+		userInterface.UnregisterGuiPanel(m_pMaterialEditorPanel);
+		delete m_pMaterialEditorPanel;
+		m_pMaterialEditorPanel = nullptr;
 	}
 
 }

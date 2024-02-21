@@ -5,6 +5,7 @@ namespace mnemosy::gui
 {
 	class ViewportGuiPanel;
 	class SceneSettingsGuiPanel;
+	class MaterialEditorGuiPanel;
 }
 
 namespace mnemosy::gui
@@ -20,8 +21,10 @@ namespace mnemosy::gui
 	private:
 
 
-		ViewportGuiPanel* m_viewportPanel = nullptr;
-		SceneSettingsGuiPanel* m_sceneSettingsPanel = nullptr;
+		ViewportGuiPanel* m_pViewportPanel = nullptr;
+		SceneSettingsGuiPanel* m_pSceneSettingsPanel = nullptr;
+		MaterialEditorGuiPanel* m_pMaterialEditorPanel = nullptr;
+
 
 	};
 

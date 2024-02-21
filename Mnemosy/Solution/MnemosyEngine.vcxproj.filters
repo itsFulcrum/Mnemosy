@@ -16,6 +16,9 @@
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Engine\Src\Systems\Input\InputSystem.cpp">
       <Filter>Src\Systems\Input</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Engine\Src\Core\Utils\PlatfromUtils_Windows.cpp">
+      <Filter>Src\Core\Utils</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Engine\Src\Graphics\Shader.cpp">
       <Filter>Src\Graphics</Filter>
     </ClCompile>
@@ -110,6 +113,9 @@
     </ClInclude>
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Engine\Include\Systems\Input\InputSystem.h">
       <Filter>Include\Systems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Engine\Include\Core\Utils\PlatfromUtils_Windows.h">
+      <Filter>Include\Core\Utils</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Engine\Include\Graphics\Utils\ShaderIncludeParser.h">
       <Filter>Include\Graphics\Utils</Filter>
@@ -218,6 +224,9 @@
     <Filter Include="Include\Core">
       <UniqueIdentifier>{C6F8C88E-56C6-3036-9B20-C409351AB70F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Include\Core\Utils">
+      <UniqueIdentifier>{5173A877-4DC6-3BFE-9C7B-B233BF2AC726}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Include\Graphics">
       <UniqueIdentifier>{161E749F-52BA-3B64-968C-B00225BDC7E8}</UniqueIdentifier>
     </Filter>
@@ -238,6 +247,9 @@
     </Filter>
     <Filter Include="Src\Core">
       <UniqueIdentifier>{62EBD711-4F07-3CA1-BD06-EC04BAC8C4DB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\Core\Utils">
+      <UniqueIdentifier>{7B4EB5C4-DC60-3A38-BF82-922863298FD9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Src\Graphics">
       <UniqueIdentifier>{E03AF005-06E9-360C-AFAD-51D20C040256}</UniqueIdentifier>

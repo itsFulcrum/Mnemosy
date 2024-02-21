@@ -13,8 +13,15 @@
 
 #include "Engine/External/ImGui/imgui.h"
 
+#include "Engine/Include/MnemosyConfig.h"
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+	#include "Engine/Include/Core/Utils/PlatfromUtils_Windows.h"
+#endif // MNEMOSY_PLATFORM_WINDOWS
+
 #include <glm/glm.hpp>
 #include <iostream>
+
+
 
 namespace mnemosy::gui
 {
@@ -71,20 +78,26 @@ namespace mnemosy::gui
 		if (ImGui::TreeNode("Skybox Settings"))
 		{
 
+
+
 			graphics::Skybox& skybox = scene.GetSkybox();
 
+			if (ImGui::Button("Load File..."))
+			{
+				#ifdef MNEMOSY_PLATFORM_WINDOWS
+					std::string filepath =  mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
+
+					if (!filepath.empty())
+					{
+						skybox.AssignSkyboxTexture(filepath.c_str(),1024);
+					}
+				#endif
+			}
 			//ImGui::Text("Skybox Settings");
 			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.1f");
 			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%1f");
 
-			ImVec4 colorTint = ImVec4(0.0,0.0,0.0,1.0);
-			colorTint.x = skybox.colorTint.r;
-			colorTint.y = skybox.colorTint.g;
-			colorTint.z = skybox.colorTint.b;
-			ImGui::ColorEdit3("Color Tint", (float*)&colorTint);
-			skybox.colorTint.r = colorTint.x;
-			skybox.colorTint.g = colorTint.y;
-			skybox.colorTint.b = colorTint.z;
+			ImGui::ColorEdit3("Color Tint", (float*)&skybox.colorTint);
 		
 			renderer.SetShaderSkyboxUniforms();
 
@@ -127,14 +140,7 @@ namespace mnemosy::gui
 
 			ImGui::DragFloat("Strength",&light.strength,1.0f,0.0f,1000.0f,"%.1f");
 			ImGui::SliderFloat("Falloff",&light.falloff,0.01f,5.0f,"%.1f");
-			ImVec4 lightColor = ImVec4(0.0, 0.0, 0.0, 1.0);
-			lightColor.x = light.color.r;
-			lightColor.y = light.color.g;
-			lightColor.z = light.color.b;
-			ImGui::ColorEdit3("Color", (float*)&lightColor);
-			light.color.r = lightColor.x;
-			light.color.g = lightColor.y;
-			light.color.b = lightColor.z;
+			ImGui::ColorEdit3("Color", (float*)&light.color);
 
 			renderer.SetPbrShaderLightUniforms();
 
