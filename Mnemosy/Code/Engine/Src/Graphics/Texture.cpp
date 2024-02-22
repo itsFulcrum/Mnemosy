@@ -4,11 +4,14 @@
 
 #include <glad/glad.h>
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+
 namespace mnemosy::graphics
 {
 	Texture::Texture() 
 	{
-	
+		
 	}
 
 	Texture::~Texture()
@@ -20,19 +23,40 @@ namespace mnemosy::graphics
 	{
 		clear();
 
-		Image* img = new Image();
+		//Image* img = new Image();
 
-		bool successfull = img->LoadImageFromFile(imagePath, flipImageVertically);
-
+		//bool successfull = img->LoadImageFromFile(imagePath, flipImageVertically);
+		//successfull = false;
 		//int channels, width, height;
 		//const char* textureData = stbi_load(imagePath, &width, &height, &channels, 0);
+		
+		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_COLOR);
 
-
-		if (successfull)
+		if (pic.empty())
 		{
-			m_channelsAmount =	img->channels;
-			m_width = img->width;
-			m_height = img->height;
+			MNEMOSY_ERROR("opencv image read failed");
+
+			pic.release();
+			
+			
+			m_ID = 0;
+			m_isInitialized = false;
+			//img->FreeData();
+			//delete img;
+			//img = nullptr;
+			return false;
+		}
+
+
+		if (!pic.empty())
+		{
+			m_channelsAmount =	pic.channels();
+			m_width = pic.cols;
+			m_height = pic.rows;
+
+			MNEMOSY_DEBUG("Loading image with openCV: widht: {} Height: {} channels: {} ", m_width, m_height, m_channelsAmount);
+
+			cv::flip(pic, pic, 0);
 
 			glGenTextures(1, &m_ID);
 			glBindTexture(GL_TEXTURE_2D, m_ID);
@@ -43,15 +67,15 @@ namespace mnemosy::graphics
 
 			if (m_channelsAmount == 4)
 			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width, img->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->imageData);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pic.ptr());
 			}
 			else if (m_channelsAmount == 3)
 			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->width, img->height, 0, GL_RGB, GL_UNSIGNED_BYTE, img->imageData);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_BGR, GL_UNSIGNED_BYTE, pic.ptr());
 			}
 			else if (m_channelsAmount == 2)
 			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, img->width, img->height, 0, GL_RG, GL_UNSIGNED_BYTE, img->imageData);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, m_width, m_height, 0, GL_RG, GL_UNSIGNED_BYTE, pic.ptr());
 
 			}
 			else if (m_channelsAmount == 1)
@@ -59,9 +83,9 @@ namespace mnemosy::graphics
 				MNEMOSY_ERROR("Texures with only 1 channel are not supported \nFilepath: {}", imagePath);
 				m_ID = 0;
 				m_isInitialized = false;
-				//img->FreeData();
-				delete img;
-				img = nullptr;
+				pic.release();
+
+
 				return false;
 
 			}
@@ -74,22 +98,14 @@ namespace mnemosy::graphics
 			m_isInitialized = true;
 			MNEMOSY_INFO("Loaded Texture from file: {}", imagePath);
 
-			delete img;
-			img = nullptr;
+			//delete img;
+			//img = nullptr;
+			pic.release();
 			return true;
 		}
-		else
-		{
-			MNEMOSY_ERROR("Failed to load texture \nFilepath: {}", imagePath);
-			m_ID = 0;
-			m_isInitialized = false;
-		}
 
 
-		//img->FreeData();
-		delete img;
-		img = nullptr;
-
+		pic.release();
 		return false;
 
 	}

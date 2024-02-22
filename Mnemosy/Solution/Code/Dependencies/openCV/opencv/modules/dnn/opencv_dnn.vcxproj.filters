@@ -1,0 +1,976 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\CMakeFiles\opencv_dnn.dir\cmake_pch.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\caffe\opencv-caffe.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\onnx\opencv-onnx.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\attr_value.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\function.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\graph.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\op_def.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\tensor.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\tensor_shape.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\types.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\tensorflow\versions.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\backend.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\caffe\caffe_importer.cpp">
+      <Filter>Src\caffe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\caffe\caffe_io.cpp">
+      <Filter>Src\caffe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\caffe\caffe_shrinker.cpp">
+      <Filter>Src\caffe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\darknet\darknet_importer.cpp">
+      <Filter>Src\darknet</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\darknet\darknet_io.cpp">
+      <Filter>Src\darknet</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\debug_utils.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\dnn.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\dnn_params.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\dnn_read.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\dnn_utils.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\graph_simplifier.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\halide_scheduler.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ie_ngraph.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\init.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\batch_norm_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\convolution_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\elementwise_layers.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\eltwise_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\fully_connected_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\layers_rvp052.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\pooling_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\quantization_utils.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\scale_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\softmax_layer.cpp">
+      <Filter>Src\int8layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layer.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layer_factory.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\accum_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\arg_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\attention_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\batch_norm_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\blank_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\concat_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\const_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\convolution_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\correlation_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\conv_depthwise.cpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\conv_winograd_f63.cpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\convolution.cpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\fast_gemm.cpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\fast_norm.cpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\softmax.cpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\crop_and_resize_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cumsum_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\detection_output_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\einsum_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\elementwise_layers.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\eltwise_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\expand_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\flatten_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\flow_warp_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\fully_connected_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\gather_elements_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\gather_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\gemm_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\group_norm_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\instance_norm_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\layer_norm.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\layers_common.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\lrn_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\matmul_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\max_unpooling_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\mvn_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\nary_eltwise_layers.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\normalize_bbox_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\not_implemented_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\padding_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\permute_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\pooling_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\prior_box_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\proposal_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\recurrent_layers.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\reduce_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\region_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\reorg_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\reshape_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\resize_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\scale_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\scatterND_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\scatter_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\shuffle_channel_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\slice_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\softmax_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\split_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\tile_layer.cpp">
+      <Filter>Src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\legacy_backend.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\model.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_cann.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_impl.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_impl_backend.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_impl_fuse.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_openvino.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_quantization.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\nms.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\common.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\math_functions.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\ocl4dnn_conv_spatial.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\ocl4dnn_inner_product.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\ocl4dnn_lrn.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\ocl4dnn_pool.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\src\ocl4dnn_softmax.cpp">
+      <Filter>Src\ocl4dnn\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\onnx\onnx_graph_simplifier.cpp">
+      <Filter>Src\onnx</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\onnx\onnx_importer.cpp">
+      <Filter>Src\onnx</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_cann.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_cuda.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_halide.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_inf_engine.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_timvx.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_vkcom.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_webnn.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\registry.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tensorflow\tf_graph_simplifier.cpp">
+      <Filter>Src\tensorflow</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tensorflow\tf_importer.cpp">
+      <Filter>Src\tensorflow</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tensorflow\tf_io.cpp">
+      <Filter>Src\tensorflow</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tflite\tflite_importer.cpp">
+      <Filter>Src\tflite</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THDiskFile.cpp">
+      <Filter>Src\torch</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THFile.cpp">
+      <Filter>Src\torch</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THGeneral.cpp">
+      <Filter>Src\torch</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\torch_importer.cpp">
+      <Filter>Src\torch</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\conv_1x1_fast_spv.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\conv_depthwise_3x3_spv.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\conv_depthwise_spv.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\conv_implicit_gemm_spv.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\gemm_spv.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\nary_eltwise_binary_forward_spv.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\spv_shader.cpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\buffer.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\command.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\context.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\fence.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\internal.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\op_base.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\op_conv.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\op_matmul.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\op_naryEltwise.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\pipeline.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\tensor.cpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\vulkan\vk_functions.cpp">
+      <Filter>Src\vkcom\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\vulkan\vk_loader.cpp">
+      <Filter>Src\vkcom\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencl_kernels_dnn.cpp">
+      <Filter>Src\opencl\kernels\autogenerated</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn.hpp">
+      <Filter>Include\opencv2</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\all_layers.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\dict.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\dnn.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\dnn.inl.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\layer.details.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\layer.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\layer_reg.private.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\shape_utils.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\utils\debug_utils.hpp">
+      <Filter>Include\opencv2\dnn\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\utils\inference_engine.hpp">
+      <Filter>Include\opencv2\dnn\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\include\opencv2\dnn\version.hpp">
+      <Filter>Include\opencv2\dnn</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencl_kernels_dnn.hpp">
+      <Filter>Src\opencl\kernels\autogenerated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\backend.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\caffe\caffe_io.hpp">
+      <Filter>Src\caffe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\caffe\glog_emulator.hpp">
+      <Filter>Src\caffe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\array.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\atomics.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\bbox_utils.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\block_stride_range.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\execution.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\functors.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\grid_stride_range.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\index_helpers.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\kernel_dispatcher.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\limits.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\math.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\memory.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\types.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\cuda\vector_traits.hpp">
+      <Filter>Src\cuda</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\darknet\darknet_io.hpp">
+      <Filter>Src\darknet</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\dnn_common.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\factory.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\graph_simplifier.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\halide_scheduler.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ie_ngraph.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\layers_common.hpp">
+      <Filter>Src\int8layers</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\layers_common.simd.hpp">
+      <Filter>Src\int8layers</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\int8layers\layers_rvp052.hpp">
+      <Filter>Src\int8layers</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layer_internals.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\conv_block.simd.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\conv_depthwise.simd.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\conv_winograd_f63.simd.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\convolution.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\fast_gemm.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\fast_gemm_kernels.default.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\fast_gemm_kernels.simd.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\fast_norm.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\cpu_kernels\softmax.hpp">
+      <Filter>Src\layers\cpu_kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\layers_common.hpp">
+      <Filter>Src\layers</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\layers\layers_common.simd.hpp">
+      <Filter>Src\layers</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\legacy_backend.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\math_utils.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\net_impl.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\nms.inl.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\include\common.hpp">
+      <Filter>Src\ocl4dnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\include\default_kernel_config.hpp">
+      <Filter>Src\ocl4dnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\include\math_functions.hpp">
+      <Filter>Src\ocl4dnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\ocl4dnn\include\ocl4dnn.hpp">
+      <Filter>Src\ocl4dnn\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\onnx\onnx_graph_simplifier.hpp">
+      <Filter>Src\onnx</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_cann.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_cuda.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_halide.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_inf_engine.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_timvx.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_vkcom.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\op_webnn.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\plugin_api.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\plugin_wrapper.impl.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\precomp.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tensorflow\tf_graph_simplifier.hpp">
+      <Filter>Src\tensorflow</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tensorflow\tf_io.hpp">
+      <Filter>Src\tensorflow</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\tflite\builtin_op_data.h">
+      <Filter>Src\tflite</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THDiskFile.h">
+      <Filter>Src\torch</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THFile.h">
+      <Filter>Src\torch</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THFilePrivate.h">
+      <Filter>Src\torch</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\torch\THGeneral.h">
+      <Filter>Src\torch</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\buffer.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\command.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\context.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\fence.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\op_base.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\op_conv.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\op_matmul.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\op_naryeltwise.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\pipeline.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\tensor.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\include\vkcom.hpp">
+      <Filter>Src\vkcom\include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\shader\spv_shader.hpp">
+      <Filter>Src\vkcom\shader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\src\internal.hpp">
+      <Filter>Src\vkcom\src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\vulkan\function_list.inl.hpp">
+      <Filter>Src\vkcom\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\vulkan\vk_functions.hpp">
+      <Filter>Src\vkcom\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\vkcom\vulkan\vk_loader.hpp">
+      <Filter>Src\vkcom\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\cvconfig.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\opencv2\opencv_modules.hpp">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\CMakeFiles\opencv_dnn.dir\Debug\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\CMakeFiles\opencv_dnn.dir\Release\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\CMakeFiles\opencv_dnn.dir\MinSizeRel\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\CMakeFiles\opencv_dnn.dir\RelWithDebInfo\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\CMakeFiles\00f94303f4fe5564665b40a25007477a\opencl_kernels_dnn.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\activations.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\batchnorm.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\col2im.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\concat.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\conv_layer_spatial.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\conv_spatial_helper.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\detection_output.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\dummy.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\eltwise.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\gemm_buffer.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\gemm_image.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\im2col.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\lrn.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\math.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\matvec_mul.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\mvn.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\ocl4dnn_lrn.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\ocl4dnn_pooling.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\permute.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\pooling.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\prior_box.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\region.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\slice.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\softmax.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\src\opencl\softmax_loss.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX.dir\$(Configuration)\layers_common.avx.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX.dir\$(Configuration)\conv_block.avx.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX.dir\$(Configuration)\conv_depthwise.avx.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX.dir\$(Configuration)\conv_winograd_f63.avx.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX.dir\$(Configuration)\fast_gemm_kernels.avx.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX2.dir\$(Configuration)\layers\layers_common.avx2.cpp.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX2.dir\$(Configuration)\int8layers\layers_common.avx2.cpp.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX2.dir\$(Configuration)\conv_block.avx2.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX2.dir\$(Configuration)\conv_depthwise.avx2.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX2.dir\$(Configuration)\conv_winograd_f63.avx2.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX2.dir\$(Configuration)\fast_gemm_kernels.avx2.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX512_SKX.dir\$(Configuration)\layers\layers_common.avx512_skx.cpp.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\dnn\opencv_dnn_AVX512_SKX.dir\$(Configuration)\int8layers\layers_common.avx512_skx.cpp.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{44215DDD-39F9-331E-B2BF-85F67DAFB233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{00728CAE-15D9-3023-B2D5-34D33D7AFE19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2">
+      <UniqueIdentifier>{42D6220E-2845-38F3-9216-4993873F58BB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2\dnn">
+      <UniqueIdentifier>{5D32B490-4CBF-3405-A433-28F183B7F164}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2\dnn\utils">
+      <UniqueIdentifier>{6B83DB6F-5506-3699-8A2B-F7EDE858FF95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object Libraries">
+      <UniqueIdentifier>{2C84252B-B1FF-3D7D-828E-2535FCAAE6E7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Precompile Header File">
+      <UniqueIdentifier>{CEF0C383-ECBD-36BC-82C5-2C0218026683}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2B5C5160-0234-3C95-9768-209413C78BB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src">
+      <UniqueIdentifier>{32CD143F-BD4B-3A5A-9E62-C9D75B8FD7DA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\caffe">
+      <UniqueIdentifier>{E0AC3279-3323-32F2-A50D-D661B886FC71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\cuda">
+      <UniqueIdentifier>{CCAEB61B-C375-3915-990C-178A57E6E170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\darknet">
+      <UniqueIdentifier>{2F15B9F7-F009-3BE9-96ED-193287AF3F60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\int8layers">
+      <UniqueIdentifier>{16E71F7C-8523-3777-B35D-AC1D0CA180C1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\layers">
+      <UniqueIdentifier>{3722559F-0DDC-306F-A12B-A67C7309E983}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\layers\cpu_kernels">
+      <UniqueIdentifier>{49EA776C-3BEB-36A1-9A72-49923AAA4F7C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\ocl4dnn">
+      <UniqueIdentifier>{064121B2-5B02-3F74-B15F-03862A5F662E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\ocl4dnn\include">
+      <UniqueIdentifier>{74508C4D-34E8-3288-963C-CC33DC016F28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\ocl4dnn\src">
+      <UniqueIdentifier>{93F5B685-7543-33BF-82CB-4D8FEC8471AA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\onnx">
+      <UniqueIdentifier>{BA043ABA-B6D9-3637-B96F-588307DE5272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\opencl">
+      <UniqueIdentifier>{64C6739B-A6D0-3140-98C1-91CAECE129A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\opencl\kernels">
+      <UniqueIdentifier>{232CB2BC-F75C-3747-AD5E-4C7DD8D22927}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\opencl\kernels\autogenerated">
+      <UniqueIdentifier>{8E74C2AA-A607-3039-9C47-5A81FB1264F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\tensorflow">
+      <UniqueIdentifier>{CD731F2D-A1E7-3E15-A772-4061B1903858}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\tflite">
+      <UniqueIdentifier>{F5D481F2-F5A8-37DB-9089-9C0E3E09246F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\torch">
+      <UniqueIdentifier>{04A2DB39-1A79-33DE-A663-E1B5A89D892A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\vkcom">
+      <UniqueIdentifier>{44104437-9589-340A-BBDA-92C82A6D523C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\vkcom\include">
+      <UniqueIdentifier>{14822F52-3128-3684-AAFE-3CEB051E1035}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\vkcom\shader">
+      <UniqueIdentifier>{A4D5B001-C1BF-3DD2-9D44-115629EA4D73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\vkcom\src">
+      <UniqueIdentifier>{AAB06779-1DF2-3504-8869-872D56278280}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\vkcom\vulkan">
+      <UniqueIdentifier>{0A90DA7E-03FC-39F9-8C2D-51160D7FC2ED}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\Mat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\converters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\jni_part.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\listconverters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\opencv_java.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\core\misc\java\src\cpp\core_manual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\java\src\cpp\dnn_converters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\features2d\misc\java\src\cpp\features2d_converters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\converters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\listconverters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\src\cpp\opencv_java.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\core\misc\java\src\cpp\core_manual.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\dnn\misc\java\src\cpp\dnn_converters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\features2d\misc\java\src\cpp\features2d_converters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\jni\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{6EEDAEC3-0644-3CA6-A633-30EA4FEC2CC9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2B5C5160-0234-3C95-9768-209413C78BB6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

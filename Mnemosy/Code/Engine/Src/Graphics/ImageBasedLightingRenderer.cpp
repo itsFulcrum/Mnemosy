@@ -8,6 +8,11 @@
 #include "Engine/Include/Graphics/ModelLoader.h"
 
 
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core/utils/logger.hpp>
+
+
 #include <glad/glad.h>
 
 namespace mnemosy::graphics
@@ -23,7 +28,14 @@ namespace mnemosy::graphics
 		std::unique_ptr<ModelLoader> modelLoader = std::make_unique <ModelLoader>();
 		m_unitCube = modelLoader->LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
 
-		RenderBrdfLutTexture();
+		// shut tf off 
+		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_WARNING);
+
+		//RenderBrdfLutTexture(true);
+		LoadBrdfLutTextureFromFile(); // Loss in image quality
+
+
+		
 	}
 
 	ImageBasedLightingRenderer::~ImageBasedLightingRenderer()
@@ -144,9 +156,32 @@ namespace mnemosy::graphics
 
 	}
 
-	void ImageBasedLightingRenderer::RenderBrdfLutTexture()
+
+
+	void ImageBasedLightingRenderer::BindBrdfLutTexture(unsigned int location)
 	{
-		// generate the texture
+		if (m_brdfLutTexture_isGenerated)
+		{
+			glActiveTexture(GL_TEXTURE0 + location);
+			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+
+		}
+		else
+		{
+			MNEMOSY_ERROR("ImageBaseLightingRenderer::BindBrdfLutTexture: brdf lut texture is not yet generated");
+		}
+
+	}
+	void ImageBasedLightingRenderer::RenderBrdfLutTexture(bool exportToFile)
+	{
+		if (m_brdfLutTexture_isGenerated)
+		{
+			MNEMOSY_INFO("BrdfLutTexture is already genereated")
+				return;
+		}
+
+
+
 		glGenTextures(1, &m_brdfLutTextureID);
 
 		int res = m_brdfLutResolution;
@@ -171,6 +206,29 @@ namespace mnemosy::graphics
 
 		DrawIntoFramebuffer();
 
+		if (exportToFile)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+
+			// TODO: deallocate malloc memory
+			float* gl_texture_bytes = (float*)malloc(sizeof(float) * res * res * 3);
+
+			//glgetteximage(gl_texture_2d, 0 /* mipmap level */, gl_bgr, gl_unsigned_byte, gl_texture_bytes);
+
+			glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_FLOAT, gl_texture_bytes);
+			cv::Mat img = cv::Mat(res, res, CV_32FC3, gl_texture_bytes);
+
+			cv::flip(img, img, 0);
+			
+			cv::imwrite("../Resources/Textures/ibl/ibl_brdfLut.tif", img);
+			
+			
+			//delete gl_texture_bytes;
+			img.release();
+
+		}
+
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -181,21 +239,47 @@ namespace mnemosy::graphics
 		m_brdfLutTexture_isGenerated = true;
 
 		MNEMOSY_DEBUG("Generated brdf lut texture");
+
 	}
 
-
-	void ImageBasedLightingRenderer::BindBrdfLutTexture(unsigned int location)
+	void ImageBasedLightingRenderer::LoadBrdfLutTextureFromFile()
 	{
+
 		if (m_brdfLutTexture_isGenerated)
 		{
-			glActiveTexture(GL_TEXTURE0 + location);
-			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
 
+			return;
 		}
-		else
-		{
-			MNEMOSY_ERROR("ImageBaseLightingRenderer::BindBrdfLutTexture: brdf lut texture is not yet generated");
-		}
+		
+		cv::Mat pic = cv::imread("../Resources/Textures/ibl/ibl_brdfLut.tif", cv::IMREAD_UNCHANGED);
+
+		MNEMOSY_ASSERT(!pic.empty(), "Couldnt load brdf lut texture from filepath: ../Resources/Textures/ibl/ibl_brdfLut.tif");
+		
+		cv::flip(pic, pic, 0);
+
+
+
+		glGenTextures(1, &m_brdfLutTextureID);
+
+		int res = m_brdfLutResolution;
+		glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, pic.cols, pic.rows, 0, GL_BGR, GL_FLOAT, pic.ptr());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+
+		pic.release();
+		m_brdfLutTexture_isGenerated = true;
+
+		MNEMOSY_DEBUG("Generated brdf lut");
+
+
 
 	}
 

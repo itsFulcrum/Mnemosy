@@ -1,0 +1,156 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/ml/CMakeFiles/opencv_test_ml.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_ann.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_bayes.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_em.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_kmeans.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_knearest.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_lr.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_mltests.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_rtrees.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_save_load.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_svmsgd.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_svmtrainauto.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_utils.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/ml/test/test_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_ml",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/ml/CMakeFiles/opencv_test_ml.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/ml/CMakeFiles/opencv_test_ml.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/ml/CMakeFiles/opencv_test_ml.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/ml/CMakeFiles/opencv_test_ml.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_ml",
+			"AccuracyTest"
+		],
+		"name" : "opencv_test_ml"
+	}
+}

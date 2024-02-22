@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\CMakeFiles\opencv_video.dir\cmake_pch.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\bgfg_KNN.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\bgfg_gaussmix2.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\camshift.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\dis_flow.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\ecc.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\kalman.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\lkpyramid.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\optflowgf.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\optical_flow_io.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_feature.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_feature_set.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_mil_model.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_mil_state.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_model.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_sampler.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_sampler_algorithm.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_state_estimator.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracking_feature.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracking_online_mil.cpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\tracker.cpp">
+      <Filter>Src\tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\tracker_dasiamrpn.cpp">
+      <Filter>Src\tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\tracker_goturn.cpp">
+      <Filter>Src\tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\tracker_mil.cpp">
+      <Filter>Src\tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\tracker_nano.cpp">
+      <Filter>Src\tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\tracker_vit.cpp">
+      <Filter>Src\tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\variational_refinement.cpp">
+      <Filter>Src</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\opencl_kernels_video.cpp">
+      <Filter>Src\opencl\kernels\autogenerated</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\include\opencv2\video.hpp">
+      <Filter>Include\opencv2</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\include\opencv2\video\background_segm.hpp">
+      <Filter>Include\opencv2\video</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\include\opencv2\video\detail\tracking.detail.hpp">
+      <Filter>Include\opencv2\video\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\include\opencv2\video\legacy\constants_c.h">
+      <Filter>Include\opencv2\video\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\include\opencv2\video\tracking.hpp">
+      <Filter>Include\opencv2\video</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\include\opencv2\video\video.hpp">
+      <Filter>Include\opencv2\video</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\opencl_kernels_video.hpp">
+      <Filter>Src\opencl\kernels\autogenerated</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\lkpyramid.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\precomp.hpp">
+      <Filter>Src</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_feature_haar.impl.hpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_mil_model.hpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracker_mil_state.hpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracking_feature.hpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\tracking\detail\tracking_online_mil.hpp">
+      <Filter>Src\tracking\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\cvconfig.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\opencv2\opencv_modules.hpp">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\CMakeFiles\opencv_video.dir\Debug\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\CMakeFiles\opencv_video.dir\Release\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\CMakeFiles\opencv_video.dir\MinSizeRel\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\video\CMakeFiles\opencv_video.dir\RelWithDebInfo\cmake_pch.hxx">
+      <Filter>Precompile Header File</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\CMakeFiles\92ef48115b7ed9be891f1ee615c72798\opencl_kernels_video.cpp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\opencl\bgfg_knn.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\opencl\bgfg_mog2.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\opencl\dis_flow.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\opencl\optical_flow_farneback.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\video\src\opencl\pyrlk.cl">
+      <Filter>Src\opencl\kernels</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{44215DDD-39F9-331E-B2BF-85F67DAFB233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{00728CAE-15D9-3023-B2D5-34D33D7AFE19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2">
+      <UniqueIdentifier>{42D6220E-2845-38F3-9216-4993873F58BB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2\video">
+      <UniqueIdentifier>{338BBA4F-AF4E-3ECA-A45B-39DEF121ABF3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2\video\detail">
+      <UniqueIdentifier>{F5D71719-7507-3D60-9834-2F5462095FB7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\opencv2\video\legacy">
+      <UniqueIdentifier>{D00501C6-D12A-3209-A2DD-E1BD2102B206}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Precompile Header File">
+      <UniqueIdentifier>{CEF0C383-ECBD-36BC-82C5-2C0218026683}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2B5C5160-0234-3C95-9768-209413C78BB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src">
+      <UniqueIdentifier>{32CD143F-BD4B-3A5A-9E62-C9D75B8FD7DA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\opencl">
+      <UniqueIdentifier>{64C6739B-A6D0-3140-98C1-91CAECE129A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\opencl\kernels">
+      <UniqueIdentifier>{232CB2BC-F75C-3747-AD5E-4C7DD8D22927}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\opencl\kernels\autogenerated">
+      <UniqueIdentifier>{8E74C2AA-A607-3039-9C47-5A81FB1264F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\tracking">
+      <UniqueIdentifier>{64CECC4A-74E7-39AE-A6EA-16F8C7B49E4F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Src\tracking\detail">
+      <UniqueIdentifier>{2EBC55E2-74DA-3C09-9CF1-101CD6165983}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

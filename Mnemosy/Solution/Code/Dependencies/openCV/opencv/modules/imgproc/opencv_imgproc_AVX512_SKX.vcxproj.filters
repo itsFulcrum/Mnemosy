@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\imgproc\sumpixels.avx512_skx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\imgproc\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2B5C5160-0234-3C95-9768-209413C78BB6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

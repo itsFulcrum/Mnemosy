@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\CMakeFiles\e4988cd1d0a52a1334c1f8f6719e4e5f\gen_opencv_java_source.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\CMakeFiles\7b1c348757ef16e798a9c71dd251a758\gen_opencv_java_source.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\openCV\opencv\modules\java\generator\gen_java.py" />
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\java_bindings_generator\gen_java.json" />
+    <None Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\openCV\opencv\modules\java_bindings_generator\CMakeFiles\gen_opencv_java_source" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{44215DDD-39F9-331E-B2BF-85F67DAFB233}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

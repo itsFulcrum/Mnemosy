@@ -100,7 +100,9 @@ void main()
 	//// ============================================================================================================ ////
 			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 
-
 			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
+
+			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
+			//fragmentOutputColor.g = texture(_brdfLUT, uv).g;
 
 }

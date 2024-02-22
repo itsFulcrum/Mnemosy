@@ -1,0 +1,75 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_perf_videoio.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/perf/perf_input.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/perf/perf_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/perf/perf_output.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/perf/perf_camera.impl.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/perf/perf_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_perf_videoio.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_perf_videoio.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_perf_videoio.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_perf_videoio.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_videoio",
+			"PerfTest"
+		],
+		"name" : "opencv_perf_videoio"
+	}
+}

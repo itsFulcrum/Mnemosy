@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\tinyxml2\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\bin\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">xmltest.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">xmltest</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\tinyxml2\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\bin\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">xmltest.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">xmltest</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\tinyxml2\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\bin\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">xmltest.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">xmltest</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\Code\Dependencies\tinyxml2\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Solution\bin\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">xmltest.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">xmltest</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
@@ -117,9 +117,9 @@
     <PostBuildEvent>
       <Message>Configuring xmltest resources directory: C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/resources</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Debug/resources
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Debug/resources
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Debug/resources/out
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Debug/resources/out
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -134,8 +134,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Debug/xmltest.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Debug/xmltest.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Debug/xmltest.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Debug/xmltest.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -175,9 +175,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Configuring xmltest resources directory: C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/resources</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Release/resources
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Release/resources
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Release/resources/out
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Release/resources/out
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -192,8 +192,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Release/xmltest.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/Release/xmltest.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Release/xmltest.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/Release/xmltest.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -233,9 +233,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Configuring xmltest resources directory: C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/resources</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/MinSizeRel/resources
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/MinSizeRel/resources
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/MinSizeRel/resources/out
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/MinSizeRel/resources/out
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -250,8 +250,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/MinSizeRel/xmltest.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/MinSizeRel/xmltest.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/MinSizeRel/xmltest.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/MinSizeRel/xmltest.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -290,9 +290,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <PostBuildEvent>
       <Message>Configuring xmltest resources directory: C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/resources</Message>
       <Command>setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/RelWithDebInfo/resources
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/tinyxml2/resources C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/RelWithDebInfo/resources
 if %errorlevel% neq 0 goto :cmEnd
-"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/RelWithDebInfo/resources/out
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/RelWithDebInfo/resources/out
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -307,8 +307,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/RelWithDebInfo/xmltest.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/tinyxml2/RelWithDebInfo/xmltest.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/RelWithDebInfo/xmltest.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/bin/RelWithDebInfo/xmltest.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>

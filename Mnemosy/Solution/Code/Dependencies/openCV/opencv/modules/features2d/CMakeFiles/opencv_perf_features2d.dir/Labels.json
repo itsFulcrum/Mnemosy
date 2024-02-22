@@ -1,0 +1,93 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_perf_features2d.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/opencl/perf_brute_force_matcher.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/opencl/perf_feature2d.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/perf_batchDistance.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/perf_feature2d.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/perf_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/perf_feature2d.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/perf/perf_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_perf_features2d.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_perf_features2d.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_perf_features2d.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_perf_features2d.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_features2d",
+			"PerfTest"
+		],
+		"name" : "opencv_perf_features2d"
+	}
+}

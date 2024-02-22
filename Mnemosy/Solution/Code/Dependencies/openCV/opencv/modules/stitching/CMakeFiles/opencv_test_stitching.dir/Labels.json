@@ -1,0 +1,120 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_test_stitching.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/ocl/test_warpers.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_blenders.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_blenders.cuda.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_exposure_compensate.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_matchers.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_reprojection.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_stitcher.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_wave_correction.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/test/test_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_stitching",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_test_stitching.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_test_stitching.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_test_stitching.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_test_stitching.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_stitching",
+			"AccuracyTest"
+		],
+		"name" : "opencv_test_stitching"
+	}
+}

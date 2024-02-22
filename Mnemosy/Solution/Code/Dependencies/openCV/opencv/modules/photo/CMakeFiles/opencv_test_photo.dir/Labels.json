@@ -1,0 +1,129 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_test_photo.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/ocl/test_denoising.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_cloning.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_decolor.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_denoise_tvl1.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_denoising.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_denoising.cuda.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_hdr.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_inpaint.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_npr.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/test/test_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_photo",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_test_photo.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_test_photo.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_test_photo.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_test_photo.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_photo",
+			"AccuracyTest"
+		],
+		"name" : "opencv_test_photo"
+	}
+}

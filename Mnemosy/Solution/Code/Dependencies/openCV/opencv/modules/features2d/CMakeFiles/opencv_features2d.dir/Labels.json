@@ -1,0 +1,483 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_features2d.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/include/opencv2/features2d.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/include/opencv2/features2d/features2d.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/include/opencv2/features2d/hal/interface.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/affine_feature.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/agast.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/agast_score.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/akaze.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/bagofwords.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/blobdetector.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/brisk.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/draw.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/dynamic.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/evaluation.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/fast.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/fast_score.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/feature2d.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/gftt.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/AKAZEFeatures.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/KAZEFeatures.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/fed.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/nldiffusion_functions.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/keypoint.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/matchers.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/mser.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/orb.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/sift.dispatch.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/opencl/akaze.cl",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/opencl/brute_force_match.cl",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/opencl/fast.cl",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/opencl/orb.cl",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/opencl_kernels_features2d.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/opencl_kernels_features2d.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/agast_score.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/fast.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/fast_score.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/hal_replacement.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/AKAZEConfig.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/AKAZEFeatures.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/KAZEConfig.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/KAZEFeatures.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/TEvolution.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/fed.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/nldiffusion_functions.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/kaze/utils.h",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/features2d/src/sift.simd.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_features2d",
+				"Module"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/opencv_features2d_SSE4_1.dir/$(Configuration)/sift.sse4_1.obj"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/opencv_features2d_AVX2.dir/$(Configuration)/fast.avx2.obj"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/opencv_features2d_AVX2.dir/$(Configuration)/sift.avx2.obj"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/opencv_features2d_AVX512_SKX.dir/$(Configuration)/sift.avx512_skx.obj"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/cvconfig.h"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/opencv2/opencv_modules.hpp"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_features2d.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_features2d.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_features2d.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/features2d/CMakeFiles/opencv_features2d.dir/RelWithDebInfo/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/199bf82b34c07f5d7ff374e1efcdbad8/opencl_kernels_features2d.cpp.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_features2d",
+			"Module"
+		],
+		"name" : "opencv_features2d"
+	}
+}

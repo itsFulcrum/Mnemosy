@@ -18,7 +18,7 @@ namespace mnemosy::graphics
 		unsigned int height = MnemosyEngine::GetInstance().GetWindow().GetWindowWidth();
 		
 		m_camera = std::make_unique<Camera>(width, height);
-		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/UnitSphereSmooth.fbx");
+		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/unitPlane.fbx");
 		m_gizmoMesh = std::make_unique<RenderMesh>("../Resources/Meshes/Gizmo.fbx");
 		m_light = std::make_unique<Light>();
 		m_skybox = std::make_unique<Skybox>("../Resources/Textures/spruit_sunrise.hdr", 2048);

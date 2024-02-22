@@ -1,0 +1,5 @@
+Specification-Title: OpenCV
+Specification-Version: 4.9.0-dev
+Implementation-Title: OpenCV
+Implementation-Version: 4.9.0-181-g5fbf3d85bf
+Implementation-Date: 2024-02-21T12:27:17Z

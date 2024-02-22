@@ -1,0 +1,34 @@
+# Target labels
+ Main
+ opencv_photo
+ PerfTest
+# Source files and their labels
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_perf_photo.dir/cmake_pch.cxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/perf/opencl/perf_denoising.cpp
+ Main
+ opencv_photo
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/perf/perf_cuda.cpp
+ Main
+ opencv_photo
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/perf/perf_hdr.cpp
+ Main
+ opencv_photo
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/perf/perf_inpaint.cpp
+ Main
+ opencv_photo
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/perf/perf_main.cpp
+ Main
+ opencv_photo
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/photo/perf/perf_precomp.hpp
+ Main
+ opencv_photo
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_perf_photo.dir/Debug/cmake_pch.hxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_perf_photo.dir/Release/cmake_pch.hxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_perf_photo.dir/MinSizeRel/cmake_pch.hxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/photo/CMakeFiles/opencv_perf_photo.dir/RelWithDebInfo/cmake_pch.hxx

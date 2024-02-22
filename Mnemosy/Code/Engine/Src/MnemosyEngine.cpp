@@ -21,6 +21,9 @@
 
 #include "Engine/Include/Gui/UserInterface.h"
 
+#include <opencv2/core.hpp>
+#include <opencv2/core/utils/logger.hpp>
+
 namespace mnemosy
 {
 	// private singleton stuff
@@ -53,6 +56,7 @@ namespace mnemosy
 
 		m_pLogger = std::make_unique<core::Logger>();
 
+
 		MNEMOSY_INFO("Starting Mnemosy v{}.{}", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR);
 
 		#ifdef MNEMOSY_CONFIG_DEBUG
@@ -71,6 +75,10 @@ namespace mnemosy
 		MNEMOSY_TRACE("Initializing Subsystems");
 		m_pWindow = new core::Window(WindowTitle);
 		MNEMOSY_TRACE("Window Initialized");
+		
+		double timeBegin = glfwGetTime();
+
+
 		// subsystems
 		m_clock = std::make_unique<core::Clock>();
 
@@ -98,6 +106,15 @@ namespace mnemosy
 		m_clock->capDeltaTime = true;
 
 		m_isInitialized = true;
+
+
+		MNEMOSY_INFO("End Startup");
+		double timeEnd = glfwGetTime();
+		MNEMOSY_INFO("TimeBeginStartup: {} ,TimeEndStartup: {}  StartupTime: {} ", timeBegin,timeEnd,(timeEnd-timeBegin));
+		
+
+		// shut tf off opencv logging
+		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_ERROR);
 
 	}
 

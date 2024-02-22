@@ -1,0 +1,165 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_test_videoio.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_audio.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_camera.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_container_avi.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_dynamic.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_ffmpeg.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_gstreamer.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_images.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_mfx.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_microphone.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_orientation.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_plugins.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_v4l2.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_video_io.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/videoio/test/test_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_videoio",
+				"AccuracyTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_test_videoio.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_test_videoio.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_test_videoio.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/videoio/CMakeFiles/opencv_test_videoio.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_videoio",
+			"AccuracyTest"
+		],
+		"name" : "opencv_test_videoio"
+	}
+}

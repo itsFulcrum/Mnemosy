@@ -1,0 +1,38 @@
+# Target labels
+ Main
+ opencv_stitching
+ PerfTest
+# Source files and their labels
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_perf_stitching.dir/cmake_pch.cxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/opencl/perf_stitch.cpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/opencl/perf_warpers.cpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/perf_estimators.cpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/perf_main.cpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/perf_matchers.cpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/perf_stich.cpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/stitching/perf/perf_precomp.hpp
+ Main
+ opencv_stitching
+ PerfTest
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_perf_stitching.dir/Debug/cmake_pch.hxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_perf_stitching.dir/Release/cmake_pch.hxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_perf_stitching.dir/MinSizeRel/cmake_pch.hxx
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/stitching/CMakeFiles/opencv_perf_stitching.dir/RelWithDebInfo/cmake_pch.hxx

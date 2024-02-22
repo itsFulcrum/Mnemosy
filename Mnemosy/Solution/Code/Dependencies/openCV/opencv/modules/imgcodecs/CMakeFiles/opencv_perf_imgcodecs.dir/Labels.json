@@ -1,0 +1,66 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/imgcodecs/CMakeFiles/opencv_perf_imgcodecs.dir/cmake_pch.cxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/imgcodecs/perf/perf_jpeg.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_imgcodecs",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/imgcodecs/perf/perf_main.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_imgcodecs",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/imgcodecs/perf/perf_png.cpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_imgcodecs",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencv/modules/imgcodecs/perf/perf_precomp.hpp",
+			"labels" : 
+			[
+				"Main",
+				"opencv_imgcodecs",
+				"PerfTest"
+			]
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/imgcodecs/CMakeFiles/opencv_perf_imgcodecs.dir/Debug/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/imgcodecs/CMakeFiles/opencv_perf_imgcodecs.dir/Release/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/imgcodecs/CMakeFiles/opencv_perf_imgcodecs.dir/MinSizeRel/cmake_pch.hxx"
+		},
+		{
+			"file" : "C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/Code/Dependencies/openCV/opencv/modules/imgcodecs/CMakeFiles/opencv_perf_imgcodecs.dir/RelWithDebInfo/cmake_pch.hxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"Main",
+			"opencv_imgcodecs",
+			"PerfTest"
+		],
+		"name" : "opencv_perf_imgcodecs"
+	}
+}

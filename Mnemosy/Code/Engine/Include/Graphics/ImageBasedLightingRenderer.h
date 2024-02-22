@@ -20,11 +20,12 @@ namespace mnemosy::graphics
 		
 		void RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes, bool makeConvolutedIrradianceMap);
 		void RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& cubemapID, unsigned int& equirectangularTextureID, unsigned int resolution);
-		void RenderBrdfLutTexture();
 
 		void BindBrdfLutTexture(unsigned int location);
 
 	private:
+		void RenderBrdfLutTexture(bool exportToFile);
+		void LoadBrdfLutTextureFromFile();
 		void DrawIntoFramebuffer();
 
 	private:

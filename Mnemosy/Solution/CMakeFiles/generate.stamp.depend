@@ -22,6 +22,18 @@ C:/Program Files/CMake/share/cmake-3.27/Modules/Platform/Windows-MSVC.cmake
 C:/Program Files/CMake/share/cmake-3.27/Modules/Platform/Windows.cmake
 C:/Program Files/CMake/share/cmake-3.27/Modules/Platform/WindowsPaths.cmake
 C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/CMakeLists.txt
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/OpenCVConfig-version.cmake
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/OpenCVConfig.cmake
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/opencv_core490.dll
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/opencv_core490d.dll
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/opencv_imgcodecs490.dll
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/opencv_imgcodecs490d.dll
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/opencv_imgproc490.dll
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/opencv_imgproc490d.dll
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/lib/OpenCVConfig.cmake
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/lib/OpenCVModules-debug.cmake
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/lib/OpenCVModules-release.cmake
+C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/lib/OpenCVModules.cmake
 C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/3.27.4/CMakeCCompiler.cmake
 C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/3.27.4/CMakeCXXCompiler.cmake
 C:/Users/fulcrum/Documents/cppProjects/Mnemosy/Mnemosy/Solution/CMakeFiles/3.27.4/CMakeRCCompiler.cmake
