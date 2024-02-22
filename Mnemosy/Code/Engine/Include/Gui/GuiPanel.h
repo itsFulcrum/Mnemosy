@@ -16,6 +16,8 @@ namespace mnemosy::gui
 		virtual void Initialize() {};
 		virtual void Draw() {};
 
+		bool isActive() { return showPanel; }
+		void setActive() { showPanel = true; }
 
 		std::string GetName();
 	protected:

@@ -17,8 +17,8 @@ namespace mnemosy::gui
 
 	void ViewportGuiPanel::Draw()
 	{
-		//if (!showPanel)
-		//	return;
+		if (!showPanel)
+			return;
 
 		ImGui::Begin(panelName.c_str(), &showPanel);
 

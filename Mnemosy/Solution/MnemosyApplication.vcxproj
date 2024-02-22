@@ -334,6 +334,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\Input\SceneInputController.cpp" />
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\GuiPanelManager.h" />
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\GuiPanelManager.cpp" />
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\MainMenuBarGuiPanel.h" />
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\MainMenuBarGuiPanel.cpp" />
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\GlobalSettingsGuiPanel.h" />
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\GlobalSettingsGuiPanel.cpp" />
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\ViewportGuiPanel.h" />
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\ViewportGuiPanel.cpp" />
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\SceneSettingsGuiPanel.h" />

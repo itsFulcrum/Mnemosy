@@ -16,6 +16,12 @@
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\GuiPanelManager.cpp">
       <Filter>Src\GuiPanels</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\MainMenuBarGuiPanel.cpp">
+      <Filter>Src\GuiPanels</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\GlobalSettingsGuiPanel.cpp">
+      <Filter>Src\GuiPanels</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Src\GuiPanels\ViewportGuiPanel.cpp">
       <Filter>Src\GuiPanels</Filter>
     </ClCompile>
@@ -37,6 +43,12 @@
       <Filter>Include\Input</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\GuiPanelManager.h">
+      <Filter>Include\GuiPanels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\MainMenuBarGuiPanel.h">
+      <Filter>Include\GuiPanels</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\GlobalSettingsGuiPanel.h">
       <Filter>Include\GuiPanels</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Application\Include\GuiPanels\ViewportGuiPanel.h">

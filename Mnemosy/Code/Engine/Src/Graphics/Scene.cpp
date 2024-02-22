@@ -18,7 +18,7 @@ namespace mnemosy::graphics
 		unsigned int height = MnemosyEngine::GetInstance().GetWindow().GetWindowWidth();
 		
 		m_camera = std::make_unique<Camera>(width, height);
-		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/unitPlane.fbx");
+		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_mnemosy.fbx");
 		m_gizmoMesh = std::make_unique<RenderMesh>("../Resources/Meshes/Gizmo.fbx");
 		m_light = std::make_unique<Light>();
 		m_skybox = std::make_unique<Skybox>("../Resources/Textures/spruit_sunrise.hdr", 2048);
@@ -47,6 +47,56 @@ namespace mnemosy::graphics
 
 
 
+
+	void Scene::SetPreviewMesh(PreviewMesh previewMeshType)
+	{
+		if (previewMeshType == m_currentPreviewMesh)
+			return; // already set
+		
+
+		if (previewMeshType == PreviewMesh::Custom)
+		{
+			// makes button appear to load a custom mesh
+			m_currentPreviewMesh = PreviewMesh::Custom;
+			return;
+		}
+		if (previewMeshType == PreviewMesh::Default)
+		{
+			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_mnemosy.fbx");
+			m_currentPreviewMesh = PreviewMesh::Default;
+			return;
+		}
+		if (previewMeshType == PreviewMesh::Cube)
+		{
+			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cube.fbx");
+			m_currentPreviewMesh = PreviewMesh::Cube;
+			return;
+		}
+		if (previewMeshType == PreviewMesh::Plane)
+		{
+			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_plane.fbx");
+			m_currentPreviewMesh = PreviewMesh::Plane;
+			return;
+		}
+		if (previewMeshType == PreviewMesh::Sphere)
+		{
+			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_sphere.fbx");
+			m_currentPreviewMesh = PreviewMesh::Sphere;
+			return;
+		}
+		if (previewMeshType == PreviewMesh::Cylinder)
+		{
+			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cylinder.fbx");
+			m_currentPreviewMesh = PreviewMesh::Cylinder;
+			return;
+		}
+		if (previewMeshType == PreviewMesh::Suzanne)
+		{
+			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_suzanne.fbx");
+			m_currentPreviewMesh = PreviewMesh::Suzanne;
+			return;
+		}
+	}
 
 	void Scene::Setup()
 	{
