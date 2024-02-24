@@ -53,6 +53,48 @@ namespace mnemosy::gui
 			graphics::RenderMesh& renderMesh = scene.GetMesh();
 			
 			//ImGui::Text("Mesh Settings");
+			{
+				const char* previewMesh_List[7] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne"}; // they need to be ordered the same as in lightType Enum in light class
+				int previewMesh_Current = (int)scene.GetCurrentPreviewMesh();
+				ImGui::Combo("Preview Mesh", &previewMesh_Current, previewMesh_List, IM_ARRAYSIZE(previewMesh_List));
+
+				if ((int)scene.GetCurrentPreviewMesh() != previewMesh_Current)
+				{
+					if (previewMesh_Current == 0)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Custom);
+					else if(previewMesh_Current == 1)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Default);
+					else if(previewMesh_Current == 2)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Cube);
+					else if(previewMesh_Current == 3)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Plane);
+					else if(previewMesh_Current == 4)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Sphere);
+					else if(previewMesh_Current == 5)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Cylinder);
+					else if(previewMesh_Current == 6)
+						scene.SetPreviewMesh(graphics::PreviewMesh::Suzanne);
+				}
+
+				if (previewMesh_Current == 0)
+				{
+					if (ImGui::Button("Load Mesh..."))
+					{
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+						std::string filepath = mnemosy::core::FileDialogs::OpenFile("FBX (*.fbx)\0*.fbx\0 Obj (*.obj)\0*.obj\0");
+
+						if (!filepath.empty())
+						{
+							renderMesh.LoadMesh(filepath.c_str());
+						}
+#endif
+					}
+				}
+
+			}
+
+
 
 			float meshPos[3] = { 1.0f,1.0f,1.0f };
 			meshPos[0] = renderMesh.transform.GetPosition().x;
@@ -69,6 +111,7 @@ namespace mnemosy::gui
 			ImGui::DragFloat3("Mesh Rotation", (float*)meshRot, 0.1f, -360.0f, 360.0f, "%0.1f");
 			glm::vec3 newMeshRot = glm::vec3(meshRot[0], meshRot[1], meshRot[2]);
 			renderMesh.transform.SetRotationEulerAngles(newMeshRot);
+
 
 
 			ImGui::TreePop();

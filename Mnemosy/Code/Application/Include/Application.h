@@ -36,6 +36,7 @@ namespace mnemosy
 		void Shutdown();
 
 		MnemosyEngine& GetEngine();
+		gui::GuiPanelManager& GetGuiPanelManager() { return *m_pGuiPanelManager; }
 
 	private:
 

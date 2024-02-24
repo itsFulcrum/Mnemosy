@@ -50,8 +50,14 @@ namespace mnemosy::gui
 		StartFrame();
 
 		ImGui::DockSpaceOverViewport();
-
 		ImGuiIO& io = ImGui::GetIO();
+
+
+
+		if (m_mainMenuBarGuiPanel)
+		{
+			m_mainMenuBarGuiPanel->Draw();
+		}
 
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
@@ -98,6 +104,31 @@ namespace mnemosy::gui
 				return;
 			}
 		}
+	}
+
+	void UserInterface::RegisterMainMenuBarGuiPanel(GuiPanel& newMenuBarPanel)
+	{
+		MNEMOSY_ASSERT(!m_mainMenuBarGuiPanel ,"There can only be one main menu bar, it was already registered")
+
+		if (m_mainMenuBarGuiPanel)
+		{
+			return;
+		}
+
+		m_mainMenuBarGuiPanel = &newMenuBarPanel;
+	}
+
+	void UserInterface::UnregisterMainMenuBarGuiPanel()
+	{
+		MNEMOSY_ASSERT(m_mainMenuBarGuiPanel,"There is no menu bar registered yet")
+
+		if (!m_mainMenuBarGuiPanel)
+		{
+			return;
+		}
+
+		//delete m_mainMenuBarGuiPanel;
+		m_mainMenuBarGuiPanel = nullptr;
 	}
 
 

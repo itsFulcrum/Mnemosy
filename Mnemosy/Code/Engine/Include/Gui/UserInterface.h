@@ -29,6 +29,9 @@ namespace mnemosy::gui
 		void RegisterGuiPanel(GuiPanel* newPanel);
 		void UnregisterGuiPanel(GuiPanel* existingPanel);
 
+		void RegisterMainMenuBarGuiPanel(GuiPanel& newMenuBarPanel);
+		void UnregisterMainMenuBarGuiPanel();
+
 
 		bool show_demo_window = true;
 	private:
@@ -38,6 +41,8 @@ namespace mnemosy::gui
 
 
 		std::vector<GuiPanel*> m_guiPanels;
+		GuiPanel* m_mainMenuBarGuiPanel = nullptr;
+
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar;
 	};
