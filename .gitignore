@@ -16,6 +16,10 @@
 # Mono auto generated files
 mono_crash.*
 
+# solution directory
+Mnemosy/Solution/
+
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
