@@ -6,6 +6,8 @@
 #include "Engine/Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Engine/Include/Graphics/Image.h"
 
+#include "Engine/Include/Graphics/Utils/KtxImage.h"
+
 #include <memory>
 
 namespace mnemosy::graphics
@@ -67,31 +69,95 @@ namespace mnemosy::graphics
 			m_colorCubemap_isGenerated = false;
 		}
 		
-		// just from texture to cubemap
-		equirectangularToCubemap(m_colorCubemapID, resolution, false);
-		m_colorCubemap_isGenerated = true;
-		MNEMOSY_DEBUG("Generated cubemap from equirectangular texture");
 
 
-		if (generateConvolutionMaps)
+		if (m_loadCubemapsFromFile) 
 		{
-			// irradiance map
-			if (m_irradianceMap_isGenerated)
+			// color Cubemap
 			{
-				glDeleteTextures(1, &m_irradianceMapID);
+				glGenTextures(1, &m_colorCubemapID);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, m_colorCubemapID);
+
+				KtxImage ktxImg;
+				ktxImg.LoadKtx("../Resources/Textures/Cubemaps/spruitSunrise_cube_color.ktx2", m_colorCubemapID);
+
+				//glBindTexture(GL_TEXTURE_CUBE_MAP, m_colorCubemapID);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			}
-			equirectangularToCubemap(m_irradianceMapID, m_irradianceMapResolution, true);
+			m_colorCubemap_isGenerated = true;
+			MNEMOSY_DEBUG("LOADED Color cubemap");
+			// irradiance cubemap
+			{
+				glGenTextures(1, &m_irradianceMapID);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
+
+				KtxImage ktxImg;
+				ktxImg.LoadKtx("../Resources/Textures/Cubemaps/spruitSunrise_cube_irradiance.ktx2", m_irradianceMapID);
+
+				//glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			}
 			m_irradianceMap_isGenerated = true;
-			MNEMOSY_DEBUG("Generated irradiance cubemap");
+			MNEMOSY_DEBUG("LOADED irradiance cubemap");
 			
-			// prefilter Map
-			if (m_prefilterMap_isGenerated)
+			
+			// Prefilter cubemap
 			{
-				glDeleteTextures(1, &m_prefilterMapID);
+				glGenTextures(1, &m_prefilterMapID);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMapID);
+
+				KtxImage ktxImg;
+				ktxImg.LoadKtx("../Resources/Textures/Cubemaps/spruitSunrise_cube_prefilter.ktx2", m_prefilterMapID);
+
+				//glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+
 			}
-			equirectangularToPrefilteredCubemap(m_prefilterMapID, m_prefilteredMapResolution);
 			m_prefilterMap_isGenerated = true;
-			MNEMOSY_DEBUG("Generated prefilterd cubemap");
+			MNEMOSY_DEBUG("LOADED Prefilter cubemap");
+		}
+		else
+		{
+
+			// just from texture to cubemap
+			equirectangularToCubemap(m_colorCubemapID, resolution, false);
+			m_colorCubemap_isGenerated = true;
+			MNEMOSY_DEBUG("Generated cubemap from equirectangular texture");
+
+
+			if (generateConvolutionMaps)
+			{
+				// irradiance map
+				if (m_irradianceMap_isGenerated)
+				{
+					glDeleteTextures(1, &m_irradianceMapID);
+				}
+				equirectangularToCubemap(m_irradianceMapID, m_irradianceMapResolution, true);
+				m_irradianceMap_isGenerated = true;
+				MNEMOSY_DEBUG("Generated irradiance cubemap");
+			
+				// prefilter Map
+				if (m_prefilterMap_isGenerated)
+				{
+					glDeleteTextures(1, &m_prefilterMapID);
+				}
+				equirectangularToPrefilteredCubemap(m_prefilterMapID, m_prefilteredMapResolution);
+				m_prefilterMap_isGenerated = true;
+				MNEMOSY_DEBUG("Generated prefilterd cubemap");
+			}
 		}
 
 
@@ -164,6 +230,23 @@ namespace mnemosy::graphics
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+
+
+		if (!m_exportCubemaps)
+			return;
+
+		if (makeConvolutedIrradianceMap)
+		{
+			KtxImage ktxImg;
+			ktxImg.SaveCubemapKtx("../Resources/Textures/Cubemaps/spruitSunrise_cube_irradiance.ktx2", cubemapID, resolution);
+		}
+		else 
+		{
+			KtxImage ktxImg;
+			ktxImg.SaveCubemapKtx("../Resources/Textures/Cubemaps/spruitSunrise_cube_color.ktx2", cubemapID, resolution);
+		}
+
 	}
 
 	void Cubemap::equirectangularToPrefilteredCubemap(unsigned int& cubemapID, unsigned int resolution)
@@ -176,7 +259,7 @@ namespace mnemosy::graphics
 		for (int i = 0; i < 6; ++i)
 		{
 			auto data = std::vector<unsigned char>();
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
 		}
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -188,6 +271,15 @@ namespace mnemosy::graphics
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToPrefilteredCubemapTexture(cubemapID, m_equirectangularTextureID, resolution);
+
+
+		if (!m_exportCubemaps)
+			return;
+
+
+		KtxImage ktxImg;
+		ktxImg.SaveCubemapKtx("../Resources/Textures/Cubemaps/spruitSunrise_cube_prefilter.ktx2", cubemapID, resolution);
+
 	}
 
 }

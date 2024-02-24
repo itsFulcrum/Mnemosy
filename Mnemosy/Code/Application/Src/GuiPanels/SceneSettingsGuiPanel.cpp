@@ -197,8 +197,8 @@ namespace mnemosy::gui
 
 			ImGui::SliderFloat("Field of View", &camera.settings.fov, 1.0f, 160.0f, "%.1f");
 
-			ImGui::DragFloat("Near Clip",&camera.settings.nearClip , 0.1f, 0.00001, 100.0f, "%0.01f");
-			ImGui::DragFloat("Far Clip",&camera.settings.farClip , 0.1f, 0.02, 5000.0f, "%0.01f");
+			ImGui::DragFloat("Near Clip", &camera.settings.nearClip, 0.1f, 0.00001f, 100.0f, "%0.4f");
+			ImGui::DragFloat("Far Clip", &camera.settings.farClip, 0.1f, 0.02f, 5000.0f, "%0.4f");
 
 
 			ImGui::TreePop();

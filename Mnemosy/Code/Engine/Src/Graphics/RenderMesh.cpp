@@ -58,19 +58,35 @@ namespace mnemosy::graphics
 	{
 		if (m_modelData)
 		{
-			delete m_modelData;
-			m_modelData = nullptr;
+			ClearModelData();
 		}
 
 		ModelLoader modelLoader;
 		m_modelData = modelLoader.LoadModelDataFromFile(path);
 	}
 
+
+
+
 	ModelData& RenderMesh::GetModelData()
 	{
 		MNEMOSY_ASSERT(m_modelData, "RenderMesh has no model data yet");
 
 		return *m_modelData;
+	}
+
+	void RenderMesh::ClearModelData()
+	{
+		for (int i = 0; i < m_modelData->meshes.size(); i++)
+		{
+			m_modelData->meshes[i].vertecies.clear();
+			m_modelData->meshes[i].indecies.clear();
+		}
+		m_modelData->meshes.clear();
+
+		delete m_modelData;
+		m_modelData = nullptr;
+
 	}
 
 }

@@ -36,7 +36,11 @@ namespace mnemosy::graphics
 		bool m_prefilterMap_isGenerated = false;
 
 		unsigned int m_irradianceMapResolution = 64;
-		unsigned int m_prefilteredMapResolution = 256;
+		unsigned int m_prefilteredMapResolution = 512;
+
+
+		bool m_exportCubemaps = false;
+		bool m_loadCubemapsFromFile = true;
 
 	};
 

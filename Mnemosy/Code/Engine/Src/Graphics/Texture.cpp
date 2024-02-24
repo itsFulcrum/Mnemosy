@@ -6,6 +6,9 @@
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+
+#include "Engine/Include/Graphics/Utils/KtxImage.h"
 
 namespace mnemosy::graphics
 {
@@ -23,14 +26,54 @@ namespace mnemosy::graphics
 	{
 		clear();
 
-		//Image* img = new Image();
+		/*Image* img = new Image();
 
-		//bool successfull = img->LoadImageFromFile(imagePath, flipImageVertically);
+		bool successfull = img->LoadImageFromFile(imagePath, flipImageVertically);
+
+		if (successfull)
+		{
+			MNEMOSY_TRACE("StbLoaded img  numChannels: {}", img->channels);
+			KtxImage ktxImg;
+			ktxImg.SaveKtx("../Resources/Textures/Tom5_linear.ktx2", img->imageData, img->width);
+		}*/
+
 		//successfull = false;
 		//int channels, width, height;
 		//const char* textureData = stbi_load(imagePath, &width, &height, &channels, 0);
 		
+
+		// TEST Loading Ktx Image
+		bool loadKTX = false;
+		if (loadKTX)
+		{
+			glGenTextures(1, &m_ID);
+			KtxImage ktxImg;
+			ktxImg.LoadKtx(imagePath, m_ID); // should return if successful
+			//ktxImg.SaveKtx(imagePath, 1024);
+
+			
+
+			glBindTexture(GL_TEXTURE_2D, m_ID);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			if (generateMipmaps)
+			{
+				glGenerateMipmap(GL_TEXTURE_2D);
+			}
+
+			m_isInitialized = true;
+
+			return true;
+		}
+		// TEST Loading Ktx Image end
+
 		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_COLOR);
+		
+
+
 
 		if (pic.empty())
 		{
@@ -46,10 +89,28 @@ namespace mnemosy::graphics
 			//img = nullptr;
 			return false;
 		}
-
+		
 
 		if (!pic.empty())
 		{
+
+			// save img as ktx2 file
+			bool saveKtx = true;
+			if(saveKtx)
+			{
+				cv::Mat rgba;
+				cv::cvtColor(pic, rgba, cv::COLOR_BGR2RGB); // convert to rgb
+			
+				MNEMOSY_TRACE("openCV loaded img  numChannels: {}", rgba.channels());
+				KtxImage ktxImg;
+				bool worked = ktxImg.SaveKtx("../Resources/Textures/ExportTest2_linear.ktx2", rgba.ptr(),rgba.channels(), rgba.cols, rgba.rows);
+				if(worked)
+					MNEMOSY_TRACE("Exported ktx");
+				rgba.release();
+			}
+
+
+
 			m_channelsAmount =	pic.channels();
 			m_width = pic.cols;
 			m_height = pic.rows;

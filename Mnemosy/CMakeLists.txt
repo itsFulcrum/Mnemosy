@@ -87,6 +87,22 @@ ${imGui_subDir}/imgui_stdlib.h
 ${imGui_subDir}/imgui_stdlib.cpp
 )
 
+# KTX
+set(KTX_FEATURE_DOC OFF CACHE BOOL "" FORCE)
+set(KTX_FEATURE_JNI OFF CACHE BOOL "" FORCE)
+set(KTX_FEATURE_PY OFF CACHE BOOL "" FORCE)
+set(KTX_FEATURE_STATIC_LIBRARY ON CACHE BOOL "" FORCE)
+set(KTX_FEATURE_TESTS OFF CACHE BOOL "" FORCE)
+set(KTX_FEATURE_TOOLS OFF CACHE BOOL "" FORCE)
+set(KTX_FEATURE_TOOLS_CTS OFF CACHE BOOL "" FORCE)
+set(KTX_FEATURE_VK_UPLOAD OFF CACHE BOOL "" FORCE)
+set(KTX_WERROR OFF CACHE BOOL "" FORCE)
+set(ktx_software_subDir "Code/Dependencies/KTX-Software-main/")
+add_subdirectory(${ktx_software_subDir})
+
+
+
+#C:\Users\fulcrum\Documents\cppProjects\Mnemosy\Mnemosy\Code\Dependencies\Neuer Ordner\KTX-Software-main\build\Debug
 
 # Json
 set(JSON_BuildTests OFF CACHE INTERNAL "")
@@ -167,6 +183,13 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Utils/PlatfromUtils_Windows.cpp
 
 # Graphics
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/ShaderIncludeParser.h
+#${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/KTX/ktx.h
+#${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/KTX/ktxvulkan.h
+#${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/KTX/vkformat_enum.h
+#${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/KTX/KHR/khr_df.h
+
+${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/KtxImage.h
+${ENGINE_SOURCE_PATH}/Src/Graphics/Utils/KtxImage.cpp
 
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Shader.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Shader.cpp
@@ -271,14 +294,12 @@ source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/${ENGINE_SOURCE_PATH} FILES ${ALL_SO
 # link external libraries
 target_include_directories(${ENGINE_PROJECT} PRIVATE libs/assimp-src/include)
 
-
-
-
 target_link_libraries(${ENGINE_PROJECT} PUBLIC
 OpenGL::GL
 glad
 glfw
 glm
+
 #imGui
 assimp
 stbImage
@@ -286,6 +307,13 @@ stbImage
 nlohmann_json::nlohmann_json
 tinyxml2
 )
+
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${ktx_software_subDir}lib/)
+target_link_libraries(${ENGINE_PROJECT} PUBLIC ktx)
+
+#target_link_libraries(${ENGINE_PROJECT} PUBLIC "Code/Dependencies/Krons/ktx" )
+#configure_file("Code/Dependencies/NeuerOrdner/KTX-Software-main/build/Debug/ktx.dll" ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
+#configure_file("Code/Dependencies/NeuerOrdner/KTX-Software-main/build/Debug/ktx.dll" ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
 
 target_link_libraries(${ENGINE_PROJECT} PUBLIC ${OpenCV_LIBS})
 

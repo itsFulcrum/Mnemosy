@@ -21,8 +21,6 @@
 
 #include "Engine/Include/Gui/UserInterface.h"
 
-#include <opencv2/core.hpp>
-#include <opencv2/core/utils/logger.hpp>
 
 namespace mnemosy
 {
@@ -111,10 +109,6 @@ namespace mnemosy
 		MNEMOSY_INFO("End Startup");
 		double timeEnd = glfwGetTime();
 		MNEMOSY_INFO("TimeBeginStartup: {} ,TimeEndStartup: {}  StartupTime: {} ", timeBegin,timeEnd,(timeEnd-timeBegin));
-		
-
-		// shut tf off opencv logging
-		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_ERROR);
 
 	}
 

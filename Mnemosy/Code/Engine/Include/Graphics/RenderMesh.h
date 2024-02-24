@@ -31,6 +31,8 @@ namespace mnemosy::graphics
 		Transform transform;
 	
 	private:
+		void ClearModelData();
+
 
 		Material* m_material = nullptr;
 		ModelData* m_modelData = nullptr;

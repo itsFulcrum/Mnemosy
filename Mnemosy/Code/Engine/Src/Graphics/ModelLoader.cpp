@@ -43,7 +43,6 @@ namespace mnemosy::graphics
 		m_fileDirectory = path.substr(0, path.find_first_of('/'));
 		M_ProcessNode(scene->mRootNode, scene, *modelData);
 
-
 		MNEMOSY_INFO("Loaded model from file: {}", path);
 
 		return modelData;

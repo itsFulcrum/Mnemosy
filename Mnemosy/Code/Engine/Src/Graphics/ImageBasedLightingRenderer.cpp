@@ -12,6 +12,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/utils/logger.hpp>
 
+#include "Engine/Include/Graphics/Utils/KtxImage.h"
 
 #include <glad/glad.h>
 
@@ -96,7 +97,16 @@ namespace mnemosy::graphics
 
 			DrawIntoFramebuffer();
 
+
+			
+
+			//glGetTexImage()
+
 		}
+
+		
+		
+
 			// return to default framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -148,6 +158,8 @@ namespace mnemosy::graphics
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+
+
 
 
 		// return to default framebuffer

@@ -35,8 +35,6 @@ namespace mnemosy::core
 			return ofn.lpstrFile;
 		}
 
-		
-
 		return std::string();
 	}
 
@@ -56,6 +54,9 @@ namespace mnemosy::core
 		{
 			return ofn.lpstrFile;
 		}
+
+
+		return std::string();
 	}
 
 }
