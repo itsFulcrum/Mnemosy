@@ -1,11 +1,9 @@
-#include "Engine/Include/Graphics/Transform.h"
+#include "Include/Graphics/Transform.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
-
 namespace mnemosy::graphics
 {
-
 	glm::mat4 Transform::GetTransformMatrix()
 	{
 		glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), m_position);
@@ -63,6 +61,4 @@ namespace mnemosy::graphics
 		m_up = glm::normalize(glm::cross(m_right,m_forward));
 	}
 
-
-
-}
+} // !mnemosy::graphics

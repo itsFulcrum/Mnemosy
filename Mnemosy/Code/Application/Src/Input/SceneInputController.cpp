@@ -1,10 +1,10 @@
-#include "Application/Include/Input/SceneInputController.h"
-#include "Application/Include/Application.h"
+#include "Include/Input/SceneInputController.h"
+#include "Include/Application.h"
 
-#include "Engine/Include/Systems/Input/InputSystem.h"
-#include "Engine/Include/Graphics/Skybox.h"
-#include "Engine/Include/Graphics/Scene.h"
-#include "Engine/Include/Graphics/Renderer.h"
+#include "Include/Systems/Input/InputSystem.h"
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Scene.h"
+#include "Include/Graphics/Renderer.h"
 
 #include <GLFW/glfw3.h>
 #include <functional>
@@ -62,4 +62,4 @@ namespace mnemosy::input
 		inputSystem.UnregisterMouseCursorInput(m_onMouseMoved_id);
 	}
 
-}
+} // mnemosy::input

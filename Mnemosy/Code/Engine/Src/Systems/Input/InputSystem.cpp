@@ -1,9 +1,8 @@
-#include "Engine/Include/Systems/Input/InputSystem.h"
+#include "Include/Systems/Input/InputSystem.h"
 
-#include "Engine/Include/MnemosyEngine.h"
-#include "Engine/Include/Core/Window.h"
-#include "Engine/Include/Core/Log.h"
-
+#include "Include/MnemosyEngine.h"
+#include "Include/Core/Window.h"
+#include "Include/Core/Log.h"
 
 namespace mnemosy::systems
 {
@@ -415,6 +414,4 @@ namespace mnemosy::systems
 		}
 	}
 
-
-
-}
+} // !mnemosy::gui

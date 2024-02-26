@@ -1,15 +1,13 @@
-#ifndef GRAPHCIS_MATERIAL_H
-#define GRAPHCIS_MATERIAL_H
+#ifndef MATERIAL_H
+#define MATERIAL_H
 
-
-#include <Engine/Include/Graphics/Shader.h>
-#include <Engine/Include/Graphics/Texture.h>
+#include "Include/Graphics/Shader.h"
+#include "Include/Graphics/Texture.h"
 
 #include <glm/glm.hpp>
 
 namespace mnemosy::graphics
 {
-
 	enum PBRTextureType
 	{
 		ALBEDO,
@@ -23,7 +21,6 @@ namespace mnemosy::graphics
 	class Material
 	{
 	public:
-
 		Material();
 		~Material();
 
@@ -32,23 +29,16 @@ namespace mnemosy::graphics
 		float Roughness = 0.5f;
 		float Metallic = 0.0f;
 		float EmissionStrength = 0.0f;
-		// currently not supported by shader
-		float NormalStrength = 1.0f;
-
+		float NormalStrength = 1.0f; // not supported by shader at the moment
 
 		void setDefaults();
-		//void assignShader(Shader& newShader);
+
 		void assignTexture(PBRTextureType pbrType, Texture& texture);
 		void assignTexture(PBRTextureType pbrType, std::string filePath);
 		void removeTexture(PBRTextureType pbrType);
 		void setMaterialUniforms(Shader& shader);
-		//Shader& GetShader();
-
 
 	private:
-		
-		//Shader* m_pPbrShader = nullptr;
-
 		Texture* m_pAlbedoTexture = nullptr;
 		Texture* m_pNormalTexture = nullptr;
 		Texture* m_pRoughnessTexture = nullptr;
@@ -58,6 +48,6 @@ namespace mnemosy::graphics
 		
 	};
 
-}
+} // mnemosy::graphics
 
-#endif // !GRAPHCIS_MATERIAL_H
+#endif // !MATERIAL_H

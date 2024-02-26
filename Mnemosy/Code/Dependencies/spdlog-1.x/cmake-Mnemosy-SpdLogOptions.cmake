@@ -1,0 +1,5 @@
+# options from Mnemosy for SpdLog
+
+set(SPDLOG_SYSTEM_INCLUDES  ON CACHE BOOL "" FORCE)
+set(SPDLOG_TIDY             ON CACHE BOOL "" FORCE)
+set(SPDLOG_USE_STD_FORMAT   ON CACHE BOOL "" FORCE)

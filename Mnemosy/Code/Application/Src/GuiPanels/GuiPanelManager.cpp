@@ -1,14 +1,13 @@
-#include "Application/Include/GuiPanels/GuiPanelManager.h"
+#include "Include/GuiPanels/GuiPanelManager.h"
+#include "Include/GuiPanels/MainMenuBarGuiPanel.h"
+#include "Include/GuiPanels/ViewportGuiPanel.h"
+#include "Include/GuiPanels/GlobalSettingsGuiPanel.h"
+#include "Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Include/GuiPanels/MaterialEditorGuiPanel.h"
+#include "Include/Application.h"
 
-#include "Engine/Include/MnemosyEngine.h"
-#include "Engine/Include/Gui/UserInterface.h"
-
-#include "Application/Include/Application.h"
-#include "Application/Include/GuiPanels/MainMenuBarGuiPanel.h"
-#include "Application/Include/GuiPanels/ViewportGuiPanel.h"
-#include "Application/Include/GuiPanels/GlobalSettingsGuiPanel.h"
-#include "Application/Include/GuiPanels/SceneSettingsGuiPanel.h"
-#include "Application/Include/GuiPanels/MaterialEditorGuiPanel.h"
+#include "Include/MnemosyEngine.h"
+#include "Include/Gui/UserInterface.h"
 
 namespace mnemosy::gui
 {
@@ -16,7 +15,6 @@ namespace mnemosy::gui
 	{
 		UserInterface& userInterface = ENGINE_INSTANCE().GetUserInterface();
 		// gui panels
-
 		m_pMainMenuBarPanel = new MainMenuBarGuiPanel();
 		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
 		m_pViewportPanel = new ViewportGuiPanel();
@@ -27,7 +25,6 @@ namespace mnemosy::gui
 		userInterface.RegisterGuiPanel(m_pSceneSettingsPanel);
 		m_pMaterialEditorPanel = new MaterialEditorGuiPanel();
 		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
-
 
 	}
 
@@ -55,8 +52,5 @@ namespace mnemosy::gui
 		delete m_pMaterialEditorPanel;
 		m_pMaterialEditorPanel = nullptr;
 
-
-
 	}
-
 }

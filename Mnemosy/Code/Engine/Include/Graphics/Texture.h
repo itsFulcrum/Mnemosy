@@ -1,7 +1,5 @@
-#ifndef GRAPHICS_TEXTURE_H
-#define GRAPHICS_TEXTURE_H
-
-
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 namespace mnemosy::graphics 
 {
@@ -29,8 +27,8 @@ namespace mnemosy::graphics
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
 
-	
 	};
-}
 
-#endif //!GRAPHICS_TEXTURE_H
+} // mnemosy::graphics
+
+#endif //!TEXTURE_H

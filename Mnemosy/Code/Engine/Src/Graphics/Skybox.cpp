@@ -1,11 +1,10 @@
-#include "Engine/Include/Graphics/Skybox.h"
+#include "Include/Graphics/Skybox.h"
 
+#include "Include/Graphics/Cubemap.h"
+#include "Include/Graphics/ModelData.h"
 
-#include "Engine/Include/Graphics/Cubemap.h"
-#include "Engine/Include/Graphics/ModelData.h"
-
-#include "Engine/Include/Core/Log.h"
-#include "Engine/Include/Graphics/ModelLoader.h"
+#include "Include/Core/Log.h"
+#include "Include/Graphics/ModelLoader.h"
 
 namespace mnemosy::graphics
 {

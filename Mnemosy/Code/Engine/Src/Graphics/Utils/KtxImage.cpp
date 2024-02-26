@@ -1,6 +1,5 @@
-#include "Engine/Include/Graphics/Utils/KtxImage.h"
-#include "Engine/Include/Core/Log.h"
-
+#include "Include/Graphics/Utils/KtxImage.h"
+#include "Include/Core/Log.h"
 
 #include <glad/glad.h>
 #include <ktx.h>
@@ -222,4 +221,4 @@ namespace mnemosy::graphics
 		return true;
 	}
 
-}
+} // mnemosy::graphics

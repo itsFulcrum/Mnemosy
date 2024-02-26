@@ -1,12 +1,10 @@
-#include "Engine/Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/RenderMesh.h"
 
-#include "Engine/Include/Core/Log.h"
-#include "Engine/Include/Graphics/ModelLoader.h"
+#include "Include/Core/Log.h"
 
-#include "Engine/Include/Graphics/Material.h"
-#include "Engine/Include/Graphics/ModelData.h"
-
-
+#include "Include/Graphics/ModelLoader.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/ModelData.h"
 
 namespace mnemosy::graphics
 {
@@ -89,4 +87,4 @@ namespace mnemosy::graphics
 
 	}
 
-}
+} // !mnemosy::graphics

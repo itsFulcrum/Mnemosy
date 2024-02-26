@@ -1,7 +1,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "Engine/Include/MnemosyEngine.h"
+#include "Include/MnemosyEngine.h"
 
 namespace mnemosy::input
 {
@@ -18,39 +18,27 @@ namespace mnemosy
 
 	class Application
 	{
-	private:
+	private:	// Singleton
 		Application();
 		static Application* m_sInstance;
-
-
 	public:
 		static Application& GetInstance();
-
-
 		~Application() = default;
 
 		void Initialize();
-
 		void Run();
-
 		void Shutdown();
 
 		MnemosyEngine& GetEngine();
 		gui::GuiPanelManager& GetGuiPanelManager() { return *m_pGuiPanelManager; }
-
 	private:
 
 		MnemosyEngine& m_mnemosyEngine = MnemosyEngine::GetInstance();
-
-
 
 		input::CameraInputController* m_cameraController = nullptr;
 		input::SceneInputController* m_sceneInputController = nullptr;
 
 		gui::GuiPanelManager* m_pGuiPanelManager = nullptr;
 	};
-
-
 }
-
 #endif // !APPLICATION_H

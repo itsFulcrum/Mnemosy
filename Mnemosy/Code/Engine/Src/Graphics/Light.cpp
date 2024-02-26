@@ -1,7 +1,7 @@
-#include "Engine/Include/Graphics/Light.h"
+#include "Include/Graphics/Light.h"
 
-#include "Engine/Include/Graphics/ModelData.h"
-#include "Engine/Include/Graphics/ModelLoader.h"
+#include "Include/Graphics/ModelData.h"
+#include "Include/Graphics/ModelLoader.h"
 
 namespace mnemosy::graphics
 {
@@ -45,4 +45,4 @@ namespace mnemosy::graphics
 		return int(m_type);
 	}
 
-}
+} // !mnemosy::graphics

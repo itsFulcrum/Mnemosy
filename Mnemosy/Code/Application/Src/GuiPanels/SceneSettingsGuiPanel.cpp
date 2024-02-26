@@ -1,27 +1,22 @@
-#include "Application/Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Include/GuiPanels/SceneSettingsGuiPanel.h"
 
-#include "Application/Include/Application.h"
+#include "Include/Application.h"
 
-#include "Engine/Include/Graphics/Scene.h"
-#include "Engine/Include/Graphics/Camera.h"
-#include "Engine/Include/Graphics/Light.h"
-#include "Engine/Include/Graphics/Skybox.h"
-#include "Engine/Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/Scene.h"
+#include "Include/Graphics/Camera.h"
+#include "Include/Graphics/Light.h"
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/RenderMesh.h"
 
-#include "Engine/Include/Graphics/Renderer.h"
-//#include "Engine/Include/Core/Window.h"
-
-#include "Engine/External/ImGui/imgui.h"
-
-#include "Engine/Include/MnemosyConfig.h"
+#include "Include/Graphics/Renderer.h"
+#include "External/ImGui/imgui.h"
+#include "Include/MnemosyConfig.h"
 #ifdef MNEMOSY_PLATFORM_WINDOWS
-	#include "Engine/Include/Core/Utils/PlatfromUtils_Windows.h"
+	#include "Include/Core/Utils/PlatfromUtils_Windows.h"
 #endif // MNEMOSY_PLATFORM_WINDOWS
 
 #include <glm/glm.hpp>
 #include <iostream>
-
-
 
 namespace mnemosy::gui
 {
@@ -30,23 +25,16 @@ namespace mnemosy::gui
 		panelName = "Scene Settings";
 	}
 
-
-
 	void SceneSettingsGuiPanel::Draw()
 	{
 		if (!showPanel)
 			return;
-
 
 		graphics::Scene& scene = ENGINE_INSTANCE().GetScene();
 		graphics::Renderer& renderer = ENGINE_INSTANCE().GetRenderer();
 
 		ImGui::Begin(panelName.c_str(), &showPanel);
 		
-
-		//ImGui::SeparatorText("Scene Settings");
-
-
 		// Render Mesh settings
 		if (ImGui::TreeNode("Mesh Settings"))
 		{
@@ -93,8 +81,6 @@ namespace mnemosy::gui
 				}
 
 			}
-
-
 
 			float meshPos[3] = { 1.0f,1.0f,1.0f };
 			meshPos[0] = renderMesh.transform.GetPosition().x;

@@ -1,13 +1,12 @@
-#include "Engine/Include/Graphics/Cubemap.h"
-#include "Engine/Include/Core/Log.h"
+#include "Include/Graphics/Cubemap.h"
+#include "Include/Core/Log.h"
+
+#include "Include/MnemosyEngine.h"
+#include "Include/Graphics/ImageBasedLightingRenderer.h"
+#include "Include/Graphics/Image.h"
+#include "Include/Graphics/Utils/KtxImage.h"
 
 #include <glad/glad.h>
-#include "Engine/Include/MnemosyEngine.h"
-#include "Engine/Include/Graphics/ImageBasedLightingRenderer.h"
-#include "Engine/Include/Graphics/Image.h"
-
-#include "Engine/Include/Graphics/Utils/KtxImage.h"
-
 #include <memory>
 
 namespace mnemosy::graphics

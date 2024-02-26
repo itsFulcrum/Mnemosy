@@ -1,21 +1,21 @@
-#include "Application/Include/GuiPanels/MaterialEditorGuiPanel.h"
+#include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 
-#include "Application/Include/Application.h"
-#include "Engine/Include/Graphics/Scene.h"
-#include "Engine/Include/Graphics/Material.h"
-#include "Engine/Include/Graphics/RenderMesh.h"
-#include "Engine/Include/Graphics/Texture.h"
-#include "Engine/External/ImGui/imgui.h"
-#include <glm/glm.hpp>
+#include "Include/Application.h"
+#include "Include/Graphics/Scene.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/Texture.h"
+#include "External/ImGui/imgui.h"
 
-#include "Engine/Include/MnemosyConfig.h"
+#include "Include/MnemosyConfig.h"
 #ifdef MNEMOSY_PLATFORM_WINDOWS
-#include "Engine/Include/Core/Utils/PlatfromUtils_Windows.h"
+	#include "Include/Core/Utils/PlatfromUtils_Windows.h"
 #endif // MNEMOSY_PLATFORM_WINDOWS
 
+#include <glm/glm.hpp>
+
 namespace mnemosy::gui
-{
-	
+{	
 	MaterialEditorGuiPanel::MaterialEditorGuiPanel()
 	{
 		panelName = "Material Editor";
@@ -27,8 +27,6 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-
-		//graphics::Scene& scene = ENGINE_INSTANCE().GetScene();
 		graphics::Material& material = ENGINE_INSTANCE().GetScene().GetMesh().GetMaterial();
 
 		ImGui::Begin(panelName.c_str(), &showPanel);
@@ -103,7 +101,5 @@ namespace mnemosy::gui
 		ImGui::End();
 
 	}
-
-
 
 }

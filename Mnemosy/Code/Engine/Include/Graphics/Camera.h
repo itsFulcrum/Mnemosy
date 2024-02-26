@@ -1,15 +1,11 @@
-#ifndef GRAPHICS_CAMERA_H
-#define GRPAHICS_CAMERA_H
+#ifndef CAMERA_H
+#define CAMERA_H
 
-#include "Engine/Include/Graphics/Transform.h"
-
+#include "Include/Graphics/Transform.h"
 #include <glm/glm.hpp>
-
 
 namespace mnemosy::graphics
 {
-
-
 	struct CameraSettings
 	{
 		float fov = 45.0f;
@@ -17,15 +13,9 @@ namespace mnemosy::graphics
 		float farClip = 500.0f;
 	};
 
-
 	class Camera
 	{
-
 	public:
-	
-
-		CameraSettings settings;
-
 		Camera(unsigned int renderScreenWidth, unsigned int renderScreenHeight);
 		~Camera();
 
@@ -34,16 +24,15 @@ namespace mnemosy::graphics
 		glm::mat4 GetViewMatrix();
 		glm::mat4 GetProjectionMatrix();
 	
+		CameraSettings settings;
 		Transform transform;
 	private:
 		unsigned int m_screenWidth = 0;
 		unsigned int m_screenHeight = 0;
 	};
 
+} // mnemosy::graphics
 
-
-}
-
-#endif // !GRAPHICS_CAMERA_H
+#endif // !CAMERA_H
 
 

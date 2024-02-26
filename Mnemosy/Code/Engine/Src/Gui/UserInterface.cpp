@@ -1,8 +1,8 @@
-#include "Engine/Include/Gui/UserInterface.h"
-#include "Engine/Include/MnemosyEngine.h"
+#include "Include/Gui/UserInterface.h"
+#include "Include/MnemosyEngine.h"
 
-#include "Engine/Include/Core/Log.h"
-#include "Engine/Include/Core/Window.h"
+#include "Include/Core/Log.h"
+#include "Include/Core/Window.h"
 
 namespace mnemosy::gui
 {
@@ -213,4 +213,4 @@ namespace mnemosy::gui
 			glfwMakeContextCurrent(backup_current_context);
 		}
 	}
-}
+} // !mnemosy::gui

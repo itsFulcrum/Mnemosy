@@ -1,14 +1,11 @@
-#ifndef GRAPHICS_CUBEMAP_H
-#define GRAPHICS_CUBEMAP_H
-
+#ifndef CUBEMAP_H
+#define CUBEMAP_H
 
 namespace mnemosy::graphics
 {
-
 	class Cubemap
 	{
 	public:
-
 		Cubemap();
 		~Cubemap();
 
@@ -45,8 +42,6 @@ namespace mnemosy::graphics
 	};
 
 
-}
+} // mnemosy::graphics
 
-
-
-#endif // !GRAPHICS_CUBEMAP_H
+#endif // !CUBEMAP_H

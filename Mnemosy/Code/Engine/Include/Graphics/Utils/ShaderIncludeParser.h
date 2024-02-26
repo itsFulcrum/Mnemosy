@@ -1,12 +1,11 @@
 #ifndef GRAPHICS_UTILS_SHADER_INCLUDE_PARSER
 #define GRAPHICS_UTILS_SHADER_INCLUDE_PARSER
 
-#include "Engine/Include/Core/Log.h"
+#include "Include/Core/Log.h"
 
 #include <string>
 #include <fstream>
 #include <iostream>
-
 
 namespace mnemosy::graphics
 {
@@ -133,7 +132,7 @@ namespace mnemosy::graphics
 	};
 
 
-}
+} // mnemosy::graphics
 
 
 

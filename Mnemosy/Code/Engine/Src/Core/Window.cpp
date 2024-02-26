@@ -1,16 +1,15 @@
-#include "Engine/Include/Core/Window.h"
-#include "Engine/Include/MnemosyConfig.h"
+#include "Include/Core/Window.h"
 
-#include "Engine/Include/Core/Log.h"
+#include "Include/MnemosyConfig.h"
+#include "Include/Core/Log.h"
+
 #include <string>
-
 #define GLFW_INCLUDE_NONE
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace mnemosy::core
 {
-
 	void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 		GLsizei length, const char* message, const void* userParam)
 	{
@@ -135,9 +134,8 @@ namespace mnemosy::core
 		}
 #endif // MNEMOSY_CONFIG_DEBUG
 
-
-
 	}
+
 	Window::~Window()
 	{
 		if (m_pWindow)
@@ -177,4 +175,4 @@ namespace mnemosy::core
 		m_currentWindowHeight = height;
 	}
 
-}
+} // mnemosy::core

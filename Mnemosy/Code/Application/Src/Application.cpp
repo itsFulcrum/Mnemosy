@@ -1,9 +1,9 @@
-#include "Application/Include/Application.h"
+#include "Include/Application.h"
 
-#include "Engine/Include/Gui/UserInterface.h"
-#include "Application/Include/Input/CameraInputController.h"
-#include "Application/Include/Input/SceneInputController.h"
-#include "Application/Include/GuiPanels/GuiPanelManager.h"
+#include "Include/Gui/UserInterface.h"
+#include "Include/Input/CameraInputController.h"
+#include "Include/Input/SceneInputController.h"
+#include "Include/GuiPanels/GuiPanelManager.h"
 
 #include <string>
 
@@ -64,4 +64,4 @@ namespace mnemosy
 		return m_mnemosyEngine;
 	}
 
-}
+} // mnemosy

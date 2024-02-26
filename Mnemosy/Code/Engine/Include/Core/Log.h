@@ -1,13 +1,12 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "Engine/Include/MnemosyConfig.h"
+#include "Include/MnemosyConfig.h"
 
 #define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
 #define _SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS
 
 #include <spdlog/spdlog.h>
-
 
 #define MNEMOSY_LOGGER_NAME "MnemosyLogger"
 

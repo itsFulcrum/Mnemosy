@@ -1,12 +1,8 @@
-#include "Application/Include/GuiPanels/GlobalSettingsGuiPanel.h"
-
-#include "Engine/External/ImGui/imgui.h"
+#include "Include/GuiPanels/GlobalSettingsGuiPanel.h"
+#include "External/ImGui/imgui.h"
 
 namespace mnemosy::gui
 {
-
-
-
 	GlobalSettingsGuiPanel::GlobalSettingsGuiPanel()
 	{
 		panelName = "Global Settings";
@@ -17,13 +13,11 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-
 		ImGui::Begin(panelName.c_str(), &showPanel);
 
 		ImGui::Text("Here will go global settings");
 
+
 		ImGui::End();
-
 	}
-
 }

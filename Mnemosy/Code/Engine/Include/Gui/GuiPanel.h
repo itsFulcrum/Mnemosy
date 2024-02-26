@@ -25,6 +25,6 @@ namespace mnemosy::gui
 		std::string panelName = "";
 
 	};
-}
+} // mnemosy::gui
 
 #endif // !GUI_PANEL_H

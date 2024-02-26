@@ -1,14 +1,14 @@
-#include "Engine/Include/Graphics/Texture.h"
-#include "Engine/Include/Core/Log.h"
-#include "Engine/Include/Graphics/Image.h"
+#include "Include/Graphics/Texture.h"
+#include "Include/Core/Log.h"
+
+#include "Include/Graphics/Image.h"
+#include "Include/Graphics/Utils/KtxImage.h"
 
 #include <glad/glad.h>
-
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "Engine/Include/Graphics/Utils/KtxImage.h"
 
 namespace mnemosy::graphics
 {
@@ -235,4 +235,4 @@ namespace mnemosy::graphics
 		return m_channelsAmount;
 	}
 
-} // end namespace mnemosy::graphics
+} // !mnemosy::graphics

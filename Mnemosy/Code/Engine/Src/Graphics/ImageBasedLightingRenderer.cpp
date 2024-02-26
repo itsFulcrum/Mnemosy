@@ -1,24 +1,18 @@
-#include "Engine/Include/Graphics/ImageBasedLightingRenderer.h"
-#include "Engine/Include/Core/Log.h"
+#include "Include/Graphics/ImageBasedLightingRenderer.h"
 
-#include "Engine/Include/Graphics/ModelData.h"
-#include "Engine/Include/Graphics/Shader.h"
-
-
-#include "Engine/Include/Graphics/ModelLoader.h"
-
+#include "Include/Core/Log.h"
+#include "Include/Graphics/ModelData.h"
+#include "Include/Graphics/Shader.h"
+#include "Include/Graphics/ModelLoader.h"
+#include "Include/Graphics/Utils/KtxImage.h"
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/utils/logger.hpp>
-
-#include "Engine/Include/Graphics/Utils/KtxImage.h"
-
 #include <glad/glad.h>
 
 namespace mnemosy::graphics
 {
-
 	ImageBasedLightingRenderer::ImageBasedLightingRenderer()
 	{
 		glGenFramebuffers(1, &m_fbo);
@@ -35,8 +29,6 @@ namespace mnemosy::graphics
 		//RenderBrdfLutTexture(true);
 		LoadBrdfLutTextureFromFile(); // Loss in image quality
 
-
-		
 	}
 
 	ImageBasedLightingRenderer::~ImageBasedLightingRenderer()
@@ -98,14 +90,7 @@ namespace mnemosy::graphics
 			DrawIntoFramebuffer();
 
 
-			
-
-			//glGetTexImage()
-
 		}
-
-		
-		
 
 			// return to default framebuffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -298,14 +283,7 @@ namespace mnemosy::graphics
 	// private
 	void ImageBasedLightingRenderer::DrawIntoFramebuffer()
 	{
-		//object.m_model.m_meshes.size();
-
 		m_imagedBasedLightingShader->Use();
-
-		// not sure if we actually need these, keep for debug in case we do
-		//glm::mat4 modelMatrix = object.GetTransformMatrix();
-		//shader.setUniformMatrix4("_modelMatrix", modelMatrix);
-
 		m_imagedBasedLightingShader->SetUniformMatrix4("_viewMatrix", glm::mat4(0.0f));
 		m_imagedBasedLightingShader->SetUniformMatrix4("_projectionMatrix", glm::mat4(0.0f));
 
@@ -319,6 +297,4 @@ namespace mnemosy::graphics
 
 	}
 
-
-
-}
+} // !mnemosy::graphics

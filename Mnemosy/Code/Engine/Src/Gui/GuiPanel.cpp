@@ -1,7 +1,8 @@
-#include "Engine/Include/Gui/GuiPanel.h"
+#include "Include/Gui/GuiPanel.h"
 
-#include "Engine/Include/Core/Log.h"
-#include <Engine/External/ImGui/imgui.h>
+#include "Include/Core/Log.h"
+
+#include <External/ImGui/imgui.h>
 
 namespace mnemosy::gui
 {
@@ -19,4 +20,4 @@ namespace mnemosy::gui
 		return panelName;
 	}
 
-}
+} // !mnemosy::gui

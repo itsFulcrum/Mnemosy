@@ -56,5 +56,6 @@ namespace mnemosy::core
 
 	};
 
-}
+} // mnemosy::core
+
 #endif // !WINDOW_H

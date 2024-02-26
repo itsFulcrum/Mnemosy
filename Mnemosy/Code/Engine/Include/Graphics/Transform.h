@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_TRANSFORM_H
-#define GRAPHICS_TRANSFORM_H
+#ifndef TRANSFORM_H
+#define TRANSFORM_H
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
@@ -54,6 +54,6 @@ namespace mnemosy::graphics
 
 	};
 
-}
+} // mnemosy::graphics
 
-#endif // !GRAPHICS_TRANSFORM_H
+#endif // !TRANSFORM_H

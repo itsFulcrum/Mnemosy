@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_MESH_DATA_H
-#define GRAPHICS_MESH_DATA_H
+#ifndef MESH_DATA_H
+#define MESH_DATA_H
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -24,6 +24,6 @@ namespace mnemosy::graphics
 		unsigned int vertexBufferObject = NULL;
 		unsigned int elementBufferObject = NULL;
 	};
-}
+} // mnemosy::graphics
 
-#endif // !GRAPHICS_MESH_DATA_H
+#endif // !MESH_DATA_H

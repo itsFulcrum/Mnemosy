@@ -1,16 +1,13 @@
 #ifndef KTX_IMAGE_H
 #define KTX_IMAGE_H
 
-
 namespace mnemosy::graphics
 {
-
 	class KtxImage
 	{
 	public:
 		KtxImage() = default;
 		~KtxImage() = default;
-
 
 		bool LoadKtx(const char* filepath, unsigned int &glTextureID);
 		bool SaveKtx(const char* filepath,unsigned char* imageData, unsigned int numChannels, unsigned int width, unsigned int height);
@@ -20,13 +17,8 @@ namespace mnemosy::graphics
 		unsigned int numChannels = 0;
 		unsigned int width = 0;
 		unsigned int height = 0;
-	private:
-
-
 	};
 
-
-}
-
+} // mnemosy::graphics
 
 #endif // !KTX_IMAGE_H

@@ -1,14 +1,13 @@
 #ifndef IMAGE_BASED_LIGHTING_RENDERER_H
 #define IMAGE_BASED_LIGHTING_RENDERER_H
 
+#include <memory>
 
 namespace mnemosy::graphics
 {
 	struct ModelData;
 	class Shader;
 }
-
-#include <memory>
 
 namespace mnemosy::graphics
 {
@@ -38,8 +37,7 @@ namespace mnemosy::graphics
 
 		int m_brdfLutResolution = 512;
 		
-
 	};
-}
+} // mnemosy::graphics
 
 #endif // !IMAGE_BASED_LIGHTING_RENDERER_H

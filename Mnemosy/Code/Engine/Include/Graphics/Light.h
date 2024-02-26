@@ -1,9 +1,11 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include "Engine/Include/Graphics/Transform.h"
+#include "Include/Graphics/Transform.h"
 
 #include <glm/glm.hpp>
+
+
 namespace mnemosy::graphics
 {
 	struct ModelData;
@@ -11,7 +13,6 @@ namespace mnemosy::graphics
 
 namespace mnemosy::graphics
 {
-	
 	enum LightType
 	{
 		DIRECTIONAL = 0,
@@ -44,7 +45,7 @@ namespace mnemosy::graphics
 
 	};
 
-}
+} // mnemosy::graphics
 
 
 #endif // !LIGHT_H

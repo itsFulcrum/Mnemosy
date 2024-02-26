@@ -38,11 +38,9 @@ namespace mnemosy::graphics
 		RenderMesh& GetGizmoMesh() { return *m_gizmoMesh; }
 		Light& GetLight() {	return *m_light;}
 		Skybox& GetSkybox() { return *m_skybox; }
-
-
 		PreviewMesh GetCurrentPreviewMesh() { return m_currentPreviewMesh; }
-		void SetPreviewMesh(PreviewMesh previewMeshType);
 
+		void SetPreviewMesh(PreviewMesh previewMeshType);
 
 	private:
 		void Setup();
@@ -56,7 +54,6 @@ namespace mnemosy::graphics
 		std::unique_ptr<Skybox> m_skybox;
 	};
 
-
-}
+} // mnemosy::graphics
 
 #endif // !SCENE_H

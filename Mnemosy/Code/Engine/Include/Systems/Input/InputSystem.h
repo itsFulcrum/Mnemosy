@@ -5,7 +5,6 @@
 #include <vector>
 #include <functional>
 
-
 namespace mnemosy::systems
 {
 #define REGISTER_KEYBOARD_INPUT(keyboardKey,pressEvent,callOnlyOnce,functionPointer)	RegisterKeyboardInput(keyboardKey,pressEvent,callOnlyOnce, std::bind(functionPointer, this, std::placeholders::_1))
@@ -124,10 +123,8 @@ namespace mnemosy::systems
 		double m_mouseLastFrameXPos = 0.0;
 		double m_mouseLastFrameYPos = 0.0;
 
-
 	};
 
+} // mnemosy::systems
 
-
-}
 #endif // !INPUT_SYSTEM_H

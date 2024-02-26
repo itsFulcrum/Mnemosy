@@ -1,9 +1,8 @@
-#ifndef GRAPHICS_MODEL_DATA_H
-#define GRAPHICS_MODEL_DATA_H
+#ifndef MODEL_DATA_H
+#define MODEL_DATA_H
 
-#include "Engine/Include/Graphics/MeshData.h"
+#include "Include/Graphics/MeshData.h"
 #include <vector>
-
 
 namespace mnemosy::graphics 
 {
@@ -11,6 +10,6 @@ namespace mnemosy::graphics
 	{
 		std::vector<MeshData> meshes;
 	};
-}
+} // mnemosy::graphics
 
-#endif // !GRAPHICS_MODEL_DATA_H
+#endif // !MODEL_DATA_H

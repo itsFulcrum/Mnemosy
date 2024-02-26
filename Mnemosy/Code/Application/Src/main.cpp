@@ -1,5 +1,4 @@
-//#include "Engine/Include/MnemosyEngine.h"
-#include "Application/Include/Application.h"
+#include "Include/Application.h"
 
 int main() {
 	
@@ -8,9 +7,6 @@ int main() {
 	app.Initialize();
 	app.Run();
 	app.Shutdown();
-
-	//delete app;
-	//app = nullptr;
 
 	return 0;
 }

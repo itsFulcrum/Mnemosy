@@ -1,7 +1,7 @@
-#include "Engine/Include/Core/Utils/PlatfromUtils_Windows.h"
+#include "Include/Core/Utils/PlatfromUtils_Windows.h"
 
-#include "Engine/Include/MnemosyEngine.h"
-#include "Engine/Include/Core/Window.h"
+#include "Include/MnemosyEngine.h"
+#include "Include/Core/Window.h"
 
 
 #include <windows.h>
@@ -10,7 +10,6 @@
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-
 
 namespace mnemosy::core
 {
@@ -59,4 +58,4 @@ namespace mnemosy::core
 		return std::string();
 	}
 
-}
+} // mnemosy::core

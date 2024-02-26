@@ -1,14 +1,15 @@
-#include "Engine/Include/Graphics/Scene.h"
-#include "Engine/Include/MnemosyEngine.h"
-#include "Engine/Include/Core/Window.h"
-#include "Engine/Include/Core/Log.h"
+#include "Include/Graphics/Scene.h"
 
-#include "Engine/Include/Graphics/Renderer.h"
-#include "Engine/Include/Graphics/Camera.h"
-#include "Engine/Include/Graphics/RenderMesh.h"
-#include "Engine/Include/Graphics/Light.h"
-#include "Engine/Include/Graphics/Skybox.h"
-#include "Engine/Include/Graphics/Material.h"
+#include "Include/MnemosyEngine.h"
+#include "Include/Core/Window.h"
+#include "Include/Core/Log.h"
+
+#include "Include/Graphics/Renderer.h"
+#include "Include/Graphics/Camera.h"
+#include "Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/Light.h"
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Material.h"
 
 namespace mnemosy::graphics
 {
@@ -140,4 +141,4 @@ namespace mnemosy::graphics
 
 	}
 
-}
+} // !mnemosy::graphics

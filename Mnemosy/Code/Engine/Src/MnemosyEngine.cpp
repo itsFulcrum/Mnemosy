@@ -1,26 +1,25 @@
-#include "Engine/Include/MnemosyEngine.h"
-#include "Engine/Include/MnemosyConfig.h"
+#include "Include/MnemosyConfig.h"
+#include "Include/MnemosyEngine.h"
 
 #include <GLFW/glfw3.h>
 
-#include "Engine/Include/Core/Window.h"
-#include "Engine/Include/Core/Logger.h"
-#include "Engine/Include/Core/Log.h"
-#include "Engine/Include/Core/Clock.h"
+#include "Include/Core/Window.h"
+#include "Include/Core/Logger.h"
+#include "Include/Core/Log.h"
+#include "Include/Core/Clock.h"
 
-#include "Engine/Include/Systems/Input/InputSystem.h"
+#include "Include/Systems/Input/InputSystem.h"
 
-#include "Engine/Include/Graphics/Material.h"
-#include "Engine/Include/Graphics/Renderer.h"
-#include "Engine/Include/Graphics/Skybox.h"
-#include "Engine/Include/Graphics/RenderMesh.h"
-#include "Engine/Include/Graphics/Camera.h"
-#include "Engine/Include/Graphics/ImageBasedLightingRenderer.h"
-#include "Engine/Include/Graphics/Light.h"
-#include "Engine/Include/Graphics/Scene.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/Renderer.h"
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/Camera.h"
+#include "Include/Graphics/ImageBasedLightingRenderer.h"
+#include "Include/Graphics/Light.h"
+#include "Include/Graphics/Scene.h"
 
-#include "Engine/Include/Gui/UserInterface.h"
-
+#include "Include/Gui/UserInterface.h"
 
 namespace mnemosy
 {
@@ -30,10 +29,7 @@ namespace mnemosy
 
 	// public
 	MnemosyEngine::~MnemosyEngine()
-	{
-
-
-	}
+	{ }
 
 	MnemosyEngine& MnemosyEngine::GetInstance()
 	{
@@ -155,9 +151,4 @@ namespace mnemosy
 		m_pWindow->Shutdown();
 	}
 
-
-	// private
-
-
-
-}
+} // !mnemosy

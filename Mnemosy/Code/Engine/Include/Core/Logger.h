@@ -1,7 +1,6 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-
 namespace mnemosy::core
 {
 	class Logger
@@ -10,6 +9,6 @@ namespace mnemosy::core
 		Logger();
 		~Logger();
 	};
-}
+} // menmosy::core
 
 #endif // !LOGGER_H

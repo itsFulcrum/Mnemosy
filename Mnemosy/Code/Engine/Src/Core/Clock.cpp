@@ -1,4 +1,4 @@
-#include "Engine/Include/Core/Clock.h"
+#include "Include/Core/Clock.h"
 
 #include <GLFW/glfw3.h>
 
@@ -52,4 +52,4 @@ namespace mnemosy::core
 		m_frameCount++;
 	}
 
-}
+} // mnemosy::core

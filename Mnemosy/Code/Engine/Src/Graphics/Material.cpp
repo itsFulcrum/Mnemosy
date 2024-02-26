@@ -1,14 +1,9 @@
-#include "Engine/Include/Graphics/Material.h"
+#include "Include/Graphics/Material.h"
 
-#include "Engine/Include/Core/Log.h"
-
-//#include "Engine/Engine.h"
-//#include <glad/glad.h> 
-//#include <gtc/matrix_transform.hpp>
+#include "Include/Core/Log.h"
 
 namespace mnemosy::graphics
 {
-
 	Material::Material()
 	{
 		setDefaults();
@@ -16,12 +11,6 @@ namespace mnemosy::graphics
 
 	Material::~Material()
 	{
-		//delete pbrShader;
-
-		//delete m_pPbrShader;
-		//m_pPbrShader = nullptr;
-
-
 		delete m_pAlbedoTexture;
 		delete m_pNormalTexture;
 		delete m_pRoughnessTexture;
@@ -46,11 +35,6 @@ namespace mnemosy::graphics
 		EmissionStrength = 0.0f;
 		NormalStrength = 1.0f; // currently not supported by shader
 	}
-
-	//void Material::assignShader(Shader& shader)
-	//{
-	//	m_pPbrShader = &shader;
-	//}
 
 	void Material::assignTexture(PBRTextureType pbrTextureType,Texture& texture)
 	{
@@ -296,11 +280,5 @@ namespace mnemosy::graphics
 		shader.SetUniformInt("_emissionMap", 6);
 	}
 
-	//Shader& Material::GetShader()
-	//{
-	//	return *m_pPbrShader;
-	//}
-
-
-}
+} // !mnemosy::graphics
 

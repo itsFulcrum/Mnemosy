@@ -1,7 +1,6 @@
-#include "Engine/Include/Graphics/Camera.h"
+#include "Include/Graphics/Camera.h"
 
-#include "Engine/Include/MnemosyEngine.h"
-
+#include "Include/MnemosyEngine.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,17 +11,14 @@ namespace mnemosy::graphics
 		SetScreenSize(renderScreenWidth, renderScreenHeight);
 	}
 
-
 	Camera::~Camera()
-	{
-	}
+	{	}
 
 	void Camera::SetScreenSize(unsigned int width, unsigned int height)
 	{
 		m_screenWidth = width;
 		m_screenHeight = height;
 	}
-
 
 	glm::mat4 Camera::GetViewMatrix()
 	{
@@ -38,4 +34,5 @@ namespace mnemosy::graphics
 		projectionMatrix = glm::perspective(glm::radians(settings.fov), float(m_screenWidth) / float(m_screenHeight), settings.nearClip, settings.farClip);
 		return projectionMatrix;
 	}
-}
+
+} // !mnemosy::graphics

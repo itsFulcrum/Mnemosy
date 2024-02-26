@@ -1,8 +1,6 @@
 #ifndef GRAPHICS_IMAGE_H
 #define GRAPHICS_IMAGE_H
 
-
-
 namespace mnemosy::graphics
 {
 	class Image
@@ -22,6 +20,6 @@ namespace mnemosy::graphics
 		unsigned int height = 0;
 		unsigned int channels = 0;
 	};
-}
+} // mnemosy::graphics
 
 #endif // !GRAPHICS_IMAGE_H

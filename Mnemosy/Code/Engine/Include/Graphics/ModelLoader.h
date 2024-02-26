@@ -1,9 +1,7 @@
 #ifndef GRAPHICS_MODEL_LOADER_H
 #define GRAPHICS_MODEL_LOADER_H
 
-
-#include "Engine/Include/Graphics/ModelData.h"
-
+#include "Include/Graphics/ModelData.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -11,12 +9,10 @@
 
 #include <string>
 
-
 /*
 	with this currentimplementation of a model it only allows to have one material
 	so even if submeshes have different materials assigned to them this class will ignore it
 */
-
 namespace mnemosy::graphics
 {
 
@@ -41,7 +37,7 @@ namespace mnemosy::graphics
 
 	};
 
-}	// End namespace mnemosy::graphics
+}	// mnemosy::graphics
 
 
 

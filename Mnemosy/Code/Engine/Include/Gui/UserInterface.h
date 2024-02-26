@@ -1,18 +1,15 @@
 #ifndef USER_INTERFACE_H
 #define USER_INTERFACE_H
 
+#include "Include/Gui/GuiPanel.h"
+
+
+#include "External/ImGui/imgui.h"
+#include "External/ImGui/imgui_impl_glfw.h"
+#include "External/ImGui/imgui_impl_opengl3.h"
+
 #include <vector>
-
 #include <GLFW/glfw3.h>
-
-#include <Engine/External/ImGui/imgui.h>
-#include <Engine/External/ImGui/imgui_impl_glfw.h>
-#include <Engine/External/ImGui/imgui_impl_opengl3.h>
-
-
-
-#include "Engine/Include/Gui/GuiPanel.h"
-
 
 namespace mnemosy::gui
 {
@@ -45,10 +42,9 @@ namespace mnemosy::gui
 
 
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar;
+	
 	};
 
-
-}
-
+} // mnemosy::gui
 
 #endif // !USER_INTERFACE_H

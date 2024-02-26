@@ -1,16 +1,13 @@
-#include "Application/Include/GuiPanels/MainMenuBarGuiPanel.h"
+#include "Include/GuiPanels/MainMenuBarGuiPanel.h"
 
-#include "Application/Include/Application.h"
-#include "Application/Include/GuiPanels/GuiPanelManager.h"
+#include "Include/Application.h"
+#include "Include/GuiPanels/GuiPanelManager.h"
+#include "Include/GuiPanels/ViewportGuiPanel.h"
+#include "Include/GuiPanels/GlobalSettingsGuiPanel.h"
+#include "Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 
-#include "Application/Include/GuiPanels/ViewportGuiPanel.h"
-#include "Application/Include/GuiPanels/GlobalSettingsGuiPanel.h"
-#include "Application/Include/GuiPanels/SceneSettingsGuiPanel.h"
-#include "Application/Include/GuiPanels/MaterialEditorGuiPanel.h"
-
-
-
-#include "Engine/External/ImGui/imgui.h"
+#include "External/ImGui/imgui.h"
 
 namespace mnemosy::gui
 {
@@ -21,9 +18,6 @@ namespace mnemosy::gui
 
 	void MainMenuBarGuiPanel::Draw()
 	{
-		//if (!showPanel)
-			//return;
-
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("Windows"))
@@ -71,14 +65,7 @@ namespace mnemosy::gui
 			//	ImGui::EndMenu();
 			//}
 
-
-
 			ImGui::EndMainMenuBar();
 		}
-
-
 	}
-
-
-
 }

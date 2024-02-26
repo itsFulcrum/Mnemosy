@@ -12,7 +12,6 @@ namespace mnemosy::graphics
 	class Scene;
 }
 
-
 namespace mnemosy::graphics
 {
 	class Renderer
@@ -75,8 +74,6 @@ namespace mnemosy::graphics
 		int msaaSamples = 4;
 	};
 
-
-
-}
+} // mnemosy::graphics
 
 #endif // !GRAPHICS_RENDERER_H

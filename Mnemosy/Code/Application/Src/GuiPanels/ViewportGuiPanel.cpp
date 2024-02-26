@@ -1,10 +1,9 @@
-#include "Application/Include/GuiPanels/ViewportGuiPanel.h"
+#include "Include/GuiPanels/ViewportGuiPanel.h"
 
-#include "Application/Include/Application.h"
-#include "Engine/Include/Graphics/Renderer.h"
-#include "Engine/Include/Core/Window.h"
-
-#include "Engine/External/ImGui/imgui.h"
+#include "Include/Application.h"
+#include "Include/Graphics/Renderer.h"
+#include "Include/Core/Window.h"
+#include "External/ImGui/imgui.h"
 
 namespace mnemosy::gui
 {
@@ -12,8 +11,6 @@ namespace mnemosy::gui
 	{
 		panelName = "Viewport";
 	}
-
-
 
 	void ViewportGuiPanel::Draw()
 	{
@@ -61,5 +58,4 @@ namespace mnemosy::gui
 
 		ImGui::End();
 	}
-
 }

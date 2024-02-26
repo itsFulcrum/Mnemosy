@@ -5,8 +5,8 @@ IF(BIICODE)
     ENDIF()
     RETURN()
 ENDIF(BIICODE)
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-cmake_policy(VERSION 2.6)
+cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
+cmake_policy(VERSION 3.21)
 
 project(tinyxml2)
 include(GNUInstallDirs)
@@ -55,7 +55,7 @@ set_target_properties(tinyxml2 PROPERTIES
 target_compile_definitions(tinyxml2 PUBLIC $<$<CONFIG:Debug>:TINYXML2_DEBUG>)
 
 if(DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
-    target_include_directories(tinyxml2 PUBLIC 
+    target_include_directories(tinyxml2 PUBLIC
                           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
@@ -77,13 +77,13 @@ export(TARGETS tinyxml2
 
 install(TARGETS tinyxml2
         EXPORT ${TARGETS_EXPORT_NAME}
-        RUNTIME 
+        RUNTIME
                 DESTINATION ${CMAKE_INSTALL_BINDIR}
                 COMPONENT tinyxml2_runtime
-        LIBRARY 
+        LIBRARY
                 DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 COMPONENT tinyxml2_libraries
-        ARCHIVE 
+        ARCHIVE
                 DESTINATION ${CMAKE_INSTALL_LIBDIR}
                 COMPONENT tinyxml2_libraries)
 

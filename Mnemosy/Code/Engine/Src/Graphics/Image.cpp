@@ -1,15 +1,12 @@
-#include "Engine/Include/Graphics/Image.h"
+#include "Include/Graphics/Image.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-
 namespace mnemosy::graphics
 {
 	Image::Image()
-	{
-	}
-
+	{ }
 	Image::~Image()
 	{
 		FreeData();
@@ -80,5 +77,4 @@ namespace mnemosy::graphics
 		channels = 0;
 	}
 
-
-}
+} // !mnemosy::graphics

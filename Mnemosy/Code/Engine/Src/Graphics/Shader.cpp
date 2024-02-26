@@ -1,10 +1,10 @@
-#include "Engine/Include/Graphics/Shader.h"
+#include "Include/Graphics/Shader.h"
 
-#include "Engine/Include/Core/Log.h"
-#include "Engine/Include/Graphics/Utils/ShaderIncludeParser.h"
+#include "Include/Core/Log.h"
+#include "Include/Graphics/Utils/ShaderIncludeParser.h"
+
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
-
 
 namespace mnemosy::graphics
 {
@@ -145,4 +145,4 @@ namespace mnemosy::graphics
 		}
 	}
 
-} // end namespace mnemosy::graphics
+} // !mnemosy::graphics

@@ -1,11 +1,9 @@
-#include "Application/Include/Input/CameraInputController.h"
+#include "Include/Input/CameraInputController.h"
 
-#include "Application/Include/Application.h"
-
-#include "Engine/Include/Systems/Input/InputSystem.h"
-#include "Engine/Include/Graphics/Camera.h"
-#include "Engine/Include/Graphics/Scene.h"
-
+#include "Include/Application.h"
+#include "Include/Systems/Input/InputSystem.h"
+#include "Include/Graphics/Camera.h"
+#include "Include/Graphics/Scene.h"
 
 #include <GLFW/glfw3.h>
 #include <functional>
@@ -207,5 +205,5 @@ namespace mnemosy::input
 
 
 
-}
+} // mnemosy::input
 

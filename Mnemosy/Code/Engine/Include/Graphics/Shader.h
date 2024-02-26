@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_SHADER_H
-#define GRAPHICS_SHADER_H
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <glm/glm.hpp>
 #include <string>
@@ -38,9 +38,8 @@ namespace mnemosy::graphics
 
 		void CheckCompileErrors(unsigned int shader, std::string type);
 
-
 	};
 
-}
+} // mnemosy::graphics
 
-#endif // !GRAPHICS_SHADER_H
+#endif // !SHADER_H

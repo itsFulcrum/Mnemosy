@@ -1,23 +1,21 @@
-#include "Engine/Include/Graphics/Renderer.h"
-#include "Engine/Include/MnemosyEngine.h"
+#include "Include/Graphics/Renderer.h"
+#include "Include/MnemosyEngine.h"
 
-#include "Engine/Include/Core/Window.h"
-#include "Engine/Include/Core/Log.h"
+#include "Include/Core/Window.h"
+#include "Include/Core/Log.h"
 
-#include "Engine/Include/Graphics/Camera.h"
-#include "Engine/Include/Graphics/Shader.h"
-#include "Engine/Include/Graphics/Material.h"
-#include "Engine/Include/Graphics/ModelData.h"
-#include "Engine/Include/Graphics/RenderMesh.h"
-#include "Engine/Include/Graphics/Cubemap.h"
-#include "Engine/Include/Graphics/Skybox.h"
-#include "Engine/Include/Graphics/Light.h"
-#include "Engine/Include/Graphics/Scene.h"
-
+#include "Include/Graphics/ImageBasedLightingRenderer.h"
+#include "Include/Graphics/Camera.h"
+#include "Include/Graphics/Shader.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/ModelData.h"
+#include "Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/Cubemap.h"
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Light.h"
+#include "Include/Graphics/Scene.h"
 
 #include <glad/glad.h>
-#include "Engine/Include/Graphics/ImageBasedLightingRenderer.h"
-
 
 namespace mnemosy::graphics
 {
@@ -60,6 +58,7 @@ namespace mnemosy::graphics
 
 	void Renderer::UnbindFramebuffer()
 	{
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
@@ -199,7 +198,8 @@ namespace mnemosy::graphics
 	void Renderer::EndFrame(unsigned int width, unsigned int height)
 	{
 		// now resolve multisampled buffer(s) into intermediate FBO
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_frameBufferObject);
+		// we dont have to bind m_frameBufferObject here again because it is already bound at framestart.
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_frameBufferObject);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitFbo);
 		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		// now scene is stored as 2D texture image, so use that image for post-processing
@@ -349,4 +349,4 @@ namespace mnemosy::graphics
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-}
+} // !mnemosy::graphics

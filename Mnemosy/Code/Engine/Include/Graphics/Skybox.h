@@ -1,7 +1,5 @@
-#ifndef GRAPHICS_SKYBOX_H
-#define GRAPHICS_SKYBOX_H
-
-
+#ifndef SKYBOX_H
+#define SKYBOX_H
 
 #include <glm/glm.hpp>
 
@@ -37,7 +35,6 @@ namespace mnemosy::graphics
 
 	};
 
+} // mnemosy::graphics
 
-}
-
-#endif // !GRAPHICS_SKYBOX_H
+#endif // !SKYBOX_H

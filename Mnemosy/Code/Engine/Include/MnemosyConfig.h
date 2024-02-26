@@ -15,8 +15,6 @@
 
 #define MNEMOSY_CONFIG_ENABLE_VSYNC
 
-
-
 static unsigned int SRC_WINDOW_WIDTH = 1600;
 static unsigned int SRC_WIDNOW_HEIGHT = 1000;
 

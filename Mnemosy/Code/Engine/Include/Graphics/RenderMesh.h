@@ -1,7 +1,7 @@
-#ifndef GRAPHICS_RENDER_MESH_H
-#define GRAPHICS_RENDER_MESH_H
+#ifndef RENDER_MESH_H
+#define RENDER_MESH_H
 
-#include "Engine/Include/Graphics/Transform.h"
+#include "Include/Graphics/Transform.h"
 
 namespace mnemosy::graphics
 {
@@ -39,7 +39,6 @@ namespace mnemosy::graphics
 
 	};
 
-}
+} // mnemosy::graphics
 
-
-#endif // !GRAPHICS_RENDER_MESH_H
+#endif // !RENDER_MESH_H

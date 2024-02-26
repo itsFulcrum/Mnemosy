@@ -1,8 +1,7 @@
 #ifndef GLOBAL_SETTINGS_GUI_PANEL_H
 #define GLOBAL_SETTINGS_GUI_PANEL_H
 
-#include "Engine/Include/Gui/GuiPanel.h"
-
+#include "Include/Gui/GuiPanel.h"
 
 namespace mnemosy::gui
 {

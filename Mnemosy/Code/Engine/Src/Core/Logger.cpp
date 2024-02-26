@@ -1,10 +1,8 @@
-#include "Engine/Include/Core/Logger.h"
+#include "Include/Core/Logger.h"
 
-
-#include "Engine/Include/Core/Log.h"
+#include "Include/Core/Log.h"
  
 #include <spdlog/sinks/stdout_color_sinks.h>
-
 #include <vector>
 #include <memory>
 
@@ -34,4 +32,4 @@ namespace mnemosy::core
 		spdlog::shutdown();
 	}
 
-}
+} // mnemosy::core

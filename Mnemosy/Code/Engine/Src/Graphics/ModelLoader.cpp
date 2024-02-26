@@ -1,9 +1,8 @@
-#include "Engine/Include/Graphics/ModelLoader.h"
+#include "Include/Graphics/ModelLoader.h"
 
-#include "Engine/Include/Core/Log.h"
+#include "Include/Core/Log.h"
 
 #include <glad/glad.h>
-
 #include <memory>
 #include <vector>
 
@@ -16,18 +15,13 @@ namespace mnemosy::graphics
 	}
 
 	// private
-
 	ModelData* ModelLoader::M_LoadModel(std::string const& path)
 	{
 		ModelData* modelData = new ModelData();
 
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace);
-
-		
-
 		//const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-		
 		// could use several options such as | aiProcess_GenNormals, aiProcess_OptimizeMeshes,aiProcess_SplitLargeMeshes,aiProcess_FlipUVs
 		// importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals );
 
@@ -205,4 +199,4 @@ namespace mnemosy::graphics
 		_meshData.indecies = Indecies;
 	}
 
-}
+} // !mnemosy::graphics
