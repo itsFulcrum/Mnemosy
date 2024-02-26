@@ -19,5 +19,4 @@ It is also  a learning project for me and my first bigger project using c++ and 
 -  Before you can run the project you need to Configure and Run CMake one more time because I use cmke to copy some dll's from OpenCV into the bin/Debug/ folder
 - After that you should be run the application
 
-currently the install process is a bit weird and with the dlls from openCV hopefully i can fix that somehow.   It Can also be that the dlls from OpenCV in this repo do not work on your system.  In That case you'd have to build OpenCV yourself and put the dlls and .lib files you build into the following folder:
-Mnemosy/Code/Dependencies/openCV/opencvBuild/install/x64/vc17/
+currently the install process is a bit weird and with the dlls from openCV hopefully i can fix that somehow.
