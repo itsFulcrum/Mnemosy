@@ -14,6 +14,16 @@ namespace mnemosy::graphics
 
 namespace mnemosy::graphics
 {
+
+	enum MSAAsamples
+	{
+		MSAAOFF,
+		MSAA2X,
+		MSAA4X,
+		MSAA8X,
+		MSAA16X
+	};
+
 	class Renderer
 	{
 	public:
@@ -47,6 +57,9 @@ namespace mnemosy::graphics
 
 		void RenderScene(Scene& scene);
 
+		int GetMSAA() { return (int)m_msaaSamplesSettings; }
+		void SetMSAASamples(MSAAsamples samples);
+
 	private:
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
@@ -71,7 +84,9 @@ namespace mnemosy::graphics
 		Shader* m_pSkyboxShader = nullptr;
 
 
-		int msaaSamples = 4;
+		int m_msaaSamples = 4;
+		MSAAsamples m_msaaSamplesSettings = MSAA4X;
+		bool m_msaaOff = false;
 	};
 
 } // mnemosy::graphics

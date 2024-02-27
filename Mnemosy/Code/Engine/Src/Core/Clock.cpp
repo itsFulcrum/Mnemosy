@@ -52,4 +52,9 @@ namespace mnemosy::core
 		m_frameCount++;
 	}
 
+	float Clock::GetFrameTime()
+	{
+		return float(m_deltaSeconds * 1000.0);
+	}
+
 } // mnemosy::core

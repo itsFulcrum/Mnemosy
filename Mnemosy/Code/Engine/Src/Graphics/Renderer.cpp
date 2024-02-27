@@ -64,17 +64,21 @@ namespace mnemosy::graphics
 
 	void Renderer::ResizeFramebuffer(unsigned int width, unsigned int height)
 	{
+		
 		// resize multisampled render framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaaSamples, GL_RGB, width, height, GL_TRUE);
+
+
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaaSamples, GL_RGB, width, height, GL_TRUE);
 		//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id, 0);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferObject);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER,msaaSamples, GL_DEPTH24_STENCIL8, width, height);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER,m_msaaSamples, GL_DEPTH24_STENCIL8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderBufferObject);
+		
 
 		// resize intermediate blit framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER,m_blitFbo);
@@ -191,7 +195,9 @@ namespace mnemosy::graphics
 		ResizeFramebuffer(width_ , height_);
 
 		//glViewport(0, 0, width_, height_);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
+		//glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
+		
+		BindFramebuffer();
 		ClearFrame();
 	}
 
@@ -200,8 +206,11 @@ namespace mnemosy::graphics
 		// now resolve multisampled buffer(s) into intermediate FBO
 		// we dont have to bind m_frameBufferObject here again because it is already bound at framestart.
 		//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_frameBufferObject);
+		
+		
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitFbo);
 		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
 		// now scene is stored as 2D texture image, so use that image for post-processing
 
 		UnbindFramebuffer();
@@ -300,6 +309,27 @@ namespace mnemosy::graphics
 
 	}
 
+	void Renderer::SetMSAASamples(MSAAsamples samples)
+	{
+		m_msaaOff = false;
+		if (samples == MSAAOFF)
+		{
+			//glDisable(GL_MULTISAMPLE);
+			m_msaaOff = true;
+			m_msaaSamples = 2; // this causes crash
+		}
+		else if (samples == MSAA2X) 
+			m_msaaSamples = 2;
+		else if (samples == MSAA4X)
+			m_msaaSamples = 4;
+		else if (samples == MSAA8X)
+			m_msaaSamples = 8;
+		else if (samples == MSAA16X)
+			m_msaaSamples = 16;
+
+		m_msaaSamplesSettings = samples;
+	}
+
 	// private
 	void Renderer::CreateRenderingFramebuffer(unsigned int width, unsigned int height)
 	{
@@ -308,7 +338,7 @@ namespace mnemosy::graphics
 
 		glGenTextures(1, &m_renderTexture_Id);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, msaaSamples , GL_RGB, width, height, GL_TRUE);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaaSamples , GL_RGB, width, height, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id, 0);
 		// dont work with multisampling
@@ -317,7 +347,7 @@ namespace mnemosy::graphics
 
 		glGenRenderbuffers(1, &m_renderBufferObject);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferObject);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER,msaaSamples, GL_DEPTH24_STENCIL8, width, height);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER,m_msaaSamples, GL_DEPTH24_STENCIL8, width, height);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderBufferObject);
 

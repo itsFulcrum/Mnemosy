@@ -17,7 +17,7 @@ namespace mnemosy::core
 		//double GetDeltaMiliseconds() { return m_deltaMili; }
 
 		int GetFPS() { return m_currentFPS; }
-
+		float GetFrameTime();
 
 		bool capDeltaTime = true;
 

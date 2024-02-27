@@ -112,7 +112,7 @@ namespace mnemosy
 		m_pRenderer->SetPbrShaderLightUniforms();
 		m_pRenderer->SetShaderSkyboxUniforms();
 
-		m_clock->capDeltaTime = true;
+		m_clock->capDeltaTime = false;
 
 		m_isInitialized = true;
 

@@ -82,10 +82,11 @@ namespace mnemosy::core
 		}
 		glfwMakeContextCurrent(m_pWindow);
 
-#ifdef MNEMOSY_CONFIG_ENABLE_VSYNC
-		glfwSwapInterval(1);
-#else
 		glfwSwapInterval(0);
+#ifdef MNEMOSY_CONFIG_ENABLE_VSYNC
+		//glfwSwapInterval(1);
+#else
+		//glfwSwapInterval(0);
 
 #endif // MNEMOSY_CONFIG_ENABLE_VSYNC
 
@@ -110,7 +111,7 @@ namespace mnemosy::core
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		MNEMOSY_DEBUG("glBindFramebuffer 0");
+		//MNEMOSY_DEBUG("glBindFramebuffer 0");
 		glDisable(GL_FRAMEBUFFER_SRGB); // srgb is manually handled in the shaders
 
 		// draw Polygons opaque (Fully shaded)
@@ -119,7 +120,7 @@ namespace mnemosy::core
 		glFrontFace(GL_CW);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		MNEMOSY_DEBUG("glViewport width {}, height {} ", m_currentWindowWidth,m_currentWindowHeight);
+		//MNEMOSY_DEBUG("glViewport width {}, height {} ", m_currentWindowWidth,m_currentWindowHeight);
 		glViewport(0, 0, m_currentWindowWidth, m_currentWindowHeight);
 
 		int flags;
