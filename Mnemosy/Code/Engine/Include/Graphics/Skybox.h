@@ -2,6 +2,7 @@
 #define SKYBOX_H
 
 #include <glm/glm.hpp>
+#include <string>
 
 namespace mnemosy::graphics
 {
@@ -18,8 +19,8 @@ namespace mnemosy::graphics
 
 		~Skybox();
 
-		void AssignSkyboxTexture(const char* imagePath, unsigned int resolution);
-
+		void AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently);
+		void LoadPreviewSkybox(std::string name);
 
 		Cubemap& GetCubemap();
 		ModelData& GetModelData();

@@ -9,11 +9,13 @@ namespace mnemosy::core
 	class Clock;
 	class Logger;
 	class Window;
+	class FileDirectories;
 }
 
 namespace mnemosy::systems
 {
 	class InputSystem;
+	class SkyboxAssetRegistry;
 }
 
 namespace mnemosy::graphics
@@ -50,8 +52,10 @@ namespace mnemosy
 
 		// Getters
 		core::Window& GetWindow() { return *m_pWindow; }
+		core::FileDirectories& GetFileDirectories() { return *m_pFileDirectories; }
 		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		systems::InputSystem& GetInputSystem() { return *m_pInputSystem; }
+		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry() { return *m_pSkyboxAssetRegistry; }
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
 		graphics::Scene& GetScene() { return *m_pScene; }
 
@@ -65,14 +69,19 @@ namespace mnemosy
 		
 		std::unique_ptr<core::Logger> m_pLogger;
 		std::unique_ptr<core::Clock> m_clock;
-		
+		std::unique_ptr<core::FileDirectories> m_pFileDirectories;
 		std::unique_ptr<systems::InputSystem> m_pInputSystem;
+
+		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;
+		
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
 		std::unique_ptr<graphics::Renderer> m_pRenderer;
 
 		std::unique_ptr<graphics::Scene> m_pScene;
 
 		std::unique_ptr<gui::UserInterface> m_pUserInterface;
+		
+
 
 	};
 

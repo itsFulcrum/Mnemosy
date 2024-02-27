@@ -172,6 +172,7 @@ namespace mnemosy::graphics
 
 		int nextMipRes = baseRes;
 
+		glActiveTexture(GL_TEXTURE0); // just to make sure
 		glBindTexture(GL_TEXTURE_CUBE_MAP, glTextureID);
 
 		// loop over mipmaps

@@ -1,0 +1,62 @@
+#ifndef SKYBOX_ASSET_REGISTRY_H
+#define SKYBOX_ASSET_REGISTRY_H
+
+#include <string>
+#include <vector>
+
+
+#include <nlohmann/json.hpp>
+
+
+namespace mnemosy::systems
+{
+
+	struct SkyboxAssetEntry 
+	{
+		std::string skyName;
+		std::string colorCubeFile;
+		std::string irradianceCubeFile;
+		std::string prefilterCubeFile;
+	};
+	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SkyboxAssetEntry,
+		skyName,
+		colorCubeFile,
+		irradianceCubeFile,
+		prefilterCubeFile
+		)
+
+	class SkyboxAssetRegistry
+	{
+	public:
+		SkyboxAssetRegistry();
+		~SkyboxAssetRegistry();
+
+		bool CheckIfExists(std::string name);
+
+		void AddEntry(std::string name);
+		void RemoveEntry(std::string name);
+
+		SkyboxAssetEntry GetEntry(std::string name);
+
+		std::vector<std::string>& GetVectorOfNames();
+
+
+
+	private:
+		void LoadEntriesFromSavedData();
+		void SaveAllEntriesToDataFile();
+		void UpdateOrderedEntryNamesVector();
+
+		std::string m_dataFileName = "SkyboxAssetsRegistry.mnsydata";
+		std::string m_pathToDatafile = "";
+
+		std::vector<SkyboxAssetEntry> m_skyboxAssets;
+		std::vector<std::string> m_orderedEntryNames;
+
+		bool prettyPrintDataFile = false;
+
+	};
+
+
+} // !mnemosy::systems
+#endif // !SKYBOX_ASSET_REGISTRY_H

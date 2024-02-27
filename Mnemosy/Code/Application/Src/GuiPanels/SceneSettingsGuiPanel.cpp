@@ -1,6 +1,8 @@
 #include "Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Include/Core/Log.h"
 
 #include "Include/Application.h"
+#include "Include/Systems/SkyboxAssetRegistry.h"
 
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Camera.h"
@@ -16,7 +18,6 @@
 #endif // MNEMOSY_PLATFORM_WINDOWS
 
 #include <glm/glm.hpp>
-#include <iostream>
 
 namespace mnemosy::gui
 {
@@ -30,12 +31,13 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		graphics::Scene& scene = ENGINE_INSTANCE().GetScene();
-		graphics::Renderer& renderer = ENGINE_INSTANCE().GetRenderer();
+		MnemosyEngine& engine = ENGINE_INSTANCE();
+		graphics::Scene& scene = engine.GetScene();
+		graphics::Renderer& renderer = engine.GetRenderer();
 
 		ImGui::Begin(panelName.c_str(), &showPanel);
 		
-		// Render Mesh settings
+		// --- Render Mesh settings
 		if (ImGui::TreeNode("Mesh Settings"))
 		{
 			graphics::RenderMesh& renderMesh = scene.GetMesh();
@@ -103,29 +105,142 @@ namespace mnemosy::gui
 			ImGui::TreePop();
 		}
 
-		// Skybox Settings
+		// --- Skybox Settings
 		if (ImGui::TreeNode("Skybox Settings"))
 		{
-
-
-
 			graphics::Skybox& skybox = scene.GetSkybox();
-
-			if (ImGui::Button("Load File..."))
+			mnemosy::systems::SkyboxAssetRegistry& skyboxRegistry = engine.GetSkyboxAssetRegistry();
+			
+			// -- Skybox Selection Menu
+			bool assetsInRegistry = !skyboxRegistry.GetVectorOfNames().empty();
+			if (assetsInRegistry) // if there are no assets in the internal vector this will crash
 			{
-				#ifdef MNEMOSY_PLATFORM_WINDOWS
-					std::string filepath =  mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
-
-					if (!filepath.empty())
+				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[m_currentSelectedSkybox].c_str();// items[item_current_idx];
+				int previousSelected = m_currentSelectedSkybox;
+				if (ImGui::BeginCombo("Preview Skyboxes", combo_preview_value, 0))
+				{
+					for (int n = 0; n < skyboxRegistry.GetVectorOfNames().size(); n++)
 					{
-						skybox.AssignSkyboxTexture(filepath.c_str(),1024);
+						const bool is_selected = (m_currentSelectedSkybox == n);
+						if (ImGui::Selectable(skyboxRegistry.GetVectorOfNames()[n].c_str(), is_selected))
+							m_currentSelectedSkybox = n;
+
+						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
 					}
-				#endif
+					ImGui::EndCombo();
+				}
+				if (m_currentSelectedSkybox != previousSelected)  // Selection has happend
+				{
+					skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[m_currentSelectedSkybox]);
+				}
 			}
-			//ImGui::Text("Skybox Settings");
+			
+			if (ImGui::Button("Load from file..."))
+			{
+				if (!m_saveSkyboxPermanentlyUponLoad)
+				{
+					#ifdef MNEMOSY_PLATFORM_WINDOWS
+						std::string filepath =  mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
+						if (!filepath.empty())
+						{
+							skybox.AssignSkyboxTexture(filepath.c_str(),"NoNameNeeded", 1024, m_saveSkyboxPermanentlyUponLoad);
+						}
+					#endif
+				}
+				else
+				{
+					ImGui::OpenPopup("Save Skybox Texture");
+				}
+			}
+			ImGui::SameLine();
+			ImGui::Checkbox("Save Permanently", &m_saveSkyboxPermanentlyUponLoad);
+
+			// -- Loading new Skybox permanently
+			if (m_saveSkyboxPermanentlyUponLoad) // called with button "Load from file..."
+			{
+				bool saveSkyboxModelOpen = true;
+				ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+				ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+				if (ImGui::BeginPopupModal("Save Skybox Texture", &saveSkyboxModelOpen, ImGuiWindowFlags_AlwaysAutoResize))
+				{
+					ImGui::TextWrapped("Please provide a unique name and select a resolution \nSo Mnemosy can save the skybox to its internal registry.");
+					ImGui::Separator();
+
+					// texfield for name 
+					static char skyboxName[32] = "Unique Name";
+					ImGui::InputText("##edit", skyboxName, IM_ARRAYSIZE(skyboxName));
+
+					// selection for resolution
+
+
+					const char* skyboxResolutions_List[4] = { "4096","2048","1024","512"}; // they need to be ordered the same as in lightType Enum in light class
+					
+					ImGui::TextWrapped("Higher Resolutions take longer to process");
+					static int resolution_Selected = 2;
+					ImGui::Combo("Resolution", &resolution_Selected, skyboxResolutions_List, IM_ARRAYSIZE(skyboxResolutions_List));
+
+
+					if (ImGui::Button("Load Skybox Image"))
+					{
+						// chack if the name string is empty TODO: make this some kind of popup
+						bool hasName = true;
+						if (skyboxName[0] == '\0')
+						{
+							hasName = false;
+							MNEMOSY_ERROR("You must provide a name to save a skybox permanently so Mnemosy can save it internaly");	
+						}
+						if (hasName)
+						{
+							// check if the name already exists TODO: Make this into some pupop
+							if (skyboxRegistry.CheckIfExists(skyboxName))
+							{
+								MNEMOSY_ERROR("A Skybox with the name {} already exists. Names must be unique", skyboxName);
+							}
+							else
+							{
+								// get resolution
+								unsigned int skyboxExportResolution = 4096;
+								if (resolution_Selected == 1)
+									skyboxExportResolution = 2048;
+								else if (resolution_Selected == 2)
+									skyboxExportResolution = 1024;
+								else if (resolution_Selected == 3)
+									skyboxExportResolution = 512;
+
+								//MNEMOSY_TRACE("Text From Input: {} ", skyboxName);
+								//MNEMOSY_TRACE("ResolutionSelected: {} ", skyboxExportResolution);
+								// open filebrowser to load image and load it using skybox.AssignSkyboxTexture(filepath.c_str(),1024, m_saveSkyboxPermanentlyUponLoad);
+
+								#ifdef MNEMOSY_PLATFORM_WINDOWS
+									std::string filepath = mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
+
+									if (!filepath.empty())
+									{
+										// Function needs to 
+										skybox.AssignSkyboxTexture(filepath.c_str(), skyboxName, skyboxExportResolution, m_saveSkyboxPermanentlyUponLoad);
+									
+										m_currentSelectedSkybox = skyboxRegistry.GetVectorOfNames().size()-1;
+									}
+								#endif
+							}
+						}
+						ImGui::CloseCurrentPopup();
+					}
+					ImGui::SetItemDefaultFocus();
+					ImGui::SameLine();
+
+					if (ImGui::Button("Cancel", ImVec2(120, 0))) 
+						ImGui::CloseCurrentPopup();
+
+					ImGui::EndPopup();
+				}
+			} // !m_saveSkyboxPermanentlyUponLoad
+
 			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.1f");
 			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%1f");
-
 			ImGui::ColorEdit3("Color Tint", (float*)&skybox.colorTint);
 		
 			renderer.SetShaderSkyboxUniforms();
@@ -133,7 +248,7 @@ namespace mnemosy::gui
 			ImGui::TreePop();
 		}
 
-		// Light Settings
+		// --- Light Settings
 		if (ImGui::TreeNode("Light Settings"))
 		{
 			graphics::Light& light = scene.GetLight();
@@ -176,7 +291,7 @@ namespace mnemosy::gui
 			ImGui::TreePop();
 		}
 
-		// Camera Settings
+		// --- Camera Settings
 		if (ImGui::TreeNode("Camera Settings"))
 		{
 			graphics::Camera& camera = scene.GetCamera();
@@ -190,7 +305,7 @@ namespace mnemosy::gui
 			ImGui::TreePop();
 		}
 
-		// Post Processing Settings
+		// --- Post Processing Settings
 		if (ImGui::TreeNode("Post processing"))
 		{
 
@@ -199,9 +314,8 @@ namespace mnemosy::gui
 			ImGui::TreePop();
 		}
 
-		//ImGui::ColorEdit3("MyColor##1", (float*)&color, misc_flags);
 
 		ImGui::End();
 	}
 
-}
+} // !mnemosy::gui

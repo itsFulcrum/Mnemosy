@@ -1,5 +1,10 @@
 #include "Include/Graphics/Skybox.h"
 
+#include "Include/MnemosyEngine.h"
+#include "Include/Systems/SkyboxAssetRegistry.h"
+#include "Include/Core/FileDirectories.h"
+
+
 #include "Include/Graphics/Cubemap.h"
 #include "Include/Graphics/ModelData.h"
 
@@ -10,7 +15,6 @@ namespace mnemosy::graphics
 {
 	Skybox::Skybox()
 	{
-
 		ModelLoader modelLoader;
 		m_pModelData = modelLoader.LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
 
@@ -22,8 +26,19 @@ namespace mnemosy::graphics
 		ModelLoader modelLoader;
 		m_pModelData = modelLoader.LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
 
+
 		m_pCubemap = new Cubemap();
-		AssignSkyboxTexture(imagePath,resolution);
+
+		// if there is no skybox in the registry generate one 
+		bool noEntriesExist = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetVectorOfNames().empty();
+		if (noEntriesExist) 
+		{
+			m_pCubemap->LoadEquirectangularFromFile(imagePath, "NoNameNeeded", resolution, false);
+			
+			return;
+		}
+
+		LoadPreviewSkybox("SpruitSunrise");
 	}
 
 	Skybox::~Skybox()
@@ -36,9 +51,42 @@ namespace mnemosy::graphics
 		m_pCubemap = nullptr;
 	}
 
-	void Skybox::AssignSkyboxTexture(const char* imagePath, unsigned int resolution)
+	void Skybox::AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently)
 	{
-		m_pCubemap->LoadEquirectangularFromFile(imagePath, resolution, true);
+		if (savePermanently)
+		{
+			m_pCubemap->LoadEquirectangularFromFile(imagePath, uniqueName,resolution, true);
+			MNEMOSY_INFO("Generated and saved skybox {} ", uniqueName);
+		}
+		else
+		{
+			m_pCubemap->LoadEquirectangularFromFile(imagePath,"NoNameNeeded", resolution, false);
+		}
+
+	}
+
+	void Skybox::LoadPreviewSkybox(std::string name)
+	{
+		// TODO load with some kind of identifyer to the filepaths
+		
+		systems::SkyboxAssetRegistry& registry = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry();
+
+
+		systems::SkyboxAssetEntry entry = registry.GetEntry(name); // faster than checking before because we go through the vector anyways
+		if (entry.skyName == "EntryDoesNotExist")
+		{
+			MNEMOSY_ERROR("Skybox::LoadPreviewSkybox: Skybox of name: {} - does not exist", name);
+			return;
+		}
+		
+		core::FileDirectories& dirs = MnemosyEngine::GetInstance().GetFileDirectories();
+		std::string cubemapsPathString = dirs.GetCubemapsPath().generic_string();
+
+		std::string colorPath		= cubemapsPathString + "/" + entry.colorCubeFile;
+		std::string irradiancePath	= cubemapsPathString + "/" + entry.irradianceCubeFile;
+		std::string prefilterPath	= cubemapsPathString + "/" + entry.prefilterCubeFile;
+			
+		m_pCubemap->LoadCubemapsFromKtxFiles(colorPath.c_str(),irradiancePath.c_str(),prefilterPath.c_str());
 	}
 
 	Cubemap& Skybox::GetCubemap()

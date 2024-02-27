@@ -13,8 +13,15 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Logger.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/Log.h
 ${ENGINE_SOURCE_PATH}/Include/Core/Clock.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
+
+${ENGINE_SOURCE_PATH}/Include/Core/FileDirectories.h
+${ENGINE_SOURCE_PATH}/Src/Core/FileDirectories.cpp
+
+
 ${ENGINE_SOURCE_PATH}/Include/Systems/Input/InputSystem.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/Input/InputSystem.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/SkyboxAssetRegistry.h
+${ENGINE_SOURCE_PATH}/Src/Systems/SkyboxAssetRegistry.cpp
 
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h

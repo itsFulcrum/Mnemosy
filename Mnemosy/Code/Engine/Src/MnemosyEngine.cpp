@@ -7,8 +7,10 @@
 #include "Include/Core/Logger.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
+#include "Include/Core/FileDirectories.h"
 
 #include "Include/Systems/Input/InputSystem.h"
+#include "Include/Systems/SkyboxAssetRegistry.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -75,10 +77,16 @@ namespace mnemosy
 
 		// subsystems
 		m_clock = std::make_unique<core::Clock>();
+		m_pFileDirectories = std::make_unique<core::FileDirectories>();
+
 
 
 		//MNEMOSY_TRACE("Clock Initialized");
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
+		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
+
+
+
 		//MNEMOSY_TRACE("InputSystem Initialized");
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
 		//MNEMOSY_TRACE("ibl_Renderer Initialized");
@@ -106,6 +114,10 @@ namespace mnemosy
 		double timeEnd = glfwGetTime();
 		MNEMOSY_INFO("TimeBeginStartup: {} ,TimeEndStartup: {}  StartupTime: {} ", timeBegin,timeEnd,(timeEnd-timeBegin));
 
+
+		//fs::path meshsPath = GetFileDirectories().GetResourcesPath() / fs::path("Meshes");
+		//MNEMOSY_DEBUG("MeshesPath: {}", meshsPath.generic_string());
+		//GetFileDirectories().GetResourcesPath();
 	}
 
 	void MnemosyEngine::Run()

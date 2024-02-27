@@ -11,6 +11,10 @@ namespace mnemosy::gui
 		SceneSettingsGuiPanel();
 
 		virtual void Draw() override;
+
+	private:
+		bool m_saveSkyboxPermanentlyUponLoad = false;
+		int m_currentSelectedSkybox = 0;
 	};
 }
 #endif // !SCENE_SETTINGS_GUI_PANEL_H

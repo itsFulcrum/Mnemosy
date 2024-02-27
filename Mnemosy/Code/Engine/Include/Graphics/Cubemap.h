@@ -1,6 +1,8 @@
 #ifndef CUBEMAP_H
 #define CUBEMAP_H
 
+#include <string>
+
 namespace mnemosy::graphics
 {
 	class Cubemap
@@ -9,7 +11,11 @@ namespace mnemosy::graphics
 		Cubemap();
 		~Cubemap();
 
-		void LoadEquirectangularFromFile(const char* path, unsigned int resolution, bool generateConvolutionMap);
+		void LoadEquirectangularFromFile(const char* imagePath,const char* name, unsigned int colorCubemapResolution, bool savePermanently);
+		
+		
+		void LoadCubemapsFromKtxFiles(const char* colorCubemapPath, const char* irradianceCubemapPath, const char* prefilterCubemapPath);
+
 
 		void BindColorCubemap(unsigned int location);
 		void BindIrradianceCubemap(unsigned int location);
@@ -18,7 +24,10 @@ namespace mnemosy::graphics
 
 	private:
 		void equirectangularToCubemap(unsigned int& cubemapID, unsigned int resolution, bool makeConvolutedIrradianceMap);
+		void equirectangularToIrradianceCubemap(unsigned int& cubemapID, unsigned int resolution);
 		void equirectangularToPrefilteredCubemap(unsigned int& cubemapID, unsigned int resolution);
+		void exportGeneratedCubemapsToKtx(std::string name, unsigned int colorCubemapResolution);
+
 
 		unsigned int m_equirectangularTextureID = 0;
 		bool m_equirectangularTexture_isGenerated = false;
@@ -37,7 +46,7 @@ namespace mnemosy::graphics
 
 
 		bool m_exportCubemaps = false;
-		bool m_loadCubemapsFromFile = true;
+		bool m_loadCubemapsFromFile = false;
 
 	};
 

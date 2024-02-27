@@ -31,8 +31,8 @@ set(glad_subDir "Code/Dependencies/glad")
 add_subdirectory(${glad_subDir})
 
 # SpdLog
-set(spdLog_subDir "Code/Dependencies/spdlog-1.x")
-include(${CMAKE_CURRENT_LIST_DIR}/${spdLog_subDir}/cmake-Mnemosy-SpdLogOptions.cmake)
+set(spdLog_subDir "Code/Dependencies/spdlog-1.x/")
+include(${CMAKE_CURRENT_LIST_DIR}/${spdLog_subDir}cmake-Mnemosy-SpdLogOptions.cmake)
 add_subdirectory(${spdLog_subDir})
 
 #stbImage
@@ -68,13 +68,13 @@ set(OpenCV_DIR "Code/Dependencies/openCV/opencvBuild/install/")
 find_package(OpenCV REQUIRED PATHS "Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/")
 
 # Copy debug/release dlls to respective executable directory
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
 
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
 
 # ==== Load Internal Sources
 # Setting ENGINE source files to: ENGINE_SOURCE_FILES
@@ -113,10 +113,11 @@ target_include_directories(${ENGINE_PROJECT} PRIVATE ${ktx_software_subDir}lib/)
 
 # public for libraries that application also needs
 target_link_libraries(${ENGINE_PROJECT} PUBLIC
-  glfw
-  glm
-  nlohmann_json::nlohmann_json
-  tinyxml2
+glfw
+glm
+nlohmann_json::nlohmann_json
+tinyxml2
+#spdlog::spdlog_header_only
 )
 
 target_link_libraries(${ENGINE_PROJECT} PRIVATE
@@ -125,9 +126,10 @@ glad
 assimp
 stbImage
 ktx
-spdlog::spdlog_header_only
+#spdlog::spdlog_header_only
 )
 target_link_libraries(${ENGINE_PROJECT} PRIVATE ${OpenCV_LIBS})
 
+target_link_libraries(${ENGINE_PROJECT} PUBLIC spdlog::spdlog_header_only)
 # linking for app project
 target_link_libraries(${APP_PROJECT} PRIVATE ${ENGINE_PROJECT} )

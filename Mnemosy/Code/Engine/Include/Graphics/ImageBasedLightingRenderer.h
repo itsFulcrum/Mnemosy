@@ -17,7 +17,8 @@ namespace mnemosy::graphics
 		ImageBasedLightingRenderer();
 		~ImageBasedLightingRenderer();
 		
-		void RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes, bool makeConvolutedIrradianceMap);
+		void RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes);
+		void RenderEquirectangularToIrradianceCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes);
 		void RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& cubemapID, unsigned int& equirectangularTextureID, unsigned int resolution);
 
 		void BindBrdfLutTexture(unsigned int location);

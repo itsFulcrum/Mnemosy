@@ -27,7 +27,7 @@ namespace mnemosy::graphics
 		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_WARNING);
 
 		//RenderBrdfLutTexture(true);
-		LoadBrdfLutTextureFromFile(); // Loss in image quality
+		LoadBrdfLutTextureFromFile();
 
 	}
 
@@ -39,118 +39,115 @@ namespace mnemosy::graphics
 		m_unitCube = nullptr;
 	}
 
-	void ImageBasedLightingRenderer::RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes, bool makeConvolutedIrradianceMap)
+	void ImageBasedLightingRenderer::RenderEquirectangularToCubemapTexture(unsigned int& ColorCubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes)
 	{
 		glViewport(0, 0, textureRes, textureRes);
-
-		//unsigned int fbo;
-		//glGenFramebuffers(1, &fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		
-		for (int i = 0; i < 6; i++)
+		glBindTexture(GL_TEXTURE_CUBE_MAP, ColorCubemapTextureID);
+		for (int cubeFace = 0; cubeFace < 6; cubeFace++)
 		{
-			int side = i;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, cubemapTextureID, 0);
-
-			//bool framebufferSuccessfull = glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE;
-
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubeFace, ColorCubemapTextureID, 0);
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			{
 				MNEMOSY_ASSERT(false, "Framebuffer is not complete");
-
-				//glDeleteFramebuffers(1, &fbo);
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-				
 				return;
 			}
 
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureID);
-
 			glViewport(0, 0, textureRes, textureRes);
-
 			glClearColor(1.0f, 0.0f, 1.0f, 1.f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			m_imagedBasedLightingShader->Use();
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, equirectangularTextureID);
 
-
+			m_imagedBasedLightingShader->Use();
 			m_imagedBasedLightingShader->SetUniformInt("_equirectangularMap", 0);
-			m_imagedBasedLightingShader->SetUniformInt("_currentFace", side);
-
-			if (makeConvolutedIrradianceMap)
-				m_imagedBasedLightingShader->SetUniformInt("_mode", 1); 
-			else
-				m_imagedBasedLightingShader->SetUniformInt("_mode", 0); 
-
+			m_imagedBasedLightingShader->SetUniformInt("_currentFace", cubeFace);
+			m_imagedBasedLightingShader->SetUniformInt("_mode", 0); 
 
 			DrawIntoFramebuffer();
-
-
 		}
 
-			// return to default framebuffer
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// return to default framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	}
 
-	void ImageBasedLightingRenderer::RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& cubemapID, unsigned int& equirectangularTextureID, unsigned int resolution)
+	void ImageBasedLightingRenderer::RenderEquirectangularToIrradianceCubemapTexture(unsigned int& irradianceCubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes)
 	{
-		unsigned int textureResolution = resolution;
-		glViewport(0, 0, resolution, resolution);
-
+		glViewport(0, 0, textureRes, textureRes);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
-		m_imagedBasedLightingShader->Use();
+		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceCubemapTextureID);
+		for (int cubeFace = 0; cubeFace < 6; cubeFace++)
+		{
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubeFace, irradianceCubemapTextureID, 0);
+			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			{
+				MNEMOSY_ASSERT(false, "Framebuffer is not complete");
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				return;
+			}
+
+			glViewport(0, 0, textureRes, textureRes);
+			glClearColor(1.0f, 0.0f, 1.0f, 1.f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, equirectangularTextureID);
+
+			m_imagedBasedLightingShader->Use();
+			m_imagedBasedLightingShader->SetUniformInt("_equirectangularMap", 0);
+			m_imagedBasedLightingShader->SetUniformInt("_currentFace", cubeFace);
+			m_imagedBasedLightingShader->SetUniformInt("_mode", 1);
+
+			DrawIntoFramebuffer();
+		}
+		// return to default framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void ImageBasedLightingRenderer::RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& prefilterCubemapID, unsigned int& equirectangularTextureID, unsigned int resolution)
+	{
+		glViewport(0, 0, resolution, resolution);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, equirectangularTextureID);
 
+		m_imagedBasedLightingShader->Use();
 		m_imagedBasedLightingShader->SetUniformInt("_equirectangularMap", 0);
 		m_imagedBasedLightingShader->SetUniformInt("_mode", 2);
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
 
 		unsigned int maxMipLevels = 5;
-
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 		{
-			unsigned int mipRes = int(textureResolution * std::pow(0.5, mip));
-
+			unsigned int mipRes = int(resolution * std::pow(0.5, mip));
 			glViewport(0, 0, mipRes, mipRes);
 
 			float roughness = float(mip) / float(maxMipLevels - 1);
 			m_imagedBasedLightingShader->SetUniformFloat("_roughness", roughness);
 
-			for (int i = 0; i < 6; i++)
+			for (int cubeFace = 0; cubeFace < 6; cubeFace++)
 			{
-				int face = i;
-
-				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, cubemapID, mip);
-
-
+				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubeFace, prefilterCubemapID, mip);
 				glClearColor(1.0f, 0.0f, 1.0f, 1.f);
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				m_imagedBasedLightingShader->SetUniformInt("_currentFace", face);
+				m_imagedBasedLightingShader->SetUniformInt("_currentFace", cubeFace);
 
 				DrawIntoFramebuffer();
 			}
 		}
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
-
-
-
-
-		// return to default framebuffer
-		//glDeleteFramebuffers(1, &fbo);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
+		// bind Default Framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	}
 
 
@@ -176,8 +173,6 @@ namespace mnemosy::graphics
 			MNEMOSY_INFO("BrdfLutTexture is already genereated")
 				return;
 		}
-
-
 
 		glGenTextures(1, &m_brdfLutTextureID);
 

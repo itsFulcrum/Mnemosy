@@ -3851,6 +3851,7 @@ static void ShowDemoWindowPopups()
             {
                 ImGui::Text("Edit name:");
                 ImGui::InputText("##edit", name, IM_ARRAYSIZE(name));
+
                 if (ImGui::Button("Close"))
                     ImGui::CloseCurrentPopup();
                 ImGui::EndPopup();
@@ -3872,6 +3873,7 @@ static void ShowDemoWindowPopups()
         // Always center this window when appearing
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        
 
         if (ImGui::BeginPopupModal("Delete?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
         {
