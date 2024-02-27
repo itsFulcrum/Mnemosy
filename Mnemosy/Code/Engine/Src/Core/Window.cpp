@@ -81,14 +81,16 @@ namespace mnemosy::core
 			return;
 		}
 		glfwMakeContextCurrent(m_pWindow);
+		
+		if (m_vsyncEnabled)
+		{
+			glfwSwapInterval(1);
+		}
+		else
+		{
+			glfwSwapInterval(0);
+		}
 
-		glfwSwapInterval(0);
-#ifdef MNEMOSY_CONFIG_ENABLE_VSYNC
-		//glfwSwapInterval(1);
-#else
-		//glfwSwapInterval(0);
-
-#endif // MNEMOSY_CONFIG_ENABLE_VSYNC
 
 
 
@@ -174,6 +176,21 @@ namespace mnemosy::core
 		//MNEMOSY_DEBUG("Window::SetWindowSize to width: {} Height: {} ", width, height);
 		m_currentWindowWidth = width;
 		m_currentWindowHeight = height;
+	}
+
+	void Window::EnableVsync(bool enable)
+	{
+		if (enable)
+		{
+			glfwSwapInterval(1);
+			m_vsyncEnabled = true;
+		}
+		else
+		{
+			glfwSwapInterval(0);
+			m_vsyncEnabled = false;
+		}
+
 	}
 
 } // mnemosy::core

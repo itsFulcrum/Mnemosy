@@ -10,6 +10,8 @@ namespace mnemosy::core
 		m_currentTime = static_cast<double>(glfwGetTime());
 		m_deltaSeconds = m_currentTime - m_timeLastFrame;
 
+		m_uncappedDeltaSeconds = m_deltaSeconds;
+
 		if (capDeltaTime)
 		{
 			if (m_deltaSeconds < m_deltaLowLimit)
@@ -41,7 +43,7 @@ namespace mnemosy::core
 
 
 
-		m_fpsCounter += (float)m_deltaSeconds;
+		m_fpsCounter += (float)m_uncappedDeltaSeconds;
 		if (m_fpsCounter >= 1.f)
 		{
 			m_fpsCounter = 0;
@@ -54,7 +56,7 @@ namespace mnemosy::core
 
 	float Clock::GetFrameTime()
 	{
-		return float(m_deltaSeconds * 1000.0);
+		return float(m_uncappedDeltaSeconds * 1000.0);
 	}
 
 } // mnemosy::core

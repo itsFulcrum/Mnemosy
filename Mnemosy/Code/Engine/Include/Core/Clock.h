@@ -31,7 +31,7 @@ namespace mnemosy::core
 		double m_currentTime = 0.0;
 		double m_timeLastFrame = 0.0;
 		double m_deltaSeconds = 0.0;
-		
+		double m_uncappedDeltaSeconds = 0.0;
 		//double m_currentTimeMili = 0.0f;
 		//double m_timeLastFrameMili = 0.0f;
 		//double m_deltaMili = 0.0f;

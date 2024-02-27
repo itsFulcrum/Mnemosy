@@ -44,6 +44,8 @@ namespace mnemosy::core
 
 		void SetWindowSize_InternalByIntputSystem(const unsigned int width,const unsigned int height);
 
+		void EnableVsync(bool enable);
+		bool IsVsyncEnabled() { return m_vsyncEnabled; }
 	private:
 		unsigned int m_currentWindowWidth = 0;
 		unsigned int m_currentWindowHeight = 0;
@@ -53,6 +55,7 @@ namespace mnemosy::core
 
 		GLFWwindow* m_pWindow = nullptr;
 
+		bool m_vsyncEnabled = true;
 
 	};
 
