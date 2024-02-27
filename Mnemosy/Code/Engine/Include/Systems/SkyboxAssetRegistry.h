@@ -1,12 +1,12 @@
 #ifndef SKYBOX_ASSET_REGISTRY_H
 #define SKYBOX_ASSET_REGISTRY_H
 
+
+#include <filesystem>
 #include <string>
 #include <vector>
 
-
 #include <nlohmann/json.hpp>
-
 
 namespace mnemosy::systems
 {
@@ -47,11 +47,13 @@ namespace mnemosy::systems
 		void SaveAllEntriesToDataFile();
 		void UpdateOrderedEntryNamesVector();
 
+		bool CheckDataFile(std::filesystem::directory_entry dataFile);
+
 		std::string m_dataFileName = "SkyboxAssetsRegistry.mnsydata";
 		std::string m_pathToDatafile = "";
 
 		std::vector<SkyboxAssetEntry> m_skyboxAssets;
-		std::vector<std::string> m_orderedEntryNames;
+		std::vector<std::string> m_orderedEntryNames; // ordered just means that they should always be in the same order as the entries are in the m_skyboxAsstes;
 
 		bool prettyPrintDataFile = false;
 

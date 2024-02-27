@@ -25,10 +25,14 @@ namespace mnemosy::graphics
 
 	private:
 		void RenderBrdfLutTexture(bool exportToFile);
-		void LoadBrdfLutTextureFromFile();
+		void RenderBrdfLutTextureAndSafeKtx(const char* exportpath,bool exportToFile);
+		void LoadBrdfLutTexture();
 		void DrawIntoFramebuffer();
 
 	private:
+		void InitializeMeshAndShader();
+		bool IsShaderAndMeshInitialized();
+
 		unsigned int m_fbo = 0;
 
 		ModelData* m_unitCube = nullptr;

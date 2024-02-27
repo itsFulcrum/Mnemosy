@@ -62,7 +62,7 @@ namespace mnemosy::graphics
 		glLinkProgram(ID);
 		CheckCompileErrors(ID, "PROGRAM");
 
-		MNEMOSY_DEBUG("Compiled Shader Program:\n	VertexShader: {}\n	FragmentShader: {}", vertexPath, fragmentPath);
+		MNEMOSY_DEBUG("Compiled Shader Program:\nVertexShader: {}\nFragmentShader: {}", vertexPath, fragmentPath);
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);

@@ -5,7 +5,6 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/FileDirectories.h"
 
-#include <filesystem>
 #include <fstream>
 
 
@@ -59,6 +58,8 @@ namespace mnemosy::systems
 		newEntry.prefilterCubeFile	= name + "_cubePrefilter.ktx2";
 
 		m_skyboxAssets.push_back(newEntry);
+		m_orderedEntryNames.push_back(name);
+
 
 		// save to file
 		SaveAllEntriesToDataFile();
@@ -72,14 +73,11 @@ namespace mnemosy::systems
 			if (m_skyboxAssets[i].skyName == name)
 			{
 				m_skyboxAssets.erase(m_skyboxAssets.begin() + i);
-				
-				
+				m_orderedEntryNames.erase(m_orderedEntryNames.begin() + i);
 				break;
 			}
 		}
 
-		// save updated list to file
-		// this could be slow consider only doing this on application close or when user explicitly saves
 		SaveAllEntriesToDataFile();
 	}
 
@@ -94,7 +92,7 @@ namespace mnemosy::systems
 				if (entry.skyName == name)
 				{
 
-					returnEntry.skyName					= entry.skyName;
+					returnEntry.skyName				= entry.skyName;
 					returnEntry.colorCubeFile		= entry.colorCubeFile;
 					returnEntry.irradianceCubeFile	= entry.irradianceCubeFile;
 					returnEntry.prefilterCubeFile	= entry.prefilterCubeFile;
@@ -104,7 +102,7 @@ namespace mnemosy::systems
 			}
 		}
 
-		returnEntry.skyName					= "EntryDoesNotExist";
+		returnEntry.skyName				= "EntryDoesNotExist";
 		returnEntry.colorCubeFile		= "EntryDoesNotExist";
 		returnEntry.irradianceCubeFile	= "EntryDoesNotExist";
 		returnEntry.prefilterCubeFile	= "EntryDoesNotExist";
@@ -122,138 +120,108 @@ namespace mnemosy::systems
 	{
 		//MNEMOSY_TRACE("LOADING FILE..")
 		std::filesystem::directory_entry dataFile = std::filesystem::directory_entry(m_pathToDatafile);
-
-		if (!dataFile.exists())
-		{
-			MNEMOSY_ERROR("SkyboxAssetRegistry::LoadEntriesFromSavedData: File did Not Exist: {} \n Creating new file at that location", m_pathToDatafile);
-			std::ofstream file;
-			file.open(m_pathToDatafile);
-			file << "";
-			file.close();
+		if (!CheckDataFile(dataFile))
 			return;
-		}
-		if (!dataFile.is_regular_file())
-		{
-			MNEMOSY_ERROR("SkyboxAssetRegistry::LoadEntriesFromSavedData: File is not a regular file: {}", m_pathToDatafile);
-			return;
-		}
 
 		std::ifstream dataFileStream;
-		dataFileStream.open(m_pathToDatafile,std::ios::in);
+		dataFileStream.open(m_pathToDatafile);
 
 		nlohmann::json readFile;
-
 		try {
 			readFile = nlohmann::json::parse(dataFileStream);
-			//nlohmann::json readFile{ nlohmann::json::parse(dataFileStream) };
 		}
-		catch (nlohmann::json::parse_error err) 
-		{
+		catch (nlohmann::json::parse_error err) {
 			MNEMOSY_ERROR("SkyboxAssetRegistry::LoadEntriesFromSavedData: Error Parsing File. Message: {}", err.what());
 			return;
 		}
 
 		int amountOfEntries = readFile["2_Header_Info"]["entriesAmount"].get<int>();
 		std::vector<std::string> entryNames = readFile["2_Header_Info"]["entryNames"].get<std::vector<std::string>>();
-
-
+		
+		// just in case we ever want to load from file while app is already running clear vectors first
+		m_skyboxAssets.clear();
 		m_orderedEntryNames.clear();
-
-		for (std::string& name : entryNames)
+		for (int i = 0; i < entryNames.size(); i++) 
 		{
-			AddEntry(name);
+			AddEntry(entryNames[i]);
 		}
 
+		entryNames.clear();
 		dataFileStream.close();
-
-		UpdateOrderedEntryNamesVector();
 	}
-
 
 	void SkyboxAssetRegistry::SaveAllEntriesToDataFile()
 	{
 		std::filesystem::directory_entry dataFile = std::filesystem::directory_entry(m_pathToDatafile);
+		CheckDataFile(dataFile);
 
-		if (!dataFile.exists())
-		{
-			MNEMOSY_ERROR("SkyboxAssetRegistry::SaveEntriesToDataFile: File did Not Exist: {} \n Creating new file at that location", m_pathToDatafile);
-			std::ofstream file;
-			file.open(m_pathToDatafile);
-			file << "";
-			file.close();
-			return;
-		}
-		if (!dataFile.is_regular_file())
-		{
-			MNEMOSY_ERROR("SkyboxAssetRegistry::SaveEntriesToDataFile: File is not a regular file: {}", m_pathToDatafile);
-			return;
-		}
-
-		//std::ifstream()
-		//MNEMOSY_WARN("PathToDataFile: {}", m_pathToDatafile);
-		
 		std::ofstream dataFileStream;
-		// clear file first
+		// clear file first // idk this seems kinda stupid and dangerous but also it gets mees up when just overwriting it // maybe do backup copy first?
 		dataFileStream.open(m_pathToDatafile);
 		dataFileStream << "";
 		dataFileStream.close();
-
 		
+		// start Saving
 		dataFileStream.open(m_pathToDatafile);
-
-		std::vector<std::string> allEntryNames;
-		
-		for (SkyboxAssetEntry& entry : m_skyboxAssets)
-		{
-			allEntryNames.push_back(entry.skyName);
-		}
-		
-		nlohmann::json SkyboxAssetsJson;
+		nlohmann::json SkyboxAssetsJson; // top level json object
+		SkyboxAssetsJson["1_Mnemosy_Data_File"] = "SkyboxRegistryData";
 		
 		nlohmann::json HeaderInfo;
-		HeaderInfo["entriesAmount"] = m_skyboxAssets.size();
-		HeaderInfo["entryNames"] = allEntryNames;
+		HeaderInfo["entriesAmount"] = m_orderedEntryNames.size();
+		HeaderInfo["entryNames"] = m_orderedEntryNames;
 		
-		SkyboxAssetsJson["1_Mnemosy_Data_File"] = "SkyboxRegistryData";
 		SkyboxAssetsJson["2_Header_Info"] = HeaderInfo;
 		
-		//dataFileStream << HeaderInfo.dump(-1);
-
-		// add each entry
+		// add each entry to json object "Asset_Entries"
 		nlohmann::json assetEntries;
-		for (SkyboxAssetEntry& entry : m_skyboxAssets)
+		for (int i = 0; i < m_skyboxAssets.size(); i++)
 		{
-			assetEntries[entry.skyName] = entry;
-
+			assetEntries[m_skyboxAssets[i].skyName] = m_skyboxAssets[i];
 		}
-
 		SkyboxAssetsJson["Asset_Entries"] = assetEntries;
+
 
 		if(prettyPrintDataFile)
 			dataFileStream << SkyboxAssetsJson.dump(2);
 		else
 			dataFileStream << SkyboxAssetsJson.dump(-1);
 
-
-		allEntryNames.clear();
 		dataFileStream.close();
-	
-		UpdateOrderedEntryNamesVector();
 	}
 
 	void SkyboxAssetRegistry::UpdateOrderedEntryNamesVector()
 	{
-
+		//  curently its optimised to directly do it when also loading and saving but keeping function around for later maybe
 		m_orderedEntryNames.clear();
 		for (int i = 0; i < m_skyboxAssets.size(); i++)
 		{
 			m_orderedEntryNames.push_back(m_skyboxAssets[i].skyName);
 		}
-
 	}
 
+	bool SkyboxAssetRegistry::CheckDataFile(std::filesystem::directory_entry dataFile)
+	{
+		if (!dataFile.exists())
+		{
+			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File did Not Exist: {} \n Creating new file at that location", m_pathToDatafile);
+			std::ofstream file;
+			file.open(m_pathToDatafile);
+			file << "";
+			file.close();
+			return false;
+		}
+		if (!dataFile.is_regular_file())
+		{
+			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File is not a regular file: {}", m_pathToDatafile);
+			// maybe need to delete unregular file first idk should never happen anyhow
+			std::ofstream file;
+			file.open(m_pathToDatafile);
+			file << "";
+			file.close();
+			return false;
+		}
 
-
-
+		return true;
+	}
 
 } // !mnemosy::systems

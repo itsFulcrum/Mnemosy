@@ -70,8 +70,8 @@ namespace mnemosy
 		std::unique_ptr<core::Logger> m_pLogger;
 		std::unique_ptr<core::Clock> m_clock;
 		std::unique_ptr<core::FileDirectories> m_pFileDirectories;
-		std::unique_ptr<systems::InputSystem> m_pInputSystem;
 
+		std::unique_ptr<systems::InputSystem> m_pInputSystem;
 		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;
 		
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;

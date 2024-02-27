@@ -76,29 +76,36 @@ namespace mnemosy
 
 
 		// subsystems
+		// order of initialization here matters
+		
 		m_clock = std::make_unique<core::Clock>();
-		m_pFileDirectories = std::make_unique<core::FileDirectories>();
+		MNEMOSY_TRACE("Clock Initialized");
+		
+		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
+		MNEMOSY_TRACE("FileDirectories Initialized");
 
 
 
-		//MNEMOSY_TRACE("Clock Initialized");
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
+		MNEMOSY_TRACE("InputSystem Initialized");
 		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
+		MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
 
 
 
-		//MNEMOSY_TRACE("InputSystem Initialized");
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
-		//MNEMOSY_TRACE("ibl_Renderer Initialized");
+		MNEMOSY_TRACE("ibl_Renderer Initialized");
 		m_pRenderer = std::make_unique<graphics::Renderer>();
-		//MNEMOSY_TRACE("Renderer Initialized");
+		MNEMOSY_TRACE("Renderer Initialized");
+
 
 		m_pScene = std::make_unique<graphics::Scene>();
-		//MNEMOSY_TRACE("Scene Initialized");
+		MNEMOSY_TRACE("Scene Initialized");
 
 
 
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
+		MNEMOSY_TRACE("UserInterface Initialized");
 
 		
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();

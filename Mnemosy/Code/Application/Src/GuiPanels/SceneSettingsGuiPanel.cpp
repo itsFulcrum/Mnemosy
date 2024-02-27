@@ -222,7 +222,7 @@ namespace mnemosy::gui
 										// Function needs to 
 										skybox.AssignSkyboxTexture(filepath.c_str(), skyboxName, skyboxExportResolution, m_saveSkyboxPermanentlyUponLoad);
 									
-										m_currentSelectedSkybox = skyboxRegistry.GetVectorOfNames().size()-1;
+										m_currentSelectedSkybox = (int)skyboxRegistry.GetVectorOfNames().size() -1;
 									}
 								#endif
 							}
