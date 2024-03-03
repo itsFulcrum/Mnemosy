@@ -95,7 +95,7 @@ namespace mnemosy::graphics
 		{
 
 			// save img as ktx2 file
-			bool saveKtx = true;
+			bool saveKtx = false;
 			if(saveKtx)
 			{
 				cv::Mat rgba;
