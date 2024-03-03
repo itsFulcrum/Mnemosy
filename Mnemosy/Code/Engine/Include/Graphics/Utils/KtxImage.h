@@ -10,6 +10,7 @@ namespace mnemosy::graphics
 		~KtxImage() = default;
 
 		bool LoadKtx(const char* filepath, unsigned int &glTextureID);
+		bool LoadBrdfKTX(const char* filepath, unsigned int& glTextureID);
 		bool SaveKtx(const char* filepath,unsigned char* imageData, unsigned int numChannels, unsigned int width, unsigned int height);
 		bool SaveBrdfLutKtx(const char* filepath, unsigned int& glTextureID, unsigned int resolution);
 		

@@ -115,14 +115,11 @@ namespace mnemosy::graphics
 
 
 		// gizmo mesh setup
-		//m_gizmoMesh->LoadMesh("../Resources/Meshes/Gizmo.fbx");
-		m_gizmoMesh->transform.SetPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+		// gizmo Mesh could just be a modelData object directly. it doesnt need a material instance but it die
+		m_gizmoMesh->transform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 		m_gizmoMesh->transform.SetRotationEulerAngles(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_gizmoMesh->transform.SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
-		m_gizmoMesh->GetMaterial().Albedo = glm::vec3(1.0f, 0.2f, 0.2f);
-		m_gizmoMesh->GetMaterial().Emission = glm::vec3(1.0f, 0.2f, 0.2f);
-		m_gizmoMesh->GetMaterial().EmissionStrength = 1;
-		m_gizmoMesh->GetMaterial().Roughness = 1.0f;
+		m_gizmoMesh->transform.SetScale(glm::vec3(0.03f, 0.03f, 0.03f));
+
 
 		// skybox setup
 		//MNEMOSY_TRACE("StartGenerateSkyboxes");

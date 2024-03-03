@@ -16,7 +16,7 @@ namespace mnemosy::graphics
 			ktxTexture* kTexture;
 			KTX_error_code errorCode;
 			
-			errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_NO_FLAGS, &kTexture);
+			errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &kTexture);
 			if (errorCode != 0)
 			{
 				MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
@@ -24,9 +24,10 @@ namespace mnemosy::graphics
 				ktxTexture_Destroy(kTexture);
 				return false;
 			}			
-		
+
+
 			GLenum target, glerror;
-			errorCode = ktxTexture_GLUpload(kTexture, &glTextureID, &target, &glerror);
+			errorCode = ktxTexture_GLUpload(ktxTexture(kTexture), &glTextureID, &target, &glerror);
 			if (errorCode != 0)
 			{
 				MNEMOSY_ERROR("KtxImage::LoadKtx: GLUpload Failed \nError code: {}", ktxErrorString(errorCode));
@@ -38,6 +39,60 @@ namespace mnemosy::graphics
 			ktxTexture_Destroy(kTexture);
 			return true;
 		}
+	}
+
+	bool KtxImage::LoadBrdfKTX(const char* filepath, unsigned int& glTextureID)
+	{
+		// function upload the image directly to openGl instead of calling GLUpload.  
+		// seeing artifacs when using GLUpload()
+		// only possible because i know the format (GL_RG32F) ahead of time
+
+		ktxTexture* kTexture;
+		KTX_error_code errorCode;
+		ktx_size_t offset;
+		ktx_uint8_t* image;
+		ktx_uint32_t level, layer, faceSlice;
+
+
+		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &kTexture);
+		if (errorCode != 0)
+		{
+			MNEMOSY_ERROR("KtxImage::LoadBrdfKTX - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
+			numChannels = 0; width = 0; height = 0;
+			ktxTexture_Destroy(kTexture);
+			return false;
+		}
+
+
+		level = 0; layer = 0; faceSlice = 0;
+		errorCode = ktxTexture_GetImageOffset(kTexture, level, layer, faceSlice, &offset);
+		if (errorCode != 0)
+		{
+			MNEMOSY_ERROR("KtxImage::LoadBrdfKTX - GetImageOffset Failed \nError code: {}", ktxErrorString(errorCode));
+			numChannels = 0; width = 0; height = 0;
+			ktxTexture_Destroy(kTexture);
+			return false;
+		}
+
+		image = ktxTexture_GetData(kTexture) + offset;
+
+		int res = kTexture->baseWidth;
+
+		glGenTextures(1, &glTextureID);
+		glBindTexture(GL_TEXTURE_2D, glTextureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, res, res, 0, GL_RG, GL_FLOAT, image);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		glActiveTexture(GL_TEXTURE0);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		//delete image; // prob gets deleted by ktxTexture_destroy // causes crash
+		ktxTexture_Destroy(kTexture);
+		
+		return true;
 	}
 
 	bool KtxImage::SaveKtx(const char* filepath, unsigned char* imageData, unsigned int numChannels, unsigned int width, unsigned int height)

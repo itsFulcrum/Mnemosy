@@ -8,11 +8,13 @@
 #include "Include/Graphics/ModelLoader.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 
-#include <string>
-#include <filesystem>
+// needed if loading and saving brdf lut to .tif file
 //#include <opencv2/core.hpp>
 //#include <opencv2/imgcodecs.hpp>
+//#include <opencv2/imgproc.hpp>
 //#include <opencv2/core/utils/logger.hpp>
+
+#include <filesystem>
 #include <glad/glad.h>
 
 
@@ -23,10 +25,13 @@ namespace mnemosy::graphics
 		glGenFramebuffers(1, &m_fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		
-		//MNEMOSY_DEBUG("BindFramebuffer ImageBaseLighting: {} ", m_fbo);
-		
+		// turn of openCV Logging
+		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+
 		m_brdfLutTexture_isGenerated = false;
 		LoadBrdfLutTexture();
+		//LoadBrdfLutTextureTiff();
+
 	}
 
 	ImageBasedLightingRenderer::~ImageBasedLightingRenderer()
@@ -174,82 +179,68 @@ namespace mnemosy::graphics
 		}
 
 	}
-	void ImageBasedLightingRenderer::RenderBrdfLutTexture(bool exportToFile) // depricated use ktx export
+	
+	// depricated use RenderBrdfLutTextureAndSafeKtx()
+	void ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeTif(std::string exportpath, bool exportToFile)
 	{
-		//if (m_brdfLutTexture_isGenerated)
-		//{
-		//	MNEMOSY_INFO("ImageBasedLightingRenderer::RenderBrdfLutTexture - BrdfLutTexture is already genereated")
-		//	return;
-		//}
+		if (m_brdfLutTexture_isGenerated)
+		{
+			MNEMOSY_INFO("ImageBasedLightingRenderer::RenderBrdfLutTexture - BrdfLutTexture is already genereated")
+				return;
+		}
 
-		//if (!IsShaderAndMeshInitialized())
-		//	InitializeMeshAndShader();
+		if (!IsShaderAndMeshInitialized())
+			InitializeMeshAndShader();
 
-		//glGenTextures(1, &m_brdfLutTextureID);
+		glGenTextures(1, &m_brdfLutTextureID);
 
-		//int res = m_brdfLutResolution;
-		//glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, res, res, 0, GL_RG, GL_FLOAT, 0);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		int res = m_brdfLutResolution;
+		glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, res, res, 0, GL_RG, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLutTextureID, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_brdfLutTextureID, 0);
 
-		//glViewport(0, 0, res, res);
+		glViewport(0, 0, res, res);
+		glClearColor(1.0f, 0.0f, 1.0f, 1.f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//glClearColor(1.0f, 0.0f, 1.0f, 1.f);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_imagedBasedLightingShader->Use();
+		m_imagedBasedLightingShader->SetUniformInt("_mode", 3);
+		DrawIntoFramebuffer();
 
-		//m_imagedBasedLightingShader->Use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		m_brdfLutTexture_isGenerated = true;
 
-		//m_imagedBasedLightingShader->SetUniformInt("_mode", 3);
+		if (exportToFile)
+		{
+			// TODO: deallocate malloc memory
+			float* gl_texture_bytes = (float*)malloc(sizeof(float) * res * res * 3);
 
-		//DrawIntoFramebuffer();
+			glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_FLOAT, gl_texture_bytes);
 
-		//if (exportToFile)
-		//{
-		//	glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+			//cv::Mat img = cv::Mat(res, res, CV_32FC3, gl_texture_bytes);
+			//cv::flip(img, img, 0);
+			//cv::imwrite(exportpath, img);
+			//img.release();
 
-		//	// TODO: deallocate malloc memory
-		//	float* gl_texture_bytes = (float*)malloc(sizeof(float) * res * res * 3);
+			MNEMOSY_INFO("Generated brdf lut texture and saved to: {}", exportpath);
+		}
 
-		//	//glgetteximage(gl_texture_2d, 0 /* mipmap level */, gl_bgr, gl_unsigned_byte, gl_texture_bytes);
-
-		//	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_FLOAT, gl_texture_bytes);
-		//	cv::Mat img = cv::Mat(res, res, CV_32FC3, gl_texture_bytes);
-
-		//	cv::flip(img, img, 0);
-		//	
-		//	cv::imwrite("../Resources/Textures/ibl/ibl_brdfLut.tif", img);
-		//	
-		//	
-		//	//delete gl_texture_bytes;
-		//	img.release();
-
-		//}
-
-
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
-		//glGenerateMipmap(GL_TEXTURE_2D);
-
-		////glDeleteFramebuffers(1, &fbo);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		//m_brdfLutTexture_isGenerated = true;
-
-		//MNEMOSY_DEBUG("Generated brdf lut texture");
-
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeKtx(const char* exportpath, bool exportToFile)
 	{
 		if (m_brdfLutTexture_isGenerated)
 		{
-			MNEMOSY_INFO("ImageBasedLightingRenderer::RenderBrdfLutTexture - BrdfLutTexture is already genereated")
+			MNEMOSY_INFO("ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeKtx - BrdfLutTexture is already genereated")
 			return;
 		}
 
@@ -260,7 +251,7 @@ namespace mnemosy::graphics
 
 		int res = m_brdfLutResolution;
 		glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, res, res, 0, GL_RG, GL_FLOAT, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, res, res, 0, GL_RG, GL_FLOAT, 0);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -283,14 +274,17 @@ namespace mnemosy::graphics
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		m_brdfLutTexture_isGenerated = true;
-		MNEMOSY_DEBUG("Generated brdf lut texture");
+
 
 		if (exportToFile)
 		{
 			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
 
 			KtxImage brdfLut;
-			brdfLut.SaveBrdfLutKtx(exportpath, m_brdfLutTextureID, m_brdfLutResolution);
+			bool success = brdfLut.SaveBrdfLutKtx(exportpath, m_brdfLutTextureID, m_brdfLutResolution);
+			
+			if(success)
+				MNEMOSY_INFO("Generated brdf lut texture and safed to: {}", exportpath);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -309,23 +303,24 @@ namespace mnemosy::graphics
 		std::filesystem::path pathToFile = fd.GetTexturesPath() / std::filesystem::path("ibl/ibl_brdfLut.ktx2");
 		std::filesystem::directory_entry file = std::filesystem::directory_entry(pathToFile);
 
-		//MNEMOSY_DEBUG("pathToFile: {}", pathToFile.generic_string());
-		bool fileExists = true;
+		bool ktxFileExists = true;
 		if (!file.exists())
 		{
 			MNEMOSY_WARN("ImageBasedLightingRenderer::LoadBrdfLutTexture: brdf lut texture file does not exsist at:\n{} \nGenerating new file...", pathToFile.generic_string());
-			fileExists = false;
+			ktxFileExists = false;
 		}
 
+		// hardcoding because loading from file causes weird artifacts atm
+		//ktxFileExists = false;
+		
 		std::string p = pathToFile.generic_string(); // idk have to convert to string first stupid c++
-		if (fileExists) 
+		if (ktxFileExists) 
 		{
-
 			KtxImage brdfLut;
-
-			brdfLut.LoadKtx(p.c_str(), m_brdfLutTextureID);
-
+			brdfLut.LoadBrdfKTX(p.c_str(), m_brdfLutTextureID);
+			
 			m_brdfLutTexture_isGenerated = true;
+			MNEMOSY_DEBUG("Loaded brdf lut texture from .ktx");
 			return;
 		}
 		else // !fileExists 
@@ -334,38 +329,67 @@ namespace mnemosy::graphics
 			return;
 		}
 
+		return;
 
-		// Depricated way of loading brdfLut. - not using below
+	}
+
+	void ImageBasedLightingRenderer::LoadBrdfLutTextureTiff()
+	{
+		// DEPRICATED not in use - Only here for refrence if needed in the future
+		// needs to include open cv headers 
+		// #include <opencv2/core.hpp>
+		// #include <opencv2/imgcodecs.hpp>
+		// #include <opencv2/imgproc.hpp>
+		
+		if (m_brdfLutTexture_isGenerated)
+			return;
+
+		mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+		std::filesystem::path pathToTiffFile = fd.GetTexturesPath() / std::filesystem::path("ibl/ibl_brdfLut.tif");
+		std::filesystem::directory_entry TiffFile = std::filesystem::directory_entry(pathToTiffFile);
+		std::string path = pathToTiffFile.generic_string();
+
+		bool TiffFileExists = true;
+		if (!TiffFile.exists())
 		{
-		//cv::Mat pic = cv::imread("../Resources/Textures/ibl/ibl_brdfLut.tif", cv::IMREAD_UNCHANGED);
-
-		//MNEMOSY_ASSERT(!pic.empty(), "Couldnt load brdf lut texture from filepath: ../Resources/Textures/ibl/ibl_brdfLut.tif");
-		//
-		//cv::flip(pic, pic, 0);
-
-
-
-		//glGenTextures(1, &m_brdfLutTextureID);
-
-		//int res = m_brdfLutResolution;
-		//glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
-		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, pic.cols, pic.rows, 0, GL_BGR, GL_FLOAT, pic.ptr());
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
-		//glGenerateMipmap(GL_TEXTURE_2D);
-
-
-		//pic.release();
-		//m_brdfLutTexture_isGenerated = true;
-
-		//MNEMOSY_DEBUG("Loaded brdf lut");
+			MNEMOSY_WARN("ImageBasedLightingRenderer::LoadBrdfLutTextureTif: brdf lut texture file does not exsist at:\n{} \nGenerating new file...", path);
+			TiffFileExists = false;
 		}
 
+		if (TiffFileExists)
+		{
+			// load 
+			/*
+			cv::Mat pic = cv::imread(path, cv::IMREAD_UNCHANGED);
+
+			MNEMOSY_ASSERT(!pic.empty(), "Couldnt load brdf lut texture");
+
+			cv::flip(pic, pic, 0);
+
+			glGenTextures(1, &m_brdfLutTextureID);
+
+			int res = m_brdfLutResolution;
+			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, pic.cols, pic.rows, 0, GL_BGR, GL_FLOAT, pic.ptr());
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
+			glGenerateMipmap(GL_TEXTURE_2D);
+
+			pic.release();
+			m_brdfLutTexture_isGenerated = true;
+			MNEMOSY_DEBUG("Loaded brdf lut texture from .tif");
+			*/
+		}
+		else
+		{
+			// genereate and save to .tif file
+			RenderBrdfLutTextureAndSafeTif(path.c_str(), true);
+		}
 	}
 
 	// private
@@ -387,16 +411,24 @@ namespace mnemosy::graphics
 
 	void ImageBasedLightingRenderer::InitializeMeshAndShader()
 	{
+		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 
 		if (m_unitCube == nullptr) {
 
+			std::filesystem::path meshes = fd.GetMeshesPath();
+			std::string skyboxMeshPath = meshes.generic_string() + "/skyboxMesh.fbx";
+
 			std::unique_ptr<ModelLoader> modelLoader = std::make_unique <ModelLoader>();
-			m_unitCube = modelLoader->LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
+			m_unitCube = modelLoader->LoadModelDataFromFile(skyboxMeshPath);
 		}
 
 		if (m_imagedBasedLightingShader == nullptr) 
 		{
-			m_imagedBasedLightingShader = std::make_unique<Shader>("../Code/Engine/Src/Shaders/imageBasedLighting.vert", "../Code/Engine/Src/Shaders/imageBasedLighting.frag");
+			std::filesystem::path shaders = fd.GetShadersPath();
+			std::string vertex = shaders.generic_string()	+ "/imageBasedLighting.vert";
+			std::string fragment = shaders.generic_string() + "/imageBasedLighting.frag";
+
+			m_imagedBasedLightingShader = std::make_unique<Shader>(vertex.c_str(), fragment.c_str());
 		}
 	}
 

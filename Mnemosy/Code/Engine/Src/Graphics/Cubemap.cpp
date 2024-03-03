@@ -29,8 +29,10 @@ namespace mnemosy::graphics
 			glDeleteTextures(1,&m_prefilterMapID);
 	}
 
-	void Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name, unsigned int colorCubemapResolution, bool savePermanently)
+	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name, unsigned int colorCubemapResolution, bool savePermanently)
 	{
+		bool loadingSuccessfull = false;
+
 		if (m_equirectangularTexture_isGenerated)
 		{
 			glDeleteTextures(1, &m_equirectangularTextureID);
@@ -44,7 +46,8 @@ namespace mnemosy::graphics
 			if (!successfull)
 			{
 				MNEMOSY_ERROR("Failed to load image from file: {}", imagePath);
-				return;
+				loadingSuccessfull = false;
+				return loadingSuccessfull;
 			}
 
 			glGenTextures(1, &m_equirectangularTextureID);
@@ -86,11 +89,14 @@ namespace mnemosy::graphics
 		if (savePermanently)
 		{
 			exportGeneratedCubemapsToKtx( name, colorCubemapResolution);
+			MNEMOSY_INFO("Generated and saved skybox {} ", name);
 		}
 
 		glDeleteTextures(1, &m_equirectangularTextureID); // we dont need to keep it in gpu memory
 		m_equirectangularTexture_isGenerated = false;
 
+		loadingSuccessfull = true;
+		return loadingSuccessfull;
 	}
 
 	void Cubemap::LoadCubemapsFromKtxFiles(const char* colorCubemapPath, const char* irradianceCubemapPath, const char* prefilterCubemapPath)

@@ -41,6 +41,13 @@ namespace mnemosy::gui
 			ImGui::ColorEdit3("Emission", (float*)&material.Emission);
 			ImGui::DragFloat("Emission Strength", &material.EmissionStrength,0.01f, 0.0f, 10000.0f, "%.4f");
 
+			float uvTiling[2] = { 1.0f,1.0f };
+			uvTiling[0] = material.UVTiling.x;
+			uvTiling[1] = material.UVTiling.y;
+			ImGui::DragFloat2("UV Tiling", (float*)uvTiling, 0.1f, 0.0, 1000, "%0.4f");
+			material.UVTiling.x = uvTiling[0];
+			material.UVTiling.y = uvTiling[1];
+
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 

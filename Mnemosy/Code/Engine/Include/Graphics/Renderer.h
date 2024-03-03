@@ -52,6 +52,7 @@ namespace mnemosy::graphics
 		void EndFrame(unsigned int width, unsigned int height);
 
 		void RenderMeshes(RenderMesh& renderMesh);
+		void RenderGizmo(RenderMesh& renderMesh);
 		void RenderLightMesh(Light& light);
 		void RenderSkybox(Skybox& skybox);
 
@@ -82,7 +83,7 @@ namespace mnemosy::graphics
 		Shader* m_pPbrShader = nullptr;
 		Shader* m_pLightShader = nullptr;
 		Shader* m_pSkyboxShader = nullptr;
-
+		Shader* m_pGizmoShader = nullptr;
 
 		int m_msaaSamples = 4;
 		MSAAsamples m_msaaSamplesSettings = MSAA4X;

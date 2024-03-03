@@ -5,6 +5,7 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/FileDirectories.h"
 
+#include <filesystem>
 #include <fstream>
 
 
@@ -67,7 +68,25 @@ namespace mnemosy::systems
 
 	void SkyboxAssetRegistry::RemoveEntry(std::string name)
 	{
+		// delete the files
+		mnemosy::core::FileDirectories& FD = MnemosyEngine::GetInstance().GetFileDirectories();
+		std::filesystem::path pathToCubemaps = FD.GetCubemapsPath();
 
+		SkyboxAssetEntry entryToRemove;
+		entryToRemove.skyName				= name;
+		entryToRemove.colorCubeFile			= name + "_cubeColor.ktx2";
+		entryToRemove.irradianceCubeFile	= name + "_cubeIrradiance.ktx2";
+		entryToRemove.prefilterCubeFile		= name + "_cubePrefilter.ktx2";
+
+		std::filesystem::path pathToColor = pathToCubemaps / std::filesystem::path(entryToRemove.colorCubeFile);
+		std::filesystem::path pathToIrradiance = pathToCubemaps / std::filesystem::path(entryToRemove.irradianceCubeFile);
+		std::filesystem::path pathToPrefilter = pathToCubemaps / std::filesystem::path(entryToRemove.prefilterCubeFile);
+
+		std::filesystem::remove(pathToColor);
+		std::filesystem::remove(pathToIrradiance);
+		std::filesystem::remove(pathToPrefilter);
+
+		// removing from saved data
 		for (int i = 0; i < m_skyboxAssets.size(); i++)
 		{
 			if (m_skyboxAssets[i].skyName == name)

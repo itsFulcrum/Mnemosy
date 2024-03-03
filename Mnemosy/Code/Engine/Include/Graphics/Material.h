@@ -30,6 +30,8 @@ namespace mnemosy::graphics
 		float Metallic = 0.0f;
 		float EmissionStrength = 0.0f;
 		float NormalStrength = 1.0f; // not supported by shader at the moment
+		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
+
 
 		void setDefaults();
 

@@ -20,6 +20,8 @@ namespace mnemosy::core
 		fs::path GetTexturesPath();
 		fs::path GetDataPath();
 		fs::path GetCubemapsPath();
+		fs::path GetShadersPath();
+
 
 	private:
 		//std::filesystem::path m_mnemosyInternalResourcesDirectory;

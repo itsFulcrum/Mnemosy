@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 20)
 
 set(ENGINE_PROJECT "MnemosyEngine")
-set(APP_PROJECT "MnemosyApplication")
+set(APP_PROJECT "Mnemosy")
 
 project(${ENGINE_PROJECT})
 project(${APP_PROJECT})
@@ -10,6 +10,8 @@ project(${APP_PROJECT})
 #set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 #set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 #install(FILES $<TARGET_RUNTIME_DLLS:${APP_PROJECT}> TYPE BIN)
+
+include(GNUInstallDirs)
 
 IF (WIN32)
 ELSE()
@@ -133,3 +135,15 @@ target_link_libraries(${ENGINE_PROJECT} PRIVATE ${OpenCV_LIBS})
 target_link_libraries(${ENGINE_PROJECT} PUBLIC spdlog::spdlog_header_only)
 # linking for app project
 target_link_libraries(${APP_PROJECT} PRIVATE ${ENGINE_PROJECT} )
+
+
+set(MNEMOSY_INSTALL OFF)
+if(MNEMOSY_INSTALL)
+  # to install i need to copy dlls of opencv into bin  also Resources folder has to be copied  resources should include shaders but i have to change it in code aswell to make that work
+  set(CMAKE_INSTALL_PREFIX "C:/Users/fulcrum/Documents/TestInstall")
+
+  install(TARGETS ${APP_PROJECT} DESTINATION ${CMAKE_INSTALL_BINDIR})
+  configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_INSTALL_BINDIR} COPYONLY)
+  configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_INSTALL_BINDIR} COPYONLY)
+  configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_INSTALL_BINDIR} COPYONLY)
+ENDIF()

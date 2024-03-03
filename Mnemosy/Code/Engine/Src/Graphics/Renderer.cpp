@@ -3,6 +3,7 @@
 
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/FileDirectories.h"
 
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Camera.h"
@@ -15,6 +16,7 @@
 #include "Include/Graphics/Light.h"
 #include "Include/Graphics/Scene.h"
 
+#include <filesystem>
 #include <glad/glad.h>
 
 namespace mnemosy::graphics
@@ -23,12 +25,27 @@ namespace mnemosy::graphics
 
 	Renderer::Renderer() 
 	{
-		m_pPbrShader = new Shader("../Code/Engine/Src/Shaders/pbrVertex.vert", "../Code/Engine/Src/Shaders/pbrFragment.frag");
-		m_pLightShader = new Shader("../Code/Engine/Src/Shaders/light.vert", "../Code/Engine/Src/Shaders/light.frag");
-		m_pSkyboxShader = new Shader("../Code/Engine/Src/Shaders/skybox.vert", "../Code/Engine/Src/Shaders/skybox.frag");
+		MnemosyEngine& engine = MnemosyEngine::GetInstance();
 
-		unsigned int w = MnemosyEngine::GetInstance().GetWindow().GetWindowWidth();
-		unsigned int h = MnemosyEngine::GetInstance().GetWindow().GetWindowHeight();
+		std::filesystem::path shaders = engine.GetFileDirectories().GetShadersPath();
+		std::string shadersPath = shaders.generic_string() + "/";
+		std::string pbrVert		= shadersPath + "pbrVertex.vert";
+		std::string pbrFrag		= shadersPath + "pbrFragment.frag";
+		std::string lightVert	= shadersPath + "light.vert";
+		std::string lightFrag	= shadersPath + "light.frag";
+		std::string skyboxVert	= shadersPath + "skybox.vert";
+		std::string skyboxFrag	= shadersPath + "skybox.frag";
+		std::string gizmoVert	= shadersPath + "gizmo.vert";
+		std::string gizmoFrag	= shadersPath + "gizmo.frag";
+
+
+		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
+		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
+		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
+		m_pGizmoShader = new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
+
+		unsigned int w = engine.GetWindow().GetWindowWidth();
+		unsigned int h = engine.GetWindow().GetWindowHeight();
 		CreateRenderingFramebuffer(w,h);
 		CreateBlitFramebuffer(w,h);
 
@@ -218,10 +235,10 @@ namespace mnemosy::graphics
 
 	void Renderer::RenderMeshes(RenderMesh& renderMesh)
 	{
-		
+		m_pPbrShader->Use();
 		renderMesh.GetMaterial().setMaterialUniforms(*m_pPbrShader);
 
-		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();// object.GetTransformMatrix();
+		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
 
 
 		m_pPbrShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
@@ -236,6 +253,23 @@ namespace mnemosy::graphics
 			glBindVertexArray(0);
 		}
 
+	}
+
+	void Renderer::RenderGizmo(RenderMesh& renderMesh)
+	{
+		m_pGizmoShader->Use();
+		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
+		m_pGizmoShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
+		m_pGizmoShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
+		m_pGizmoShader->SetUniformMatrix4("_viewMatrix", glm::mat4(glm::mat3(m_viewMatrix)));
+		m_pGizmoShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+
+		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++)
+		{
+			glBindVertexArray(renderMesh.GetModelData().meshes[i].vertexArrayObject);
+			glDrawElements(GL_TRIANGLES, (GLsizei)renderMesh.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
 	}
 
 	void Renderer::RenderLightMesh(Light& light)
@@ -301,7 +335,8 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		RenderMeshes(scene.GetMesh());
-		RenderMeshes(scene.GetGizmoMesh());
+		//RenderMeshes(scene.GetGizmoMesh());
+		RenderGizmo(scene.GetGizmoMesh());
 		RenderLightMesh(scene.GetLight());
 		RenderSkybox(scene.GetSkybox());
 

@@ -33,7 +33,7 @@ namespace mnemosy::graphics
 		bool noEntriesExist = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetVectorOfNames().empty();
 		if (noEntriesExist) 
 		{
-			m_pCubemap->LoadEquirectangularFromFile(imagePath, "NoNameNeeded", resolution, false);
+			m_pCubemap->LoadEquirectangularFromFile(imagePath, "SpruitSunrise", resolution, true);
 			
 			return;
 		}
@@ -51,18 +51,23 @@ namespace mnemosy::graphics
 		m_pCubemap = nullptr;
 	}
 
-	void Skybox::AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently)
+	bool Skybox::AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently)
 	{
+		bool success = false;
+
 		if (savePermanently)
 		{
-			m_pCubemap->LoadEquirectangularFromFile(imagePath, uniqueName,resolution, true);
-			MNEMOSY_INFO("Generated and saved skybox {} ", uniqueName);
+			if( m_pCubemap->LoadEquirectangularFromFile(imagePath, uniqueName,resolution, true) )
+				success = true;
 		}
 		else
 		{
-			m_pCubemap->LoadEquirectangularFromFile(imagePath,"NoNameNeeded", resolution, false);
+			if(m_pCubemap->LoadEquirectangularFromFile(imagePath,"NoNameNeeded", resolution, false))
+				success = true;
 		}
 
+
+		return success;
 	}
 
 	void Skybox::LoadPreviewSkybox(std::string name)

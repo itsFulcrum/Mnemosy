@@ -50,4 +50,10 @@ namespace mnemosy::core
 		fs::path cubemapsPath = GetTexturesPath() / fs::path("Cubemaps");
 		return cubemapsPath;
 	}
+	fs::path FileDirectories::GetShadersPath()
+	{
+
+		fs::path shadersPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Shaders");
+		return shadersPath;
+	}
 } // !mnemosy::core

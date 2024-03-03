@@ -220,9 +220,9 @@ namespace mnemosy::gui
 									if (!filepath.empty())
 									{
 										// Function needs to 
-										skybox.AssignSkyboxTexture(filepath.c_str(), skyboxName, skyboxExportResolution, m_saveSkyboxPermanentlyUponLoad);
-									
-										m_currentSelectedSkybox = (int)skyboxRegistry.GetVectorOfNames().size() -1;
+										bool success = skybox.AssignSkyboxTexture(filepath.c_str(), skyboxName, skyboxExportResolution, m_saveSkyboxPermanentlyUponLoad);
+										if(success)
+											m_currentSelectedSkybox = (int)skyboxRegistry.GetVectorOfNames().size() -1;
 									}
 								#endif
 							}
@@ -238,6 +238,86 @@ namespace mnemosy::gui
 					ImGui::EndPopup();
 				}
 			} // !m_saveSkyboxPermanentlyUponLoad
+
+
+			// Removing skybox permanently
+			
+			static bool removePermanentlyModelOpen = false;
+			if (ImGui::Button("Remove Permanently"))
+			{
+				removePermanentlyModelOpen = true;
+				ImGui::OpenPopup("Remove Skybox Permanetly");
+
+
+				
+			}
+
+			if (ImGui::BeginPopupModal("Remove Skybox Permanetly", &removePermanentlyModelOpen, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				ImGui::Text("Select skybox to delete permanently");
+				ImGui::Separator();
+
+
+				// get list of skyboxs available to remove
+				static int selectedToRemove = 0;
+				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[selectedToRemove].c_str();// items[item_current_idx];
+				if (ImGui::BeginCombo("Skyboxes", combo_preview_value, 0))
+				{
+					for (int n = 0; n < skyboxRegistry.GetVectorOfNames().size(); n++)
+					{
+						const bool is_selected = (selectedToRemove == n);
+						if (ImGui::Selectable(skyboxRegistry.GetVectorOfNames()[n].c_str(), is_selected))
+							selectedToRemove = n;
+
+
+						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+
+				std::string nameOfSkyboxToDelete = skyboxRegistry.GetVectorOfNames()[selectedToRemove];
+
+				if (ImGui::Button("Delete", ImVec2(120, 0)))
+				{
+					// Dont allow to delete the last one
+					bool canRemove = true;
+					if (nameOfSkyboxToDelete == "SpruitSunrise")
+					{
+						canRemove = false;
+						MNEMOSY_ERROR("You are not allowed to remove the default skybox SpuritSunrise")
+					}
+
+					if (canRemove)
+					{
+
+						MNEMOSY_WARN("Removing Skybox {}", nameOfSkyboxToDelete);
+						skyboxRegistry.RemoveEntry(nameOfSkyboxToDelete);
+
+						// TODO: delete actual files from disk -> shoudl be part of removeEntry probaly
+
+						// set selected skybox to first one 
+						selectedToRemove = 0;
+						std::string firstSkyboxName = skyboxRegistry.GetVectorOfNames()[0];
+						skybox.LoadPreviewSkybox(firstSkyboxName);
+						m_currentSelectedSkybox = 0;
+					}
+
+
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+
+				if (ImGui::Button("Cancel", ImVec2(120, 0)))
+					ImGui::CloseCurrentPopup();
+
+
+				ImGui::EndPopup();
+			}
+
+
 
 			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.1f");
 			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%1f");

@@ -2,6 +2,7 @@
 #define IMAGE_BASED_LIGHTING_RENDERER_H
 
 #include <memory>
+#include <string>
 
 namespace mnemosy::graphics
 {
@@ -24,9 +25,10 @@ namespace mnemosy::graphics
 		void BindBrdfLutTexture(unsigned int location);
 
 	private:
-		void RenderBrdfLutTexture(bool exportToFile);
+		void RenderBrdfLutTextureAndSafeTif(std::string exportpath, bool exportToFile);
 		void RenderBrdfLutTextureAndSafeKtx(const char* exportpath,bool exportToFile);
 		void LoadBrdfLutTexture();
+		void LoadBrdfLutTextureTiff();
 		void DrawIntoFramebuffer();
 
 	private:

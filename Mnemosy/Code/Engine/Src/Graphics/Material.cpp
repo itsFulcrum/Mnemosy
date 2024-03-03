@@ -203,12 +203,15 @@ namespace mnemosy::graphics
 
 		shader.SetUniformFloat("_normalStrength", NormalStrength); // currently not supported by shader
 		shader.SetUniformFloat("_emissionStrength", EmissionStrength);
+		shader.SetUniformFloat2("_uvTiling", UVTiling.x, UVTiling.y);
 
 		// for the solid non texture values im passing an extra parameters for each as the last one to specify how much of it will contribute between the texture and the solid non texture values
 		// esentially lerping between texture input and non texture input. the lerp value however is just binary 0 or 1 
 		// the result is that if any texture is not bound it will use the base non texture value but if it is bound the the texture will be used
 		// Its kind of a lot of setup but it works and avoids the use of if statements in the shader and also saves a bit on the amount of uniforms in the shader.
 		// texture uniforms
+		
+		
 		if (m_pAlbedoTexture) 
 		{
 		
