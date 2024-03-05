@@ -108,7 +108,7 @@ namespace mnemosy::gui
 
 	void UserInterface::RegisterMainMenuBarGuiPanel(GuiPanel& newMenuBarPanel)
 	{
-		MNEMOSY_ASSERT(!m_mainMenuBarGuiPanel ,"There can only be one main menu bar, it was already registered")
+		MNEMOSY_ASSERT(!m_mainMenuBarGuiPanel, "There can only be one main menu bar, it was already registered");
 
 		if (m_mainMenuBarGuiPanel)
 		{
@@ -120,7 +120,7 @@ namespace mnemosy::gui
 
 	void UserInterface::UnregisterMainMenuBarGuiPanel()
 	{
-		MNEMOSY_ASSERT(m_mainMenuBarGuiPanel,"There is no menu bar registered yet")
+		MNEMOSY_ASSERT(m_mainMenuBarGuiPanel, "There is no menu bar registered yet");
 
 		if (!m_mainMenuBarGuiPanel)
 		{

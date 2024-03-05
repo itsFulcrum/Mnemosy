@@ -29,7 +29,7 @@ namespace mnemosy::graphics
 			glDeleteTextures(1,&m_prefilterMapID);
 	}
 
-	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name, unsigned int colorCubemapResolution, bool savePermanently)
+	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name,const unsigned int colorCubemapResolution,const bool savePermanently)
 	{
 		bool loadingSuccessfull = false;
 
@@ -101,8 +101,7 @@ namespace mnemosy::graphics
 
 	void Cubemap::LoadCubemapsFromKtxFiles(const char* colorCubemapPath, const char* irradianceCubemapPath, const char* prefilterCubemapPath)
 	{
-		// TODO:  Dont Hardcode Filepaths
-		// 
+
 		// color Cubemap
 		{
 			if (m_colorCubemap_isGenerated)
@@ -114,18 +113,18 @@ namespace mnemosy::graphics
 			//glBindTexture(GL_TEXTURE_CUBE_MAP, m_colorCubemapID); // bound in LoadKtx
 
 			KtxImage ktxImg;
-			ktxImg.LoadKtx(colorCubemapPath, m_colorCubemapID);
-
+			//ktxImg.LoadKtx(colorCubemapPath, m_colorCubemapID);
+			ktxImg.LoadCubemapKTX(colorCubemapPath, m_colorCubemapID);
 			//glBindTexture(GL_TEXTURE_CUBE_MAP, m_colorCubemapID);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			
 			m_colorCubemap_isGenerated = true;
 		}
-
+		//MNEMOSY_TRACE("Loaded color cube")
 
 		// irradiance cubemap
 		{
@@ -139,17 +138,17 @@ namespace mnemosy::graphics
 			// glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID); // bound in loadKtx
 
 			KtxImage ktxImg;
-			ktxImg.LoadKtx(irradianceCubemapPath, m_irradianceMapID);
+			ktxImg.LoadCubemapKTX(irradianceCubemapPath, m_irradianceMapID);
 
 			//glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			m_irradianceMap_isGenerated = true;
 		}
-
+		//MNEMOSY_TRACE("Loaded irradiance cube")
 
 		// Prefilter cubemap
 		{
@@ -167,11 +166,11 @@ namespace mnemosy::graphics
 
 			m_prefilterMap_isGenerated = true;
 		}
-
+		//MNEMOSY_TRACE("Loaded prefilter cube")
 
 	}
 
-	void Cubemap::BindColorCubemap(unsigned int location)
+	void Cubemap::BindColorCubemap(const unsigned int location)
 	{
 		if (m_colorCubemap_isGenerated)
 		{
@@ -185,7 +184,7 @@ namespace mnemosy::graphics
 			MNEMOSY_ERROR("Cubemap::BindColorCubemap: color cubemap is not yet generated");
 		}
 	}
-	void Cubemap::BindIrradianceCubemap(unsigned int location)
+	void Cubemap::BindIrradianceCubemap(const unsigned int location)
 	{
 		if (m_irradianceMap_isGenerated)
 		{
@@ -198,7 +197,7 @@ namespace mnemosy::graphics
 			MNEMOSY_ERROR("Cubemap::BindIrradianceCubemap: irradiance map is not yet generated");
 		}
 	}
-	void Cubemap::BindPrefilteredCubemap(unsigned int location)
+	void Cubemap::BindPrefilteredCubemap(const unsigned int location)
 	{
 		if (m_prefilterMap_isGenerated)
 		{
@@ -223,7 +222,7 @@ namespace mnemosy::graphics
 
 		for (int i = 0; i < 6; ++i)
 		{
-			auto data = std::vector<unsigned char>();
+			//auto data = std::vector<unsigned char>();
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, NULL);
 		}
 
@@ -297,7 +296,7 @@ namespace mnemosy::graphics
 
 	}
 
-	void Cubemap::exportGeneratedCubemapsToKtx(std::string name, unsigned int colorCubemapResolution)
+	void Cubemap::exportGeneratedCubemapsToKtx(const std::string& name,const unsigned int colorCubemapResolution)
 	{
 
 		MNEMOSY_ASSERT(m_colorCubemap_isGenerated,	"Color Cubemap is not yet generated");

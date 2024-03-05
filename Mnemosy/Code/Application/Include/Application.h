@@ -23,7 +23,7 @@ namespace mnemosy
 		static Application* m_sInstance;
 	public:
 		static Application& GetInstance();
-		~Application() = default;
+		~Application();
 
 		void Initialize();
 		void Run();

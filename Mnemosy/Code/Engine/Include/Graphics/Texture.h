@@ -10,14 +10,14 @@ namespace mnemosy::graphics
 		Texture();
 		~Texture();
 
-		bool generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps);
-		bool containsData() const;
+		const bool generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps);
+		const bool containsData() const;
 		void clear();
-		void BindToLocation(unsigned int activeTextureLocation);
-		void UnbindLocation(unsigned int activeTextureLocation);
+		void BindToLocation(const unsigned int activeTextureLocation);
+		void UnbindLocation(const unsigned int activeTextureLocation);
 		// TODO: add functions to set filter mode and Wrap behavior
 
-		int GetChannelsAmount() const;
+		const int GetChannelsAmount() const;
 
 	private:
 		unsigned int m_ID = 0;

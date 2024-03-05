@@ -51,9 +51,9 @@ namespace mnemosy
 
 
 		// Getters
-		core::Window& GetWindow() { return *m_pWindow; }
+		core::Window& GetWindow()					{ return *m_pWindow; }
 		core::FileDirectories& GetFileDirectories() { return *m_pFileDirectories; }
-		core::Clock& GetClock() { return *m_clock; }
+		core::Clock& GetClock()						{ return *m_clock; }
 		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		systems::InputSystem& GetInputSystem() { return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry() { return *m_pSkyboxAssetRegistry; }

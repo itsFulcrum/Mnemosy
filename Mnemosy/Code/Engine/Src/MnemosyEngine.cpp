@@ -31,7 +31,9 @@ namespace mnemosy
 
 	// public
 	MnemosyEngine::~MnemosyEngine()
-	{ }
+	{ 
+		
+	}
 
 	MnemosyEngine& MnemosyEngine::GetInstance()
 	{
@@ -45,6 +47,8 @@ namespace mnemosy
 
 	void MnemosyEngine::Initialize(const char* WindowTitle)
 	{
+		double timeBegin = glfwGetTime();
+
 		MNEMOSY_ASSERT(!m_isInitialized, "Engine::Initialize() has already been called");
 
 		if (m_isInitialized)
@@ -72,7 +76,6 @@ namespace mnemosy
 		m_pWindow = new core::Window(WindowTitle);
 		MNEMOSY_TRACE("Window Initialized");
 		
-		double timeBegin = glfwGetTime();
 
 
 		// subsystems
@@ -98,9 +101,11 @@ namespace mnemosy
 		m_pRenderer = std::make_unique<graphics::Renderer>();
 		MNEMOSY_TRACE("Renderer Initialized");
 
-
+		double timeSceneStart = glfwGetTime();
 		m_pScene = std::make_unique<graphics::Scene>();
-		MNEMOSY_TRACE("Scene Initialized");
+		double timeSceneEnd = glfwGetTime();
+
+		MNEMOSY_TRACE("Scene Initialized {} seconds ",timeSceneEnd-timeSceneStart);
 
 
 
@@ -117,9 +122,8 @@ namespace mnemosy
 		m_isInitialized = true;
 
 
-		MNEMOSY_INFO("End Startup");
 		double timeEnd = glfwGetTime();
-		MNEMOSY_INFO("TimeBeginStartup: {} ,TimeEndStartup: {}  StartupTime: {} ", timeBegin,timeEnd,(timeEnd-timeBegin));
+		MNEMOSY_INFO("Mnemosy Engine Initialized {} Seconds", (timeEnd - timeBegin));
 
 
 		//fs::path meshsPath = GetFileDirectories().GetResourcesPath() / fs::path("Meshes");
@@ -168,6 +172,10 @@ namespace mnemosy
 	{
 
 		m_pWindow->Shutdown();
+		delete m_pWindow;
+		m_pWindow = nullptr;
+
+		delete m_sInstance;
 	}
 
 } // !mnemosy

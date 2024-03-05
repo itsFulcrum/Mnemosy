@@ -20,7 +20,7 @@ namespace mnemosy::graphics
 		~Skybox();
 
 		bool AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently);
-		void LoadPreviewSkybox(std::string name);
+		void LoadPreviewSkybox(const std::string& name);
 
 		Cubemap& GetCubemap();
 		ModelData& GetModelData();

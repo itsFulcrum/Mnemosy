@@ -17,24 +17,23 @@ namespace mnemosy::graphics
 		
 		// Getters
 		
-		glm::vec3 GetPosition() { return m_position; }
-		glm::vec3 GetRotationEulerAngles() { return m_rotation; }
-		glm::vec3 GetScale()	{ return m_scale; }
-
-		glm::mat4 GetTransformMatrix();
-		glm::mat4 GetNormalMatrix(glm::mat4 transformMatrix);
+		const glm::vec3 GetPosition() const { return m_position; }
+		const glm::vec3 GetRotationEulerAngles() const { return m_rotation; }
+		const glm::vec3 GetScale()	const { return m_scale; }
 		
+		const glm::mat4 GetTransformMatrix() const ;
+		const glm::mat4 GetNormalMatrix(const glm::mat4& transformMatrix) const;
 		
-		glm::vec3 GetForward()	{ return m_forward; }
-		glm::vec3 GetRight()	{ return m_right; }
-		glm::vec3 GetUp()		{ return m_up; }
+		const glm::vec3 GetForward()const { return m_forward; }
+		const glm::vec3 GetRight()	const { return m_right; }
+		const glm::vec3 GetUp()		const { return m_up; }
 
 		// setters
-		void SetPosition(glm::vec3 position);
-		void SetRotationEulerAngles(glm::vec3 rotation);
-		void SetScale(glm::vec3 scale);
+		void SetPosition(const glm::vec3& position);
+		void SetRotationEulerAngles(const glm::vec3& rotation);
+		void SetScale(const glm::vec3& scale);
 
-		void RotateAroundAxis(float angle, glm::vec3 axis);
+		void RotateAroundAxis(const float angle, const glm::vec3& axis);
 
 	private:
 		void RecalculateLocalVectors_Internal(); // recalc forward,right,up vectors

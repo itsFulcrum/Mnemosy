@@ -27,7 +27,7 @@ namespace mnemosy::graphics
 		void SetUniformFloat2(const std::string& name, float x, float y) const;
 		void SetUniformFloat3(const std::string& name, float x, float y, float z) const;
 		void SetUniformFloat4(const std::string& name, float x, float y, float z, float w) const;
-		void SetUniformMatrix4(const std::string& name, glm::mat4 matrix);
+		void SetUniformMatrix4(const std::string& name, const glm::mat4& matrix);
 
 		void DeleteShaderProgram();
 
@@ -36,7 +36,7 @@ namespace mnemosy::graphics
 		std::string m_pathFragment;
 
 
-		void CheckCompileErrors(unsigned int shader, std::string type);
+		void CheckCompileErrors(unsigned int shader,const std::string& type);
 
 	};
 

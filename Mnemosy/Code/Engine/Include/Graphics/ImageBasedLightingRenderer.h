@@ -25,7 +25,7 @@ namespace mnemosy::graphics
 		void BindBrdfLutTexture(unsigned int location);
 
 	private:
-		void RenderBrdfLutTextureAndSafeTif(std::string exportpath, bool exportToFile);
+		void RenderBrdfLutTextureAndSafeTif(const std::string& exportpath, bool exportToFile);
 		void RenderBrdfLutTextureAndSafeKtx(const char* exportpath,bool exportToFile);
 		void LoadBrdfLutTexture();
 		void LoadBrdfLutTextureTiff();
@@ -35,7 +35,7 @@ namespace mnemosy::graphics
 		void InitializeMeshAndShader();
 		bool IsShaderAndMeshInitialized();
 
-		unsigned int m_fbo = 0;
+		unsigned int m_fbo = -1;
 
 		ModelData* m_unitCube = nullptr;
 		std::unique_ptr<Shader> m_imagedBasedLightingShader;

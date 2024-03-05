@@ -42,7 +42,7 @@ namespace mnemosy::graphics
 		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
 		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
-		m_pGizmoShader = new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
+		m_pGizmoShader	= new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
 
 		unsigned int w = engine.GetWindow().GetWindowWidth();
 		unsigned int h = engine.GetWindow().GetWindowHeight();
@@ -53,13 +53,21 @@ namespace mnemosy::graphics
 	}
 	Renderer::~Renderer()
 	{
+		
+
 		delete m_pPbrShader;
 		delete m_pLightShader;
 		delete m_pSkyboxShader;
+		delete m_pGizmoShader;
 		m_pPbrShader = nullptr;
 		m_pLightShader = nullptr;
 		m_pSkyboxShader = nullptr;
+		m_pGizmoShader = nullptr;
 
+
+
+		glDeleteFramebuffers(1, &m_blitFbo);
+		glDeleteTextures(1, &m_blitedRenderTexture_Id);
 
 		glDeleteRenderbuffers(1, &m_renderBufferObject);
 		glDeleteFramebuffers(1, &m_frameBufferObject);
@@ -178,12 +186,12 @@ namespace mnemosy::graphics
 
 	}
 
-	void Renderer::SetProjectionMatrix(glm::mat4 projectionMatrix)
+	void Renderer::SetProjectionMatrix(const glm::mat4& projectionMatrix)
 	{
 		m_projectionMatrix = projectionMatrix;
 	}
 
-	void Renderer::SetViewMatrix(glm::mat4 viewMatrix)
+	void Renderer::SetViewMatrix(const glm::mat4& viewMatrix)
 	{
 		m_viewMatrix = viewMatrix;
 	}
@@ -344,7 +352,7 @@ namespace mnemosy::graphics
 
 	}
 
-	void Renderer::SetMSAASamples(MSAAsamples samples)
+	void Renderer::SetMSAASamples(const MSAAsamples& samples)
 	{
 		m_msaaOff = false;
 		if (samples == MSAAOFF)

@@ -22,18 +22,18 @@ namespace mnemosy::graphics
 		ModelLoader() = default;
 		~ModelLoader() = default;
 
-		ModelData* LoadModelDataFromFile(std::string const& path);
+		ModelData* LoadModelDataFromFile( const std::string& path);
 
 	private:
-		std::string m_fileDirectory;
+		//std::string m_fileDirectory;
 
-		ModelData* M_LoadModel(std::string const& path);
+		ModelData* M_LoadModel(const std::string& path);
 
-		void M_ProcessNode(aiNode* node, const aiScene* scene, ModelData& modelData);
+		void M_ProcessNode(const aiNode* node, const aiScene* scene, ModelData& modelData);
 
-		MeshData M_ProcessMesh(aiMesh* mesh, const aiScene* scene);
+		MeshData M_ProcessMesh(const aiMesh* mesh, const aiScene* scene);
 
-		void M_SetupMesh(MeshData& _meshData, std::vector<VertexData> Vertecies, std::vector<unsigned int> Indecies);
+		void M_SetupMesh(MeshData& _meshData, const std::vector<VertexData>& Vertecies, const std::vector<unsigned int>& Indecies);
 
 	};
 

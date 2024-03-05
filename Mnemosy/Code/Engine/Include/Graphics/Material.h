@@ -35,9 +35,9 @@ namespace mnemosy::graphics
 
 		void setDefaults();
 
-		void assignTexture(PBRTextureType pbrType, Texture& texture);
-		void assignTexture(PBRTextureType pbrType, std::string filePath);
-		void removeTexture(PBRTextureType pbrType);
+		void assignTexture(const PBRTextureType& pbrType, Texture& texture);
+		void assignTexture(const PBRTextureType& pbrType, const std::string& filePath);
+		void removeTexture(const PBRTextureType& pbrType);
 		void setMaterialUniforms(Shader& shader);
 
 	private:

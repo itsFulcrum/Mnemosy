@@ -16,13 +16,13 @@ namespace mnemosy::graphics
 	class Camera
 	{
 	public:
-		Camera(unsigned int renderScreenWidth, unsigned int renderScreenHeight);
-		~Camera();
+		Camera(const unsigned int renderScreenWidth, const unsigned int renderScreenHeight);
+		~Camera() = default;
 
-		void SetScreenSize(unsigned int width, unsigned int height);
+		void SetScreenSize(const unsigned int width,const unsigned int height);
 
-		glm::mat4 GetViewMatrix();
-		glm::mat4 GetProjectionMatrix();
+		const glm::mat4 GetViewMatrix();
+		const glm::mat4 GetProjectionMatrix();
 	
 		CameraSettings settings;
 		Transform transform;

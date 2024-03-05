@@ -2,22 +2,27 @@
 
 #include "Include/Core/Log.h"
 
-
-
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 namespace mnemosy::core
 {
 	FileDirectories::FileDirectories()
 	{
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)"); /// std::filesystem::path("../Resources");
+
+		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MaterialLibrary)");
+		m_mnemosyLibraryDataFile = fs::directory_entry(R"(../Resources/Data/LibraryDirectory.mnsydata)");
+
+		LoadUserLibraryDirectoryFromDataFile();
 	}
+
 	FileDirectories::~FileDirectories()
 	{
 
 	}
 
-	fs::path FileDirectories::GetResourcesPath()
-	{
+	const fs::path FileDirectories::GetResourcesPath() {
 
 		if (m_mnemosyInternalResourcesDirectory.exists()) 
 		{
@@ -30,30 +35,184 @@ namespace mnemosy::core
 
 		return std::filesystem::path("");
 	}
-	fs::path FileDirectories::GetMeshesPath()
-	{
+
+	const fs::path FileDirectories::GetMeshesPath() {
 		fs::path meshesPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Meshes");
 		return meshesPath;
 	}
-	fs::path FileDirectories::GetTexturesPath()
-	{
+
+	const fs::path FileDirectories::GetTexturesPath() {
 		fs::path texturesPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Textures");
 		return texturesPath;
 	}
-	fs::path FileDirectories::GetDataPath()
-	{
+
+	const fs::path FileDirectories::GetDataPath() {
 		fs::path dataPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Data");
 		return dataPath;
 	}
-	fs::path FileDirectories::GetCubemapsPath()
-	{
+
+	const fs::path FileDirectories::GetCubemapsPath() {
 		fs::path cubemapsPath = GetTexturesPath() / fs::path("Cubemaps");
 		return cubemapsPath;
 	}
-	fs::path FileDirectories::GetShadersPath()
-	{
+
+	const fs::path FileDirectories::GetShadersPath() {
 
 		fs::path shadersPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Shaders");
 		return shadersPath;
 	}
+	
+	const fs::path FileDirectories::GetLibraryDirectoryPath()
+	{
+		return m_mnemosyUserLibraryDirectory.path();
+	}
+
+	void FileDirectories::SetUserLibraryDirectory(const fs::directory_entry& directoryPath) {
+	
+
+		//MNEMOSY_WARN("Setting library Directories to Path: {}", directoryPath.path().generic_string())
+		SaveUserLibraryDirectoryToDataFile(directoryPath);
+
+	}
+
+	// private methods
+
+	void FileDirectories::LoadUserLibraryDirectoryFromDataFile() {
+
+		// check if data file exists 
+		if(!CheckLibraryDataFile()) {
+			//	if not, create file and set user path to default path
+			m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
+			// saveDataFile with default file as userFile but with bool flag that user has not set it custom
+			SaveUserLibraryDirectoryToDataFile(m_mnemosyDefaultLibraryDirectory);
+			return;
+		}
+		
+		//data file exists
+		
+		// read data file and extract path;
+		std::string pathToDataFile = m_mnemosyLibraryDataFile.path().generic_string();
+
+		std::string libraryPathFromFile;
+
+		std::fstream dataFileStream;
+		dataFileStream.open(pathToDataFile);
+		{
+
+			nlohmann::json readFile;// = nlohmann::json::parse(dataFileStream);
+
+		try {
+			readFile = nlohmann::json::parse(dataFileStream);
+		}
+		catch (nlohmann::json::parse_error err) {
+			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Error Parsing File. Message: {}", err.what());
+			return;
+		}
+
+		libraryPathFromFile = readFile["Directories"]["MaterialLibraryDirectory"].get<std::string>();
+		dataFileStream.close();
+
+		readFile.clear();
+		}
+		// setting path from data file  // maybe should check if file 
+
+		fs::directory_entry directoryEntryFromFile = fs::directory_entry(libraryPathFromFile);
+
+		// final check if the path is valid
+		if (!directoryEntryFromFile.exists()) {
+
+			// if not create it
+			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Directory Does not exists..  did you delete it ? {} ", directoryEntryFromFile.path().generic_string());
+			MNEMOSY_ERROR("Setting Library path to default Default path: {} ", m_mnemosyDefaultLibraryDirectory.path().generic_string());
+			
+			m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
+			return;
+		}
+
+		m_mnemosyUserLibraryDirectory = fs::directory_entry(libraryPathFromFile);
+
+	}
+
+	void FileDirectories::SaveUserLibraryDirectoryToDataFile(const fs::directory_entry& libraryDirectoryPath) {
+		// check if path is a valid path on disc.
+		if (!libraryDirectoryPath.exists()) { 
+			
+			// if not create it
+			MNEMOSY_INFO("FileDirectories::SaveUserLibraryDirectoryToDataFile: Directory Does not exists.. creating Directories {} ", libraryDirectoryPath.path().generic_string());
+			fs::create_directories(libraryDirectoryPath.path());
+		}
+		else { // exists
+
+			//MNEMOSY_INFO("exists..");
+			if (!libraryDirectoryPath.is_directory())
+			{
+				MNEMOSY_ERROR("FileDirectories::SaveUserLibraryDirectoryToDataFile: Path {} is not a directory.", libraryDirectoryPath.path().generic_string());
+					return;
+			}
+		}
+		
+		MNEMOSY_INFO("Saving {} as library directory", libraryDirectoryPath.path().generic_string());
+
+		m_mnemosyUserLibraryDirectory = libraryDirectoryPath;
+
+		CheckLibraryDataFile();
+		std::string pathToDataFile = m_mnemosyLibraryDataFile.path().generic_string();
+		std::ofstream dataFileStream;
+		// clear file first // idk this seems kinda stupid and dangerous but also it gets mees up when just overwriting it // maybe do backup copy first?
+		dataFileStream.open(pathToDataFile);
+		dataFileStream << "";
+		dataFileStream.close();
+
+		// start Saving
+		dataFileStream.open(pathToDataFile);
+
+
+		nlohmann::json LibraryDataFileJson; // top level json object
+		LibraryDataFileJson["1_Mnemosy_Data_File"] = "LibraryDirectories";
+
+		std::string libraryDirectoryString = libraryDirectoryPath.path().generic_string();
+		nlohmann::json DirectoriesJson;
+		DirectoriesJson["MaterialLibraryDirectory"] = libraryDirectoryString;
+
+		LibraryDataFileJson["Directories"] = DirectoriesJson;
+
+		bool prettyPrintDataFile = true;
+		if (prettyPrintDataFile)
+			dataFileStream << LibraryDataFileJson.dump(2);
+		else
+			dataFileStream << LibraryDataFileJson.dump(-1);
+
+
+		dataFileStream.close();
+	}
+
+	bool FileDirectories::CheckLibraryDataFile()
+	{
+		
+		if (!m_mnemosyLibraryDataFile.exists())
+		{
+			std::string dataFilePath = m_mnemosyLibraryDataFile.path().generic_string();
+			MNEMOSY_WARN("FileDirectories::CheckLibraryDataFile: File did Not Exist: {} \nCreating new file at that location", dataFilePath);
+			std::ofstream file;
+			file.open(dataFilePath);
+			file << "";
+			file.close();
+			return false;
+		}
+		if (!m_mnemosyLibraryDataFile.is_regular_file())
+		{
+			std::string dataFilePath = m_mnemosyLibraryDataFile.path().generic_string();
+			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File is not a regular file: {} \nCreating new file at that location", dataFilePath);
+			// maybe need to delete unregular file first idk should never happen anyhow
+			std::ofstream file;
+			file.open(dataFilePath);
+			file << "";
+			file.close();
+			return false;
+		}
+
+		return true;
+	}
+
+
 } // !mnemosy::core

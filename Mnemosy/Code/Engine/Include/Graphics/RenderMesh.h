@@ -21,7 +21,7 @@ namespace mnemosy::graphics
 		~RenderMesh();
 
 		Material& GetMaterial() { return *m_material; }
-		void SetMaterial(Material* material);
+		void SetMaterial(Material* const material);
 
 		void LoadMesh(const char* path);
 

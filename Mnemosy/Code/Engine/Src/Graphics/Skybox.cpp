@@ -18,6 +18,7 @@ namespace mnemosy::graphics
 		ModelLoader modelLoader;
 		m_pModelData = modelLoader.LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
 
+		
 		m_pCubemap = new Cubemap();
 	}
 
@@ -70,11 +71,13 @@ namespace mnemosy::graphics
 		return success;
 	}
 
-	void Skybox::LoadPreviewSkybox(std::string name)
+	void Skybox::LoadPreviewSkybox(const std::string& name)
 	{
 		// TODO load with some kind of identifyer to the filepaths
 		
-		systems::SkyboxAssetRegistry& registry = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry();
+		MnemosyEngine& engine = MnemosyEngine::GetInstance();
+
+		systems::SkyboxAssetRegistry& registry = engine.GetSkyboxAssetRegistry();
 
 
 		systems::SkyboxAssetEntry entry = registry.GetEntry(name); // faster than checking before because we go through the vector anyways
@@ -84,14 +87,16 @@ namespace mnemosy::graphics
 			return;
 		}
 		
-		core::FileDirectories& dirs = MnemosyEngine::GetInstance().GetFileDirectories();
-		std::string cubemapsPathString = dirs.GetCubemapsPath().generic_string();
+		//core::FileDirectories& dirs = MnemosyEngine::GetInstance().GetFileDirectories();
+		std::string cubemapsPathString =  engine.GetFileDirectories().GetCubemapsPath().generic_string() + "/";
 
-		std::string colorPath		= cubemapsPathString + "/" + entry.colorCubeFile;
-		std::string irradiancePath	= cubemapsPathString + "/" + entry.irradianceCubeFile;
-		std::string prefilterPath	= cubemapsPathString + "/" + entry.prefilterCubeFile;
-			
+		std::string colorPath		= cubemapsPathString + entry.colorCubeFile;
+		std::string irradiancePath	= cubemapsPathString + entry.irradianceCubeFile;
+		std::string prefilterPath	= cubemapsPathString + entry.prefilterCubeFile;
+		
+		//MNEMOSY_TRACE("LoadSkybox Start");
 		m_pCubemap->LoadCubemapsFromKtxFiles(colorPath.c_str(),irradiancePath.c_str(),prefilterPath.c_str());
+		//MNEMOSY_TRACE("LoadSkybox End");
 	}
 
 	Cubemap& Skybox::GetCubemap()

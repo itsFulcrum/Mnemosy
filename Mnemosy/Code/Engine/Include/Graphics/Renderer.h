@@ -41,9 +41,9 @@ namespace mnemosy::graphics
 		void SetShaderSkyboxUniforms();
 
 
-		void SetProjectionMatrix(glm::mat4 projectionMatrix);
+		void SetProjectionMatrix(const glm::mat4& projectionMatrix);
 
-		void SetViewMatrix(glm::mat4 viewMatrix);
+		void SetViewMatrix(const glm::mat4& viewMatrix);
 
 		void SetClearColor(float r, float g, float b);
 		void ClearFrame();
@@ -59,7 +59,7 @@ namespace mnemosy::graphics
 		void RenderScene(Scene& scene);
 
 		int GetMSAA() { return (int)m_msaaSamplesSettings; }
-		void SetMSAASamples(MSAAsamples samples);
+		void SetMSAASamples(const MSAAsamples& samples);
 
 	private:
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);

@@ -34,9 +34,10 @@ namespace mnemosy::graphics
 		Emission = glm::vec3(0.0f, 0.0f, 0.0f);
 		EmissionStrength = 0.0f;
 		NormalStrength = 1.0f; // currently not supported by shader
+		UVTiling = glm::vec2(1.0f, 1.0f);
 	}
 
-	void Material::assignTexture(PBRTextureType pbrTextureType,Texture& texture)
+	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture& texture)
 	{
 		if (pbrTextureType == ALBEDO)
 			m_pAlbedoTexture = &texture;
@@ -52,7 +53,7 @@ namespace mnemosy::graphics
 			m_pEmissiveTexture = &texture;
 	}
 
-	void Material::assignTexture(PBRTextureType pbrType, std::string filePath)
+	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath)
 	{
 
 		if (pbrType == ALBEDO)
@@ -155,7 +156,7 @@ namespace mnemosy::graphics
 		}
 	}
 
-	void Material::removeTexture(PBRTextureType pbrTextureType)
+	void Material::removeTexture(const PBRTextureType& pbrTextureType)
 	{
 		if (pbrTextureType == ALBEDO)
 		{

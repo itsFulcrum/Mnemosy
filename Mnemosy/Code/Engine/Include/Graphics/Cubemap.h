@@ -11,22 +11,22 @@ namespace mnemosy::graphics
 		Cubemap();
 		~Cubemap();
 
-		bool LoadEquirectangularFromFile(const char* imagePath,const char* name, unsigned int colorCubemapResolution, bool savePermanently);
+		bool LoadEquirectangularFromFile(const char* imagePath,const char* name, const unsigned int colorCubemapResolution,const bool savePermanently);
 		
 		
 		void LoadCubemapsFromKtxFiles(const char* colorCubemapPath, const char* irradianceCubemapPath, const char* prefilterCubemapPath);
 
 
-		void BindColorCubemap(unsigned int location);
-		void BindIrradianceCubemap(unsigned int location);
-		void BindPrefilteredCubemap(unsigned int location);
+		void BindColorCubemap(const unsigned int location);
+		void BindIrradianceCubemap(const unsigned int location);
+		void BindPrefilteredCubemap(const unsigned int location);
 
 
 	private:
 		void equirectangularToCubemap(unsigned int& cubemapID, unsigned int resolution, bool makeConvolutedIrradianceMap);
 		void equirectangularToIrradianceCubemap(unsigned int& cubemapID, unsigned int resolution);
 		void equirectangularToPrefilteredCubemap(unsigned int& cubemapID, unsigned int resolution);
-		void exportGeneratedCubemapsToKtx(std::string name, unsigned int colorCubemapResolution);
+		void exportGeneratedCubemapsToKtx(const std::string& name,const unsigned int colorCubemapResolution);
 
 
 		unsigned int m_equirectangularTextureID = 0;

@@ -6,10 +6,15 @@
 
 #include <windows.h>
 #include <commdlg.h>
+#include <shobjidl_core.h>
 
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+
+
+#include <string>
+#include <filesystem>
 
 namespace mnemosy::core
 {
@@ -53,9 +58,45 @@ namespace mnemosy::core
 		{
 			return ofn.lpstrFile;
 		}
-
-
+		
 		return std::string();
+	}
+
+	std::string FileDialogs::SelectFolder(const char* filter)
+	{
+
+		IFileDialog* pfd;
+
+		LPWSTR g_path;
+
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
+		{
+			DWORD dwOptions;
+			if (SUCCEEDED(pfd->GetOptions(&dwOptions)))
+			{
+				pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
+			}
+			if (SUCCEEDED(pfd->Show(NULL)))
+			{
+				IShellItem* psi;
+				if (SUCCEEDED(pfd->GetResult(&psi)))
+				{
+					if (!SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &g_path)))
+					{
+						MessageBox(NULL, "GetIDListName() failed", NULL, NULL);
+					}
+					psi->Release();
+				}
+			}
+			pfd->Release();
+
+		}
+
+
+		std::filesystem::path convert = g_path;
+
+
+		return convert.generic_string();
 	}
 
 } // mnemosy::core

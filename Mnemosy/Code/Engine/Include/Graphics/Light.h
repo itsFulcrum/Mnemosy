@@ -25,11 +25,11 @@ namespace mnemosy::graphics
 		Light();
 		~Light();
 
-		void SetType(LightType lightType) { m_type = lightType; }
+		void SetType(const LightType& lightType) { m_type = lightType; }
 
-		ModelData& GetModelData();
+		const ModelData& GetModelData();
 
-		LightType GetLightType();
+		const LightType& GetLightType();
 		int GetLightTypeAsInt();
 
 		Transform transform;

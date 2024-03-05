@@ -31,12 +31,12 @@ namespace mnemosy::systems
 		SkyboxAssetRegistry();
 		~SkyboxAssetRegistry();
 
-		bool CheckIfExists(std::string name);
+		bool CheckIfExists(const std::string& name);
 
-		void AddEntry(std::string name);
-		void RemoveEntry(std::string name);
+		void AddEntry(const std::string& name);
+		void RemoveEntry(const std::string& name);
 
-		SkyboxAssetEntry GetEntry(std::string name);
+		SkyboxAssetEntry GetEntry(const std::string& name);
 
 		std::vector<std::string>& GetVectorOfNames();
 

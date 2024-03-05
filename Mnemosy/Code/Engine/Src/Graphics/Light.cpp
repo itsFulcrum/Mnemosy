@@ -20,7 +20,7 @@ namespace mnemosy::graphics
 		m_pPointLightMesh = nullptr;
 	}
 
-	ModelData& Light::GetModelData()
+	const ModelData& Light::GetModelData()
 	{
 		if (m_type == LightType::DIRECTIONAL)
 		{
@@ -34,7 +34,7 @@ namespace mnemosy::graphics
 		return *m_pDirectionalLightMesh;
 	}
 
-	LightType Light::GetLightType()
+	const LightType& Light::GetLightType()
 	{
 		return m_type;
 	}

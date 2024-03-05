@@ -40,7 +40,7 @@ namespace mnemosy::graphics
 
 	}
 
-	void RenderMesh::SetMaterial(Material* material)
+	void RenderMesh::SetMaterial(Material* const material)
 	{
 		if (m_material)
 		{

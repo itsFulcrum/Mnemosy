@@ -58,6 +58,14 @@ namespace mnemosy::systems
 
 	InputSystem::~InputSystem()
 	{
+
+		m_keyboardEntries.clear();
+		m_mouseButtonEntries.clear();
+		m_mouseCursorEntries.clear();
+		m_mouseScrollEntries.clear();
+		m_windowResizeEntries.clear();
+		
+
 		m_pWindow = nullptr;
 	}
 

@@ -38,9 +38,9 @@ namespace mnemosy::graphics
 		RenderMesh& GetGizmoMesh() { return *m_gizmoMesh; }
 		Light& GetLight() {	return *m_light;}
 		Skybox& GetSkybox() { return *m_skybox; }
-		PreviewMesh GetCurrentPreviewMesh() { return m_currentPreviewMesh; }
+		const PreviewMesh& GetCurrentPreviewMesh() { return m_currentPreviewMesh; }
 
-		void SetPreviewMesh(PreviewMesh previewMeshType);
+		void SetPreviewMesh(const PreviewMesh& previewMeshType);
 
 	private:
 		void Setup();

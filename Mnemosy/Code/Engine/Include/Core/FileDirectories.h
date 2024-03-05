@@ -15,20 +15,30 @@ namespace mnemosy::core
 		FileDirectories();
 		~FileDirectories();
 
-		fs::path GetResourcesPath();
-		fs::path GetMeshesPath();
-		fs::path GetTexturesPath();
-		fs::path GetDataPath();
-		fs::path GetCubemapsPath();
-		fs::path GetShadersPath();
+		const fs::path GetResourcesPath();
+		const fs::path GetMeshesPath();
+		const fs::path GetTexturesPath();
+		const fs::path GetDataPath();
+		const fs::path GetCubemapsPath();
+		const fs::path GetShadersPath();
 
+		const fs::path GetLibraryDirectoryPath();
+		void SetUserLibraryDirectory(const fs::directory_entry& directoryPath);
 
 	private:
+
+		void LoadUserLibraryDirectoryFromDataFile();
+		void SaveUserLibraryDirectoryToDataFile(const fs::directory_entry& libraryDirectoryPath);
+		bool CheckLibraryDataFile();
+		
 		//std::filesystem::path m_mnemosyInternalResourcesDirectory;
 
 		//std::filesystem::path m_userLibraryFileDirectory;
 
 		fs::directory_entry m_mnemosyInternalResourcesDirectory;
+		fs::directory_entry m_mnemosyUserLibraryDirectory;
+		fs::directory_entry m_mnemosyDefaultLibraryDirectory;
+		fs::directory_entry m_mnemosyLibraryDataFile;
 	};
 
 } // !mnemosy::core

@@ -28,24 +28,21 @@ namespace mnemosy::core
 
 		GLFWwindow& GetWindow() { return *m_pWindow; }
 		//GLFWwindow* GetRawWindowPointer() { return m_pWindow; }
-		unsigned int GetWindowWidth() { return m_currentWindowWidth; }
-		unsigned int GetWindowHeight() { return m_currentWindowHeight; }
-		float GetAspectRatio() { return float(m_currentWindowWidth) / float(m_currentWindowHeight); }
+		const unsigned int GetWindowWidth()  const { return m_currentWindowWidth; }
+		const unsigned int GetWindowHeight() const { return m_currentWindowHeight; }
+		const float GetAspectRatio() const { return float(m_currentWindowWidth) / float(m_currentWindowHeight); }
 
-
+		const ViewportData GetViewportData()	const { return m_viewportData;}
+		const unsigned int GetViewportWidth()	const { return m_viewportData.width; }
+		const unsigned int GetViewportHeight()	const { return m_viewportData.height; }
+		const unsigned int GetViewportPosX()	const { return m_viewportData.posX; }
+		const unsigned int GetViewportPosY()	const { return m_viewportData.posY; }
+		const bool IsVsyncEnabled() { return m_vsyncEnabled; }
 		
-		void SetViewportData(unsigned int viewWidth, unsigned int viewHeight, int viewStartPosX, int viewStartPosY);
-		ViewportData GetViewportData()		{ return m_viewportData;}
-		unsigned int GetViewportWidth()		{ return m_viewportData.width; }
-		unsigned int GetViewportHeight()	{ return m_viewportData.height; }
-		unsigned int GetViewportPosX()		{ return m_viewportData.posX; }
-		unsigned int GetViewportPosY()		{ return m_viewportData.posY; }
-		
-
+		void SetViewportData(const unsigned int viewWidth,const unsigned int viewHeight,const int viewStartPosX,const int viewStartPosY);
 		void SetWindowSize_InternalByIntputSystem(const unsigned int width,const unsigned int height);
+		void EnableVsync(const bool enable);
 
-		void EnableVsync(bool enable);
-		bool IsVsyncEnabled() { return m_vsyncEnabled; }
 	private:
 		unsigned int m_currentWindowWidth = 0;
 		unsigned int m_currentWindowHeight = 0;

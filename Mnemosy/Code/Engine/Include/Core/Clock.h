@@ -12,12 +12,13 @@ namespace mnemosy::core
 
 		void Update();
 
-		double GetTimeSeconds() { return m_currentTime; }
-		double GetDeltaSeconds() { return m_deltaSeconds; }
+		const double GetTimeSeconds() { return m_currentTime; }
+		const double GetGLFWTimeDirectly();
+		const double GetDeltaSeconds() { return m_deltaSeconds; }
 		//double GetDeltaMiliseconds() { return m_deltaMili; }
 
-		int GetFPS() { return m_currentFPS; }
-		float GetFrameTime();
+		const int GetFPS() { return m_currentFPS; }
+		const float GetFrameTime();
 
 		bool capDeltaTime = true;
 

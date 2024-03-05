@@ -2,11 +2,21 @@
 #include "External/ImGui/imgui.h"
 #include "Include/Core/Log.h"
 
+#include "Include/MnemosyConfig.h"
 #include "Include/Application.h"
 #include "Include/MnemosyEngine.h"
+#include "Include/Core/FileDirectories.h"
 #include "Include/Core/Clock.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Core/Window.h"
+
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+#include "Include/Core/Utils/PlatfromUtils_Windows.h"
+#endif // MNEMOSY_PLATFORM_WINDOWS
+
+
+#include <filesystem>
 
 namespace mnemosy::gui
 {
@@ -20,13 +30,50 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
+
+		MnemosyEngine& engine = ENGINE_INSTANCE();
+
 		ImGui::Begin(panelName.c_str(), &showPanel);
+
+
+
+		{
+			ImGui::SeparatorText("Library Directory");
+			core::FileDirectories& fd = engine.GetFileDirectories();
+
+
+			std::string currentLibraryDirectory = fd.GetLibraryDirectoryPath().generic_string();
+			ImGui::Text("Path: %s", currentLibraryDirectory.c_str());
+
+			if (ImGui::Button("Select Folder..."))
+			{
+
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+				//std::string filepath = mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
+				std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
+				
+
+				if (!directoryPath.empty())
+				{
+
+					fd.SetUserLibraryDirectory(std::filesystem::directory_entry(directoryPath));
+					
+				}
+
+#endif
+
+
+			}
+
+		}
+
+
 
 
 		ImGui::SeparatorText("Info");
 
 		// show fps and frametime in ms
-		MnemosyEngine& engine = ENGINE_INSTANCE();
 		core::Clock& clock = engine.GetClock();
 
 		int fps = clock.GetFPS();

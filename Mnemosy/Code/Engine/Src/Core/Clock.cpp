@@ -54,7 +54,12 @@ namespace mnemosy::core
 		m_frameCount++;
 	}
 
-	float Clock::GetFrameTime()
+	const double Clock::GetGLFWTimeDirectly()
+	{
+		return glfwGetTime();
+	}
+
+	const float Clock::GetFrameTime()
 	{
 		return float(m_uncappedDeltaSeconds * 1000.0);
 	}

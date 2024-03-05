@@ -22,8 +22,8 @@ namespace mnemosy::graphics
 {
 	ImageBasedLightingRenderer::ImageBasedLightingRenderer()
 	{
-		glGenFramebuffers(1, &m_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		//glGenFramebuffers(1, &m_fbo);
+		//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		
 		// turn of openCV Logging
 		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
@@ -181,7 +181,7 @@ namespace mnemosy::graphics
 	}
 	
 	// depricated use RenderBrdfLutTextureAndSafeKtx()
-	void ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeTif(std::string exportpath, bool exportToFile)
+	void ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeTif(const std::string& exportpath, bool exportToFile)
 	{
 		if (m_brdfLutTexture_isGenerated)
 		{
@@ -299,8 +299,8 @@ namespace mnemosy::graphics
 			return;
 
 
-		mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
-		std::filesystem::path pathToFile = fd.GetTexturesPath() / std::filesystem::path("ibl/ibl_brdfLut.ktx2");
+		//mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+		std::filesystem::path pathToFile = MnemosyEngine::GetInstance().GetFileDirectories().GetTexturesPath() / std::filesystem::path("ibl/ibl_brdfLut.ktx2");
 		std::filesystem::directory_entry file = std::filesystem::directory_entry(pathToFile);
 
 		bool ktxFileExists = true;
@@ -313,11 +313,11 @@ namespace mnemosy::graphics
 		// hardcoding because loading from file causes weird artifacts atm
 		//ktxFileExists = false;
 		
-		std::string p = pathToFile.generic_string(); // idk have to convert to string first stupid c++
+		std::string pathToFileString = pathToFile.generic_string(); // idk have to convert to string first stupid c++
 		if (ktxFileExists) 
 		{
 			KtxImage brdfLut;
-			brdfLut.LoadBrdfKTX(p.c_str(), m_brdfLutTextureID);
+			brdfLut.LoadBrdfKTX(pathToFileString.c_str(), m_brdfLutTextureID);
 			
 			m_brdfLutTexture_isGenerated = true;
 			MNEMOSY_DEBUG("Loaded brdf lut texture from .ktx");
@@ -325,7 +325,7 @@ namespace mnemosy::graphics
 		}
 		else // !fileExists 
 		{
-			RenderBrdfLutTextureAndSafeKtx(p.c_str(), true);
+			RenderBrdfLutTextureAndSafeKtx(pathToFileString.c_str(), true);
 			return;
 		}
 
@@ -412,6 +412,14 @@ namespace mnemosy::graphics
 	void ImageBasedLightingRenderer::InitializeMeshAndShader()
 	{
 		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+
+		if (m_fbo == -1)
+		{
+			glGenFramebuffers(1, &m_fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+
+		}
+
 
 		if (m_unitCube == nullptr) {
 

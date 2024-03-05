@@ -66,6 +66,7 @@ namespace mnemosy::graphics
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
 	}
 
 	void Shader::Use()
@@ -106,7 +107,8 @@ namespace mnemosy::graphics
 		int uniformLocation = glGetUniformLocation(ID, name.c_str());
 		glUniform4f(uniformLocation, x, y, z, w);
 	}
-	void Shader::SetUniformMatrix4(const std::string& name, glm::mat4 matrix) {
+
+	void Shader::SetUniformMatrix4(const std::string& name, const glm::mat4& matrix) {
 		unsigned int uniformLocation = glGetUniformLocation(ID, name.c_str());
 
 		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
@@ -121,7 +123,7 @@ namespace mnemosy::graphics
 	}
 	// private
 
-	void Shader::CheckCompileErrors(unsigned int shader, std::string type)
+	void Shader::CheckCompileErrors(unsigned int shader,const std::string& type)
 	{
 		int success;
 		char infoLog[1024];

@@ -55,7 +55,7 @@ namespace mnemosy::core
 
 	Window::Window(const char* WindowTitle)
 	{
-		m_pWindow = nullptr;
+		//m_pWindow = nullptr;
 
 		m_currentWindowWidth = SRC_WINDOW_WIDTH;
 		m_currentWindowHeight = SRC_WIDNOW_HEIGHT;
@@ -71,9 +71,10 @@ namespace mnemosy::core
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif // MNEMOSY_CONFIG_DEBUG
 
+
 		// create GLFW window
 		m_pWindow = glfwCreateWindow(m_currentWindowWidth, m_currentWindowHeight, WindowTitle, nullptr, nullptr);
-
+		
 		if (m_pWindow == nullptr)
 		{
 			MNEMOSY_ERROR("Failed to create GLFW window");
@@ -90,9 +91,6 @@ namespace mnemosy::core
 		{
 			glfwSwapInterval(0);
 		}
-
-
-
 
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{

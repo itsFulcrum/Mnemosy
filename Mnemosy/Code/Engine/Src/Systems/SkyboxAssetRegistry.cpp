@@ -29,7 +29,7 @@ namespace mnemosy::systems
 		SaveAllEntriesToDataFile();
 	}
 
-	bool SkyboxAssetRegistry::CheckIfExists(std::string name)
+	bool SkyboxAssetRegistry::CheckIfExists(const std::string& name)
 	{
 		if (m_orderedEntryNames.empty())
 			return false;
@@ -45,7 +45,7 @@ namespace mnemosy::systems
 		return false;
 	}
 
-	void SkyboxAssetRegistry::AddEntry(std::string name)
+	void SkyboxAssetRegistry::AddEntry(const std::string& name)
 	{
 		// check if it already exists
 
@@ -66,11 +66,11 @@ namespace mnemosy::systems
 		SaveAllEntriesToDataFile();
 	}
 
-	void SkyboxAssetRegistry::RemoveEntry(std::string name)
+	void SkyboxAssetRegistry::RemoveEntry(const std::string& name)
 	{
 		// delete the files
-		mnemosy::core::FileDirectories& FD = MnemosyEngine::GetInstance().GetFileDirectories();
-		std::filesystem::path pathToCubemaps = FD.GetCubemapsPath();
+		//mnemosy::core::FileDirectories& FD = MnemosyEngine::GetInstance().GetFileDirectories();
+		std::filesystem::path pathToCubemaps = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
 
 		SkyboxAssetEntry entryToRemove;
 		entryToRemove.skyName				= name;
@@ -100,7 +100,7 @@ namespace mnemosy::systems
 		SaveAllEntriesToDataFile();
 	}
 
-	SkyboxAssetEntry SkyboxAssetRegistry::GetEntry(std::string name)
+	SkyboxAssetEntry SkyboxAssetRegistry::GetEntry(const std::string& name)
 	{
 		SkyboxAssetEntry returnEntry;
 

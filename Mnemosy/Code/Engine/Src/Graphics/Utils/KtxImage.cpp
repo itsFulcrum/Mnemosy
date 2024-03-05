@@ -10,38 +10,40 @@
 
 namespace mnemosy::graphics
 {
-	bool KtxImage::LoadKtx(const char* filepath, unsigned int& glTextureID)
-	{
-		{
-			ktxTexture* kTexture;
-			KTX_error_code errorCode;
+	const bool KtxImage::LoadKtx(const char* filepath, unsigned int& glTextureID) {
+		//MNEMOSY_TRACE("LoadKtx - {}", filepath);
+		ktxTexture* kTexture;
+		KTX_error_code errorCode;
 			
-			errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &kTexture);
-			if (errorCode != 0)
-			{
-				MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
-				numChannels = 0; width = 0; height = 0;
-				ktxTexture_Destroy(kTexture);
-				return false;
-			}			
-
-
-			GLenum target, glerror;
-			errorCode = ktxTexture_GLUpload(ktxTexture(kTexture), &glTextureID, &target, &glerror);
-			if (errorCode != 0)
-			{
-				MNEMOSY_ERROR("KtxImage::LoadKtx: GLUpload Failed \nError code: {}", ktxErrorString(errorCode));
-				numChannels = 0; width = 0; height = 0;
-				ktxTexture_Destroy(kTexture);
-				return false;
-			}
-
+		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+		if (errorCode != 0)
+		{
+			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
+			numChannels = 0; width = 0; height = 0;
 			ktxTexture_Destroy(kTexture);
-			return true;
+			return false;
+		}			
+		//MNEMOSY_TRACE("LoadKtx - createNamedFile");
+
+
+		GLenum target, glerror;
+		errorCode = ktxTexture_GLUpload(ktxTexture(kTexture), &glTextureID, &target, &glerror);
+		if (errorCode != 0)
+		{
+			MNEMOSY_ERROR("KtxImage::LoadKtx: GLUpload Failed \nError code: {}", ktxErrorString(errorCode));
+			numChannels = 0; width = 0; height = 0;
+			ktxTexture_Destroy(kTexture);
+			return false;
 		}
+		//MNEMOSY_TRACE("LoadKtx - upload");
+
+		ktxTexture_Destroy(kTexture);
+		//MNEMOSY_TRACE("LoadKtx - done");
+		return true;
+		
 	}
 
-	bool KtxImage::LoadBrdfKTX(const char* filepath, unsigned int& glTextureID)
+	const bool KtxImage::LoadBrdfKTX(const char* filepath, unsigned int& glTextureID)
 	{
 		// function upload the image directly to openGl instead of calling GLUpload.  
 		// seeing artifacs when using GLUpload()
@@ -54,7 +56,7 @@ namespace mnemosy::graphics
 		ktx_uint32_t level, layer, faceSlice;
 
 
-		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &kTexture);
+		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		if (errorCode != 0)
 		{
 			MNEMOSY_ERROR("KtxImage::LoadBrdfKTX - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
@@ -95,7 +97,77 @@ namespace mnemosy::graphics
 		return true;
 	}
 
-	bool KtxImage::SaveKtx(const char* filepath, unsigned char* imageData, unsigned int numChannels, unsigned int width, unsigned int height)
+	const bool KtxImage::LoadCubemapKTX(const char* filepath, unsigned int& glTextureID)
+	{
+		// see if implementing this to upload manually reduces loading time -> not really by a lot
+
+		//MNEMOSY_TRACE("LoadCubeKtx - {}", filepath);
+		ktxTexture* kTexture;
+		KTX_error_code errorCode;
+
+		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+		if (errorCode != 0)
+		{
+			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
+			numChannels = 0; width = 0; height = 0;
+			ktxTexture_Destroy(kTexture);
+			return false;
+		}
+		//MNEMOSY_TRACE("LoadCubeKtx - createNamedFile");
+
+
+
+		int resolution = kTexture->baseWidth;
+
+
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, glTextureID);
+
+		ktx_uint32_t level = 0, layer = 0, faceSlice = 0;
+
+		ktx_size_t offset;
+		ktx_uint8_t* image;
+		
+		for (int i = 0; i < 6; ++i)
+		{
+			faceSlice = i;
+			// retrive data from ktx
+
+			errorCode = ktxTexture_GetImageOffset(kTexture, level, layer, faceSlice, &offset);
+			if (errorCode != 0)
+			{
+				MNEMOSY_ERROR("KtxImage::LoadCubeKTX - GetImageOffset Failed \nError code: {}", ktxErrorString(errorCode));
+				numChannels = 0; width = 0; height = 0;
+				ktxTexture_Destroy(kTexture);
+				return false;
+			}
+			image = ktxTexture_GetData(kTexture) + offset;
+
+			// upload to gl
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, image);
+		}
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, glTextureID);
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+		//MNEMOSY_TRACE("LoadCubeKtx - upload");
+
+		ktxTexture_Destroy(kTexture);
+		//MNEMOSY_TRACE("LoadCubeKtx - done");
+		return true;
+
+
+		return false;
+	}
+
+	const bool KtxImage::SaveKtx(const char* filepath,unsigned char* imageData, unsigned int numChannels, unsigned int width, unsigned int height)
 	{
 		ktxTexture2* texture;                   // For KTX2
 		ktxTextureCreateInfo createInfo;
@@ -185,7 +257,7 @@ namespace mnemosy::graphics
 		return true;
 	}
 
-	bool KtxImage::SaveBrdfLutKtx(const char* filepath, unsigned int& glTextureID, unsigned int resolution)
+	const bool KtxImage::SaveBrdfLutKtx(const char* filepath, unsigned int& glTextureID, unsigned int resolution)
 	{
 		ktxTexture2* texture;
 		ktxTextureCreateInfo createInfo;
@@ -273,7 +345,7 @@ namespace mnemosy::graphics
 
 	}
 
-	bool KtxImage::SaveCubemapKtx(const char* filepath, unsigned int& glTextureID, unsigned int resolution)
+	const bool KtxImage::SaveCubemapKtx(const char* filepath, unsigned int& glTextureID, unsigned int resolution)
 	{
 		ktxTexture2* texture;
 		ktxTextureCreateInfo createInfo;

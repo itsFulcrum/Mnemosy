@@ -12,6 +12,8 @@ namespace mnemosy::core
 	public:
 		static std::string OpenFile(const char* filter);
 		static std::string SaveFile(const char* filter);
+		static std::string SelectFolder(const char* filter);
+
 	};
 
 }

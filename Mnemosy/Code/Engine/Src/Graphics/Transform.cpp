@@ -4,8 +4,8 @@
 
 namespace mnemosy::graphics
 {
-	glm::mat4 Transform::GetTransformMatrix()
-	{
+	const glm::mat4 Transform::GetTransformMatrix() const {
+
 		glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), m_position);
 		glm::mat4 rotationMat = glm::toMat4(m_quatOrientation); // convert quaternion to rotation matrix
 		glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), m_scale);
@@ -21,14 +21,13 @@ namespace mnemosy::graphics
 		return transformMatrix;
 	}
 
-	glm::mat4 Transform::GetNormalMatrix(glm::mat4 transformMatrix)
-	{
+	const glm::mat4 Transform::GetNormalMatrix(const glm::mat4& transformMatrix) const {
 		return glm::transpose(glm::inverse(transformMatrix));
 	}
 
-	void Transform::SetPosition(glm::vec3 position) { m_position = position;}
+	void Transform::SetPosition(const glm::vec3& position) { m_position = position;}
 
-	void Transform::SetRotationEulerAngles(glm::vec3 rotation)
+	void Transform::SetRotationEulerAngles(const glm::vec3& rotation)
 	{
 		m_rotation = rotation;
 		m_quatOrientation = glm::quat(glm::radians(m_rotation)); // convert from euler angles in radians to quaternion
@@ -36,9 +35,9 @@ namespace mnemosy::graphics
 		RecalculateLocalVectors_Internal();
 	}
 
-	void Transform::SetScale(glm::vec3 scale) {m_scale = scale;}
+	void Transform::SetScale(const glm::vec3& scale) {m_scale = scale;}
 
-	void Transform::RotateAroundAxis(float angle, glm::vec3 axis)
+	void Transform::RotateAroundAxis(const float angle, const glm::vec3& axis)
 	{
 		glm::quat rotate = glm::angleAxis(glm::radians(angle),axis);
 

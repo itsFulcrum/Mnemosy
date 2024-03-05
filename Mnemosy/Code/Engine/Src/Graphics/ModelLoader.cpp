@@ -9,15 +9,14 @@
 namespace mnemosy::graphics
 {
 	// public
-	ModelData* ModelLoader::LoadModelDataFromFile(std::string const& path)
+	ModelData* ModelLoader::LoadModelDataFromFile(const std::string& path)
 	{
 		return	M_LoadModel(path);
 	}
 
 	// private
-	ModelData* ModelLoader::M_LoadModel(std::string const& path)
+	ModelData* ModelLoader::M_LoadModel(const std::string& path)
 	{
-		ModelData* modelData = new ModelData();
 
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace);
@@ -27,26 +26,27 @@ namespace mnemosy::graphics
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 		{
-			// build linking erro when using importer.getErroString()
-			
 			MNEMOSY_ERROR("Faild to load Model from file: {} \n Filepath: {}", importer.GetErrorString(), path);
 
+			importer.FreeScene();
+			ModelData* modelData = new ModelData();
 			return modelData;
 		}
-
-		m_fileDirectory = path.substr(0, path.find_first_of('/'));
+		
+		ModelData* modelData = new ModelData();
 		M_ProcessNode(scene->mRootNode, scene, *modelData);
+		
+		importer.FreeScene();
 
 		MNEMOSY_DEBUG("Loaded model from file: {}", path);
-
 		return modelData;
 	}
 
 
-	void ModelLoader::M_ProcessNode(aiNode* node, const aiScene* scene, ModelData& modelData)
+	void ModelLoader::M_ProcessNode(const aiNode* node, const aiScene* scene, ModelData& modelData)
 	{
 
-		// process all the node's meshes
+		// recursavly process all the node's sub meshes
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
 			//aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -54,18 +54,17 @@ namespace mnemosy::graphics
 			// semes to work for at least single mesh files..
 			aiMesh* mesh = scene->mMeshes[i];
 
-
 			modelData.meshes.push_back(M_ProcessMesh(mesh, scene));
 
-		}
-		// recursively call for all the childrens 
-		for (unsigned int i = 0; i < node->mNumChildren; i++)
-		{
 			M_ProcessNode(node->mChildren[i], scene, modelData);
 		}
+
+
+
+		
 	}
 
-	MeshData ModelLoader::M_ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	MeshData ModelLoader::M_ProcessMesh(const aiMesh* mesh, const aiScene* scene)
 	{
 		std::vector<VertexData> vertices;
 		std::vector<unsigned int> indices;
@@ -74,40 +73,15 @@ namespace mnemosy::graphics
 		{
 			VertexData vertex;
 			// process data
-			glm::vec3 position;
-			position.x = mesh->mVertices[i].x;
-			position.y = mesh->mVertices[i].y;
-			position.z = mesh->mVertices[i].z;
-			vertex.position = position;
 
-			glm::vec3 normal;
-			normal.x = mesh->mNormals[i].x;
-			normal.y = mesh->mNormals[i].y;
-			normal.z = mesh->mNormals[i].z;
-			vertex.normal = normal;
-
-
-			glm::vec3 tangent;
-			tangent.x = mesh->mTangents[i].x;
-			tangent.y = mesh->mTangents[i].y;
-			tangent.z = mesh->mTangents[i].z;
-			vertex.tangent = tangent;
-
-
-			glm::vec3 bitangent;
-			bitangent.x = mesh->mBitangents[i].x;
-			bitangent.y = mesh->mBitangents[i].y;
-			bitangent.z = mesh->mBitangents[i].z;
-			vertex.bitangent = bitangent;
-
+			vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+			vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+			vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+			vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
 
 			if (mesh->mColors[0])
 			{
-				glm::vec3 color;
-				color.r = mesh->mColors[0][i].r;
-				color.g = mesh->mColors[0][i].g;
-				color.b = mesh->mColors[0][i].b;
-				vertex.color = color;
+				vertex.color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
 			}
 			else
 			{
@@ -117,21 +91,17 @@ namespace mnemosy::graphics
 			// checking if texCoords Exist
 			if (mesh->mTextureCoords[0])
 			{
-				glm::vec2 uv0;
-				uv0.x = mesh->mTextureCoords[0][i].x;
-				uv0.y = mesh->mTextureCoords[0][i].y;
-				vertex.texCoords = uv0;
+				vertex.texCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 			}
 			else
 			{
 				vertex.texCoords = glm::vec2(0.5f, 0.5f); // all at 0
 			}
 
-
 			vertices.push_back(vertex);
 		}
-		// process indices
 
+		// process indices
 		for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
@@ -141,19 +111,19 @@ namespace mnemosy::graphics
 			}
 		}
 
-
-		// TODO: create on the heap
 		//MeshData meshData;
 		//MeshData* meshData = new MeshData();
 		std::unique_ptr<MeshData> meshData = std::make_unique<MeshData>(); // !!! idk this might not work
-
 		M_SetupMesh(*meshData, vertices, indices);
+
+		vertices.clear();
+		indices.clear();
 
 		return *meshData;
 	}
 
 
-	void ModelLoader::M_SetupMesh(MeshData& _meshData, std::vector<VertexData> Vertecies, std::vector<unsigned int> Indecies)
+	void ModelLoader::M_SetupMesh(MeshData& _meshData, const std::vector<VertexData>& Vertecies, const std::vector<unsigned int>& Indecies)
 	{
 		glGenVertexArrays(1, &_meshData.vertexArrayObject);
 		glGenBuffers(1, &_meshData.vertexBufferObject);

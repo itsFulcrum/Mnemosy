@@ -22,8 +22,7 @@ namespace mnemosy::graphics
 		clear();
 	}
 
-	bool Texture::generateFromFile(const char* imagePath, bool flipImageVertically, bool generateMipmaps)
-	{
+	const bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
 		clear();
 
 		/*Image* img = new Image();
@@ -103,7 +102,7 @@ namespace mnemosy::graphics
 			
 				MNEMOSY_TRACE("openCV loaded img  numChannels: {}", rgba.channels());
 				KtxImage ktxImg;
-				bool worked = ktxImg.SaveKtx("../Resources/Textures/ExportTest2_linear.ktx2", rgba.ptr(),rgba.channels(), rgba.cols, rgba.rows);
+				bool worked = ktxImg.SaveKtx("../Resources/Textures/ExportTest2_linear.ktx2", rgba.ptr(), rgba.channels(), rgba.cols, rgba.rows);
 				if(worked)
 					MNEMOSY_TRACE("Exported ktx");
 				rgba.release();
@@ -172,13 +171,11 @@ namespace mnemosy::graphics
 	}
 
 
-	bool Texture::containsData() const
-	{
+	const bool Texture::containsData() const {
 		return m_isInitialized;
 	}
 
-	void Texture::clear()
-	{
+	void Texture::clear() {
 		if (m_isInitialized)
 		{
 			UnbindLocation(m_lastBoundLocation);
@@ -188,8 +185,8 @@ namespace mnemosy::graphics
 		}
 	}
 
-	void Texture::BindToLocation(unsigned int activeTextureLocation)
-	{
+	void Texture::BindToLocation(const unsigned int activeTextureLocation) {
+
 		MNEMOSY_ASSERT(m_isInitialized, "Trying to bind texture that has no data");
 		if (!m_isInitialized) 
 			return;
@@ -210,8 +207,7 @@ namespace mnemosy::graphics
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 	}
 
-	void Texture::UnbindLocation(unsigned int activeTextureLocation)
-	{
+	void Texture::UnbindLocation(const unsigned int activeTextureLocation) {
 
 		if (activeTextureLocation > 16 || activeTextureLocation < 0)
 		{
@@ -225,8 +221,7 @@ namespace mnemosy::graphics
 
 	}
 
-	int Texture::GetChannelsAmount() const
-	{
+	const int Texture::GetChannelsAmount() const {
 		if (!m_isInitialized) {
 			MNEMOSY_ERROR("Trying to read data from an uninitialize texture")
 			return 0;
