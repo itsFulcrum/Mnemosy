@@ -6,6 +6,8 @@
 #include "Include/GuiPanels/GlobalSettingsGuiPanel.h"
 #include "Include/GuiPanels/SceneSettingsGuiPanel.h"
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
+#include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
+
 
 #include "External/ImGui/imgui.h"
 
@@ -49,7 +51,11 @@ namespace mnemosy::gui
 				{
 					panelManager.GetMaterialEditorPanel().setActive();
 				}
-
+				bool materialLibraryPanel = panelManager.GetMaterialLibraryPanel().isActive();
+				if (ImGui::MenuItem("Material Library", "", materialLibraryPanel, !materialLibraryPanel))
+				{
+					panelManager.GetMaterialLibraryPanel().setActive();
+				}
 
 				ImGui::EndMenu();
 			}

@@ -16,6 +16,7 @@ namespace mnemosy::systems
 {
 	class InputSystem;
 	class SkyboxAssetRegistry;
+	class MaterialLibraryRegistry;
 }
 
 namespace mnemosy::graphics
@@ -54,9 +55,11 @@ namespace mnemosy
 		core::Window& GetWindow()					{ return *m_pWindow; }
 		core::FileDirectories& GetFileDirectories() { return *m_pFileDirectories; }
 		core::Clock& GetClock()						{ return *m_clock; }
-		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		systems::InputSystem& GetInputSystem() { return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry() { return *m_pSkyboxAssetRegistry; }
+		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry() { return *m_pMaterialLibraryRegistry; }
+		
+		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
 		graphics::Scene& GetScene() { return *m_pScene; }
 
@@ -75,6 +78,9 @@ namespace mnemosy
 		std::unique_ptr<systems::InputSystem> m_pInputSystem;
 		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;
 		
+		std::unique_ptr<systems::MaterialLibraryRegistry> m_pMaterialLibraryRegistry;
+
+
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
 		std::unique_ptr<graphics::Renderer> m_pRenderer;
 

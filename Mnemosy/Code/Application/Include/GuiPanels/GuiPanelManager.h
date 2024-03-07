@@ -8,6 +8,7 @@ namespace mnemosy::gui
 	class GlobalSettingsGuiPanel;
 	class SceneSettingsGuiPanel;
 	class MaterialEditorGuiPanel;
+	class MaterialLibraryGuiPanel;
 }
 
 namespace mnemosy::gui
@@ -25,6 +26,7 @@ namespace mnemosy::gui
 		GlobalSettingsGuiPanel& GetGlobalSettingsPanel() { return *m_pGlobalSettingsPanel; }
 		SceneSettingsGuiPanel& GetSceneSettingsPanel() { return *m_pSceneSettingsPanel; }
 		MaterialEditorGuiPanel& GetMaterialEditorPanel() { return *m_pMaterialEditorPanel; }
+		MaterialLibraryGuiPanel& GetMaterialLibraryPanel() { return *m_pMaterialLibraryPanel; }
 
 
 	private:
@@ -33,6 +35,7 @@ namespace mnemosy::gui
 		GlobalSettingsGuiPanel* m_pGlobalSettingsPanel = nullptr;
 		SceneSettingsGuiPanel* m_pSceneSettingsPanel = nullptr;
 		MaterialEditorGuiPanel* m_pMaterialEditorPanel = nullptr;
+		MaterialLibraryGuiPanel* m_pMaterialLibraryPanel = nullptr;
 
 
 	};

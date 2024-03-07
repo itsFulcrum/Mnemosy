@@ -27,6 +27,10 @@ ${APP_SOURCE_PATH}/Include/GuiPanels/ViewportGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/ViewportGuiPanel.cpp
 ${APP_SOURCE_PATH}/Include/GuiPanels/SceneSettingsGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/SceneSettingsGuiPanel.cpp
+
+${APP_SOURCE_PATH}/Include/GuiPanels/MaterialLibraryGuiPanel.h
+${APP_SOURCE_PATH}/Src/GuiPanels/MaterialLibraryGuiPanel.cpp
+
 ${APP_SOURCE_PATH}/Include/GuiPanels/MaterialEditorGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/MaterialEditorGuiPanel.cpp
 

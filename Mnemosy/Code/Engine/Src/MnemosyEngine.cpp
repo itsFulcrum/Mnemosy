@@ -11,6 +11,7 @@
 
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
+#include "Include/Systems/MaterialLibraryRegistry.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -74,32 +75,32 @@ namespace mnemosy
 
 		MNEMOSY_TRACE("Initializing Subsystems");
 		m_pWindow = new core::Window(WindowTitle);
-		MNEMOSY_TRACE("Window Initialized");
+		//MNEMOSY_TRACE("Window Initialized");
 		
 
 
 		// subsystems
 		// order of initialization here matters
 		
+		// Mnemosy::core
 		m_clock = std::make_unique<core::Clock>();
-		MNEMOSY_TRACE("Clock Initialized");
-		
+		//MNEMOSY_TRACE("Clock Initialized");
 		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
-		MNEMOSY_TRACE("FileDirectories Initialized");
-
-
-
+		//MNEMOSY_TRACE("FileDirectories Initialized");
+		
+		// mnemosy::systems
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
-		MNEMOSY_TRACE("InputSystem Initialized");
+		//MNEMOSY_TRACE("InputSystem Initialized");
 		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
-		MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
+		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
+		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
 
 
-
+		// menmosy::graphcs
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
-		MNEMOSY_TRACE("ibl_Renderer Initialized");
+		//MNEMOSY_TRACE("ibl_Renderer Initialized");
 		m_pRenderer = std::make_unique<graphics::Renderer>();
-		MNEMOSY_TRACE("Renderer Initialized");
+		//MNEMOSY_TRACE("Renderer Initialized");
 
 		double timeSceneStart = glfwGetTime();
 		m_pScene = std::make_unique<graphics::Scene>();
@@ -110,7 +111,7 @@ namespace mnemosy
 
 
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
-		MNEMOSY_TRACE("UserInterface Initialized");
+		//MNEMOSY_TRACE("UserInterface Initialized");
 
 		
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
@@ -125,10 +126,6 @@ namespace mnemosy
 		double timeEnd = glfwGetTime();
 		MNEMOSY_INFO("Mnemosy Engine Initialized {} Seconds", (timeEnd - timeBegin));
 
-
-		//fs::path meshsPath = GetFileDirectories().GetResourcesPath() / fs::path("Meshes");
-		//MNEMOSY_DEBUG("MeshesPath: {}", meshsPath.generic_string());
-		//GetFileDirectories().GetResourcesPath();
 	}
 
 	void MnemosyEngine::Run()

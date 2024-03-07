@@ -3847,6 +3847,7 @@ static void ShowDemoWindowPopups()
             char buf[64];
             sprintf(buf, "Button: %s###Button", name); // ### operator override ID ignoring the preceding label
             ImGui::Button(buf);
+
             if (ImGui::BeginPopupContextItem())
             {
                 ImGui::Text("Edit name:");
@@ -3854,6 +3855,7 @@ static void ShowDemoWindowPopups()
 
                 if (ImGui::Button("Close"))
                     ImGui::CloseCurrentPopup();
+
                 ImGui::EndPopup();
             }
             ImGui::SameLine(); ImGui::Text("(<-- right-click here)");

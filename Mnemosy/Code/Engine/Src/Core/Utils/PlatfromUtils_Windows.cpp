@@ -92,7 +92,7 @@ namespace mnemosy::core
 
 		}
 
-
+		//hacky string convertion because windows is stupid
 		std::filesystem::path convert = g_path;
 
 

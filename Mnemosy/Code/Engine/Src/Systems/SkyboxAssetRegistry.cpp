@@ -5,7 +5,6 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/FileDirectories.h"
 
-#include <filesystem>
 #include <fstream>
 
 
