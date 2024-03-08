@@ -1,1 +1,82 @@
-{"1_Mnemosy_Data_File":"UserLibraryDirectoriesData","2_Header_Info":{"Description":"This file stores the treelike folder structure defined by users to organise their materials"},"3_UserDirectories":{"Root":{"1_name":"Root","2_isLeaf":false,"3_subFolderNames":["Nature","Wood","Stone"],"4_subFolders":{"Nature":{"1_name":"Nature","2_isLeaf":false,"3_subFolderNames":["Leafs","Rocks"],"4_subFolders":{"Leafs":{"1_name":"Leafs","2_isLeaf":true},"Rocks":{"1_name":"Rocks","2_isLeaf":true}}},"Stone":{"1_name":"Stone","2_isLeaf":false,"3_subFolderNames":["Concrete","Rocks"],"4_subFolders":{"Concrete":{"1_name":"Concrete","2_isLeaf":false,"3_subFolderNames":["Clean","Dirty"],"4_subFolders":{"Clean":{"1_name":"Clean","2_isLeaf":true},"Dirty":{"1_name":"Dirty","2_isLeaf":true}}},"Rocks":{"1_name":"Rocks","2_isLeaf":true}}},"Wood":{"1_name":"Wood","2_isLeaf":false,"3_subFolderNames":["Planks"],"4_subFolders":{"Planks":{"1_name":"Planks","2_isLeaf":false,"3_subFolderNames":["Indoor"],"4_subFolders":{"Indoor":{"1_name":"Indoor","2_isLeaf":true}}}}}}}}}
+{
+    "1_Mnemosy_Data_File": "UserLibraryDirectoriesData",
+    "2_Header_Info": {
+        "Description": "This file stores the treelike folder structure defined by users to organise their materials"
+    },
+    "3_UserDirectories": {
+        "Root": {
+            "1_name": "Root",
+            "2_isLeaf": false,
+            "3_subFolderNames": [
+                "Nature",
+                "Wood",
+                "Stone"
+            ],
+            "4_subFolders": {
+                "Nature": {
+                    "1_name": "Nature",
+                    "2_isLeaf": false,
+                    "3_subFolderNames": [
+                        "Leafs",
+                        "Rocks",
+                        "Moss"
+                    ],
+                    "4_subFolders": {
+                        "Leafs": {
+                            "1_name": "Leafs",
+                            "2_isLeaf": true
+                        },
+                        "Moss": {
+                            "1_name": "Moss",
+                            "2_isLeaf": true
+                        },
+                        "Rocks": {
+                            "1_name": "Rocks",
+                            "2_isLeaf": true
+                        }
+                    }
+                },
+                "Stone": {
+                    "1_name": "Stone",
+                    "2_isLeaf": false,
+                    "3_subFolderNames": [
+                        "Concrete",
+                        "Rocks"
+                    ],
+                    "4_subFolders": {
+                        "Concrete": {
+                            "1_name": "Concrete",
+                            "2_isLeaf": true
+                        },
+                        "Rocks": {
+                            "1_name": "Rocks",
+                            "2_isLeaf": true
+                        }
+                    }
+                },
+                "Wood": {
+                    "1_name": "Wood",
+                    "2_isLeaf": false,
+                    "3_subFolderNames": [
+                        "Planks"
+                    ],
+                    "4_subFolders": {
+                        "Planks": {
+                            "1_name": "Planks",
+                            "2_isLeaf": false,
+                            "3_subFolderNames": [
+                                "Indoor"
+                            ],
+                            "4_subFolders": {
+                                "Indoor": {
+                                    "1_name": "Indoor",
+                                    "2_isLeaf": true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

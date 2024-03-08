@@ -51,6 +51,7 @@ namespace mnemosy::systems
 		std::string name;
 		FolderNode* parent;
 		std::vector<FolderNode*> subNodes;
+		std::string pathFromRoot;
 		// maybe store full path .. could be useful
 		// maybe store material entries associated with this folder
 
@@ -73,20 +74,23 @@ namespace mnemosy::systems
 		FolderNode* CreateFolderNode(FolderNode* parentNode,std::string name);
 
 
+		void DeleteFolderHierarchy(FolderNode* node);
+
 
 		void SaveUserDirectoriesData();
 		void LoadUserDirectoriesFromFile();
 
-		void DeleteFolderHierarchy(FolderNode* node);
-
 		bool CheckDataFile(fs::directory_entry dataFile);
 	private:
+		bool prettyPrintDataFile = true;
+
+
 		void RecursivLoadDirectories(FolderNode* node, json& json);
 		json RecursivSaveDirectories(FolderNode* node);
 		void RecursivCleanFolderTreeMemory(FolderNode* node);
 
-		FolderNode* m_rootFolderNode;
 
+		FolderNode* m_rootFolderNode;
 
 		fs::directory_entry m_userDirectoriesDataFile;
 	};

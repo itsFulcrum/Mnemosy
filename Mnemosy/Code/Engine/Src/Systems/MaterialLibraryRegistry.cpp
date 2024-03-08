@@ -22,45 +22,6 @@ namespace mnemosy::systems
 		
 		LoadUserDirectoriesFromFile();
 
-		return;
-
-		m_rootFolderNode = CreateFolderNode(nullptr,"Root");
-
-
-
-		m_rootFolderNode->subNodes.push_back(CreateFolderNode(m_rootFolderNode,"Wood"));
-		m_rootFolderNode->subNodes.push_back(CreateFolderNode(m_rootFolderNode,"Stone"));
-
-
-
-
-		if (!m_rootFolderNode->subNodes.empty())
-		{
-			FolderNode* Wood = m_rootFolderNode->GetSubNodeByName("Wood");
-
-			Wood->subNodes.push_back(CreateFolderNode(Wood,"Planks"));
-
-
-			FolderNode* Stone = m_rootFolderNode->GetSubNodeByName("Stone");
-			if (Stone)
-			{
-				Stone->subNodes.push_back(CreateFolderNode(Stone,"Concrete"));
-				Stone->subNodes.push_back(CreateFolderNode(Stone,"Rock"));
-
-
-				FolderNode* Concrete = Stone->GetSubNodeByName("Concrete");
-				
-				if (Concrete)
-				{
-					Concrete->subNodes.push_back(CreateFolderNode(Concrete,"Clean"));
-					Concrete->subNodes.push_back(CreateFolderNode(Concrete,"Dirty"));
-
-				}
-
-
-			}
-		}
-
 	}
 
 	MaterialLibraryRegistry::~MaterialLibraryRegistry() {
@@ -116,7 +77,7 @@ namespace mnemosy::systems
 		LibraryDirectoriesJson["3_UserDirectories"] = userDirectoriesJson;
 
 
-		bool prettyPrintDataFile = false;
+		
 		if (prettyPrintDataFile)
 			dataFileStream << LibraryDirectoriesJson.dump(4);
 		else
@@ -188,10 +149,12 @@ namespace mnemosy::systems
 	{
 		//std::string name = jsonNode["1_name"].get<std::string>();
 		bool isLeafNode = jsonNode["2_isLeaf"].get<bool>();
+		
+
 
 		if (!isLeafNode) {
 
-			std::vector<std::string> subFolderNames = jsonNode["3_subFolderNames"].get<std::vector<std::string>>();
+			std::vector<std::string> subFolderNames = jsonNode["3_subFolderNames"].get<std::vector<std::string>>(); // 3 nature,wood,stone
 						
 			for (int i = 0; i < subFolderNames.size(); i++) {
 
@@ -199,7 +162,7 @@ namespace mnemosy::systems
 				node->subNodes.push_back(subNode);
 				json subJson = jsonNode["4_subFolders"][subFolderNames[i]];
 				RecursivLoadDirectories(subNode, subJson);
-
+				
 			}
 		}
 	}
