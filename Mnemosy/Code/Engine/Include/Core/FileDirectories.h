@@ -26,11 +26,13 @@ namespace mnemosy::core
 		void SetUserLibraryDirectory(const fs::directory_entry& directoryPath);
 
 	private:
+		bool prettyPrintDataFile = true;
+
 
 		void LoadUserLibraryDirectoryFromDataFile();
 		void SaveUserLibraryDirectoryToDataFile(const fs::directory_entry& libraryDirectoryPath);
 		bool CheckLibraryDataFile();
-		
+		void SetDefaultLibraryPath();
 		//std::filesystem::path m_mnemosyInternalResourcesDirectory;
 
 		//std::filesystem::path m_userLibraryFileDirectory;

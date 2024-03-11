@@ -6,15 +6,13 @@
 
 #include <fstream>
 
-
-
 namespace mnemosy::systems
 {
 	// public methods
  
 	MaterialLibraryRegistry::MaterialLibraryRegistry() {
 
-
+		m_runtimeIDCounter = 0;
 		mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 		fs::path pathToUserDirectoriesDataFile = fd.GetDataPath() / fs::path("UserLibraryDirectories.mnsydata");
 		m_userDirectoriesDataFile = fs::directory_entry(pathToUserDirectoriesDataFile); 
@@ -40,6 +38,22 @@ namespace mnemosy::systems
 		FolderNode* node = new FolderNode();
 		node->name = name;
 		node->parent = parentNode;
+
+		std::string pathFromRoot = "";
+		if (parentNode != nullptr) { // if this not root node
+			if (parentNode->name == "Root") { // if parent is root
+				pathFromRoot = node->name;
+			}
+			else {
+				pathFromRoot = parentNode->pathFromRoot + "/" + node->name;
+			}
+		}
+		node->pathFromRoot = pathFromRoot;
+
+		node->runtime_ID = m_runtimeIDCounter;
+		m_runtimeIDCounter++;
+		// create system folder 
+		CreateDirectoryForNode(node);
 
 		return node;
 	}
@@ -94,6 +108,8 @@ namespace mnemosy::systems
 			m_rootFolderNode = new FolderNode();
 			m_rootFolderNode->name = "Root";
 			m_rootFolderNode->parent = nullptr;
+			m_rootFolderNode->runtime_ID = m_runtimeIDCounter;
+			m_runtimeIDCounter++;
 		}
 
 		std::string pathToDataFileString = m_userDirectoriesDataFile.path().generic_string();
@@ -127,6 +143,20 @@ namespace mnemosy::systems
 
 	void MaterialLibraryRegistry::DeleteFolderHierarchy(FolderNode* node)
 	{
+		{
+			// delete directories from disk
+			fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+
+			fs::path directoryPathToDelete = libraryDir / fs::path(node->pathFromRoot);
+
+			try {
+				// this call removes all files and directories underneith permanently without moving it to trashbin
+				fs::remove_all(directoryPathToDelete);
+			}
+			catch (fs::filesystem_error error) {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteFolderHierarchy: Error Deleting path: {} \nError Message: {} ", directoryPathToDelete.generic_string(), error.what());
+			}
+		}
 
 		if (node->parent == nullptr || node->name == "root")
 		{
@@ -143,24 +173,108 @@ namespace mnemosy::systems
 		}
 
 		RecursivCleanFolderTreeMemory(node);
+
 	}
 
-	void MaterialLibraryRegistry::RecursivLoadDirectories(FolderNode* node, json& jsonNode)
-	{
-		//std::string name = jsonNode["1_name"].get<std::string>();
-		bool isLeafNode = jsonNode["2_isLeaf"].get<bool>();
+	void MaterialLibraryRegistry::RenameDirectory(FolderNode* node, std::string oldPathFromRoot) {
 		
+		mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+		fs::path libraryDir = fd.GetLibraryDirectoryPath();
 
+		fs::path oldPath = libraryDir / fs::path(oldPathFromRoot);
+		fs::path newPath = libraryDir / fs::path(node->pathFromRoot);
 
+		try {
+			fs::rename(oldPath, newPath);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::RenameDirectory: Error Renaming file: {} to: {} \nError message: {}", oldPath.generic_string(), newPath.generic_string(), error.what());
+		}
+	}
+
+	void MaterialLibraryRegistry::MoveDirectory(FolderNode* dragSource, FolderNode* dragTarget) {
+
+		fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+		fs::path fromPath = libraryDir / fs::path(dragSource->pathFromRoot);
+		fs::path toPath = libraryDir / fs::path(dragTarget->pathFromRoot);
+
+		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
+			//fs::rename(fromPath, toPath / fromPath.filename());
+
+		try { // copy directory to new location
+			fs::copy(fromPath, toPath / fromPath.filename(), fs::copy_options::recursive);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveDirectory: System Error Copying directory: \nMessage: {}", error.what());
+		}
+		try { // remove old directory
+			fs::remove_all(fromPath);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveDirectory: System Error Removing old directory: \nMessage: {}", error.what());
+		}
+		
+		// Updating Internal Data
+		// removing from old parent
+		for (int i = 0; i < dragSource->parent->subNodes.size(); i++) {
+			if (dragSource->parent->subNodes[i]->name == dragSource->name) {
+				dragSource->parent->subNodes.erase(dragSource->parent->subNodes.begin() + i);
+			}
+		}
+		dragSource->parent = dragTarget; // set new parent
+		dragTarget->subNodes.push_back(dragSource); // enlist into target subNodes
+		// update path from root
+		if (dragSource->parent->name == "Root") {
+			dragSource->pathFromRoot = dragSource->name; 
+		}
+		else {
+			dragSource->pathFromRoot = dragSource->parent->pathFromRoot + "/" + dragSource->name; 
+		}
+
+		// should prob save to data
+		SaveUserDirectoriesData();
+	}
+
+	void MaterialLibraryRegistry::CreateDirectoryForNode(FolderNode* node) {
+
+		mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+		fs::path libraryDir = fd.GetLibraryDirectoryPath();
+
+		fs::path directoryPath = libraryDir / fs::path(node->pathFromRoot);
+
+		fs::directory_entry newDir;
+		try {
+			newDir = fs::directory_entry(directoryPath);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::CreateDirectoryForNode: Error creating initializing Directory {}\n Error Message: {}", directoryPath.generic_string(), error.what());
+			return;
+		}
+
+		if (!newDir.exists()) {
+			fs::create_directories(newDir.path());
+		}
+		
+	}
+
+	void MaterialLibraryRegistry::RecursivLoadDirectories(FolderNode* node, json& jsonNode) {
+
+		bool isLeafNode = jsonNode["2_isLeaf"].get<bool>();
 		if (!isLeafNode) {
 
-			std::vector<std::string> subFolderNames = jsonNode["3_subFolderNames"].get<std::vector<std::string>>(); // 3 nature,wood,stone
+			std::vector<std::string> subFolderNames = jsonNode["4_subFolderNames"].get<std::vector<std::string>>(); // 3 nature,wood,stone
 						
 			for (int i = 0; i < subFolderNames.size(); i++) {
 
-				FolderNode* subNode = CreateFolderNode(node, subFolderNames[i]);
+				FolderNode* subNode = new FolderNode();
+				subNode->parent = node;
+				subNode->name = subFolderNames[i];
+				subNode->pathFromRoot = jsonNode["5_subFolders"][subFolderNames[i]]["3_pathFromRoot"].get<std::string>();
+				subNode->runtime_ID = m_runtimeIDCounter;
+				m_runtimeIDCounter++;
 				node->subNodes.push_back(subNode);
-				json subJson = jsonNode["4_subFolders"][subFolderNames[i]];
+				
+				json subJson = jsonNode["5_subFolders"][subFolderNames[i]];
 				RecursivLoadDirectories(subNode, subJson);
 				
 			}
@@ -176,6 +290,22 @@ namespace mnemosy::systems
 		bool isLeafNode = node->IsLeafNode();
 		nodeJson["2_isLeaf"] = isLeafNode;
 
+
+		std::string pathFromRoot = "";
+
+		if (node->parent != nullptr) { // if not root node
+
+			if (node->parent->name == "Root") {
+
+				pathFromRoot = node->name;
+			}
+			else {
+				pathFromRoot = node->parent->pathFromRoot + "/" + node->name;
+			}
+		}
+		//MNEMOSY_DEBUG("PathFromRoot: {}", pathFromRoot);
+		nodeJson["3_pathFromRoot"] = pathFromRoot;
+
 		if (!isLeafNode) {
 			std::vector<std::string> subNodeNames;
 
@@ -183,7 +313,7 @@ namespace mnemosy::systems
 
 				subNodeNames.push_back(node->subNodes[i]->name);
 			}
-			nodeJson["3_subFolderNames"] = subNodeNames;
+			nodeJson["4_subFolderNames"] = subNodeNames;
 
 			json subNodes;
 			for (int i = 0; i < node->subNodes.size(); i++) {
@@ -191,11 +321,33 @@ namespace mnemosy::systems
 				subNodes[node->subNodes[i]->name] = RecursivSaveDirectories(node->subNodes[i]);
 			}
 
-			nodeJson["4_subFolders"] = subNodes;
+			nodeJson["5_subFolders"] = subNodes;
 
 		}
 
 		return nodeJson;
+	}
+
+	FolderNode* MaterialLibraryRegistry::RecursivGetNodeByRuntimeID(FolderNode* node, unsigned int id) {
+
+		if (node == nullptr) {
+			return nullptr;
+		}
+
+		if (node->runtime_ID == id) {
+			return node;
+		}
+
+		FolderNode* foundNode = nullptr;
+		for (FolderNode* child : node->subNodes) {
+
+			foundNode = RecursivGetNodeByRuntimeID(child, id);
+			if (foundNode != nullptr) {
+				break; // Found the node, no need to search further
+			}
+		}
+
+		return foundNode;
 	}
 
 	bool MaterialLibraryRegistry::CheckDataFile(fs::directory_entry dataFile) {
@@ -225,9 +377,7 @@ namespace mnemosy::systems
 		return true;
 	}
 
-
 	// == private methods
-
 
 	void MaterialLibraryRegistry::RecursivCleanFolderTreeMemory(FolderNode* node) {
 
@@ -241,7 +391,6 @@ namespace mnemosy::systems
 		delete node;
 		node = nullptr;
 	}
-
 
 	// methos for struct
 	FolderNode* FolderNode::GetSubNodeByName(std::string name)

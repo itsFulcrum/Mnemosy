@@ -54,7 +54,7 @@ namespace mnemosy::systems
 		std::string pathFromRoot;
 		// maybe store full path .. could be useful
 		// maybe store material entries associated with this folder
-
+		unsigned int runtime_ID; // not saving this only for runtime identification
 		
 		FolderNode* GetSubNodeByName(std::string name);
 		bool IsLeafNode();
@@ -75,15 +75,21 @@ namespace mnemosy::systems
 
 
 		void DeleteFolderHierarchy(FolderNode* node);
+		void RenameDirectory(FolderNode* node,std::string oldPathFromRoot);
+		void MoveDirectory(FolderNode* dragSource, FolderNode* dragTarget);
+
 
 
 		void SaveUserDirectoriesData();
 		void LoadUserDirectoriesFromFile();
 
+		FolderNode* RecursivGetNodeByRuntimeID(FolderNode* node, unsigned int id);
 		bool CheckDataFile(fs::directory_entry dataFile);
 	private:
-		bool prettyPrintDataFile = true;
+		unsigned int m_runtimeIDCounter = 0;
 
+		bool prettyPrintDataFile = true;
+		void CreateDirectoryForNode(FolderNode* node);
 
 		void RecursivLoadDirectories(FolderNode* node, json& json);
 		json RecursivSaveDirectories(FolderNode* node);

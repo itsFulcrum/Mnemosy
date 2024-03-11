@@ -9,9 +9,14 @@ namespace mnemosy::core
 {
 	FileDirectories::FileDirectories()
 	{
-		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)"); /// std::filesystem::path("../Resources");
+		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
 
 		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MaterialLibrary)");
+		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
+			MNEMOSY_WARN("Default Mnemosy Directory does not yet exist. Creating directories {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
+			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
+		}
+
 		m_mnemosyLibraryDataFile = fs::directory_entry(R"(../Resources/Data/LibraryDirectory.mnsydata)");
 
 		LoadUserLibraryDirectoryFromDataFile();
@@ -93,14 +98,14 @@ namespace mnemosy::core
 		// read data file and extract path;
 		std::string pathToDataFile = m_mnemosyLibraryDataFile.path().generic_string();
 
-		std::string libraryPathFromFile;
+		std::string libraryPathFromFile = "";
 
 		std::fstream dataFileStream;
 		dataFileStream.open(pathToDataFile);
-		{
 
-			nlohmann::json readFile;// = nlohmann::json::parse(dataFileStream);
 
+
+		nlohmann::json readFile;
 		try {
 			readFile = nlohmann::json::parse(dataFileStream);
 		}
@@ -113,22 +118,28 @@ namespace mnemosy::core
 		dataFileStream.close();
 
 		readFile.clear();
+		
+		// checking if path is valid
+		fs::directory_entry directoryEntryFromFile;
+		try {
+			directoryEntryFromFile = fs::directory_entry(libraryPathFromFile);
 		}
-		// setting path from data file  // maybe should check if file 
-
-		fs::directory_entry directoryEntryFromFile = fs::directory_entry(libraryPathFromFile);
+		catch (fs::filesystem_error err) {
+			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: System error initilizing directory {}\nError Message: {}", libraryPathFromFile,err.what());
+			SetDefaultLibraryPath();
+			return;
+		}
 
 		// final check if the path is valid
 		if (!directoryEntryFromFile.exists()) {
 
 			// if not create it
 			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Directory Does not exists..  did you delete it ? {} ", directoryEntryFromFile.path().generic_string());
-			MNEMOSY_ERROR("Setting Library path to default Default path: {} ", m_mnemosyDefaultLibraryDirectory.path().generic_string());
-			
-			m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
+			SetDefaultLibraryPath();
 			return;
 		}
 
+		// when we reach here, the path read from file should exsist and be valid
 		m_mnemosyUserLibraryDirectory = fs::directory_entry(libraryPathFromFile);
 
 	}
@@ -176,7 +187,7 @@ namespace mnemosy::core
 
 		LibraryDataFileJson["Directories"] = DirectoriesJson;
 
-		bool prettyPrintDataFile = true;
+		
 		if (prettyPrintDataFile)
 			dataFileStream << LibraryDataFileJson.dump(2);
 		else
@@ -212,6 +223,18 @@ namespace mnemosy::core
 		}
 
 		return true;
+	}
+
+	void FileDirectories::SetDefaultLibraryPath() {
+		// checking if default path  exists if not creating it
+		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
+			MNEMOSY_WARN("FileDirectories::SetDefaultLibraryPath: Default Mnemosy Directory does not exist yet. Creating directories at {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
+			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
+		}
+
+		m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
+		MNEMOSY_ERROR("Setting Library path to default Default path: {} ", m_mnemosyDefaultLibraryDirectory.path().generic_string());
+
 	}
 
 

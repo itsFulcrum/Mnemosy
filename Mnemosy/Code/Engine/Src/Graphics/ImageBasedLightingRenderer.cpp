@@ -20,24 +20,20 @@
 
 namespace mnemosy::graphics
 {
-	ImageBasedLightingRenderer::ImageBasedLightingRenderer()
-	{
-		//glGenFramebuffers(1, &m_fbo);
-		//glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		
-		// turn of openCV Logging
-		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
-
+	ImageBasedLightingRenderer::ImageBasedLightingRenderer() {
+		m_framebufferGenerated = false;
 		m_brdfLutTexture_isGenerated = false;
 		LoadBrdfLutTexture();
-		//LoadBrdfLutTextureTiff();
-
 	}
 
-	ImageBasedLightingRenderer::~ImageBasedLightingRenderer()
-	{
-		glDeleteFramebuffers(1, &m_fbo);
-		m_fbo = 0;
+	ImageBasedLightingRenderer::~ImageBasedLightingRenderer() {
+		
+		if (m_framebufferGenerated) {
+			glDeleteFramebuffers(1, &m_fbo);
+			m_fbo = 0;
+			m_framebufferGenerated = false;
+		}
+		
 		delete m_unitCube;
 		m_unitCube = nullptr;
 	}
@@ -47,10 +43,8 @@ namespace mnemosy::graphics
 		if (!IsShaderAndMeshInitialized())
 			InitializeMeshAndShader();
 
-
 		glViewport(0, 0, textureRes, textureRes);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-		
+
 		glBindTexture(GL_TEXTURE_CUBE_MAP, ColorCubemapTextureID);
 		for (int cubeFace = 0; cubeFace < 6; cubeFace++)
 		{
@@ -77,9 +71,6 @@ namespace mnemosy::graphics
 			DrawIntoFramebuffer();
 		}
 
-		// return to default framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	}
 
 	void ImageBasedLightingRenderer::RenderEquirectangularToIrradianceCubemapTexture(unsigned int& irradianceCubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes)
@@ -88,7 +79,6 @@ namespace mnemosy::graphics
 			InitializeMeshAndShader();
 
 		glViewport(0, 0, textureRes, textureRes);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceCubemapTextureID);
 		for (int cubeFace = 0; cubeFace < 6; cubeFace++)
@@ -115,17 +105,13 @@ namespace mnemosy::graphics
 
 			DrawIntoFramebuffer();
 		}
-		// return to default framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void ImageBasedLightingRenderer::RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& prefilterCubemapID, unsigned int& equirectangularTextureID, unsigned int resolution)
-	{
+	void ImageBasedLightingRenderer::RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& prefilterCubemapID, unsigned int& equirectangularTextureID, unsigned int resolution) {
 		if (!IsShaderAndMeshInitialized())
 			InitializeMeshAndShader();
 
 		glViewport(0, 0, resolution, resolution);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, equirectangularTextureID);
@@ -159,11 +145,27 @@ namespace mnemosy::graphics
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
-		// bind Default Framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void ImageBasedLightingRenderer::PrepareCubemapRendering() {
 
+		if (!IsShaderAndMeshInitialized()) {
+			InitializeMeshAndShader();
+		}
+
+	}
+
+	void ImageBasedLightingRenderer::EndCubemapRendering() {
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if (m_framebufferGenerated) {
+			glDeleteFramebuffers(1, &m_fbo);
+			m_framebufferGenerated = false;
+			m_fbo = 0;
+		}
+
+	}
 
 	void ImageBasedLightingRenderer::BindBrdfLutTexture(unsigned int location)
 	{
@@ -332,7 +334,7 @@ namespace mnemosy::graphics
 		return;
 
 	}
-
+	// depricated Use LoadBrdfLutTexture
 	void ImageBasedLightingRenderer::LoadBrdfLutTextureTiff()
 	{
 		// DEPRICATED not in use - Only here for refrence if needed in the future
@@ -409,17 +411,15 @@ namespace mnemosy::graphics
 
 	}
 
-	void ImageBasedLightingRenderer::InitializeMeshAndShader()
-	{
+	void ImageBasedLightingRenderer::InitializeMeshAndShader() {
+
 		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 
-		if (m_fbo == -1)
-		{
+		if (!m_framebufferGenerated) {
 			glGenFramebuffers(1, &m_fbo);
-			glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
+			m_framebufferGenerated = true;
 		}
-
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 		if (m_unitCube == nullptr) {
 
@@ -430,8 +430,7 @@ namespace mnemosy::graphics
 			m_unitCube = modelLoader->LoadModelDataFromFile(skyboxMeshPath);
 		}
 
-		if (m_imagedBasedLightingShader == nullptr) 
-		{
+		if (m_imagedBasedLightingShader == nullptr) {
 			std::filesystem::path shaders = fd.GetShadersPath();
 			std::string vertex = shaders.generic_string()	+ "/imageBasedLighting.vert";
 			std::string fragment = shaders.generic_string() + "/imageBasedLighting.frag";
@@ -440,8 +439,10 @@ namespace mnemosy::graphics
 		}
 	}
 
-	bool ImageBasedLightingRenderer::IsShaderAndMeshInitialized()
-	{
+	bool ImageBasedLightingRenderer::IsShaderAndMeshInitialized() {
+
+		if (!m_framebufferGenerated)
+			return false;
 
 		if (m_unitCube == nullptr)
 			return false;

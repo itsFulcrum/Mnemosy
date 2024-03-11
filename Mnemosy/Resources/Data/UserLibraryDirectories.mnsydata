@@ -7,74 +7,21 @@
         "Root": {
             "1_name": "Root",
             "2_isLeaf": false,
-            "3_subFolderNames": [
-                "Nature",
-                "Wood",
-                "Stone"
+            "3_pathFromRoot": "",
+            "4_subFolderNames": [
+                "Two",
+                "One"
             ],
-            "4_subFolders": {
-                "Nature": {
-                    "1_name": "Nature",
-                    "2_isLeaf": false,
-                    "3_subFolderNames": [
-                        "Leafs",
-                        "Rocks",
-                        "Moss"
-                    ],
-                    "4_subFolders": {
-                        "Leafs": {
-                            "1_name": "Leafs",
-                            "2_isLeaf": true
-                        },
-                        "Moss": {
-                            "1_name": "Moss",
-                            "2_isLeaf": true
-                        },
-                        "Rocks": {
-                            "1_name": "Rocks",
-                            "2_isLeaf": true
-                        }
-                    }
+            "5_subFolders": {
+                "One": {
+                    "1_name": "One",
+                    "2_isLeaf": true,
+                    "3_pathFromRoot": "One"
                 },
-                "Stone": {
-                    "1_name": "Stone",
-                    "2_isLeaf": false,
-                    "3_subFolderNames": [
-                        "Concrete",
-                        "Rocks"
-                    ],
-                    "4_subFolders": {
-                        "Concrete": {
-                            "1_name": "Concrete",
-                            "2_isLeaf": true
-                        },
-                        "Rocks": {
-                            "1_name": "Rocks",
-                            "2_isLeaf": true
-                        }
-                    }
-                },
-                "Wood": {
-                    "1_name": "Wood",
-                    "2_isLeaf": false,
-                    "3_subFolderNames": [
-                        "Planks"
-                    ],
-                    "4_subFolders": {
-                        "Planks": {
-                            "1_name": "Planks",
-                            "2_isLeaf": false,
-                            "3_subFolderNames": [
-                                "Indoor"
-                            ],
-                            "4_subFolders": {
-                                "Indoor": {
-                                    "1_name": "Indoor",
-                                    "2_isLeaf": true
-                                }
-                            }
-                        }
-                    }
+                "Two": {
+                    "1_name": "Two",
+                    "2_isLeaf": true,
+                    "3_pathFromRoot": "Two"
                 }
             }
         }

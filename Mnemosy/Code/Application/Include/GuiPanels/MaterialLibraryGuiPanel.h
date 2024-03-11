@@ -26,13 +26,22 @@ namespace mnemosy::gui
 		void RecursivDrawSubfolders(systems::FolderNode* node);
 		
 	private:
-
+		void AddSubfolder(systems::FolderNode* node,std::string name);
 		void ChangeNodeName(systems::FolderNode* node, std::string newName);
+		
+		
+		void HandleDeleteHierarchyModal();
+		void DeleteHierarchy(systems::FolderNode* node);
+		systems::FolderNode* m_nodeDeleteHierarchy = nullptr;
 
 		ImGuiTreeNodeFlags treeNodeFlags;
 
 		systems::MaterialLibraryRegistry& m_materialRegistry;
 		systems::FolderNode* rootNode = nullptr; // pointer lifetime is handled by the engine
+
+
+
+		bool showDeleteHierarchyModel = false;
 	};
 
 } // !mnemosy::gui

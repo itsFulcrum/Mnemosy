@@ -13,12 +13,9 @@
 
 namespace mnemosy::graphics
 {
-	Cubemap::Cubemap()
-	{
-	}
+	Cubemap::Cubemap() { }
 
-	Cubemap::~Cubemap()
-	{
+	Cubemap::~Cubemap() {
 		if(m_equirectangularTexture_isGenerated)
 			glDeleteTextures(1,&m_equirectangularTextureID);
 		if(m_colorCubemap_isGenerated)
@@ -29,22 +26,19 @@ namespace mnemosy::graphics
 			glDeleteTextures(1,&m_prefilterMapID);
 	}
 
-	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name,const unsigned int colorCubemapResolution,const bool savePermanently)
-	{
-		bool loadingSuccessfull = false;
-
-		if (m_equirectangularTexture_isGenerated)
-		{
+	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name,const unsigned int colorCubemapResolution,const bool savePermanently) {
+		
+		if (m_equirectangularTexture_isGenerated) {
 			glDeleteTextures(1, &m_equirectangularTextureID);
 			m_equirectangularTexture_isGenerated = false;
 		}
 		
+		bool loadingSuccessfull = false;
 		{
 			// TODO : Load using OpenCV not stbImage -> move all image loading to either ktx or OpenCv 
 			std::unique_ptr<Image>  img = std::make_unique<Image>();
 			bool successfull = img->LoadImageFromFileFLOAT(imagePath, false);
-			if (!successfull)
-			{
+			if (!successfull) {
 				MNEMOSY_ERROR("Failed to load image from file: {}", imagePath);
 				loadingSuccessfull = false;
 				return loadingSuccessfull;
@@ -52,7 +46,7 @@ namespace mnemosy::graphics
 
 			glGenTextures(1, &m_equirectangularTextureID);
 			glBindTexture(GL_TEXTURE_2D, m_equirectangularTextureID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, img->width, img->height, 0, GL_RGB, GL_FLOAT, img->imageDataFLOAT);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, img->width, img->height, 0, GL_RGB, GL_FLOAT, img->imageDataFLOAT); // upload data to gpu
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -62,38 +56,24 @@ namespace mnemosy::graphics
 		}
 		
 		// Generate Convolution maps
+		ImageBasedLightingRenderer& ibl_Renderer = MnemosyEngine::GetInstance().GetIblRenderer();
+		ibl_Renderer.PrepareCubemapRendering();
 
-		// Color Cubemap
-		if (m_colorCubemap_isGenerated)
-		{
-			glDeleteTextures(1, &m_colorCubemapID);
-			m_colorCubemap_isGenerated = false;
-		}
-		// just from texture to cubemap // after everything is generated and saved to file we can delete m_equirectangular image
-		equirectangularToCubemap(m_colorCubemapID, colorCubemapResolution, false);
+		equirectangularToCubemap(colorCubemapResolution);
+		equirectangularToIrradianceCubemap(m_irradianceMapResolution);
+		equirectangularToPrefilteredCubemap(m_prefilteredMapResolution);
+		
+		ibl_Renderer.EndCubemapRendering();
 
-		// Irradiance CubemapMap
-		if (m_irradianceMap_isGenerated)
-		{
-			glDeleteTextures(1, &m_irradianceMapID);
-		}
-		equirectangularToIrradianceCubemap(m_irradianceMapID, m_irradianceMapResolution);
-
-		// Prefilter CubemapMap
-		if (m_prefilterMap_isGenerated)
-		{
-			glDeleteTextures(1, &m_prefilterMapID);
-		}
-		equirectangularToPrefilteredCubemap(m_prefilterMapID, m_prefilteredMapResolution);
-
-		if (savePermanently)
-		{
+		if (savePermanently) {
 			exportGeneratedCubemapsToKtx( name, colorCubemapResolution);
 			MNEMOSY_INFO("Generated and saved skybox {} ", name);
 		}
 
 		glDeleteTextures(1, &m_equirectangularTextureID); // we dont need to keep it in gpu memory
+		m_equirectangularTextureID = -1;
 		m_equirectangularTexture_isGenerated = false;
+
 
 		loadingSuccessfull = true;
 		return loadingSuccessfull;
@@ -213,17 +193,20 @@ namespace mnemosy::graphics
 
 
 // private
-	// todo can get rid of cubemapId in func arguments
-	void Cubemap::equirectangularToCubemap(unsigned int& cubemapID, unsigned int resolution, bool savePermanently)
-	{
-		// create cubemap texture
-		glGenTextures(1, &cubemapID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
 
-		for (int i = 0; i < 6; ++i)
-		{
-			//auto data = std::vector<unsigned char>();
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, NULL);
+	void Cubemap::equirectangularToCubemap(unsigned int resolution) {
+		
+		if (m_colorCubemap_isGenerated) {
+			glDeleteTextures(1, &m_colorCubemapID);
+			m_colorCubemap_isGenerated = false;
+		}
+		
+		// create cubemap texture
+		glGenTextures(1, &m_colorCubemapID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_colorCubemapID);
+
+		for (int i = 0; i < 6; ++i) {
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, NULL); // preallocate gpu memory
 		}
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -233,20 +216,24 @@ namespace mnemosy::graphics
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 		
-		MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToCubemapTexture(cubemapID, m_equirectangularTextureID, resolution);
+		MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToCubemapTexture(m_colorCubemapID, m_equirectangularTextureID, resolution);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_colorCubemapID);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		m_colorCubemap_isGenerated = true;
 	}
 
-	void Cubemap::equirectangularToIrradianceCubemap(unsigned int& irradianceCubemapID, unsigned int resolution)
-	{
+	void Cubemap::equirectangularToIrradianceCubemap(unsigned int resolution) {
+		
+		if (m_irradianceMap_isGenerated) {
+			glDeleteTextures(1, &m_irradianceMapID);
+			m_irradianceMap_isGenerated = false;
+		}
 		// create cubemap texture
-		glGenTextures(1, &irradianceCubemapID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceCubemapID);
+		glGenTextures(1, &m_irradianceMapID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
 
 		for (int i = 0; i < 6; ++i)
 		{
@@ -260,25 +247,27 @@ namespace mnemosy::graphics
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToIrradianceCubemapTexture(irradianceCubemapID, m_equirectangularTextureID, resolution);
+		MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToIrradianceCubemapTexture(m_irradianceMapID, m_equirectangularTextureID, resolution);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceCubemapID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		m_irradianceMap_isGenerated = true;		
 
 	}
-	// todo can get rid of CubemapId int parameters
-	void Cubemap::equirectangularToPrefilteredCubemap(unsigned int& cubemapID, unsigned int resolution)
-	{
 
+	void Cubemap::equirectangularToPrefilteredCubemap(unsigned int resolution) {
+
+		if (m_prefilterMap_isGenerated) {
+			glDeleteTextures(1, &m_prefilterMapID);
+			m_prefilterMap_isGenerated = false;
+		}
 		// create cubemap Texture
 		glGenTextures(1, &m_prefilterMapID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_prefilterMapID);
 
-		for (int i = 0; i < 6; ++i)
-		{
+		for (int i = 0; i < 6; ++i) {
 			auto data = std::vector<unsigned char>();
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
 		}

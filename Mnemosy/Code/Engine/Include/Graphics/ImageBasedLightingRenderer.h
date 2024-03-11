@@ -21,6 +21,8 @@ namespace mnemosy::graphics
 		void RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes);
 		void RenderEquirectangularToIrradianceCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes);
 		void RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& cubemapID, unsigned int& equirectangularTextureID, unsigned int resolution);
+		void PrepareCubemapRendering();
+		void EndCubemapRendering();
 
 		void BindBrdfLutTexture(unsigned int location);
 
@@ -35,7 +37,8 @@ namespace mnemosy::graphics
 		void InitializeMeshAndShader();
 		bool IsShaderAndMeshInitialized();
 
-		unsigned int m_fbo = -1;
+		bool m_framebufferGenerated = false;
+		unsigned int m_fbo = 0;
 
 		ModelData* m_unitCube = nullptr;
 		std::unique_ptr<Shader> m_imagedBasedLightingShader;

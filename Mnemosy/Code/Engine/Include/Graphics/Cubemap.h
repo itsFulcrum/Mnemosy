@@ -23,9 +23,9 @@ namespace mnemosy::graphics
 
 
 	private:
-		void equirectangularToCubemap(unsigned int& cubemapID, unsigned int resolution, bool makeConvolutedIrradianceMap);
-		void equirectangularToIrradianceCubemap(unsigned int& cubemapID, unsigned int resolution);
-		void equirectangularToPrefilteredCubemap(unsigned int& cubemapID, unsigned int resolution);
+		void equirectangularToCubemap(unsigned int resolution);
+		void equirectangularToIrradianceCubemap(unsigned int resolution);
+		void equirectangularToPrefilteredCubemap(unsigned int resolution);
 		void exportGeneratedCubemapsToKtx(const std::string& name,const unsigned int colorCubemapResolution);
 
 

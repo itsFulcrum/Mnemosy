@@ -246,13 +246,10 @@ namespace mnemosy::gui
 			if (ImGui::Button("Remove Permanently"))
 			{
 				removePermanentlyModelOpen = true;
-				ImGui::OpenPopup("Remove Skybox Permanetly");
-
-
-				
+				ImGui::OpenPopup("Remove Skybox Permanently");
 			}
 
-			if (ImGui::BeginPopupModal("Remove Skybox Permanetly", &removePermanentlyModelOpen, ImGuiWindowFlags_AlwaysAutoResize))
+			if (ImGui::BeginPopupModal("Remove Skybox Permanently", &removePermanentlyModelOpen, ImGuiWindowFlags_AlwaysAutoResize))
 			{
 				ImGui::Text("Select skybox to delete permanently");
 				ImGui::Separator();

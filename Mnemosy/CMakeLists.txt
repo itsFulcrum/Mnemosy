@@ -70,13 +70,13 @@ set(OpenCV_DIR "Code/Dependencies/openCV/opencvBuild/install/")
 find_package(OpenCV REQUIRED PATHS "Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/")
 
 # Copy debug/release dlls to respective executable directory
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${CMAKE_BINARY_DIR}/bin/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
 
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_BINARY_DIR}/bin/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
 
 # ==== Load Internal Sources
 # Setting ENGINE source files to: ENGINE_SOURCE_FILES
