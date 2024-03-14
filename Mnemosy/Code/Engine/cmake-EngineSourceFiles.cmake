@@ -25,6 +25,8 @@ ${ENGINE_SOURCE_PATH}/Include/Systems/SkyboxAssetRegistry.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/SkyboxAssetRegistry.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/MaterialLibraryRegistry.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/MaterialLibraryRegistry.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/FolderTreeNode.h
+${ENGINE_SOURCE_PATH}/Src/Systems/FolderTreeNode.cpp
 
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h

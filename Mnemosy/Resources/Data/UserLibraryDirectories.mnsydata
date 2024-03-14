@@ -9,21 +9,69 @@
             "2_isLeaf": false,
             "3_pathFromRoot": "",
             "4_subFolderNames": [
-                "Two",
-                "One"
+                "Stone",
+                "Nature",
+                "Wood"
             ],
             "5_subFolders": {
-                "One": {
-                    "1_name": "One",
-                    "2_isLeaf": true,
-                    "3_pathFromRoot": "One"
+                "Nature": {
+                    "1_name": "Nature",
+                    "2_isLeaf": false,
+                    "3_pathFromRoot": "Nature",
+                    "4_subFolderNames": [
+                        "Sand",
+                        "Grass",
+                        "Snow"
+                    ],
+                    "5_subFolders": {
+                        "Grass": {
+                            "1_name": "Grass",
+                            "2_isLeaf": true,
+                            "3_pathFromRoot": "Nature/Grass",
+                            "6_hasMaterials": false
+                        },
+                        "Sand": {
+                            "1_name": "Sand",
+                            "2_isLeaf": true,
+                            "3_pathFromRoot": "Nature/Sand",
+                            "6_hasMaterials": false
+                        },
+                        "Snow": {
+                            "1_name": "Snow",
+                            "2_isLeaf": true,
+                            "3_pathFromRoot": "Nature/Snow",
+                            "6_hasMaterials": false
+                        }
+                    },
+                    "6_hasMaterials": false
                 },
-                "Two": {
-                    "1_name": "Two",
+                "Stone": {
+                    "1_name": "Stone",
                     "2_isLeaf": true,
-                    "3_pathFromRoot": "Two"
+                    "3_pathFromRoot": "Stone",
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "New Material_1",
+                        "New Material_2",
+                        "New Material_3",
+                        "New Material"
+                    ]
+                },
+                "Wood": {
+                    "1_name": "Wood",
+                    "2_isLeaf": true,
+                    "3_pathFromRoot": "Wood",
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "New Material_4",
+                        "New Material_5",
+                        "New Material_6",
+                        "New Material_7",
+                        "New Material_8"
+                    ]
                 }
-            }
+            },
+            "6_hasMaterials": false
         }
     }
 }
