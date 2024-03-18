@@ -27,14 +27,15 @@ namespace mnemosy::input
 
 		if (!m_RMB_pressed) return;
 
+		MnemosyEngine& engine = ENGINE_INSTANCE();
 
-		ENGINE_INSTANCE().GetInputSystem().HandleMouseOverViewport();
+		engine.GetInputSystem().HandleMouseOverViewport();
 
 		float amount = float(xOffset * m_envrionmentRotationSpeed * deltaSeconds);
 		 //*m_envrionmentRotation += offset;
-		ENGINE_INSTANCE().GetScene().GetSkybox().rotation += amount;
+		engine.GetScene().GetSkybox().rotation += amount;
 
-		ENGINE_INSTANCE().GetRenderer().SetShaderSkyboxUniforms();
+		engine.GetRenderer().SetShaderSkyboxUniforms(engine.GetScene().GetSkybox());
 	}
 
 	// private

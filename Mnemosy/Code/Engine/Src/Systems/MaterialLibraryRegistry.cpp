@@ -1,12 +1,19 @@
 #include "Include/Systems/MaterialLibraryRegistry.h"
 
-
 #include "Include/Core/Log.h"
 #include "Include/MnemosyEngine.h"
+#include "Include/Graphics/Renderer.h"
+#include "Include/Graphics/Texture.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/Scene.h"
+#include "Include/Graphics/Utils/KtxImage.h"
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/FolderTreeNode.h"
+#include "Include/Systems/ThumbnailManager.h"
 
+#include <glad/glad.h>
 #include <fstream>
+
 
 namespace mnemosy::systems
 {
@@ -16,12 +23,14 @@ namespace mnemosy::systems
 		: m_fileDirectories{ MnemosyEngine::GetInstance().GetFileDirectories()}
 	{
 
-		m_runtimeIDCounter = 0;
+		m_runtimeIDCounter = 1;
+		m_runtimeMaterialIDCounter = 1;
 		//mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetDataPath() / fs::path("UserLibraryDirectories.mnsydata");
 		m_userDirectoriesDataFile = fs::directory_entry(pathToUserDirectoriesDataFile); 
 		
 		m_rootNodeName = "Root";
+		m_folderNodeOfActiveMaterial = nullptr;
 
 		LoadUserDirectoriesFromFile();
 
@@ -51,6 +60,16 @@ namespace mnemosy::systems
 		}
 		
 		RecursivUpadtePathFromRoot(node);
+
+
+
+		// check if the folder  we renamed  included the active material in its hierarchy
+		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
+		if (!activeMaterialDataFile.exists()) {
+			MNEMOSY_WARN("MaterialLibraryRegistry::RenameDirectory: active material path doesn exist anymore");
+			std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
+			m_activeMaterialDataFilePath = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) /  fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
+		}
 	}
 
 	void MaterialLibraryRegistry::MoveDirectory(FolderNode* dragSource, FolderNode* dragTarget) {
@@ -96,6 +115,18 @@ namespace mnemosy::systems
 
 		// should prob save to data
 		SaveUserDirectoriesData();
+
+
+
+		// check if the folder  we renamed  included the active material in its hierarchy
+		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
+		if (!activeMaterialDataFile.exists()) {
+			MNEMOSY_WARN("MaterialLibraryRegistry::MoveDirectory: active material path doesnt exist anymore");
+			std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
+			m_activeMaterialDataFilePath = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
+		}
+
+
 	}
 
 	void MaterialLibraryRegistry::DeleteFolderHierarchy(FolderNode* node) {
@@ -105,6 +136,8 @@ namespace mnemosy::systems
 			MNEMOSY_WARN("You can't delete the root directory");
 			return;
 		}
+
+		
 		
 		{ // delete directories from disk			
 			fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
@@ -119,7 +152,7 @@ namespace mnemosy::systems
 			}
 		}
 
-		// remove from node from parent subnodes list
+		// remove node from parent subnodes list
 		for (int i = 0; i < node->parent->subNodes.size(); i++) {
 			if (node->parent->subNodes[i]->name == node->name) {
 				node->parent->subNodes.erase(node->parent->subNodes.begin() + i);
@@ -128,6 +161,14 @@ namespace mnemosy::systems
 
 		// Free memory for all subsequent nodes recursivly
 		RecursivCleanFolderTreeMemory(node);
+
+		// check if the folder hierarchy we deleted included the active material
+		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
+		if (!activeMaterialDataFile.exists()) {
+			SetDefaultMaterial();
+		}
+
+		
 	}
 
 
@@ -195,7 +236,7 @@ namespace mnemosy::systems
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 		// create directory for material
 		fs::path materialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(finalName);
-		MNEMOSY_TRACE("Add Material: new material directory: {}", materialDirectory.generic_string());
+		//MNEMOSY_TRACE("Add Material: new material directory: {}", materialDirectory.generic_string());
 
 		try {
 			fs::create_directory(materialDirectory);
@@ -203,50 +244,63 @@ namespace mnemosy::systems
 			MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error creating directory. \nError message: {}", error.what());
 			return;
 		}
-		// Render basic thumbnail image
-		// 
-		// create default material data file;
-		// TODO:
-		// write actual data into file
-
 		
+		// create default material data file
+
+		// Copy Default thumbnail image
+		fs::path pathToDefaultThumbnail = m_fileDirectories.GetTexturesPath() / fs::path("default_thumbnail.ktx2");
+		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(finalName + "_thumbnail.ktx2");
+		fs::copy_file(pathToDefaultThumbnail,pathToMaterialThumbnail);
+						
 		CreateNewMaterialDataFile(materialDirectory,finalName);
 
-
-
-		// create material instance and make it visible in the viewport and material editor
-
 		// adding entry to list of directory node;
-		node->subMaterialNames.push_back(finalName);
+		MaterialInfo matInfo;
+		matInfo.name = finalName; 
+		matInfo.runtime_ID = m_runtimeMaterialIDCounter;
+		m_runtimeMaterialIDCounter++;
+		matInfo.thumbnailTexure_ID = 0;
+		matInfo.thumbnailLoaded = false;
+
+		// check if it was created in the currently opend folder
+		if (node == m_selectedFolderNode) {
+			// make sure it gets loaded
+			MnemosyEngine::GetInstance().GetThumbnailManager().NewThumbnailInActiveFolder();
+		}
+
+		node->subMaterials.push_back(matInfo);
 
 	}
 
-	void MaterialLibraryRegistry::ChangeMaterialName(systems::FolderNode* node, std::string& materialName, std::string& newName, int positionInVector) {
+	void MaterialLibraryRegistry::ChangeMaterialName(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
 
-		std::string oldName = materialName;
-		if (materialName == newName)
+		std::string oldName = materialInfo.name;
+		unsigned int matID = materialInfo.runtime_ID;
+
+		if (materialInfo.name == newName)
 			return;
 		
-		// check if name exists already and add suffix number if needed
-		int suffix = 1;
 		std::string finalName = newName;
-		while (node->SubMaterialExistsAlready(finalName)) {
-			finalName = newName + "_" + std::to_string(suffix);
-			suffix++;
+		// check if name exists already add suffix number if needed
+		{
+			int suffix = 1;
+			while (node->SubMaterialExistsAlready(finalName)) {
+				finalName = newName + "_" + std::to_string(suffix);
+				suffix++;
+			}
 		}
-
-
 
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 
 		// change name of thumbnail img
 
-		// change names of all accosiated textures
+
+		fs::path materialDir = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName);
 
 		// change name of data file. TODO: and adjust all data inside
 		{
-			fs::path oldDataFilePath = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName) / fs::path(oldName + ".mnsydata");
-			fs::path newDataFilePath = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName) / fs::path(finalName + ".mnsydata");
+			fs::path newDataFilePath = materialDir / fs::path(finalName + ".mnsydata");
+			fs::path oldDataFilePath = materialDir / fs::path(oldName + ".mnsydata");
 			
 			std::fstream dataFileStream;
 			dataFileStream.open(oldDataFilePath.generic_string());
@@ -262,9 +316,74 @@ namespace mnemosy::systems
 			dataFileStream.close();
 
 			readFile["name"] = finalName;
-			std::string thumbnailPath = finalName + "_thumbnail.ktx2";
-			readFile["thumbnailPath"] = thumbnailPath;
+			
+			
+			// Renaming all accosiated textures
+			if (readFile["albedoAssigned"].get<bool>()) {
+				std::string oldFileName = readFile["albedoPath"].get<std::string>();
+				std::string newFileName = finalName + "_albedo.ktx2";
+				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+				fs::path newTextureFile = materialDir / fs::path(newFileName);				
+				try { fs::rename(oldTextureFile, newTextureFile); } 
+				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}				
+				readFile["albedoPath"] = newFileName;
+			}
+			if (readFile["normalAssigned"].get<bool>()) {
+				std::string oldFileName = readFile["normalPath"].get<std::string>();
+				std::string newFileName = finalName + "_normal.ktx2";
+				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+				fs::path newTextureFile = materialDir / fs::path(newFileName);
+				try { fs::rename(oldTextureFile, newTextureFile);}
+				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+				readFile["normalPath"] = newFileName;
+			}
+			if (readFile["roughAssigned"].get<bool>()) {
+				std::string oldFileName = readFile["roughPath"].get<std::string>();
+				std::string newFileName = finalName + "_roughness.ktx2";
+				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+				fs::path newTextureFile = materialDir / fs::path(newFileName);
+				try { fs::rename(oldTextureFile, newTextureFile);}
+				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+				readFile["roughPath"] = newFileName;
+			}
+			if (readFile["metalAssigned"].get<bool>()) {
+				std::string oldFileName = readFile["metalPath"].get<std::string>();
+				std::string newFileName = finalName + "_metallic.ktx2";
+				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+				fs::path newTextureFile = materialDir / fs::path(newFileName);
+				try { fs::rename(oldTextureFile, newTextureFile);}
+				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); }
+				readFile["metalPath"] = newFileName;
+			}
+			if (readFile["emissionAssigned"].get<bool>()) {
+				std::string oldFileName = readFile["emissionPath"].get<std::string>();
+				std::string newFileName = finalName + "_emissive.ktx2";
+				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+				fs::path newTextureFile = materialDir / fs::path(newFileName);
+				try { fs::rename(oldTextureFile, newTextureFile);}
+				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+				readFile["emissionPath"] = newFileName;
+			}
+			if (readFile["aoAssigned"].get<bool>()) {
+				std::string oldFileName = readFile["aoPath"].get<std::string>();
+				std::string newFileName = finalName + "_ambientOcclusion.ktx2";
+				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+				fs::path newTextureFile = materialDir / fs::path(newFileName);
+				try {fs::rename(oldTextureFile, newTextureFile);}
+				catch (fs::filesystem_error e) {MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+				readFile["aoPath"] = newFileName;
+			}
 
+			// change name of thumbnail file
+			std::string oldFileName = readFile["thumbnailPath"].get<std::string>();
+			std::string newFileName = finalName + "_thumbnail.ktx2";
+			fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			fs::path newTextureFile = materialDir / fs::path(newFileName);
+			try { fs::rename(oldTextureFile, newTextureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); }
+			readFile["thumbnailPath"] = newFileName;
+
+			// outputting updated file
 			std::ofstream outFileStream;
 			outFileStream.open(oldDataFilePath.generic_string());
 			if (prettyPrintDataFile)
@@ -273,13 +392,8 @@ namespace mnemosy::systems
 				outFileStream << readFile.dump(-1);
 			outFileStream.close();
 
-			try {
-				fs::rename(oldDataFilePath, newDataFilePath);
-			}
-			catch (fs::filesystem_error error) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming dataFile. \nError message: {}", error.what());
-				return;
-			}
+			try {fs::rename(oldDataFilePath, newDataFilePath);}
+			catch (fs::filesystem_error error) {MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming dataFile. \nError message: {}", error.what());}
 		}
 
 		// change name of material folder.
@@ -287,26 +401,39 @@ namespace mnemosy::systems
 			fs::path oldPath = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName);
 			fs::path newPath = libraryDir / fs::path(node->pathFromRoot) / fs::path(finalName);
 
-			try {
-				fs::rename(oldPath, newPath);
-			}
-			catch (fs::filesystem_error error) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming directory. \nError message: {}", error.what());
-			}
+			try { fs::rename(oldPath, newPath);}
+			catch (fs::filesystem_error error) {MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming directory. \nError message: {}", error.what());}
 		}
 
-
 		// change name in vector of names..
-		node->subMaterialNames[positionInVector] = finalName;
+		node->subMaterials[positionInVector].name = finalName;
+
+		// check if we are changing the active material
+		if (m_activeMaterialID == matID) {
+			// set updated path for data file
+			MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name = finalName;
+			fs::path newDataPath = libraryDir / fs::path(node->pathFromRoot) / fs::path(finalName) / fs::path(finalName + ".mnsydata");
+			m_activeMaterialDataFilePath = newDataPath;
+		}
+
 		// save library data file;
 	}
 
-	void MaterialLibraryRegistry::DeleteMaterial(FolderNode* node, std::string& materialName, int positionInVector) {
+	void MaterialLibraryRegistry::DeleteMaterial(FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector) {
+
+		unsigned int matID = materialInfo.runtime_ID;
+
+		// check if material is part of the opend folder
+		if (node == m_selectedFolderNode) {
+			// unload thumbnail
+			MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(materialInfo);
+		}
+
 
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 		// delete files
 
-		fs::path pathToMaterialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(materialName);
+		fs::path pathToMaterialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(materialInfo.name);
 		
 		try {
 			fs::remove_all(pathToMaterialDirectory);
@@ -321,15 +448,22 @@ namespace mnemosy::systems
 		// I should switch it to a different one here and free memory;
 		
 		// deleting from vector
-		node->subMaterialNames.erase(node->subMaterialNames.begin() + positionInVector);
+		node->subMaterials.erase(node->subMaterials.begin() + positionInVector);
 		
+
+		// check if we are delete the active material
+		if (m_activeMaterialID == matID) {
+			SetDefaultMaterial();
+		}
+
+
 		// maybe save library data file
 	}
 
-	void MaterialLibraryRegistry::MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, std::string& name) {
+	void MaterialLibraryRegistry::MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo& materialInfo) {
 
 		// move material folder / copy dir and remove dir
-		std::string materialName = name; // temporary storing name here
+		std::string materialName = materialInfo.name; // temporary storing name here
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 
 		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
@@ -352,18 +486,471 @@ namespace mnemosy::systems
 			return;
 		}
 
+		
+
+		// enlist into target node list
 
 		// remove from source node list
 		// this could maybe be done faster if we pass the vector position directly into the function
-		for (int i = 0; i < sourceNode->subMaterialNames.size(); i++) {
-			if (sourceNode->subMaterialNames[i] == materialName) {
-				sourceNode->subMaterialNames.erase(sourceNode->subMaterialNames.begin() + i);
+		for (int i = 0; i < sourceNode->subMaterials.size(); i++) {
+			if (sourceNode->subMaterials[i].name == materialName) {
+
+				// make sure thumbnail get popperly unloaded
+				if (sourceNode == m_selectedFolderNode) {
+					MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(sourceNode->subMaterials[i]);
+				}
+
+
+				// enlist into target node list
+				targetNode->subMaterials.push_back(sourceNode->subMaterials[i]);
+				// remove from source nodel list
+				sourceNode->subMaterials.erase(sourceNode->subMaterials.begin() + i);
+
+				break;
 			}
 		}
 
-		// enlist into target node list
-		targetNode->subMaterialNames.push_back(materialName);
+
+		// check if the moved material was the active material
+		if (materialInfo.runtime_ID == m_activeMaterialID) {
+			MNEMOSY_TRACE("MaterialLibraryRegistry::MoveMaterial: Moving Material: ID: {}, active ID: {}",materialInfo.runtime_ID,m_activeMaterialID);
+			
+			// set updated path for data file
+			fs::path newDataFilePath = toPath / fs::path(materialName + ".mnsydata");
+			m_activeMaterialDataFilePath = newDataFilePath;
+			m_folderNodeOfActiveMaterial = targetNode;
+		}
+
+		// make sure thumbnail gets loaded
+		if (targetNode == m_selectedFolderNode) {
+			MnemosyEngine::GetInstance().GetThumbnailManager().NewThumbnailInActiveFolder();
+		}
+
 		// save
+	}
+
+	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(fs::path& materialDirectory,systems::MaterialInfo& materialInfo,FolderNode* parentNode) {
+		// save active material first
+		if (m_userMaterialBound) {
+			SaveActiveMaterialToFile();
+		}
+		
+		// load json file
+		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
+		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo.name + ".mnsydata");
+
+		std::ifstream dataFileStream;
+		dataFileStream.open(dataFile.generic_string());
+		
+		json readFile;
+		try {
+			readFile = json::parse(dataFileStream);
+		}
+		catch (json::parse_error err) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile: Error parsing data file: {} \nMessage: {}",dataFile.generic_string(), err.what());
+			return;
+		}
+
+		graphics::Material* mat = new graphics::Material();
+		{
+			mat->Name = readFile["name"].get<std::string>();
+			mat->Albedo.r = readFile["albedo_r"].get<float>();
+			mat->Albedo.g = readFile["albedo_g"].get<float>();
+			mat->Albedo.b = readFile["albedo_b"].get<float>();
+			mat->Roughness = readFile["roughness"].get<float>();
+			mat->Metallic = readFile["metallic"].get<float>();
+
+			mat->Emission.r = readFile["emission_r"].get<float>();
+			mat->Emission.g = readFile["emission_g"].get<float>();
+			mat->Emission.b = readFile["emission_b"].get<float>();
+			mat->EmissionStrength = readFile["emissionStrength"].get<float>();
+
+			mat->NormalStrength = readFile["normalStrength"].get<float>();
+
+			mat->UVTiling.x = readFile["uvScale_x"].get<float>();
+			mat->UVTiling.y = readFile["uvScale_y"].get<float>();
+		
+			bool albedoTexture		= readFile["albedoAssigned"].get<bool>();
+			bool roughnessTexture	= readFile["roughAssigned"].get<bool>();
+			bool metalTexture		= readFile["metalAssigned"].get<bool>();
+			bool emissionTexture	= readFile["emissionAssigned"].get<bool>();
+			bool normalTexture		= readFile["normalAssigned"].get<bool>();
+			bool aoTexture			= readFile["aoAssigned"].get<bool>();
+
+			if (albedoTexture) {
+				std::string path = materialDir.generic_string() + "/" + readFile["albedoPath"].get<std::string>();
+				graphics::Texture* albedoTex = new graphics::Texture();
+				albedoTex->LoadFromKtx(path.c_str());
+				mat->assignTexture(graphics::PBRTextureType::ALBEDO, albedoTex);
+			}
+			if (roughnessTexture) {
+				std::string path = materialDir.generic_string() + "/" + readFile["roughPath"].get<std::string>();
+				graphics::Texture* roughnessTex = new graphics::Texture();
+				roughnessTex->LoadFromKtx(path.c_str());
+				mat->assignTexture(graphics::PBRTextureType::ROUGHNESS, roughnessTex);
+			}
+			if (metalTexture) {
+				std::string path = materialDir.generic_string() + "/" + readFile["metalPath"].get<std::string>();
+				graphics::Texture* metallicTex = new graphics::Texture();
+				metallicTex->LoadFromKtx(path.c_str());
+				mat->assignTexture(graphics::PBRTextureType::METALLIC, metallicTex);
+			}
+			if (emissionTexture) {
+				std::string path = materialDir.generic_string() + "/" + readFile["emissionPath"].get<std::string>();
+				graphics::Texture* emissionTex = new graphics::Texture();
+				emissionTex->LoadFromKtx(path.c_str());
+				mat->assignTexture(graphics::PBRTextureType::EMISSION, emissionTex);
+			}
+			if (normalTexture) {
+				std::string path = materialDir.generic_string() + "/" + readFile["normalPath"].get<std::string>();
+				graphics::Texture* normalTex = new graphics::Texture();
+				normalTex->LoadFromKtx(path.c_str());
+				mat->assignTexture(graphics::PBRTextureType::NORMAL, normalTex);
+			}
+			if (aoTexture) {
+				std::string path = materialDir.generic_string() + "/" + readFile["aoPath"].get<std::string>();
+				graphics::Texture* aoTex = new graphics::Texture();
+				aoTex->LoadFromKtx(path.c_str());
+				mat->assignTexture(graphics::PBRTextureType::AMBIENTOCCLUSION, aoTex);
+			}
+			// load thumbnail
+
+			dataFileStream.close();
+		}
+
+		m_userMaterialBound = true;
+		m_activeMaterialDataFilePath = dataFile;
+		m_activeMaterialID = materialInfo.runtime_ID;
+		m_folderNodeOfActiveMaterial = parentNode;
+
+		MnemosyEngine::GetInstance().GetScene().SetMaterial(mat);
+	}
+
+	void MaterialLibraryRegistry::SaveActiveMaterialToFile() {
+
+		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
+				
+		{ // Render thumbnail of active material
+			fs::path libDir = m_fileDirectories.GetLibraryDirectoryPath();
+			fs::path thumbnailAbsolutePath = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) / thumbnailPath;
+			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailOfActiveMaterial(thumbnailAbsolutePath,m_selectedFolderNode, m_activeMaterialID);
+									
+		}
+			
+		
+
+		std::ofstream dataFileStream;
+		dataFileStream.open(m_activeMaterialDataFilePath.generic_string());		
+		
+		json MaterialJson; // top level json object
+		MaterialJson["1_Mnemosy_Data_File"] = "Material Meta Data";
+
+		MaterialJson["name"] = activeMat.Name;
+		
+		MaterialJson["albedo_r"] = activeMat.Albedo.r; // maybe convert from range 0-255 to 0-1 range by deviding by 255
+		MaterialJson["albedo_g"] = activeMat.Albedo.g;
+		MaterialJson["albedo_b"] = activeMat.Albedo.b;
+
+		MaterialJson["roughness"] = activeMat.Roughness;
+		MaterialJson["metallic"] = activeMat.Metallic;
+
+		MaterialJson["emission_r"] = activeMat.Emission.r;
+		MaterialJson["emission_g"] = activeMat.Emission.r;
+		MaterialJson["emission_b"] = activeMat.Emission.r;
+		MaterialJson["emissionStrength"] = activeMat.EmissionStrength;
+
+		MaterialJson["normalStrength"] = activeMat.NormalStrength;
+		MaterialJson["uvScale_x"] = activeMat.UVTiling.x;
+		MaterialJson["uvScale_y"] = activeMat.UVTiling.y;
+
+		bool albedoAssigned		= activeMat.isAlbedoAssigned();
+		bool roughAssigned		= activeMat.isRoughnessAssigned();
+		bool metalAssigned		= activeMat.isMetallicAssigned();
+		bool emissionAssigned	= activeMat.isEmissiveAssigned();
+		bool normalAssigned		= activeMat.isNormalAssigned();
+		bool aoAssigned			= activeMat.isAoAssigned();
+		
+		std::string albedoPath		= "notAssigned";
+		std::string roughnessPath	= "notAssigned";
+		std::string metallicPath	= "notAssigned";
+		std::string emissionPath	= "notAssigned";
+		std::string normalPath		= "notAssigned";
+		std::string aoPath			= "notAssigned";
+
+		std::string matName = activeMat.Name;
+
+		if (albedoAssigned)		{ albedoPath	= matName	+ "_albedo.ktx2"; }
+		if (roughAssigned)		{ roughnessPath = matName	+ "_roughness.ktx2"; }
+		if (metalAssigned)		{ metallicPath	= matName	+ "_metallic.ktx2"; }
+		if (emissionAssigned)	{ emissionPath	= matName	+ "_emissive.ktx2"; }
+		if (normalAssigned)		{ normalPath	= matName	+ "_normal.ktx2"; }
+		if (aoAssigned)			{ aoPath		= matName	+ "_ambientOcclusion.ktx2"; }
+
+		MaterialJson["albedoAssigned"]		= albedoAssigned;
+		MaterialJson["roughAssigned"]		= roughAssigned;
+		MaterialJson["metalAssigned"]		= metalAssigned;
+		MaterialJson["emissionAssigned"]	= emissionAssigned;
+		MaterialJson["normalAssigned"]		= normalAssigned;
+		MaterialJson["aoAssigned"]			= aoAssigned;
+
+		MaterialJson["albedoPath"]		= albedoPath;
+		MaterialJson["roughPath"]		= roughnessPath;
+		MaterialJson["metalPath"]		= metallicPath;
+		MaterialJson["emissionPath"]	= emissionPath;
+		MaterialJson["normalPath"]		= normalPath;
+		MaterialJson["aoPath"]			= aoPath;
+
+		//fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
+		MaterialJson["thumbnailPath"] = thumbnailPath.generic_string();
+
+		if (prettyPrintDataFile)
+			dataFileStream << MaterialJson.dump(4);
+		else
+			dataFileStream << MaterialJson.dump(-1);
+		dataFileStream.close();
+
+	}
+
+	void MaterialLibraryRegistry::SetDefaultMaterial() {
+		m_userMaterialBound = false;
+		m_activeMaterialID = 0;
+		m_activeMaterialDataFilePath = fs::path();
+		m_folderNodeOfActiveMaterial = nullptr;
+
+
+		graphics::Material* defaultMaterial = new graphics::Material();
+		MnemosyEngine::GetInstance().GetScene().SetMaterial(defaultMaterial);
+	}
+
+	void MaterialLibraryRegistry::LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath) {
+		// save texture to disk with correct filename to folder of active material
+
+		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) ;
+		
+		std::string filename;
+		
+		graphics::Texture* tex = new graphics::Texture();
+		tex->generateFromFile(filepath.c_str(),true,true);
+		graphics::KtxImage ktxImg;
+
+		if (textureType == graphics::ALBEDO) {
+			
+			filename = activeMat.Name + "_albedo.ktx2";
+			fs::path exportPath = materialDir / fs::path(filename);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_COLOR, true);
+		}
+		else if (textureType == graphics::NORMAL) {
+			filename = activeMat.Name + "_normal.ktx2";
+			fs::path exportPath = materialDir / fs::path(filename);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_NORMAL, true);
+		}
+		else if (textureType == graphics::ROUGHNESS) {
+			filename = activeMat.Name + "_roughness.ktx2";
+			fs::path exportPath = materialDir / fs::path(filename);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_LINEAR_CHANNEL, true);
+		}
+		else if (textureType == graphics::METALLIC) {
+			filename = activeMat.Name + "_metallic.ktx2";
+			fs::path exportPath = materialDir / fs::path(filename);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_LINEAR_CHANNEL, true);
+		}
+		else if (textureType == graphics::AMBIENTOCCLUSION) {
+			filename = activeMat.Name + "_ambientOcclusion.ktx2";
+			fs::path exportPath = materialDir / fs::path(filename);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_LINEAR_CHANNEL, true);
+		}
+		else if (textureType == graphics::EMISSION) {
+			filename = activeMat.Name + "_emissive.ktx2";
+			fs::path exportPath = materialDir / fs::path(filename);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_COLOR, true);
+		}
+
+		// save material data file
+		std::ifstream readFileStream;
+		readFileStream.open(m_activeMaterialDataFilePath.generic_string());
+
+		json readFile;
+		try {
+			readFile = json::parse(readFileStream);
+		}
+		catch (json::parse_error err) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadTextureForActiveMaterial: Error Parsing Data File. Message: {}", err.what());
+			readFileStream.close();
+			delete tex;
+			return;
+		}
+		readFileStream.close();
+
+		json outFile = readFile;
+
+		std::ofstream outFileStream;
+		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
+		
+		if (textureType == graphics::ALBEDO) {
+			outFile["albedoAssigned"] = true;
+			outFile["albedoPath"] = filename;
+		}
+		else if (textureType == graphics::NORMAL){
+			outFile["normalAssigned"] = true;
+			outFile["normalPath"] = filename;
+		}
+		else if (textureType == graphics::ROUGHNESS) {
+			outFile["roughAssigned"] = true;
+			outFile["roughPath"] = filename;
+		}
+		else if (textureType == graphics::METALLIC) {
+			outFile["metalAssigned"] = true;
+			outFile["metalPath"] = filename;
+		}
+		else if (textureType == graphics::AMBIENTOCCLUSION) {
+			outFile["aoAssigned"] = true;
+			outFile["aoPath"] = filename;
+		}
+		else if (textureType == graphics::EMISSION) {
+			outFile["emissionAssigned"] = true;
+			outFile["emissionPath"] = filename;
+		}
+
+
+		if (prettyPrintDataFile)
+			outFileStream << outFile.dump(4);
+		else
+			outFileStream << outFile.dump(-1);
+
+		outFileStream.close();
+
+
+		// load texture to material
+
+		activeMat.assignTexture(textureType, tex);
+	}
+
+	void MaterialLibraryRegistry::DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType) {
+
+		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		
+		std::ifstream readFileStream;
+		readFileStream.open(m_activeMaterialDataFilePath.generic_string());
+
+		json readFile;
+		try {
+			readFile = json::parse(readFileStream);
+		}
+		catch (json::parse_error err) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: Error parsing data file.\nError message: {}", err.what());
+			readFileStream.close();
+			return;
+		}
+		readFileStream.close();
+		json outFile = readFile;
+
+		std::ofstream outFileStream;
+		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
+
+		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+
+		if (textureType == graphics::ALBEDO) {
+			fs::path textureFile = materialDir / fs::path(outFile["albedoPath"].get<std::string>());
+			try { fs::remove(textureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+
+			outFile["albedoAssigned"] = false;
+			outFile["albedoPath"] = "notAssigned";
+		}
+		else if (textureType == graphics::NORMAL) {
+			fs::path textureFile = materialDir / fs::path(outFile["normalPath"].get<std::string>());
+			try { fs::remove(textureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+
+			outFile["normalAssigned"] = false;
+			outFile["normalPath"] = "notAssigned";
+		}
+		else if (textureType == graphics::ROUGHNESS) {
+			fs::path textureFile = materialDir / fs::path(outFile["roughPath"].get<std::string>());
+			try { fs::remove(textureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+
+			outFile["roughAssigned"] = false;
+			outFile["roughPath"] = "notAssigned";
+		}
+		else if (textureType == graphics::METALLIC) {
+			fs::path textureFile = materialDir / fs::path(outFile["metalPath"].get<std::string>());
+			try { fs::remove(textureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+
+			outFile["metalAssigned"] = false;
+			outFile["metalPath"] = "notAssigned";
+		}
+		else if (textureType == graphics::AMBIENTOCCLUSION) {
+			fs::path textureFile = materialDir / fs::path(outFile["aoPath"].get<std::string>());
+			try { fs::remove(textureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+
+			outFile["aoAssigned"] = false;
+			outFile["aoPath"] = "notAssigned";
+		}
+		else if (textureType == graphics::EMISSION) {
+			fs::path textureFile = materialDir / fs::path(outFile["emissionPath"].get<std::string>());
+			try { fs::remove(textureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+
+			outFile["emissionAssigned"] = false;
+			outFile["emissionPath"] = "notAssigned";
+		}
+
+		if (prettyPrintDataFile)
+			outFileStream << outFile.dump(4);
+		else
+			outFileStream << outFile.dump(-1);
+		outFileStream.close();
+		
+		activeMat.removeTexture(textureType);
+	}
+
+	void MaterialLibraryRegistry::OpenFolderNode(FolderNode* node){
+
+		if (node == nullptr) {
+			MNEMOSY_WARN("Node is nullptr");
+			return;
+		}
+
+		// already selectd node
+		if (m_selectedFolderNode == node) {
+			return;
+		}
+		
+		if (m_selectedFolderNode == nullptr) {
+			
+			m_selectedFolderNode = node;
+		}
+
+		// TODO: loading / deleting thumbnails should be handled by a thumbnail manger class
+
+
+		MnemosyEngine::GetInstance().GetThumbnailManager().DeleteLoadedThumbnailsOfActiveFolder(m_selectedFolderNode);
+
+
+		m_selectedFolderNode = node;
+
+		if (!node->HasMaterials()) {
+			return;
+		}
+
+		// load thumbnails of the opend folder
+
+		FolderNode* selectedNode = m_selectedFolderNode;
+
+
+		return;
+		//fs::path folderDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(selectedNode->pathFromRoot);
+		//MnemosyEngine::GetInstance().GetThumbnailManager().LoadThumbnailsOfActiveFolder(m_selectedFolderNode, folderDir);
+
+
+
+
+
 	}
 
 	
@@ -385,10 +972,10 @@ namespace mnemosy::systems
 		std::ifstream dataFileStream;
 		dataFileStream.open(pathToDataFileString);
 
-		nlohmann::json readFile;
+		json readFile;
 		try {
-			readFile = nlohmann::json::parse(dataFileStream);
-		} catch (nlohmann::json::parse_error err) {
+			readFile = json::parse(dataFileStream);
+		} catch (json::parse_error err) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadUserDirectoriesFromFile: Error Parsing File. Message: {}", err.what());
 			return;
 		}
@@ -450,7 +1037,6 @@ namespace mnemosy::systems
 
 		dataFileStream.close();
 	}
-
 
 	// == private methods
 
@@ -557,14 +1143,18 @@ namespace mnemosy::systems
 			node->subNodes.clear();
 		} 
 
-		if (!node->subMaterialNames.empty()) {
-			node->subMaterialNames.clear();
+		if (!node->subMaterials.empty()) {
+			node->subMaterials.clear();
+		}
+
+		// if node we are deleting is the currently selected one, select root node.
+		if(node == m_selectedFolderNode){
+			OpenFolderNode(m_rootFolderNode);
 		}
 
 		delete node;
 		node = nullptr;
 	}
-
 
 	void MaterialLibraryRegistry::RecursivLoadDirectories(FolderNode* node, json& jsonNode) {
 
@@ -572,7 +1162,17 @@ namespace mnemosy::systems
 
 		bool hasMaterials = jsonNode["6_hasMaterials"].get<bool>();
 		if (hasMaterials) {
-			node->subMaterialNames = jsonNode["6_materialEntries"].get<std::vector<std::string>>();
+			std::vector<std::string> subMatNames = jsonNode["6_materialEntries"].get<std::vector<std::string>>();
+			for (int i = 0; i < subMatNames.size(); i++) {
+				
+				MaterialInfo matInfo; 
+				matInfo.name = subMatNames[i];
+				matInfo.runtime_ID = m_runtimeMaterialIDCounter;
+				m_runtimeMaterialIDCounter++;
+
+				node->subMaterials.push_back(matInfo);
+			}
+
 		}
 
 		if (!isLeafNode) {
@@ -622,11 +1222,18 @@ namespace mnemosy::systems
 		nodeJson["3_pathFromRoot"] = pathFromRoot;
 
 
-		bool hasMaterials = !node->subMaterialNames.empty();
+		bool hasMaterials = !node->subMaterials.empty();
 
 		nodeJson["6_hasMaterials"] = hasMaterials;
 		if (hasMaterials) {
-			nodeJson["6_materialEntries"] = node->subMaterialNames;
+
+			std::vector<std::string> matNames;
+			for (int i = 0; i < node->subMaterials.size(); i++) {
+				matNames.push_back(node->subMaterials[i].name);
+			}
+
+			nodeJson["6_materialEntries"] = matNames;
+			matNames.clear();
 		}
 
 		if (!isLeafNode) {

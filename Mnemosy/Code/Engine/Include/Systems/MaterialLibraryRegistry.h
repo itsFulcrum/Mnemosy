@@ -11,10 +11,14 @@ using namespace nlohmann;
 namespace fs = std::filesystem;
 
 namespace mnemosy::systems {
+	struct MaterialInfo;
 	struct FolderNode;
 }
 namespace mnemosy::core {
 	class FileDirectories;
+}
+namespace mnemosy::graphics {
+	enum PBRTextureType;
 }
 
 namespace mnemosy::systems
@@ -31,8 +35,8 @@ namespace mnemosy::systems
 		float metallic			= 0.0f;
 		
 		float emission_r		= 0.0f;
-		float emission_b		= 0.0f;
 		float emission_g		= 0.0f;
+		float emission_b		= 0.0f;
 		float emissionStrength	= 0.0f;
 		
 		float normalStrength	= 1.0f;
@@ -40,16 +44,17 @@ namespace mnemosy::systems
 		float uvScale_y			= 1.0f;
 
 		bool albedoAssigned = false;
-		std::string albedoPath	= "notAssigned";
 		bool roughAssigned = false;
-		std::string roughPath	= "notAssigned";
 		bool metalAssigned = false;
-		std::string metalPath	= "notAssigned";
 		bool emissionAssigned = false;
-		std::string emissionPath = "notAssigned";
 		bool normalAssigned = false;
-		std::string normalPath	= "notAssigned";
 		bool aoAssigned = false;
+
+		std::string albedoPath	= "notAssigned";
+		std::string roughPath	= "notAssigned";
+		std::string metalPath	= "notAssigned";
+		std::string emissionPath = "notAssigned";
+		std::string normalPath	= "notAssigned";
 		std::string aoPath		= "notAssigned";
 
 		std::string thumbnailPath = "notAssigned";
@@ -76,15 +81,33 @@ namespace mnemosy::systems
 		FolderNode* RecursivGetNodeByRuntimeID(FolderNode* node, unsigned int id);
 
 		void CreateNewMaterial(FolderNode* node, std::string name);
-		void ChangeMaterialName(systems::FolderNode* node, std::string& materialName, std::string& newName, int positionInVector);
-		void DeleteMaterial(FolderNode* node, std::string& materialName, int positionInVector);
-		void MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, std::string& name);
+		void ChangeMaterialName(FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector);
+		void DeleteMaterial(FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector);
+		void MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo& materialInfo);
+
+		void LoadActiveMaterialFromFile(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
+		void SaveActiveMaterialToFile();
+		void SetDefaultMaterial();
+
+		FolderNode* GetSelectedNode() { return m_selectedFolderNode; }
+		int GetActiveMaterialID() { return m_activeMaterialID; }
+		bool UserMaterialBound() { return m_userMaterialBound; }
+		fs::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
+		//std::string& GetFolderNodeNameOfActiveMaterial() { return m_folderNodeOfActiveMaterial->name; }
+		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath);
+		void DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType);
+
+
+		void OpenFolderNode(FolderNode* node);
+
 	private:
+
 		core::FileDirectories& m_fileDirectories;
 		// runtime id's are only used for identification at runtime. specifically for drag and drop behavior
-		unsigned int m_runtimeIDCounter = 0;
+		unsigned int m_runtimeIDCounter = 1;
+		unsigned int m_runtimeMaterialIDCounter = 1;
 		FolderNode* m_rootFolderNode;
-
+		FolderNode* m_selectedFolderNode = nullptr;
 
 		void CreateNewMaterialDataFile(fs::path& folderPath,std::string& name);
 		void CreateDirectoryForNode(FolderNode* node);
@@ -100,6 +123,20 @@ namespace mnemosy::systems
 		json RecursivSaveDirectories(FolderNode* node);
 		bool CheckDataFile(fs::directory_entry dataFile);
 		
+		// active Material;
+		fs::path m_activeMaterialDataFilePath;
+		unsigned int m_activeMaterialID = 0; // 0 means non selected // at startup and if selected gets deleted
+		bool m_userMaterialBound = false;
+	public:
+
+		FolderNode* m_folderNodeOfActiveMaterial = nullptr;
+
+
+
+
+
+
+
 	};
 
 

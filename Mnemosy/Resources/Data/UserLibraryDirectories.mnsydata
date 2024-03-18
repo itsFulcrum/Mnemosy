@@ -11,9 +11,20 @@
             "4_subFolderNames": [
                 "Stone",
                 "Nature",
-                "Wood"
+                "Wood",
+                "Metals"
             ],
             "5_subFolders": {
+                "Metals": {
+                    "1_name": "Metals",
+                    "2_isLeaf": true,
+                    "3_pathFromRoot": "Metals",
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "Scratched",
+                        "Testymesty"
+                    ]
+                },
                 "Nature": {
                     "1_name": "Nature",
                     "2_isLeaf": false,
@@ -51,24 +62,19 @@
                     "3_pathFromRoot": "Stone",
                     "6_hasMaterials": true,
                     "6_materialEntries": [
-                        "New Material_1",
-                        "New Material_2",
-                        "New Material_3",
-                        "New Material"
+                        "Cliff",
+                        "Quite_Very_Long_Material_Name_Yes",
+                        "Tiles",
+                        "Rock",
+                        "New Material",
+                        "Marble"
                     ]
                 },
                 "Wood": {
                     "1_name": "Wood",
                     "2_isLeaf": true,
                     "3_pathFromRoot": "Wood",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "New Material_4",
-                        "New Material_5",
-                        "New Material_6",
-                        "New Material_7",
-                        "New Material_8"
-                    ]
+                    "6_hasMaterials": false
                 }
             },
             "6_hasMaterials": false

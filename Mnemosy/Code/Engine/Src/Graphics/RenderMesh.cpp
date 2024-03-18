@@ -10,52 +10,28 @@ namespace mnemosy::graphics
 {
 	RenderMesh::RenderMesh()
 	{
-		m_material = new Material();
+		//m_material = new Material();
 
 		LoadMesh("../Resources/Meshes/UnitCube.fbx");
 	}
 
-	RenderMesh::RenderMesh(const char* path)
-	{
-		m_material = new Material();
+	RenderMesh::RenderMesh(const char* path) {
 
 		LoadMesh(path);
 	}
 
-	RenderMesh::~RenderMesh()
-	{
-
-		if (m_material)
-		{
-			delete m_material;
-			m_material = nullptr;
-		}
-
-
-		if (m_modelData)
-		{
+	RenderMesh::~RenderMesh() {
+		
+		if (m_modelData) {
 			delete m_modelData;
 			m_modelData = nullptr;
 		}
-
 	}
 
-	void RenderMesh::SetMaterial(Material* const material)
-	{
-		if (m_material)
-		{
-			delete m_material;
-			m_material = nullptr;
-		}
+	void RenderMesh::LoadMesh(const char* path) {
 
-		m_material = material;
+		if (m_modelData) {
 
-	}
-
-	void RenderMesh::LoadMesh(const char* path)
-	{
-		if (m_modelData)
-		{
 			ClearModelData();
 		}
 
@@ -66,17 +42,16 @@ namespace mnemosy::graphics
 
 
 
-	ModelData& RenderMesh::GetModelData()
-	{
-		MNEMOSY_ASSERT(m_modelData, "RenderMesh has no model data yet");
+	ModelData& RenderMesh::GetModelData() {
 
+		MNEMOSY_ASSERT(m_modelData, "RenderMesh has no model data yet");
 		return *m_modelData;
 	}
 
-	void RenderMesh::ClearModelData()
-	{
-		for (int i = 0; i < m_modelData->meshes.size(); i++)
-		{
+	void RenderMesh::ClearModelData() {
+
+		for (int i = 0; i < m_modelData->meshes.size(); i++) {
+
 			m_modelData->meshes[i].vertecies.clear();
 			m_modelData->meshes[i].indecies.clear();
 		}
@@ -84,7 +59,6 @@ namespace mnemosy::graphics
 
 		delete m_modelData;
 		m_modelData = nullptr;
-
 	}
 
 } // !mnemosy::graphics

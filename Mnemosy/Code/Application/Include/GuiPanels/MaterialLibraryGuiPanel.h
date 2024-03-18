@@ -8,6 +8,7 @@
 
 namespace mnemosy::systems
 {
+	struct MaterialInfo;
 	struct FolderNode;
 	class MaterialLibraryRegistry;
 }
@@ -39,8 +40,8 @@ namespace mnemosy::gui
 		void ChangeNodeName(systems::FolderNode* node, std::string newName);
 		
 		void AddMaterial(systems::FolderNode* node,std::string name);
-		void ChangeMaterialName(systems::FolderNode* node,std::string& materialName, std::string& newName, int positionInVector);
-		void DeleteMaterial(systems::FolderNode* node, std::string& materialName, int positionInVector);
+		void ChangeMaterialName(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector);
+		void DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector);
 
 
 		void HandleDeleteHierarchyModal();
@@ -54,7 +55,8 @@ namespace mnemosy::gui
 		systems::FolderNode* rootNode = nullptr; // pointer lifetime is handled by the engine
 
 
-		systems::FolderNode* m_selectedNode = nullptr;
+		//systems::FolderNode* m_selectedNode = nullptr;
+		
 
 		bool showDeleteHierarchyModel = false;
 	};

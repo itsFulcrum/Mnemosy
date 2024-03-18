@@ -3,6 +3,10 @@
 
 #include "Include/Gui/GuiPanel.h"
 
+namespace mnemosy::systems {
+	class MaterialLibraryRegistry;
+}
+
 namespace mnemosy::gui
 {
 	class MaterialEditorGuiPanel : public GuiPanel
@@ -11,6 +15,9 @@ namespace mnemosy::gui
 		MaterialEditorGuiPanel();
 
 		virtual void Draw() override;
+
+	private:
+		systems::MaterialLibraryRegistry& m_materialRegistry;
 	};
 }
 

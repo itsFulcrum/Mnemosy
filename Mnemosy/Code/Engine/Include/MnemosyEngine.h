@@ -17,6 +17,7 @@ namespace mnemosy::systems
 	class InputSystem;
 	class SkyboxAssetRegistry;
 	class MaterialLibraryRegistry;
+	class ThumbnailManager;
 }
 
 namespace mnemosy::graphics
@@ -26,6 +27,7 @@ namespace mnemosy::graphics
 	class Renderer;
 	class ImageBasedLightingRenderer;
 	class Scene;
+	class ThumbnailScene;
 }
 namespace mnemosy::gui
 {
@@ -58,10 +60,13 @@ namespace mnemosy
 		systems::InputSystem& GetInputSystem() { return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry() { return *m_pSkyboxAssetRegistry; }
 		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry() { return *m_pMaterialLibraryRegistry; }
-		
+		systems::ThumbnailManager& GetThumbnailManager() { return *m_pThumbnailManger; }
+
+
 		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
 		graphics::Scene& GetScene() { return *m_pScene; }
+		graphics::ThumbnailScene& GetThumbnailScene() { return *m_pThumbnailScene; }
 
 
 		gui::UserInterface& GetUserInterface() { return *m_pUserInterface; }
@@ -79,12 +84,14 @@ namespace mnemosy
 		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;
 		
 		std::unique_ptr<systems::MaterialLibraryRegistry> m_pMaterialLibraryRegistry;
+		std::unique_ptr<systems::ThumbnailManager> m_pThumbnailManger;
 
 
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
 		std::unique_ptr<graphics::Renderer> m_pRenderer;
 
 		std::unique_ptr<graphics::Scene> m_pScene;
+		std::unique_ptr<graphics::ThumbnailScene> m_pThumbnailScene;
 
 		std::unique_ptr<gui::UserInterface> m_pUserInterface;
 		

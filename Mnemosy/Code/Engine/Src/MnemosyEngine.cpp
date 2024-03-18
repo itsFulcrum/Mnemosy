@@ -12,6 +12,7 @@
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
+#include "Include/Systems/ThumbnailManager.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -21,6 +22,7 @@
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Light.h"
 #include "Include/Graphics/Scene.h"
+#include "Include/Graphics/ThumbnailScene.h"
 
 #include "Include/Gui/UserInterface.h"
 
@@ -94,6 +96,7 @@ namespace mnemosy
 		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
 		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
 		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
+		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
 
 
 		// menmosy::graphcs
@@ -105,6 +108,7 @@ namespace mnemosy
 		double timeSceneStart = glfwGetTime();
 		m_pScene = std::make_unique<graphics::Scene>();
 		double timeSceneEnd = glfwGetTime();
+		m_pThumbnailScene = std::make_unique<graphics::ThumbnailScene>();
 
 		MNEMOSY_TRACE("Scene Initialized {} seconds ",timeSceneEnd-timeSceneStart);
 
@@ -115,8 +119,8 @@ namespace mnemosy
 
 		
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
-		m_pRenderer->SetPbrShaderLightUniforms();
-		m_pRenderer->SetShaderSkyboxUniforms();
+		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
+		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->GetSkybox());
 
 		m_clock->capDeltaTime = true;
 
@@ -152,10 +156,11 @@ namespace mnemosy
 
 
 			m_pScene->Update();
-
+			//m_pThumbnailScene->Update();
 
 			// Rendering
 			m_pRenderer->RenderScene(*m_pScene);
+			//m_pRenderer->RenderThumbnailScene();
 
 			m_pUserInterface->Render();
 

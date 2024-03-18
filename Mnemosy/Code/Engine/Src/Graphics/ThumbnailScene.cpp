@@ -1,4 +1,4 @@
-#include "Include/Graphics/Scene.h"
+#include "Include/Graphics/ThumbnailScene.h"
 
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Window.h"
@@ -13,35 +13,30 @@
 
 namespace mnemosy::graphics
 {
-	Scene::Scene()
+	ThumbnailScene::ThumbnailScene()
 	{
 		//MNEMOSY_TRACE("Start Init Scene");
 		mnemosy::core::Window& window = MnemosyEngine::GetInstance().GetWindow();
 		
 		m_camera = std::make_unique<Camera>(window.GetWindowWidth(), window.GetWindowHeight());
 		
-		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_mnemosy.fbx");
-		m_gizmoMesh = std::make_unique<RenderMesh>("../Resources/Meshes/Gizmo.fbx");
+		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cylinder.fbx");
+		//m_gizmoMesh = std::make_unique<RenderMesh>("../Resources/Meshes/Gizmo.fbx");
 		m_light = std::make_unique<Light>();
 		
 		//MNEMOSY_TRACE("Scene - light Init");
 		m_skybox = std::make_unique<Skybox>("../Resources/Textures/spruit_sunrise.hdr", 1024);
 		//MNEMOSY_TRACE("Scene - Skybox Init");
 
-		m_activeMaterial = new Material();
+		//m_activeMaterial = new Material();
 
 		Setup();
 	}
-	Scene::~Scene() {
+	ThumbnailScene::~ThumbnailScene() {
 
-		if (m_activeMaterial) {
-
-			delete m_activeMaterial;
-			m_activeMaterial = nullptr;
-		}
 	}
 
-	void Scene::Update()
+	void ThumbnailScene::Update()
 	{
 		MnemosyEngine& instance = MnemosyEngine::GetInstance();
 
@@ -58,9 +53,8 @@ namespace mnemosy::graphics
 
 
 
-
-	void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
-	{
+	/*
+	void ThumbnailScene::SetPreviewMesh(const PreviewMesh& previewMeshType) {
 		if (previewMeshType == m_currentPreviewMesh)
 			return; // already set
 		
@@ -108,23 +102,15 @@ namespace mnemosy::graphics
 			return;
 		}
 	}
+	*/
 
-	void Scene::SetMaterial(Material* material) {
-		if (m_activeMaterial) {
-			delete m_activeMaterial;
-			m_activeMaterial = nullptr;
-		}
+	
 
-		m_activeMaterial = material;
-
-	}
-
-	void Scene::Setup()
+	void ThumbnailScene::Setup()
 	{
 		// camera setup
-		m_camera->transform.SetPosition(glm::vec3(0.0f, 1.0f, 3.0f));
+		m_camera->transform.SetPosition(glm::vec3(0.0f, 0.0f, 1.8f));
 		m_camera->transform.SetRotationEulerAngles(glm::vec3(0.0f, 180.0f, 0.0f));
-
 
 		// base mesh setup
 		//m_mesh->LoadMesh("../Resources/Meshes/UnitSphereSmooth.fbx");
@@ -134,23 +120,19 @@ namespace mnemosy::graphics
 		//m_mesh->GetMaterial().Roughness = 0.15f;
 
 
-		// gizmo mesh setup
-		// gizmo Mesh could just be a modelData object directly. it doesnt need a material instance but it die
-		//m_gizmoMesh->transform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_gizmoMesh->transform.SetRotationEulerAngles(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_gizmoMesh->transform.SetScale(glm::vec3(0.03f, 0.03f, 0.03f));
-
-
 		// skybox setup
 		//MNEMOSY_TRACE("StartGenerateSkyboxes");
 		//m_skybox->AssignSkyboxTexture("../Resources/Textures/spruit_sunrise.hdr", 2048);
-		//m_skybox->colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
-		//m_skybox->exposure = 0.0f;
+		m_skybox->rotation = 2;
+		m_skybox->colorTint = glm::vec3(0.3f, 0.3f, 0.3f);
+		m_skybox->exposure = -0.5f;
+
+
 
 		// light setup
 		m_light->transform.SetPosition(glm::vec3(0.0f, 4.0f, 3.0f));
 		m_light->transform.SetRotationEulerAngles(glm::vec3(-45.0f, 0.0f, 0.0));
-		m_light->strength = 12.0f;
+		m_light->strength = 50.0f;
 		//m_light->color = glm::vec3(1.0f, 1.0f, 1.0f);
 		m_light->SetType(graphics::LightType::POINT);
 		m_light->falloff = 0.5f;

@@ -9,25 +9,43 @@ namespace mnemosy::graphics
 		setDefaults();
 	}
 
-	Material::~Material()
-	{
-		delete m_pAlbedoTexture;
-		delete m_pNormalTexture;
-		delete m_pRoughnessTexture;
-		delete m_pMetallicTexture;
-		delete m_pEmissiveTexture;
-		delete m_pAmbientOcclusionTexture;
+	Material::~Material() {
+
+		if (m_pAlbedoTexture) {
+			delete m_pAlbedoTexture;
+			m_pAlbedoTexture = nullptr;
+		}
+
+		if (m_pRoughnessTexture) {
+			delete m_pRoughnessTexture;
+			m_pRoughnessTexture = nullptr;
+		}
+
+		if (m_pMetallicTexture) {
+			delete m_pMetallicTexture;
+			m_pMetallicTexture = nullptr;
+		}
+
+		if (m_pNormalTexture) {
+			delete m_pNormalTexture;
+			m_pNormalTexture = nullptr;
+		}
+
+		if (m_pEmissiveTexture) {
+			delete m_pEmissiveTexture;
+			m_pEmissiveTexture = nullptr;
+		}
+
+		if (m_pAlbedoTexture) {
+			delete m_pAmbientOcclusionTexture;
+			m_pAmbientOcclusionTexture = nullptr;
+		}
 		
-		m_pNormalTexture = nullptr;
-		m_pRoughnessTexture = nullptr;
-		m_pMetallicTexture = nullptr;
-		m_pAlbedoTexture = nullptr;
-		m_pEmissiveTexture = nullptr;
-		m_pAmbientOcclusionTexture = nullptr;
 	}
 
 	void Material::setDefaults()
 	{
+		Name = "Mnemosy Default";
 		Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 		Roughness = 0.5f;
 		Metallic = 0.0f;
@@ -37,20 +55,25 @@ namespace mnemosy::graphics
 		UVTiling = glm::vec2(1.0f, 1.0f);
 	}
 
-	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture& texture)
-	{
+	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* texture) {
+
 		if (pbrTextureType == ALBEDO)
-			m_pAlbedoTexture = &texture;
+			m_pAlbedoTexture = texture;
+
 		else if (pbrTextureType == ROUGHNESS)
-			m_pRoughnessTexture = &texture;
+			m_pRoughnessTexture = texture;
+		
 		else if (pbrTextureType == METALLIC)
-			m_pMetallicTexture = &texture;
+			m_pMetallicTexture = texture;
+		
 		else if (pbrTextureType == NORMAL)
-			m_pNormalTexture = &texture;
+			m_pNormalTexture = texture;
+		
 		else if (pbrTextureType == AMBIENTOCCLUSION)
-			m_pAmbientOcclusionTexture = &texture;
+			m_pAmbientOcclusionTexture = texture;
+		
 		else if (pbrTextureType == EMISSION)
-			m_pEmissiveTexture = &texture;
+			m_pEmissiveTexture = texture;
 	}
 
 	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath)

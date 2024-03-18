@@ -9,7 +9,7 @@ precision highp float;
   vec4 sampleAlbedoAlphaMap(sampler2D albedoSampler, vec2 uv,vec4 albedoColorValue)
   {
     vec4 albedoMap = texture(albedoSampler,uv);
-    albedoMap = clamp(albedoMap,0.0,1.0);
+    //albedoMap = clamp(albedoMap,0.0,1.0);
     albedoMap = sRGBToLinear(albedoMap);
 
     vec3 albedoSolidColor = sRGBToLinear(albedoColorValue).rgb;
@@ -22,7 +22,7 @@ precision highp float;
   vec3 sampleEmissionMap(sampler2D emissionSampler, vec2 uv,vec4 emissionColorValue)
   {
     vec4 emissionMap = texture(emissionSampler,uv);
-    emissionMap = clamp(emissionMap,0.0,1.0);
+    //emissionMap = clamp(emissionMap,0.0,1.0);
     emissionMap = sRGBToLinear (emissionMap);
     //vec3 emissionSolidColor = vec3(0.0,0.0,0.0);
     vec3 emissionSolidColor = sRGBToLinear(emissionColorValue).rgb;
@@ -32,16 +32,18 @@ precision highp float;
 
   float sampleRoughnessMap(sampler2D roughnessSampler,vec2 uv,vec2 roughnessValue)
   {
-    vec4 roughnessMap = texture(roughnessSampler,uv);
-    float roughness = grayscaleLinear(roughnessMap.rgb);
+    //vec4 roughnessMap = texture(roughnessSampler,uv);
+    //float roughness = grayscaleLinear(roughnessMap.rgb);
+    float roughness = texture(roughnessSampler,uv).r;
     roughness = lerp(roughness,roughnessValue.x,roughnessValue.y);
     return clamp(roughness,0.0,1.0);
   }
 
   float sampleMetallicMap(sampler2D metallicSampler,vec2 uv,vec2 metallicValue)
   {
-    vec4 metallicMap = texture(metallicSampler,uv);
-    float metallic = grayscaleLinear(metallicMap.rgb);
+    //vec4 metallicMap = texture(metallicSampler,uv);
+    //float metallic = grayscaleLinear(metallicMap.rgb);
+    float metallic = texture(metallicSampler,uv).r;
     metallic = lerp(metallic,metallicValue.x,metallicValue.y);
     return clamp(metallic,0.0,1.0);
   }
@@ -49,7 +51,8 @@ precision highp float;
   float sampleAmbientOcclusionMap(sampler2D ambientOcclusionSampler,vec2 uv,float aoValue)
   {
     vec4 ambientOcclusionMap = texture(ambientOcclusionSampler,uv);
-    float ao = grayscaleLinear(ambientOcclusionMap.rgb);
+    //float ao = grayscaleLinear(ambientOcclusionMap.rgb);
+    float ao = texture(ambientOcclusionSampler,uv).r;
     ao = lerp(ao,1.0,aoValue);
     return clamp(ao,0.0,1.0);
   }

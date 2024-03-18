@@ -15,6 +15,8 @@
 #include "Include/Graphics/Skybox.h"
 #include "Include/Graphics/Light.h"
 #include "Include/Graphics/Scene.h"
+#include "Include/Graphics/ThumbnailScene.h"
+
 
 #include <filesystem>
 #include <glad/glad.h>
@@ -131,10 +133,10 @@ namespace mnemosy::graphics
 
 	}
 
-	void Renderer::SetPbrShaderLightUniforms()
+	void Renderer::SetPbrShaderLightUniforms(Light& light)
 	{
 
-		Light& light = MnemosyEngine::GetInstance().GetScene().GetLight();
+		//Light& light = MnemosyEngine::GetInstance().GetScene().GetLight();
 
 		m_pPbrShader->Use();
 
@@ -156,9 +158,9 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformFloat("_lightAttentuation", light.falloff);
 	}
 
-	void Renderer::SetShaderSkyboxUniforms()
+	void Renderer::SetShaderSkyboxUniforms(Skybox& skybox)
 	{
-		Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
+		//Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
 
 		m_pPbrShader->Use();
 		skybox.GetCubemap().BindIrradianceCubemap(7);
@@ -243,8 +245,8 @@ namespace mnemosy::graphics
 
 	void Renderer::RenderMeshes(RenderMesh& renderMesh)
 	{
-		m_pPbrShader->Use();
-		renderMesh.GetMaterial().setMaterialUniforms(*m_pPbrShader);
+		//m_pPbrShader->Use();
+		//renderMesh.GetMaterial().setMaterialUniforms(*m_pPbrShader);
 
 		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
 
@@ -331,6 +333,8 @@ namespace mnemosy::graphics
 
 	void Renderer::RenderScene(Scene& scene)
 	{
+		
+
 		unsigned int width = MnemosyEngine::GetInstance().GetWindow().GetViewportWidth();
 		unsigned int height = MnemosyEngine::GetInstance().GetWindow().GetViewportHeight();
 
@@ -342,14 +346,78 @@ namespace mnemosy::graphics
 		glm::vec3 cameraPosition = scene.GetCamera().transform.GetPosition();
 		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
+		scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
 		RenderMeshes(scene.GetMesh());
-		//RenderMeshes(scene.GetGizmoMesh());
 		RenderGizmo(scene.GetGizmoMesh());
 		RenderLightMesh(scene.GetLight());
+
 		RenderSkybox(scene.GetSkybox());
 
 		EndFrame(width,height);
 
+	}
+
+	void Renderer::RenderThumbnail(Material& activeMaterial)
+	{
+
+		//Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+
+		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
+		unsigned int thumbnailResolution = 512;
+		
+		MSAAsamples userMSAAsetting =  m_msaaSamplesSettings;
+		SetMSAASamples(MSAAsamples::MSAA4X);
+		
+		unsigned int width = m_thumbnailResolution;
+		unsigned int height = m_thumbnailResolution;
+
+		SetPbrShaderLightUniforms(thumbScene.GetLight());
+		SetShaderSkyboxUniforms(thumbScene.GetSkybox());
+
+		thumbScene.GetCamera().SetScreenSize(width, height);
+
+		m_projectionMatrix = thumbScene.GetCamera().GetProjectionMatrix();
+		m_viewMatrix = thumbScene.GetCamera().GetViewMatrix();
+
+
+		//m_camera->SetScreenSize(instance.GetWindow().GetViewportWidth(), instance.GetWindow().GetViewportHeight());
+		//m_scene->GetCamera().SetScreenSize(m_pWindow->GetWindowWidth(), m_pWindow->GetWindowHeight());
+
+		//instance.GetRenderer().SetViewMatrix(m_camera->GetViewMatrix());
+		//instance.GetRenderer().SetProjectionMatrix(m_camera->GetProjectionMatrix());
+
+
+		StartFrame(width, height);
+
+
+		//SetPbrShaderGlobalSceneUniforms(scene.GetSkybox(), scene.GetLight(), scene.GetCamera().transform.GetPosition());
+
+		m_pPbrShader->Use();
+
+
+		glm::vec3 cameraPosition = thumbScene.GetCamera().transform.GetPosition();
+		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		activeMaterial.setMaterialUniforms(*m_pPbrShader);
+
+		RenderMeshes(thumbScene.GetMesh());
+		
+		
+		//RenderGizmo(scene.GetGizmoMesh());
+		RenderLightMesh(thumbScene.GetLight());
+
+		RenderSkybox(thumbScene.GetSkybox());
+
+		EndFrame(width, height);
+
+
+
+
+		// restore user settings
+		SetMSAASamples(userMSAAsetting);
+		Scene& scene = MnemosyEngine::GetInstance().GetScene();
+		SetPbrShaderLightUniforms(scene.GetLight());
+		SetShaderSkyboxUniforms(scene.GetSkybox());
 	}
 
 	void Renderer::SetMSAASamples(const MSAAsamples& samples)

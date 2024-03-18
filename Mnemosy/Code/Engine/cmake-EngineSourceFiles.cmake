@@ -27,6 +27,8 @@ ${ENGINE_SOURCE_PATH}/Include/Systems/MaterialLibraryRegistry.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/MaterialLibraryRegistry.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/FolderTreeNode.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/FolderTreeNode.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/ThumbnailManager.h
+${ENGINE_SOURCE_PATH}/Src/Systems/ThumbnailManager.cpp
 
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
@@ -69,6 +71,8 @@ ${ENGINE_SOURCE_PATH}/Include/Graphics/Light.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Light.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Scene.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Scene.cpp
+${ENGINE_SOURCE_PATH}/Include/Graphics/ThumbnailScene.h
+${ENGINE_SOURCE_PATH}/Src/Graphics/ThumbnailScene.cpp
 
 #user interface
 ${ENGINE_SOURCE_PATH}/Include/Gui/UserInterface.h

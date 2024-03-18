@@ -107,6 +107,10 @@ void main()
 			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
 
 			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
+			//float r = texture(_roughnessMap,uv).r;
+			//float r = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);
+			//fragmentOutputColor.rgb = vec3(r,r,r);
+
 			//fragmentOutputColor.rgb = texture(_brdfLUT, uv).rgb;
 
 }

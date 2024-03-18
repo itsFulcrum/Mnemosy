@@ -8,170 +8,152 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/core/utils/logger.hpp>
 
+#include <math.h>
 
 namespace mnemosy::graphics
 {
-	Texture::Texture() 
-	{
-		
+	Texture::Texture() {
+		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
 	}
 
-	Texture::~Texture()
-	{
+	Texture::~Texture() {
 		clear();
 	}
 
-	const bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
+	bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
 		clear();
-
-		/*Image* img = new Image();
-
-		bool successfull = img->LoadImageFromFile(imagePath, flipImageVertically);
-
-		if (successfull)
-		{
-			MNEMOSY_TRACE("StbLoaded img  numChannels: {}", img->channels);
-			KtxImage ktxImg;
-			ktxImg.SaveKtx("../Resources/Textures/Tom5_linear.ktx2", img->imageData, img->width);
-		}*/
-
-		//successfull = false;
-		//int channels, width, height;
-		//const char* textureData = stbi_load(imagePath, &width, &height, &channels, 0);
 		
+		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
 
-		// TEST Loading Ktx Image
-		bool loadKTX = false;
-		if (loadKTX)
-		{
-			glGenTextures(1, &m_ID);
-			KtxImage ktxImg;
-			ktxImg.LoadKtx(imagePath, m_ID); // should return if successful
-			//ktxImg.SaveKtx(imagePath, 1024);
-
-			
-
-			glBindTexture(GL_TEXTURE_2D, m_ID);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			if (generateMipmaps)
-			{
-				glGenerateMipmap(GL_TEXTURE_2D);
-			}
-
-			m_isInitialized = true;
-
-			return true;
-		}
-		// TEST Loading Ktx Image end
-
-		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_COLOR);
-		
-
-
-
-		if (pic.empty())
-		{
-			MNEMOSY_ERROR("opencv image read failed");
-
+		if (pic.empty()) {
+			MNEMOSY_ERROR("Texture::generateFromFile: OpenCV Image read failed");
 			pic.release();
-			
-			
 			m_ID = 0;
 			m_isInitialized = false;
-			//img->FreeData();
-			//delete img;
-			//img = nullptr;
-			return false;
+			return false;					
 		}
 		
-
-		if (!pic.empty())
-		{
-
-			// save img as ktx2 file
-			bool saveKtx = false;
-			if(saveKtx)
-			{
-				cv::Mat rgba;
-				cv::cvtColor(pic, rgba, cv::COLOR_BGR2RGB); // convert to rgb
+		m_channelsAmount =	pic.channels();
+		m_width = pic.cols;
+		m_height = pic.rows;
+		int bitDepth = pic.depth();
+		cv::flip(pic, pic, 0);
 			
-				MNEMOSY_TRACE("openCV loaded img  numChannels: {}", rgba.channels());
-				KtxImage ktxImg;
-				bool worked = ktxImg.SaveKtx("../Resources/Textures/ExportTest2_linear.ktx2", rgba.ptr(), rgba.channels(), rgba.cols, rgba.rows);
-				if(worked)
-					MNEMOSY_TRACE("Exported ktx");
-				rgba.release();
+		MNEMOSY_DEBUG("Texture::gnerateFromFile: Loading image: {}\nWidht: {} Height: {} Channels: {} Depth: {}", imagePath, m_width, m_height, m_channelsAmount, pic.depth());
+					
+		glGenTextures(1, &m_ID);
+		glBindTexture(GL_TEXTURE_2D, m_ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		
+		//depth 0 = 8bit unsigned byte, 2 0 16bit UNSIGNED SHORT // 4 not tested
+
+		//Loading with RGBA channels
+		if (m_channelsAmount == 4) {
+			cv::cvtColor(pic, pic, cv::COLOR_BGRA2RGBA);
+			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
+			// cv::pow requres input to be in 32 or 64 bit...
+
+			if (bitDepth == 0) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pic.ptr());
 			}
+			else if (bitDepth == 2) {
 
-
-
-			m_channelsAmount =	pic.channels();
-			m_width = pic.cols;
-			m_height = pic.rows;
-
-			MNEMOSY_DEBUG("Loading image with openCV: widht: {} Height: {} channels: {} ", m_width, m_height, m_channelsAmount);
-
-			cv::flip(pic, pic, 0);
-
-			glGenTextures(1, &m_ID);
-			glBindTexture(GL_TEXTURE_2D, m_ID);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			if (m_channelsAmount == 4)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pic.ptr());
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_SHORT, pic.ptr());
 			}
-			else if (m_channelsAmount == 3)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_BGR, GL_UNSIGNED_BYTE, pic.ptr());
+			else if (bitDepth == 4) { // not tested
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_FLOAT, pic.ptr());
 			}
-			else if (m_channelsAmount == 2)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, m_width, m_height, 0, GL_RG, GL_UNSIGNED_BYTE, pic.ptr());
+		}
+		// load with RGB channels
+		else if (m_channelsAmount == 3) {
 
+			cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
+			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
+			// cv::pow requres input to be in 32 or 64 bit...
+			
+			
+			if (bitDepth == 0) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, pic.ptr());
 			}
-			else if (m_channelsAmount == 1)
-			{
-				MNEMOSY_ERROR("Texures with only 1 channel are not supported \nFilepath: {}", imagePath);
-				m_ID = 0;
-				m_isInitialized = false;
-				pic.release();
-
-
-				return false;
-
+			else if (bitDepth == 2) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_SHORT, pic.ptr());
 			}
-
-			if (generateMipmaps)
-			{
-				glGenerateMipmap(GL_TEXTURE_2D);
+			else if (bitDepth == 4) { // not tested
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_FLOAT, pic.ptr());
 			}
-
-			m_isInitialized = true;
-			MNEMOSY_INFO("Loaded Texture from file: {}", imagePath);
-
-			//delete img;
-			//img = nullptr;
-			pic.release();
-			return true;
 		}
 
+		else if (m_channelsAmount == 1) {
 
+			//cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
+			
+			if (bitDepth == 0) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pic.ptr());
+
+			}
+			else if (bitDepth == 2) { // not tested
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_SHORT, pic.ptr());
+			}
+			else if (bitDepth == 4) { // not tested
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_FLOAT, pic.ptr());
+			}
+		}
+			
+		else if (m_channelsAmount == 2) {
+			MNEMOSY_ERROR("Texture::generateFromFile: Loading Texures with only 2 or 1 channels is not supported at the moment \nFilepath: {}", imagePath);
+			m_ID = 0;
+			m_isInitialized = false;
+			glDeleteTextures(1,&m_ID);
+			pic.release();
+			return false;
+		}
 		pic.release();
-		return false;
 
+		if (generateMipmaps) {
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		m_isInitialized = true;
+
+		return true;
+	}
+
+	bool Texture::LoadFromKtx(const char* imagePath) {
+		clear();
+				
+		glGenTextures(1, &m_ID);
+		KtxImage ktxImg;
+		bool successfull = ktxImg.LoadKtx(imagePath, m_ID); // should return if successful
+		
+		if (!successfull) {
+			glDeleteTextures(1, &m_ID);
+			m_isInitialized = false;
+			return false;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, m_ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+		// lets try if its loading them from the file
+		// glGenerateMipmap(GL_TEXTURE_2D);
+		
+		m_isInitialized = true;
+
+		return true;
 	}
 
 
-	const bool Texture::containsData() const {
+	bool Texture::containsData() const {
 		return m_isInitialized;
 	}
 
@@ -219,15 +201,6 @@ namespace mnemosy::graphics
 		}
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 
-	}
-
-	const int Texture::GetChannelsAmount() const {
-		if (!m_isInitialized) {
-			MNEMOSY_ERROR("Trying to read data from an uninitialize texture")
-			return 0;
-		}
-
-		return m_channelsAmount;
 	}
 
 } // !mnemosy::graphics

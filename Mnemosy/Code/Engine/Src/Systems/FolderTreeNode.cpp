@@ -19,16 +19,24 @@ namespace mnemosy::systems
 
 	bool FolderNode::SubMaterialExistsAlready(std::string name) {
 
-		if (subMaterialNames.empty())
+		if (subMaterials.empty())
 			return false;
 
-		for (std::string subMat : subMaterialNames) {
-			if (subMat == name) {
+		for (MaterialInfo subMat : subMaterials) {
+			if (subMat.name == name) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	bool FolderNode::HasMaterials() {
+
+		if (subMaterials.empty())
+			return false;
+
+		return true;
 	}
 
 	FolderNode* FolderNode::GetSubNodeByName(std::string name) {

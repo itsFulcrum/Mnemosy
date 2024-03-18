@@ -8,6 +8,7 @@ namespace mnemosy::graphics
 	class Shader;
 	class RenderMesh;
 	class Skybox;
+	class Material;
 	class Light;
 	class Scene;
 }
@@ -37,8 +38,8 @@ namespace mnemosy::graphics
 		unsigned int GetRenderTextureId();
 
 		void SetPbrShaderBrdfLutUniforms();
-		void SetPbrShaderLightUniforms();
-		void SetShaderSkyboxUniforms();
+		void SetPbrShaderLightUniforms(Light& light);
+		void SetShaderSkyboxUniforms(Skybox& skybox);
 
 
 		void SetProjectionMatrix(const glm::mat4& projectionMatrix);
@@ -57,10 +58,13 @@ namespace mnemosy::graphics
 		void RenderSkybox(Skybox& skybox);
 
 		void RenderScene(Scene& scene);
+		void RenderThumbnail(Material& activeMaterial);
+
+
 
 		int GetMSAA() { return (int)m_msaaSamplesSettings; }
 		void SetMSAASamples(const MSAAsamples& samples);
-
+		unsigned int GetThumbnailResolution() { return m_thumbnailResolution; };
 	private:
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
@@ -88,6 +92,8 @@ namespace mnemosy::graphics
 		int m_msaaSamples = 4;
 		MSAAsamples m_msaaSamplesSettings = MSAA4X;
 		bool m_msaaOff = false;
+
+		unsigned int m_thumbnailResolution = 256;
 	};
 
 } // mnemosy::graphics

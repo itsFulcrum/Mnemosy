@@ -45,12 +45,11 @@ vec4 applyExposure(vec4 color,float exposure)
 //////////// Gamma Functions
 // =============================================================================================================
 
-// This is not a correct sRGB converstion just a simple gamma correct.
+// This is not a correct sRGB converstion just a standard simple gamma correct.
 
 vec4 linearTosRGB(vec4 linearColor)
 {
   return vec4(pow(linearColor.rgb, vec3(1/2.2f)),linearColor.a);
-
 }
 
 vec4 sRGBToLinear(vec4 sRGBColor)

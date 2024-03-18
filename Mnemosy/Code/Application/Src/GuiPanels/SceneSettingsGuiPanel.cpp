@@ -320,7 +320,7 @@ namespace mnemosy::gui
 			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%1f");
 			ImGui::ColorEdit3("Color Tint", (float*)&skybox.colorTint);
 		
-			renderer.SetShaderSkyboxUniforms();
+			renderer.SetShaderSkyboxUniforms(skybox);
 
 			ImGui::TreePop();
 		}
@@ -363,7 +363,7 @@ namespace mnemosy::gui
 			ImGui::SliderFloat("Falloff",&light.falloff,0.01f,5.0f,"%.1f");
 			ImGui::ColorEdit3("Color", (float*)&light.color);
 
-			renderer.SetPbrShaderLightUniforms();
+			renderer.SetPbrShaderLightUniforms(light);
 
 			ImGui::TreePop();
 		}

@@ -8,12 +8,13 @@
 
 namespace mnemosy::systems
 {
-	//struct MaterialInfo
-	//{
-	//	std::string name;
-	//	std::string pathToDataFile;
-	//	std::string pathToThumbnail;
-	//};
+	struct MaterialInfo {
+	public:
+		std::string name;
+		unsigned int runtime_ID; // only used for runtime identification.
+		bool thumbnailLoaded = false;
+		unsigned int thumbnailTexure_ID = 0;
+	};
 
 	struct FolderNode {
 	
@@ -25,9 +26,10 @@ namespace mnemosy::systems
 		FolderNode* parent;
 		std::vector<FolderNode*> subNodes;
 
-		std::vector<std::string> subMaterialNames;
+		std::vector<MaterialInfo> subMaterials;
+		//std::vector<std::string> subMaterialNames;
 		bool SubMaterialExistsAlready(std::string name);
-
+		bool HasMaterials();
 
 
 		FolderNode* GetSubNodeByName(std::string name);

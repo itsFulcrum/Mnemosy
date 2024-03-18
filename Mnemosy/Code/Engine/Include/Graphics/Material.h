@@ -4,6 +4,7 @@
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/Texture.h"
 
+#include <string>
 #include <glm/glm.hpp>
 
 namespace mnemosy::graphics
@@ -24,7 +25,8 @@ namespace mnemosy::graphics
 		Material();
 		~Material();
 
-		glm::vec3 Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
+		std::string Name = "Mnemosy Default";
+		glm::vec3 Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
 		glm::vec3 Emission = glm::vec3(0.0f, 0.0f, 0.0f);
 		float Roughness = 0.5f;
 		float Metallic = 0.0f;
@@ -35,11 +37,18 @@ namespace mnemosy::graphics
 
 		void setDefaults();
 
-		void assignTexture(const PBRTextureType& pbrType, Texture& texture);
+		void assignTexture(const PBRTextureType& pbrType, Texture* texture);
 		void assignTexture(const PBRTextureType& pbrType, const std::string& filePath);
 		void removeTexture(const PBRTextureType& pbrType);
 		void setMaterialUniforms(Shader& shader);
 
+
+		bool isAlbedoAssigned()		{ return m_pAlbedoTexture; }
+		bool isNormalAssigned()		{ return m_pNormalTexture; }
+		bool isRoughnessAssigned()	{ return m_pRoughnessTexture; }
+		bool isMetallicAssigned()	{ return m_pMetallicTexture; }
+		bool isEmissiveAssigned()	{ return m_pEmissiveTexture; }
+		bool isAoAssigned()			{ return m_pAmbientOcclusionTexture; }
 	private:
 		Texture* m_pAlbedoTexture = nullptr;
 		Texture* m_pNormalTexture = nullptr;
