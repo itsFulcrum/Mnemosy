@@ -13,9 +13,11 @@ namespace mnemosy::graphics
 		unsigned int ID = NULL;
 
 		Shader(const char* vertexPath, const char* fragmentPath);
+		Shader(const char* MeshPath, const char* fragmentPath, bool isMeshShader);
 		~Shader();
 
 		void CreateShaderProgram(const char* vertexPath, const char* fragmentPath);
+		void CreateMeshShaderProgramm(const char* meshPath, const char* fragmentPath);
 
 		void Use();
 
@@ -32,6 +34,7 @@ namespace mnemosy::graphics
 		void DeleteShaderProgram();
 
 	private:
+
 		std::string m_pathVertex;
 		std::string m_pathFragment;
 

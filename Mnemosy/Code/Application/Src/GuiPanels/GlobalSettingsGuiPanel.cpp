@@ -45,24 +45,19 @@ namespace mnemosy::gui
 			std::string currentLibraryDirectory = fd.GetLibraryDirectoryPath().generic_string();
 			ImGui::Text("Path: %s", currentLibraryDirectory.c_str());
 
-			if (ImGui::Button("Select Folder..."))
-			{
-
+			if (ImGui::Button("Select Folder...")) {
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 				//std::string filepath = mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
 				std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
 				
-
-				if (!directoryPath.empty())
-				{
+				if (!directoryPath.empty()) {
 
 					fd.SetUserLibraryDirectory(std::filesystem::directory_entry(directoryPath));
 					
 				}
 
 #endif
-
 
 			}
 

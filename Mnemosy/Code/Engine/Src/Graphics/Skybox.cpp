@@ -71,10 +71,9 @@ namespace mnemosy::graphics
 		return success;
 	}
 
-	void Skybox::LoadPreviewSkybox(const std::string& name)
-	{
-		// TODO load with some kind of identifyer to the filepaths
+	void Skybox::LoadPreviewSkybox(const std::string& name) {
 		
+		// TODO load with some kind of identifyer to the filepaths
 		MnemosyEngine& engine = MnemosyEngine::GetInstance();
 
 		systems::SkyboxAssetRegistry& registry = engine.GetSkyboxAssetRegistry();

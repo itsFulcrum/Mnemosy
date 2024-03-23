@@ -182,4 +182,9 @@ vec2 Hammersley(uint i, uint N)
     return vec2(float(i)/float(N), RadicalInverse_VdC(i));
 }
 
+float simpleHash(vec2 uv)
+{
+    return fract(sin(7.289 * uv.x + 11.23 * uv.y) * 23758.5453);
+}
+
 #endif

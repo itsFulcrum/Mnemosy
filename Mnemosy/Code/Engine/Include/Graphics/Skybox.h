@@ -26,9 +26,14 @@ namespace mnemosy::graphics
 		ModelData& GetModelData();
 
 	public:
-		float rotation = 0;
-		float exposure = 0;
-		glm::vec3 colorTint = glm::vec3(1.0, 1.0f, 1.0f);
+		float rotation = 0.0f;
+		float exposure = 0.0f;
+		glm::vec3 colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		glm::vec3 backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
+		float opacity = 1.0f;
+		int blurSteps = 0;
+		float blurRadius = 0.0f;
 
 	private:
 		ModelData* m_pModelData = nullptr;

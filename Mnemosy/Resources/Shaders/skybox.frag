@@ -1,34 +1,91 @@
 #version 450 core
 
 #include includes/colorFunctions.glsl
+#include includes/mathFunctions.glsl
 
 precision highp float;
 
-out vec4 FragmentColor;
+out vec4 fragmentOutputColor;
 
+// vertex input
 in vec3 cubeMapSampleVector;
+in vec3 cubeSampleRight;
+in vec3 cubeSampleUp;
+
 
 uniform samplerCube _skybox;
 uniform samplerCube _irradianceMap;
 uniform samplerCube _prefilterMap;
 
-
 uniform float _exposure;
 uniform vec3 _colorTint;
 
+uniform float _blurRadius;
+uniform int _blurSteps;
+uniform vec3 _backgroundColor;
+uniform float _opacity;
+
+
 void main()
 {
-    vec4 skyboxColor = texture(_skybox, cubeMapSampleVector);
-    //vec4 irradianceColor = textureLod(_irradianceMap, cubeMapSampleVector,1);
-    //vec4 prefilteredColor = texture(_prefilterMap, cubeMapSampleVector);
+  vec4 fragmenColorLinear = vec4(0.0f,0.0f,0.0f,1.0f);
+  vec4 skyboxColor = vec4(0.0f,0.0f,0.0f,1.0f);
+  //skyboxColor = texture(_skybox, cubeMapSampleVector); // just normally sampling skybox
 
-    skyboxColor = applyExposure(skyboxColor,_exposure);
-    skyboxColor.rgb *= _colorTint;
+  // skybox blurring
+  if(_blurSteps > 0 && _blurRadius > 0.0001f) {
+
+    float increment = _blurRadius / _blurSteps * 0.1f;
+
+    vec3 up = vec3(0.0f,1.0f,0.0f);
+    //vec3 up = normalize(cubeSampleUp);
+    vec3 right = normalize(cubeSampleRight);
+
+    //float jx = simpleHash(cubeMapSampleVector.xy);
+    for (int i = 0; i < _blurSteps; i++) {
+      float rot = i * increment;
+
+      //float jy = simpleHash(vec2(right.x,rot));
+      //float jz = simpleHash(vec2(rot,right.y));
+      //vec3 jitter = normalize(vec3(jx,jy,jx));
+      //jitter *= 0.4f;
+      //
+      vec3 sampleUp = Rotate_About_Axis_Radians_float(cubeMapSampleVector,up,rot);
+      skyboxColor += texture(_skybox, normalize(sampleUp));
+      vec3 sampleDown = Rotate_About_Axis_Radians_float(cubeMapSampleVector,-up,rot);
+      skyboxColor += texture(_skybox, normalize(sampleDown));
+      vec3 sampleRight = Rotate_About_Axis_Radians_float(cubeMapSampleVector,right,rot);
+      skyboxColor += texture(_skybox, normalize(sampleRight));
+      vec3 sampleLeft = Rotate_About_Axis_Radians_float(cubeMapSampleVector,-right,rot);
+      skyboxColor += texture(_skybox, normalize(sampleLeft));
+      // diagonal
+      vec3 sampleVec1 = Rotate_About_Axis_Radians_float(cubeMapSampleVector,up+right,rot);
+      skyboxColor += texture(_skybox, normalize(sampleVec1));
+      vec3 sampleVec2 = Rotate_About_Axis_Radians_float(cubeMapSampleVector,up-right,rot);
+      skyboxColor += texture(_skybox, normalize(sampleVec2));
+      vec3 sampleVec3 = Rotate_About_Axis_Radians_float(cubeMapSampleVector,-up+right,rot);
+      skyboxColor += texture(_skybox, normalize(sampleVec3));
+      vec3 sampleVec4 = Rotate_About_Axis_Radians_float(cubeMapSampleVector,-up-right,rot);
+      skyboxColor += texture(_skybox, normalize(sampleVec4));
+
+    }
+    skyboxColor = skyboxColor / (_blurSteps * 8);
+
+  }
+  else { // no blurring
+    skyboxColor = texture(_skybox, cubeMapSampleVector);
+  }
 
 
-    FragmentColor = skyboxColor;
+  skyboxColor = applyExposure(skyboxColor,_exposure);
 
-    //FragmentColor.rgb = mix(skyboxColor.rgb, irradianceColor.rgb,0.85);
+  skyboxColor.rgb *= _colorTint;
+  vec3 background = sRGBToLinear(vec4(_backgroundColor,1.0f)).rgb;
+  fragmenColorLinear.rgb = mix(background.rgb,skyboxColor.rgb,_opacity);
 
-    FragmentColor = postProcess(FragmentColor,0.0);
+
+
+  // POST PROCCESSING
+  fragmentOutputColor = vec4(0.0f,0.0f,0.0f,1.0f);
+  fragmentOutputColor = postProcess(fragmenColorLinear,0.0);
 }

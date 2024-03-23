@@ -238,10 +238,8 @@ namespace mnemosy::gui
 					ImGui::EndPopup();
 				}
 			} // !m_saveSkyboxPermanentlyUponLoad
-
-
-			// Removing skybox permanently
 			
+			// Removing skybox permanently
 			static bool removePermanentlyModelOpen = false;
 			if (ImGui::Button("Remove Permanently"))
 			{
@@ -316,10 +314,18 @@ namespace mnemosy::gui
 
 
 
-			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.1f");
-			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%1f");
+			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.4f");
+			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%.4f");
+			
+			ImGui::ColorEdit3("Background Color", (float*)&skybox.backgroundColor);
+			ImGui::SliderFloat("Opacity", &skybox.opacity, 0.0f, 1.0f, "%.4f");
+			
 			ImGui::ColorEdit3("Color Tint", (float*)&skybox.colorTint);
-		
+			ImGui::SliderFloat("Blur Radius", &skybox.blurRadius, 0.0f, 2.0f, "%.5f");
+			ImGui::SliderInt("Blur Steps", &skybox.blurSteps, 0, 50);
+
+
+
 			renderer.SetShaderSkyboxUniforms(skybox);
 
 			ImGui::TreePop();

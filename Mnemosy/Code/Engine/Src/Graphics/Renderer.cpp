@@ -33,6 +33,8 @@ namespace mnemosy::graphics
 		std::string shadersPath = shaders.generic_string() + "/";
 		std::string pbrVert		= shadersPath + "pbrVertex.vert";
 		std::string pbrFrag		= shadersPath + "pbrFragment.frag";
+		//std::string pbrMesh		= shadersPath + "pbrVert_MESH.glsl";
+		//std::string pbrMeshFrag	= shadersPath + "pbrMeshFragment.frag";
 		std::string lightVert	= shadersPath + "light.vert";
 		std::string lightFrag	= shadersPath + "light.frag";
 		std::string skyboxVert	= shadersPath + "skybox.vert";
@@ -42,6 +44,7 @@ namespace mnemosy::graphics
 
 
 		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
+
 		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
 		m_pGizmoShader	= new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
@@ -50,6 +53,7 @@ namespace mnemosy::graphics
 		unsigned int h = engine.GetWindow().GetWindowHeight();
 		CreateRenderingFramebuffer(w,h);
 		CreateBlitFramebuffer(w,h);
+		CreateThumbnailFramebuffer(m_thumbnailResolution,m_thumbnailResolution);
 
 		//SetPbrShaderBrdfLutUniforms();
 	}
@@ -158,11 +162,10 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformFloat("_lightAttentuation", light.falloff);
 	}
 
-	void Renderer::SetShaderSkyboxUniforms(Skybox& skybox)
-	{
-		//Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
-
+	void Renderer::SetShaderSkyboxUniforms(Skybox& skybox) {
+		
 		m_pPbrShader->Use();
+		
 		skybox.GetCubemap().BindIrradianceCubemap(7);
 		m_pPbrShader->SetUniformInt("_irradianceMap", 7);
 		skybox.GetCubemap().BindPrefilteredCubemap(8);
@@ -173,7 +176,6 @@ namespace mnemosy::graphics
 
 		m_pSkyboxShader->Use();
 
-		// test if we only need to do this once;
 		skybox.GetCubemap().BindColorCubemap(0);
 		m_pSkyboxShader->SetUniformInt("_skybox", 0);
 		skybox.GetCubemap().BindIrradianceCubemap(1);
@@ -185,6 +187,11 @@ namespace mnemosy::graphics
 		m_pSkyboxShader->SetUniformFloat("_rotation", skybox.rotation);
 		m_pSkyboxShader->SetUniformFloat3("_colorTint", skybox.colorTint.r, skybox.colorTint.g, skybox.colorTint.b);
 		m_pSkyboxShader->SetUniformFloat("_exposure", skybox.exposure);
+
+		m_pSkyboxShader->SetUniformFloat("_blurRadius", skybox.blurRadius);
+		m_pSkyboxShader->SetUniformFloat3("_backgroundColor", skybox.backgroundColor.r, skybox.backgroundColor.g, skybox.backgroundColor.b);
+		m_pSkyboxShader->SetUniformFloat("_opacity", skybox.opacity);
+		m_pSkyboxShader->SetUniformInt("_blurSteps", skybox.blurSteps);
 
 	}
 
@@ -207,7 +214,6 @@ namespace mnemosy::graphics
 
 	void Renderer::ClearFrame()
 	{
-		//MNEMOSY_DEBUG("Renderer::ClearFrame")
 		glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//glEnable(GL_DEPTH_TEST);
@@ -243,25 +249,36 @@ namespace mnemosy::graphics
 		UnbindFramebuffer();
 	}
 
-	void Renderer::RenderMeshes(RenderMesh& renderMesh)
-	{
-		//m_pPbrShader->Use();
-		//renderMesh.GetMaterial().setMaterialUniforms(*m_pPbrShader);
+	void Renderer::RenderMeshes(RenderMesh& renderMesh) {
 
 		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
 
-
+		m_pPbrShader->Use();
 		m_pPbrShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
 		m_pPbrShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
 		m_pPbrShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
 		m_pPbrShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
 
-		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++)
-		{
+		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
+
 			glBindVertexArray(renderMesh.GetModelData().meshes[i].vertexArrayObject);
 			glDrawElements(GL_TRIANGLES, (GLsizei)renderMesh.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 		}
+
+		// Mesh Shader Experiment
+		/*
+		glCullFace(GL_BACK);
+		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
+
+			for (unsigned int a = 0; a < renderMesh.GetModelData().meshes[i].vertecies.size(); a++) {
+
+				m_pPbrShader->SetUniformFloat3("_VertPos",renderMesh.GetModelData().meshes[i].vertecies[a].position.x, renderMesh.GetModelData().meshes[i].vertecies[a].position.y, renderMesh.GetModelData().meshes[i].vertecies[a].position.z);
+				glDrawMeshTasksNV(0,1);
+			}
+		}
+		glCullFace(GL_FRONT);
+		*/	
 
 	}
 
@@ -333,28 +350,23 @@ namespace mnemosy::graphics
 
 	void Renderer::RenderScene(Scene& scene)
 	{
-		
-
 		unsigned int width = MnemosyEngine::GetInstance().GetWindow().GetViewportWidth();
 		unsigned int height = MnemosyEngine::GetInstance().GetWindow().GetViewportHeight();
 
 		StartFrame(width, height);
-
-		//SetPbrShaderGlobalSceneUniforms(scene.GetSkybox(), scene.GetLight(), scene.GetCamera().transform.GetPosition());
 
 		m_pPbrShader->Use();
 		glm::vec3 cameraPosition = scene.GetCamera().transform.GetPosition();
 		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
 		scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
+
 		RenderMeshes(scene.GetMesh());
 		RenderGizmo(scene.GetGizmoMesh());
 		RenderLightMesh(scene.GetLight());
-
 		RenderSkybox(scene.GetSkybox());
 
 		EndFrame(width,height);
-
 	}
 
 	void Renderer::RenderThumbnail(Material& activeMaterial)
@@ -408,7 +420,11 @@ namespace mnemosy::graphics
 
 		RenderSkybox(thumbScene.GetSkybox());
 
-		EndFrame(width, height);
+		//EndFrame(width, height);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_thumbnailFbo);
+		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
@@ -485,6 +501,24 @@ namespace mnemosy::graphics
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_blitedRenderTexture_Id, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Renderer::CreateThumbnailFramebuffer(unsigned int width, unsigned int height) {
+
+		glGenFramebuffers(1, &m_thumbnailFbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumbnailFbo);
+
+
+		glGenTextures(1, &m_thumbnailRenderTexture_Id);
+		glBindTexture(GL_TEXTURE_2D, m_thumbnailRenderTexture_Id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_thumbnailRenderTexture_Id, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);

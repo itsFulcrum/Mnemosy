@@ -64,11 +64,14 @@ namespace mnemosy::systems
 
 
 		// check if the folder  we renamed  included the active material in its hierarchy
-		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
-		if (!activeMaterialDataFile.exists()) {
-			MNEMOSY_WARN("MaterialLibraryRegistry::RenameDirectory: active material path doesn exist anymore");
-			std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
-			m_activeMaterialDataFilePath = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) /  fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
+		if (!m_activeMaterialDataFilePath.empty()) {
+
+			fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
+			if (!activeMaterialDataFile.exists()) {
+				MNEMOSY_WARN("MaterialLibraryRegistry::RenameDirectory: active material path doesn exist anymore");
+				std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
+				m_activeMaterialDataFilePath = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) /  fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
+			}
 		}
 	}
 

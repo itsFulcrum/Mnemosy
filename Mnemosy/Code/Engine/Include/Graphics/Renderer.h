@@ -59,7 +59,7 @@ namespace mnemosy::graphics
 
 		void RenderScene(Scene& scene);
 		void RenderThumbnail(Material& activeMaterial);
-
+		unsigned int GetThumbnailRenderTextureID() { return m_thumbnailRenderTexture_Id; }
 
 
 		int GetMSAA() { return (int)m_msaaSamplesSettings; }
@@ -68,6 +68,7 @@ namespace mnemosy::graphics
 	private:
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
+		void CreateThumbnailFramebuffer(unsigned int width, unsigned int height);
 
 		// for rendering with msaa enabled
 		unsigned int m_frameBufferObject = 0;
@@ -93,6 +94,10 @@ namespace mnemosy::graphics
 		MSAAsamples m_msaaSamplesSettings = MSAA4X;
 		bool m_msaaOff = false;
 
+
+
+		unsigned int m_thumbnailRenderTexture_Id = 0;
+		unsigned int m_thumbnailFbo = 0;
 		unsigned int m_thumbnailResolution = 256;
 	};
 

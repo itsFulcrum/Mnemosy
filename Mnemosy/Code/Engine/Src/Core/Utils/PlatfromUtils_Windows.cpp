@@ -62,41 +62,38 @@ namespace mnemosy::core
 		return std::string();
 	}
 
-	std::string FileDialogs::SelectFolder(const char* filter)
-	{
+	std::string FileDialogs::SelectFolder(const char* filter) {
 
 		IFileDialog* pfd;
-
 		LPWSTR g_path;
 
-		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
-		{
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd)))) {
 			DWORD dwOptions;
-			if (SUCCEEDED(pfd->GetOptions(&dwOptions)))
-			{
-				pfd->SetOptions(dwOptions | FOS_PICKFOLDERS);
+			if (SUCCEEDED(pfd->GetOptions(&dwOptions))) {
+				pfd->SetOptions(dwOptions | FOS_PICKFOLDERS); 
 			}
-			if (SUCCEEDED(pfd->Show(NULL)))
-			{
+			if (SUCCEEDED(pfd->Show(NULL))) {
+
 				IShellItem* psi;
-				if (SUCCEEDED(pfd->GetResult(&psi)))
-				{
-					if (!SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &g_path)))
-					{
+				if (SUCCEEDED(pfd->GetResult(&psi))) {
+
+					if (!SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &g_path))) {
+
 						MessageBox(NULL, "GetIDListName() failed", NULL, NULL);
+						return std::string();
 					}
+
+					//hacky string convertion because windows is stupid
+					std::filesystem::path convert = g_path;
+					return convert.generic_string();
+
 					psi->Release();
 				}
 			}
 			pfd->Release();
-
 		}
 
-		//hacky string convertion because windows is stupid
-		std::filesystem::path convert = g_path;
-
-
-		return convert.generic_string();
+		return std::string();
 	}
 
 } // mnemosy::core

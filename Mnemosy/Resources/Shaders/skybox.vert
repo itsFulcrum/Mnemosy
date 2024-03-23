@@ -5,6 +5,8 @@
 layout (location = 0) in vec3 aPosition;
 precision highp float;
 out vec3 cubeMapSampleVector;
+out vec3 cubeSampleRight;
+out vec3 cubeSampleUp;
 
 uniform mat4 _viewMatrix;
 uniform mat4 _projectionMatrix;
@@ -13,9 +15,16 @@ uniform float _rotation;
 
 void main()
 {
-    cubeMapSampleVector = aPosition;
-    cubeMapSampleVector = Rotate_About_Axis_Radians_float(aPosition, vec3(0.0,1.0,0.0), _rotation);
 
+    //cubeMapSampleVector = aPosition;
+    //cubeMapSampleVector = Rotate_About_Axis_Radians_float(aPosition, vec3(0.0,1.0,0.0), _rotation);
+    vec3 forward = normalize( Rotate_About_Axis_Radians_float(aPosition, vec3(0.0,1.0,0.0), _rotation));
+    vec3 right = normalize(cross(forward,vec3(0.0,1.0,0.0)));
+    vec3 up = normalize(cross(right,forward));
+
+    cubeMapSampleVector = forward;
+    cubeSampleRight = right;
+    cubeSampleUp = up;
 
     vec4 pos = _projectionMatrix * _viewMatrix * vec4(aPosition,1.0f);
     gl_Position = pos.xyww;

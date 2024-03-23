@@ -126,6 +126,9 @@ namespace mnemosy::graphics
 		m_skybox->rotation = 2;
 		m_skybox->colorTint = glm::vec3(0.3f, 0.3f, 0.3f);
 		m_skybox->exposure = -0.5f;
+		m_skybox->blurSteps = 0;
+		m_skybox->backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
+		m_skybox->opacity = 0.0f;
 
 
 

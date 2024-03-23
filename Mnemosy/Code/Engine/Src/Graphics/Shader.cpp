@@ -13,7 +13,12 @@ namespace mnemosy::graphics
 	Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	{
 		CreateShaderProgram(vertexPath, fragmentPath);
-	};
+	}
+	Shader::Shader(const char* MeshPath, const char* fragmentPath, bool isMeshShader)
+	{
+
+		CreateMeshShaderProgramm(MeshPath,fragmentPath);
+	}
 
 	Shader::~Shader()
 	{
@@ -66,6 +71,56 @@ namespace mnemosy::graphics
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
+	}
+
+	void Shader::CreateMeshShaderProgramm(const char* meshPath, const char* fragmentPath)
+	{
+		if (ID)
+		{
+			MNEMOSY_WARN("A Shader program already exists under this ID: {} \nFilepath Vertex Shader: {}\nFilepath Fragment Shader: {} \n -> Proceding to override shader program", ID, m_pathVertex, m_pathFragment);
+			DeleteShaderProgram();
+		}
+		m_pathVertex = meshPath;
+		m_pathFragment = fragmentPath;
+
+		std::string vertexCode = Shadinclude::load(meshPath, "#include");
+		std::string fragmentCode = Shadinclude::load(fragmentPath, "#include");
+
+		const char* vertexShaderCode = vertexCode.c_str();
+		const char* fragmentShaderCode = fragmentCode.c_str();
+
+
+		// compile shaders
+		//int success;
+		//char infoLog[512];
+
+		unsigned int vertexShader;
+		unsigned int fragmentShader;
+		// compile vertex
+		vertexShader = glCreateShader(GL_MESH_SHADER_NV);
+		glShaderSource(vertexShader, 1, &vertexShaderCode, NULL);
+		glCompileShader(vertexShader);
+		// print compile Errors upon failure
+		CheckCompileErrors(vertexShader, "VERTEX");
+		// compile fragment
+		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragmentShader, 1, &fragmentShaderCode, NULL);
+		glCompileShader(fragmentShader);
+		CheckCompileErrors(fragmentShader, "FRAGMENT");
+
+
+		ID = glCreateProgram();
+		glAttachShader(ID, vertexShader);
+		glAttachShader(ID, fragmentShader);
+		glLinkProgram(ID);
+		CheckCompileErrors(ID, "PROGRAM");
+
+		MNEMOSY_DEBUG("Compiled Shader Program:\nMeshShader: {}\nFragmentShader: {}", meshPath, fragmentPath);
+
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
+
 
 	}
 

@@ -1,4 +1,5 @@
 #version 450 core
+
 // vertex Data
 layout (location=0) in vec3 aPos;
 layout (location=1) in vec3 aNormal;
@@ -35,5 +36,6 @@ void main()
   vec3 B = normalize(vec3(_normalMatrix * vec4(aBitangent, 0.0)));
   vec3 N = normalize(vec3(_normalMatrix * vec4(aNormal,    0.0)));
   tangentToWorldMatrix = mat3(T, B, N);
+
 
 }
