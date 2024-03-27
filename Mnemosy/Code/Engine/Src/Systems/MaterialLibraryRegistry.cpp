@@ -459,7 +459,6 @@ namespace mnemosy::systems
 			SetDefaultMaterial();
 		}
 
-
 		// maybe save library data file
 	}
 
@@ -533,6 +532,8 @@ namespace mnemosy::systems
 	}
 
 	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(fs::path& materialDirectory,systems::MaterialInfo& materialInfo,FolderNode* parentNode) {
+		
+		MNEMOSY_DEBUG("MaterialLibraryRegistry::LoadActiveMaterialFromFile: Loading Material: {}", materialInfo.name);
 		// save active material first
 		if (m_userMaterialBound) {
 			SaveActiveMaterialToFile();

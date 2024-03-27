@@ -426,7 +426,8 @@ namespace mnemosy::graphics
 		if (m_unitCube == nullptr) {
 
 			std::filesystem::path meshes = fd.GetMeshesPath();
-			std::string skyboxMeshPath = meshes.generic_string() + "/mnemosy_skybox_render_mesh.fbx"; 
+			// this MUST be a simple unit cube mesh otherwise the shader will cause a device lost
+			std::string skyboxMeshPath = meshes.generic_string() + "/mnemosy_skybox_generation_mesh.fbx"; 
 
 			std::unique_ptr<ModelLoader> modelLoader = std::make_unique <ModelLoader>();
 			m_unitCube = modelLoader->LoadModelDataFromFile(skyboxMeshPath);
@@ -439,8 +440,6 @@ namespace mnemosy::graphics
 
 			m_imagedBasedLightingShader = std::make_unique<Shader>(vertex.c_str(), fragment.c_str());
 		}
-
-		MNEMOSY_DEBUG("SHADER AND MESH LOADED");
 	}
 
 	bool ImageBasedLightingRenderer::IsShaderAndMeshInitialized() {

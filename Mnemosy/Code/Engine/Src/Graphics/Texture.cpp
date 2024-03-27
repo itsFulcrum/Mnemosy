@@ -24,11 +24,6 @@ namespace mnemosy::graphics
 	Texture::~Texture() {
 
 		clear();
-		if (m_ID > 0) {
-			glDeleteTextures(1, &m_ID);
-			m_ID = 0;
-		}
-
 	}
 
 	bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
@@ -170,9 +165,9 @@ namespace mnemosy::graphics
 	}
 
 	void Texture::clear() {
-		if (m_isInitialized)
-		{
-			MNEMOSY_DEBUG("Delete Texture ID: {}", m_ID);
+
+		if (m_isInitialized) {
+
 			UnbindLocation(m_lastBoundLocation);
 			glDeleteTextures(1, &m_ID);
 			m_ID = 0;

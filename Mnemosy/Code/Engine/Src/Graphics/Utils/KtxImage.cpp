@@ -23,11 +23,6 @@ namespace mnemosy::graphics
 			return false;
 		}
 
-
-
-		//MNEMOSY_TRACE("LoadKtx - createNamedFile");
-
-
 		GLenum target, glerror;
 		errorCode = ktxTexture_GLUpload(ktxTexture(kTexture), &glTextureID, &target, &glerror);
 		if (errorCode != 0)
@@ -37,11 +32,9 @@ namespace mnemosy::graphics
 			ktxTexture_Destroy(kTexture);
 			return false;
 		}
-		//MNEMOSY_TRACE("LoadKtx - upload");
 		//MNEMOSY_DEBUG("KTX Gen GL Tex ID {}", glTextureID);
 
 		ktxTexture_Destroy(kTexture);
-		//MNEMOSY_TRACE("LoadKtx - done");
 		return true;
 		
 	}

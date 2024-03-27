@@ -98,7 +98,6 @@ namespace mnemosy::gui
 							if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i].runtime_ID); {
 								
 								fs::path matDir = fs::path(selectedNode->pathFromRoot) / fs::path(matName);
-								MNEMOSY_TRACE("MaterialLibraryGuiPanel::Draw: Loading Material: {}", matName);
 								m_materialRegistry.LoadActiveMaterialFromFile(matDir,selectedNode->subMaterials[i], selectedNode);
 							}
 						}
