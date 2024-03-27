@@ -49,6 +49,8 @@ namespace mnemosy::graphics
 		bool isMetallicAssigned()	{ return m_pMetallicTexture; }
 		bool isEmissiveAssigned()	{ return m_pEmissiveTexture; }
 		bool isAoAssigned()			{ return m_pAmbientOcclusionTexture; }
+
+		unsigned int DebugGetTextureID(const PBRTextureType& pbrType);
 	private:
 		Texture* m_pAlbedoTexture = nullptr;
 		Texture* m_pNormalTexture = nullptr;

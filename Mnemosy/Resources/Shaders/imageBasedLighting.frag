@@ -6,10 +6,10 @@ precision highp float;
 #include includes/pbrLightingTerms.glsl
 
 
-const float irradiance_sampleDelta = 0.01; // subsample detail - default 0.0125;
+const float irradiance_sampleDelta = 0.0125; // subsample detail - default 0.0125;
 
-const uint prefilter_SAMPLE_COUNT = 4000u;
-const float prefilter_RESOLUTION = 6000.0; // improves quality
+const uint prefilter_SAMPLE_COUNT = 1000u;
+const float prefilter_RESOLUTION = 1000.0; // improves quality
 
 in vec2 texCoord;
 out vec4 fragmentColor;
@@ -18,7 +18,6 @@ uniform sampler2D _equirectangularMap;
 uniform int _mode = 0;
 uniform int _currentFace;
 uniform float _roughness;
-
 
 vec3 uvToXYZ(int face, vec2 uv)
 {

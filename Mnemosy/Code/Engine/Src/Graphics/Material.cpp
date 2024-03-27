@@ -36,7 +36,7 @@ namespace mnemosy::graphics
 			m_pEmissiveTexture = nullptr;
 		}
 
-		if (m_pAlbedoTexture) {
+		if (m_pAmbientOcclusionTexture) {
 			delete m_pAmbientOcclusionTexture;
 			m_pAmbientOcclusionTexture = nullptr;
 		}
@@ -305,6 +305,40 @@ namespace mnemosy::graphics
 		shader.SetUniformInt("_metallicMap", 3);
 		shader.SetUniformInt("_ambientOcculusionMap", 4);
 		shader.SetUniformInt("_emissionMap", 6);
+	}
+
+	unsigned int Material::DebugGetTextureID(const PBRTextureType& pbrTextureType)
+	{
+		if (pbrTextureType == ALBEDO)
+		{
+			if(m_pAlbedoTexture)
+				return m_pAlbedoTexture->GetID();
+		}
+		else if (pbrTextureType == ROUGHNESS)
+		{
+			if(m_pRoughnessTexture)
+				return m_pRoughnessTexture->GetID();
+		}
+		else if (pbrTextureType == METALLIC)
+		{
+			if(m_pMetallicTexture)
+				return m_pMetallicTexture->GetID();
+		}
+		else if (pbrTextureType == NORMAL)
+		{
+			if(m_pNormalTexture)
+				return m_pNormalTexture->GetID();
+		}
+		else if (pbrTextureType == AMBIENTOCCLUSION)
+		{
+			if(m_pAmbientOcclusionTexture)
+				return m_pAmbientOcclusionTexture->GetID();
+		}
+		else if (pbrTextureType == EMISSION)
+		{
+			if(m_pEmissiveTexture)
+				return m_pEmissiveTexture->GetID();
+		}
 	}
 
 } // !mnemosy::graphics

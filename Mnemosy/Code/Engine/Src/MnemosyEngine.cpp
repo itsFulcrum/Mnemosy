@@ -156,6 +156,8 @@ namespace mnemosy
 
 
 			m_pScene->Update();
+			m_pThumbnailManger->Update();
+
 			//m_pThumbnailScene->Update();
 
 			// Rendering

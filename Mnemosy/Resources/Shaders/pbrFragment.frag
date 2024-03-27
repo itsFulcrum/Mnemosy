@@ -65,14 +65,11 @@ void main()
 	////// SURFACE DATA ============================================================================================= ////
 	//// ============================================================================================================ ////
 
-
-
-
 			SurfaceData surfaceData;
 			vec4 albedoAlpha = sampleAlbedoAlphaMap(_albedoMap,uv,_albedoColorValue);
 
 			surfaceData.albedo = albedoAlpha.rgb;
-		  surfaceData.normal = sampleNormalMap(_normalMap,uv,tangentToWorldMatrix,_normalValue);
+		  surfaceData.normal = sampleNormalMap(_normalMap,uv,_normalStrength,tangentToWorldMatrix,_normalValue);
 		  surfaceData.emissive = sampleEmissionMap(_emissionMap,uv,_emissionColorValue);
 		  surfaceData.emissionStrength = _emissionStrength;
 		  surfaceData.roughness = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);

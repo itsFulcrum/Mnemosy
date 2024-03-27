@@ -2,6 +2,7 @@
 #define THUMBNAIL_MANAGER_H
 
 #include <filesystem>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -21,12 +22,12 @@ namespace mnemosy::systems {
 		ThumbnailManager();
 		~ThumbnailManager();
 		
-
+		void Update();
 
 		
 		void RenderThumbnailOfActiveMaterial(fs::path& pathToThumbnail,FolderNode* selectedFolder,unsigned int activeMaterialID);
 
-		void RefreshThumbnail(MaterialInfo& materialInfo, fs::path& pathToThumbnail);
+		//void RefreshThumbnail(MaterialInfo& materialInfo, fs::path& pathToThumbnail);
 
 		void DeleteThumbnailFromCache(MaterialInfo& materialInfo);
 
@@ -35,27 +36,10 @@ namespace mnemosy::systems {
 
 		void NewThumbnailInActiveFolder() { m_activeFolderFullyLoaded = false; }
 
-
-		unsigned int GetThumbnailTextureID() { return m_thumbnailRenderTexture_Id; }
 	private:
 		bool m_activeFolderFullyLoaded = false;
 
-
-
-		void CreateThumbnailFramebuffers();
-		void RenderThumbnail(graphics::Material& activeMaterial);
-
-
-		unsigned int m_fbo = 0;
-		unsigned int m_rbo = 0;
-		unsigned int m_renderTexture = 0;
-
-
-		unsigned int m_thumbnailRenderTexture_Id = 0;
-		unsigned int m_blitFbo = 0;
-		unsigned int m_thumbnailResolution = 256;
-
-
+		std::vector<systems::MaterialInfo*> m_thumbnailsQuedForRefresh;
 	};
 } // ! mnemosy::systems
 #endif // !THUMBNAIL_MANAGER_H

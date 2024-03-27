@@ -1,0 +1,14 @@
+
+Default cubemaps/HDRi images are all licensed under the CC0-Creative Commons license.
+
+Brown Photostudio
+Authors: Sergej Majboroda
+https://polyhaven.com/a/brown_photostudio_02
+
+Kloofendal Misty Morning
+Authors: Greg Zaal
+https://polyhaven.com/a/kloofendal_misty_morning
+
+Belfast Sunset
+Authors: Dimitrios Savva, Greg Zaal
+https://polyhaven.com/a/belfast_sunset

@@ -24,6 +24,8 @@ namespace mnemosy::graphics
 		m_framebufferGenerated = false;
 		m_brdfLutTexture_isGenerated = false;
 		LoadBrdfLutTexture();
+
+		InitializeMeshAndShader();
 	}
 
 	ImageBasedLightingRenderer::~ImageBasedLightingRenderer() {
@@ -42,7 +44,7 @@ namespace mnemosy::graphics
 	{
 		if (!IsShaderAndMeshInitialized())
 			InitializeMeshAndShader();
-
+				
 		glViewport(0, 0, textureRes, textureRes);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, ColorCubemapTextureID);
@@ -70,7 +72,7 @@ namespace mnemosy::graphics
 
 			DrawIntoFramebuffer();
 		}
-
+		MNEMOSY_DEBUG("RENDERED EQURECTANGULAR TO CUBEMAP..");
 	}
 
 	void ImageBasedLightingRenderer::RenderEquirectangularToIrradianceCubemapTexture(unsigned int& irradianceCubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes)
@@ -105,6 +107,8 @@ namespace mnemosy::graphics
 
 			DrawIntoFramebuffer();
 		}
+
+		MNEMOSY_DEBUG("RENDERED EQURECTANGULAR TO Irradiance..");
 	}
 
 	void ImageBasedLightingRenderer::RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& prefilterCubemapID, unsigned int& equirectangularTextureID, unsigned int resolution) {
@@ -152,7 +156,7 @@ namespace mnemosy::graphics
 		if (!IsShaderAndMeshInitialized()) {
 			InitializeMeshAndShader();
 		}
-
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	}
 
 	void ImageBasedLightingRenderer::EndCubemapRendering() {
@@ -185,11 +189,11 @@ namespace mnemosy::graphics
 	// depricated use RenderBrdfLutTextureAndSafeKtx()
 	void ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeTif(const std::string& exportpath, bool exportToFile)
 	{
-		if (m_brdfLutTexture_isGenerated)
+		/*if (m_brdfLutTexture_isGenerated)
 		{
 			MNEMOSY_INFO("ImageBasedLightingRenderer::RenderBrdfLutTexture - BrdfLutTexture is already genereated")
 				return;
-		}
+		}*/
 
 		if (!IsShaderAndMeshInitialized())
 			InitializeMeshAndShader();
@@ -220,8 +224,8 @@ namespace mnemosy::graphics
 		glGenerateMipmap(GL_TEXTURE_2D);
 		m_brdfLutTexture_isGenerated = true;
 
-		if (exportToFile)
-		{
+		if (exportToFile) {
+
 			// TODO: deallocate malloc memory
 			float* gl_texture_bytes = (float*)malloc(sizeof(float) * res * res * 3);
 
@@ -401,7 +405,6 @@ namespace mnemosy::graphics
 		m_imagedBasedLightingShader->SetUniformMatrix4("_viewMatrix", glm::mat4(0.0f));
 		m_imagedBasedLightingShader->SetUniformMatrix4("_projectionMatrix", glm::mat4(0.0f));
 
-
 		for (unsigned int i = 0; i < m_unitCube->meshes.size(); i++)
 		{
 			glBindVertexArray(m_unitCube->meshes[i].vertexArrayObject);
@@ -418,13 +421,12 @@ namespace mnemosy::graphics
 		if (!m_framebufferGenerated) {
 			glGenFramebuffers(1, &m_fbo);
 			m_framebufferGenerated = true;
-		}
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+		}		
 
 		if (m_unitCube == nullptr) {
 
 			std::filesystem::path meshes = fd.GetMeshesPath();
-			std::string skyboxMeshPath = meshes.generic_string() + "/skyboxMesh.fbx";
+			std::string skyboxMeshPath = meshes.generic_string() + "/mnemosy_skybox_render_mesh.fbx"; 
 
 			std::unique_ptr<ModelLoader> modelLoader = std::make_unique <ModelLoader>();
 			m_unitCube = modelLoader->LoadModelDataFromFile(skyboxMeshPath);
@@ -437,6 +439,8 @@ namespace mnemosy::graphics
 
 			m_imagedBasedLightingShader = std::make_unique<Shader>(vertex.c_str(), fragment.c_str());
 		}
+
+		MNEMOSY_DEBUG("SHADER AND MESH LOADED");
 	}
 
 	bool ImageBasedLightingRenderer::IsShaderAndMeshInitialized() {

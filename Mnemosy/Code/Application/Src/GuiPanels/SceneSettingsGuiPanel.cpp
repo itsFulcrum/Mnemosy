@@ -279,10 +279,10 @@ namespace mnemosy::gui
 				{
 					// Dont allow to delete the last one
 					bool canRemove = true;
-					if (nameOfSkyboxToDelete == "SpruitSunrise")
+					if (nameOfSkyboxToDelete == "BrownPhotostudio")
 					{
 						canRemove = false;
-						MNEMOSY_ERROR("You are not allowed to remove the default skybox SpuritSunrise")
+						MNEMOSY_ERROR("You are not allowed to remove the default skybox BrownPhotostudio")
 					}
 
 					if (canRemove)
@@ -319,7 +319,7 @@ namespace mnemosy::gui
 			
 			ImGui::ColorEdit3("Background Color", (float*)&skybox.backgroundColor);
 			ImGui::SliderFloat("Opacity", &skybox.opacity, 0.0f, 1.0f, "%.4f");
-			
+			ImGui::SliderFloat("Gradient", &skybox.gradientOpacity, 0.0f, 1.0f, "%.4f");
 			ImGui::ColorEdit3("Color Tint", (float*)&skybox.colorTint);
 			ImGui::SliderFloat("Blur Radius", &skybox.blurRadius, 0.0f, 2.0f, "%.5f");
 			ImGui::SliderInt("Blur Steps", &skybox.blurSteps, 0, 50);

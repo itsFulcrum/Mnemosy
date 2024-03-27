@@ -10,7 +10,7 @@
 namespace mnemosy::graphics
 {
 	const bool KtxImage::LoadKtx(const char* filepath, unsigned int& glTextureID) {
-		//MNEMOSY_TRACE("LoadKtx - {}", filepath);
+		
 		ktxTexture* kTexture;
 		KTX_error_code errorCode;
 			
@@ -38,6 +38,7 @@ namespace mnemosy::graphics
 			return false;
 		}
 		//MNEMOSY_TRACE("LoadKtx - upload");
+		//MNEMOSY_DEBUG("KTX Gen GL Tex ID {}", glTextureID);
 
 		ktxTexture_Destroy(kTexture);
 		//MNEMOSY_TRACE("LoadKtx - done");

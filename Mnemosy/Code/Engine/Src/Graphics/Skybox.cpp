@@ -11,21 +11,28 @@
 #include "Include/Core/Log.h"
 #include "Include/Graphics/ModelLoader.h"
 
+#include <filesystem>
+
 namespace mnemosy::graphics
 {
-	Skybox::Skybox()
-	{
-		ModelLoader modelLoader;
-		m_pModelData = modelLoader.LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
+	Skybox::Skybox() {
 
+		std::filesystem::path meshesPath = MnemosyEngine::GetInstance().GetFileDirectories().GetMeshesPath();
+		std::filesystem::path skyboxMesh = meshesPath / std::filesystem::path("mnemosy_skybox_render_mesh.fbx");// sphere makes for better rendering but for generating skybox from equrectanuglar wee need cubeMesh
+
+		ModelLoader modelLoader;
+		m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str()); 
 		
 		m_pCubemap = new Cubemap();
 	}
 
-	Skybox::Skybox(const char* imagePath, unsigned int resolution)
-	{
+	Skybox::Skybox(const char* imagePath, unsigned int resolution) {
+
+		std::filesystem::path meshesPath = MnemosyEngine::GetInstance().GetFileDirectories().GetMeshesPath();
+		std::filesystem::path skyboxMesh = meshesPath / std::filesystem::path("mnemosy_skybox_render_mesh.fbx");// sphere makes for better rendering but for generating skybox from equrectanuglar wee need cubeMesh
+
 		ModelLoader modelLoader;
-		m_pModelData = modelLoader.LoadModelDataFromFile("../Resources/Meshes/skyboxMesh.fbx");
+		m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str());
 
 
 		m_pCubemap = new Cubemap();
@@ -34,12 +41,12 @@ namespace mnemosy::graphics
 		bool noEntriesExist = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetVectorOfNames().empty();
 		if (noEntriesExist) 
 		{
-			m_pCubemap->LoadEquirectangularFromFile(imagePath, "SpruitSunrise", resolution, true);
+			m_pCubemap->LoadEquirectangularFromFile(imagePath, "BrownPhotostudio", resolution, true);
 			
 			return;
 		}
 
-		LoadPreviewSkybox("SpruitSunrise");
+		LoadPreviewSkybox("BrownPhotostudio");
 	}
 
 	Skybox::~Skybox()

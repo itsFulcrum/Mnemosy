@@ -17,6 +17,7 @@ namespace mnemosy::core
 
 		const fs::path GetResourcesPath();
 		const fs::path GetMeshesPath();
+		const fs::path GetPreviewMeshesPath();
 		const fs::path GetTexturesPath();
 		const fs::path GetDataPath();
 		const fs::path GetCubemapsPath();

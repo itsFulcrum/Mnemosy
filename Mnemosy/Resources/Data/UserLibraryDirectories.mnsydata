@@ -18,7 +18,11 @@
                     "1_name": "Metals",
                     "2_isLeaf": true,
                     "3_pathFromRoot": "Metals",
-                    "6_hasMaterials": false
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "UVGrid",
+                        "Cliff"
+                    ]
                 },
                 "Stone": {
                     "1_name": "Stone",
@@ -26,7 +30,7 @@
                     "3_pathFromRoot": "Stone",
                     "6_hasMaterials": true,
                     "6_materialEntries": [
-                        "Cliff",
+                        "T",
                         "Testy"
                     ]
                 },

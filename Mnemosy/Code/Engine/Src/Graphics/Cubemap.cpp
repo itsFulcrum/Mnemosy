@@ -30,6 +30,7 @@ namespace mnemosy::graphics
 		
 		if (m_equirectangularTexture_isGenerated) {
 			glDeleteTextures(1, &m_equirectangularTextureID);
+			m_equirectangularTextureID = 0;
 			m_equirectangularTexture_isGenerated = false;
 		}
 		
@@ -49,7 +50,7 @@ namespace mnemosy::graphics
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, img->width, img->height, 0, GL_RGB, GL_FLOAT, img->imageDataFLOAT); // upload data to gpu
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glGenerateMipmap(GL_TEXTURE_2D);
 			m_equirectangularTexture_isGenerated = true;
@@ -199,6 +200,7 @@ namespace mnemosy::graphics
 		if (m_colorCubemap_isGenerated) {
 			glDeleteTextures(1, &m_colorCubemapID);
 			m_colorCubemap_isGenerated = false;
+			m_colorCubemapID = 0;
 		}
 		
 		// create cubemap texture
@@ -230,6 +232,7 @@ namespace mnemosy::graphics
 		if (m_irradianceMap_isGenerated) {
 			glDeleteTextures(1, &m_irradianceMapID);
 			m_irradianceMap_isGenerated = false;
+			m_irradianceMapID = 0;
 		}
 		// create cubemap texture
 		glGenTextures(1, &m_irradianceMapID);
@@ -237,7 +240,6 @@ namespace mnemosy::graphics
 
 		for (int i = 0; i < 6; ++i)
 		{
-			auto data = std::vector<unsigned char>();
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB32F, resolution, resolution, 0, GL_RGB, GL_FLOAT, NULL);
 		}
 
@@ -253,7 +255,7 @@ namespace mnemosy::graphics
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_irradianceMapID);
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-		m_irradianceMap_isGenerated = true;		
+		m_irradianceMap_isGenerated = true;
 
 	}
 
@@ -262,6 +264,7 @@ namespace mnemosy::graphics
 		if (m_prefilterMap_isGenerated) {
 			glDeleteTextures(1, &m_prefilterMapID);
 			m_prefilterMap_isGenerated = false;
+			m_prefilterMapID = 0;
 		}
 		// create cubemap Texture
 		glGenTextures(1, &m_prefilterMapID);

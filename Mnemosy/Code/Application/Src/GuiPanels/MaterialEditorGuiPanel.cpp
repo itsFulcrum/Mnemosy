@@ -68,6 +68,7 @@ namespace mnemosy::gui
 			ImGui::SliderFloat("Metallic", &activeMat.Metallic, 0.0f, 1.0f, "%.4f");
 			ImGui::ColorEdit3("Emission", (float*)&activeMat.Emission);
 			ImGui::DragFloat("Emission Strength", &activeMat.EmissionStrength,0.01f, 0.0f, 10000.0f, "%.4f");
+			ImGui::DragFloat("Normal Strength", &activeMat.NormalStrength,0.01f, 0.0f, 100.0f, "%.4f");
 
 			float uvTiling[2] = { 1.0f,1.0f };
 			uvTiling[0] = activeMat.UVTiling.x;
@@ -93,6 +94,10 @@ namespace mnemosy::gui
 				if(ImGui::Button("Delete Albedo")) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::ALBEDO);
 				}
+				ImGui::SameLine();
+				// DEBUG
+				std::string TextureID = "ID " + std::to_string( activeMat.DebugGetTextureID(graphics::ALBEDO));
+				ImGui::Text(TextureID.c_str());
 			}
 
 			if (ImGui::Button("Load Normal...")) {
@@ -106,6 +111,9 @@ namespace mnemosy::gui
 				if (ImGui::Button("Delete Normal")) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::NORMAL);
 				}
+				// DEBUG
+				std::string TextureID = "ID " + std::to_string(activeMat.DebugGetTextureID(graphics::NORMAL));
+				ImGui::Text(TextureID.c_str());
 			}
 			// Roughness
 			if (ImGui::Button("Load Roughness...")) {
@@ -119,6 +127,10 @@ namespace mnemosy::gui
 				if (ImGui::Button("Delete Roughness")) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::ROUGHNESS);
 				}
+
+				// DEBUG
+				std::string TextureID = "ID " + std::to_string(activeMat.DebugGetTextureID(graphics::ROUGHNESS));
+				ImGui::Text(TextureID.c_str());
 			}
 
 			// Metallic

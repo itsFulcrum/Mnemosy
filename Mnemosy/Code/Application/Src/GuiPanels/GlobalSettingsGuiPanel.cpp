@@ -91,7 +91,6 @@ namespace mnemosy::gui
 			{
 				renderer.SetMSAASamples((graphics::MSAAsamples)previewMSAA_Current);
 			}
-			ImGui::TextWrapped("MSAA OFF is not implemented at the moment and causes creashes \nSo setting It to off is same as to 2X for now");
 
 			ImGui::Checkbox("Cap Delta Time",&clock.capDeltaTime);
 			bool vSyncEnabled = window.IsVsyncEnabled();

@@ -2,7 +2,7 @@
 #define SAMPLE_PBR_MAPS
 
 #include colorFunctions.glsl
-
+#include mathFunctions.glsl
 
 precision highp float;
 
@@ -48,6 +48,7 @@ precision highp float;
     return clamp(metallic,0.0,1.0);
   }
 
+
   float sampleAmbientOcclusionMap(sampler2D ambientOcclusionSampler,vec2 uv,float aoValue)
   {
     vec4 ambientOcclusionMap = texture(ambientOcclusionSampler,uv);
@@ -57,12 +58,20 @@ precision highp float;
     return clamp(ao,0.0,1.0);
   }
 
-  vec3 sampleNormalMap(sampler2D normalSampler, vec2 uv, mat3 spaceTransformMatrix,float normalValue)
+  vec3 sampleNormalMap(sampler2D normalSampler, vec2 uv, float strength, mat3 spaceTransformMatrix,float normalValue)
   {
     vec3 normalMap = texture(normalSampler,uv).xyz;
     normalMap = lerp(normalMap.xyz, vec3(0.5f,0.5f,1.0f),normalValue);
     // convert 0 to 1 range to -1 to 1
     normalMap = normalize(normalMap * 2 - 1);
+
+    //normalMap = NormalStrengthSpherical(normalMap,strength); // unity version looks better than using spherical coords and is also much faster
+    normalMap = vec3(normalMap.xy * strength,mix(1,normalMap.z,clamp(strength,0,1)));
+
+
+    normalMap = normalize(normalMap);
+    //vec3(In.xy * Strength, lerp(1, In.z, saturate(Strength)));
+
     // transform normal into the space we want. as of now lighting is done in worldspace
     normalMap =  normalize(spaceTransformMatrix * normalMap);
     return normalMap;

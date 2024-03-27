@@ -58,19 +58,25 @@ namespace mnemosy::gui
 				std::string directoryText = "Directory: " + m_materialRegistry.GetSelectedNode()->name;
 				ImGui::SeparatorText(directoryText.c_str());
 
+				static float buttonSize = 128.0f;
+				ImGui::SliderFloat("Icon Size",&buttonSize,32.0f,350.0f,"%.0f");
+				ImGui::Spacing();
 
 				if (m_materialRegistry.GetSelectedNode()->HasMaterials()) {
 					// to do kinda messy tbh registry could store it too
 					fs::path lib = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 					fs::path activeFolderPath =  lib / fs::path( m_materialRegistry.GetSelectedNode()->pathFromRoot);
+
 					MnemosyEngine::GetInstance().GetThumbnailManager().LoadThumbnailsOfActiveFolder(m_materialRegistry.GetSelectedNode(),activeFolderPath);
+
+
 
 					systems::FolderNode* selectedNode = m_materialRegistry.GetSelectedNode();
 
 					ImGuiStyle& style = ImGui::GetStyle();
 					float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-				
-					ImVec2 button_size(100.0f, 100.0f);
+					
+					ImVec2 button_size(buttonSize, buttonSize);
 					int materialCount = selectedNode->subMaterials.size();
 					for (int i = 0; i < materialCount; i++) {
 
@@ -78,7 +84,14 @@ namespace mnemosy::gui
 						ImGui::BeginGroup();
 						std::string& matName = selectedNode->subMaterials[i].name;
 
+
+						//ImTextureID texID = (void*)selectedNode->subMaterials[i].thumbnailTexure_ID;
+
+						//delete texID;
+						//MNEMOSY_DEBUG("Texture ID:{}", selectedNode->subMaterials[i].thumbnailTexure_ID);
 						bool pressed = ImGui::ImageButton((void*)selectedNode->subMaterials[i].thumbnailTexure_ID, button_size, ImVec2(0, 1), ImVec2(1, 0));
+						
+
 						if (pressed) {
 
 							// check if its already the active material
@@ -90,8 +103,9 @@ namespace mnemosy::gui
 							}
 						}
 
-						
-						ImGui::Text(matName.c_str());
+						std::string naaame = matName + "  TexID: " + std::to_string(selectedNode->subMaterials[i].thumbnailTexure_ID);
+						ImGui::Text(naaame.c_str());
+						//ImGui::Text(matName.c_str());
 
 						ImGui::EndGroup();
 

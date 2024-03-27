@@ -7,6 +7,7 @@ precision highp float;
 out vec3 cubeMapSampleVector;
 out vec3 cubeSampleRight;
 out vec3 cubeSampleUp;
+out vec2 screenSpacePos;
 
 uniform mat4 _viewMatrix;
 uniform mat4 _projectionMatrix;
@@ -25,7 +26,7 @@ void main()
     cubeMapSampleVector = forward;
     cubeSampleRight = right;
     cubeSampleUp = up;
-
     vec4 pos = _projectionMatrix * _viewMatrix * vec4(aPosition,1.0f);
+    screenSpacePos = pos.xy;
     gl_Position = pos.xyww;
 }

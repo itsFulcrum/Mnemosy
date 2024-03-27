@@ -19,15 +19,35 @@ namespace mnemosy::systems {
 
 	ThumbnailManager::ThumbnailManager() {
 	
-		CreateThumbnailFramebuffers();
 	}
 
 	ThumbnailManager::~ThumbnailManager() {
-		glDeleteFramebuffers(1, &m_fbo);
-		glDeleteRenderbuffers(1, &m_rbo);
-		glDeleteTextures(1, &m_renderTexture);
-		glDeleteFramebuffers(1, &m_blitFbo);
-		glDeleteTextures(1, &m_thumbnailRenderTexture_Id);
+		if (!m_thumbnailsQuedForRefresh.empty()) {
+
+			m_thumbnailsQuedForRefresh.clear();
+		}
+	}
+
+	void ThumbnailManager::Update() {
+
+		// When we want to refresh a thumbnail we need to delete the current texture first and then create a new one.  
+		// But we cant delete it emediatly because we already gave its texture id to im gui for rendering at the end of the frame. 
+		// so we have to delay the refresh to the next frame and update before we set up the next imGuiFrame
+
+		if (!m_thumbnailsQuedForRefresh.empty()) {
+
+			for (int i = 0; i < m_thumbnailsQuedForRefresh.size(); i++) {
+
+				glDeleteTextures(1, &m_thumbnailsQuedForRefresh[i]->thumbnailTexure_ID);
+				//MNEMOSY_DEBUG("Delete GL TEX ID {}", thumbnailQuedForRefresh[i].thumbnailTexure_ID);
+				m_thumbnailsQuedForRefresh[i]->thumbnailLoaded = false;
+				m_thumbnailsQuedForRefresh[i]->thumbnailTexure_ID = 0;
+			}
+
+			m_thumbnailsQuedForRefresh.clear();
+			m_activeFolderFullyLoaded = false;
+		}
+
 	}
 
 	void ThumbnailManager::RenderThumbnailOfActiveMaterial(fs::path& pathToThumbnail, FolderNode* selectedFolder,unsigned int activeMaterialID) {
@@ -46,11 +66,12 @@ namespace mnemosy::systems {
 
 		// check if the active material is part of the currently opend folder and refresh if needed
 		if (selectedFolder->HasMaterials()) {
-			for (systems::MaterialInfo mat : selectedFolder->subMaterials) {
 
-				if (mat.runtime_ID == activeMaterialID) {
+			for (int i = 0; i < selectedFolder->subMaterials.size(); i++) {
 
-					RefreshThumbnail(mat, thumbnailAbsolutePath);
+				if (selectedFolder->subMaterials[i].runtime_ID == activeMaterialID) {
+
+					m_thumbnailsQuedForRefresh.push_back(&selectedFolder->subMaterials[i]);
 					break;
 				}
 			}
@@ -59,20 +80,25 @@ namespace mnemosy::systems {
 
 
 	}
-	void ThumbnailManager::RefreshThumbnail(MaterialInfo& materialInfo,fs::path& pathToThumbnail) {
+	//void ThumbnailManager::RefreshThumbnail(MaterialInfo& materialInfo,fs::path& pathToThumbnail) {
+	//	/// NOT IN USE AT THE MOMENT...
+	//	glDeleteTextures(1, &materialInfo.thumbnailTexure_ID);
+	//	MNEMOSY_DEBUG("Delete GL TEX ID {}", materialInfo.thumbnailTexure_ID);
+	//	materialInfo.thumbnailTexure_ID = 0;
+	//	materialInfo.thumbnailLoaded = false;
 
-		glDeleteTextures(1, &materialInfo.thumbnailTexure_ID);
-		materialInfo.thumbnailTexure_ID = 0;
-		glGenTextures(1, &materialInfo.thumbnailTexure_ID);
 
-		graphics::KtxImage thumbnailImg;
-		thumbnailImg.LoadKtx(pathToThumbnail.generic_string().c_str(), materialInfo.thumbnailTexure_ID);
-	}
+	//	m_activeFolderFullyLoaded = false;
+	//	//glGenTextures(1, &materialInfo.thumbnailTexure_ID);
+	//	//graphics::KtxImage thumbnailImg;
+	//	//thumbnailImg.LoadKtx(pathToThumbnail.generic_string().c_str(), materialInfo.thumbnailTexure_ID);
+	//}
+	
 	void ThumbnailManager::DeleteThumbnailFromCache(MaterialInfo& materialInfo) {
 		glDeleteTextures(1, &materialInfo.thumbnailTexure_ID);
 		materialInfo.thumbnailTexure_ID = 0;
 		materialInfo.thumbnailLoaded = false;
-		MNEMOSY_TRACE("Deleted thumbnail: {}, from memory", materialInfo.name);
+		//MNEMOSY_DEBUG("Deleted thumbnail: {}, from memory", materialInfo.name);
 
 	}
 
@@ -88,10 +114,10 @@ namespace mnemosy::systems {
 			for (int i = 0; i < activeFolder->subMaterials.size(); i++) {
 
 				if (activeFolder->subMaterials[i].thumbnailLoaded) {
+					//MNEMOSY_DEBUG("Delete GL TEX ID {}", activeFolder->subMaterials[i].thumbnailTexure_ID);
 					glDeleteTextures(1, &activeFolder->subMaterials[i].thumbnailTexure_ID);
 					activeFolder->subMaterials[i].thumbnailLoaded = false;
 					activeFolder->subMaterials[i].thumbnailTexure_ID = 0;
-					MNEMOSY_TRACE("Deleted thumbnail for {}", activeFolder->subMaterials[i].name);
 				}
 			}
 		}
@@ -112,7 +138,7 @@ namespace mnemosy::systems {
 
 			if (!activeFolder->subMaterials[i].thumbnailLoaded) {
 
-				glGenTextures(1, &activeFolder->subMaterials[i].thumbnailTexure_ID);
+				//glGenTextures(1, &activeFolder->subMaterials[i].thumbnailTexure_ID);
 
 				fs::path thumbnailPath = folderDirectory / fs::path(activeFolder->subMaterials[i].name) / fs::path(activeFolder->subMaterials[i].name + "_thumbnail.ktx2");
 
@@ -120,11 +146,13 @@ namespace mnemosy::systems {
 				bool success = ktxThumbnail.LoadKtx(thumbnailPath.generic_string().c_str(), activeFolder->subMaterials[i].thumbnailTexure_ID);
 				if (!success) {
 
-					MNEMOSY_TRACE("Loaded thumbnail FAILED: {}", activeFolder->subMaterials[i].name);
+					MNEMOSY_WARN("Loaded thumbnail FAILED: {}", activeFolder->subMaterials[i].name);
+					glDeleteTextures(1, &activeFolder->subMaterials[i].thumbnailTexure_ID);
+					return;
 				}
 
 				activeFolder->subMaterials[i].thumbnailLoaded = true;
-				MNEMOSY_TRACE("Loaded thumbnail for {}", activeFolder->subMaterials[i].name);
+				//MNEMOSY_DEBUG("Loaded Thumbnail for {} GLTex ID: {}", activeFolder->subMaterials[i].name,activeFolder->subMaterials[i].thumbnailTexure_ID);
 
 
 				if(i == activeFolder->subMaterials.size()){
@@ -136,123 +164,6 @@ namespace mnemosy::systems {
 				break;
 			}
 		}
-	}
-
-	void ThumbnailManager::CreateThumbnailFramebuffers()
-	{
-		glGenFramebuffers(1, &m_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
-		glGenTextures(1, &m_renderTexture);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture);
-
-		// rendering thumbnails with msaa4 always
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, m_thumbnailResolution, m_thumbnailResolution, GL_TRUE);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE,m_renderTexture, 0);
-		
-
-		glGenRenderbuffers(1, &m_rbo);
-		glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, m_thumbnailResolution, m_thumbnailResolution);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
-
-		MNEMOSY_ASSERT(glad_glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Faild to complete framebuffer");
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		// for blitting thumbnail texture
-
-		glGenFramebuffers(1, &m_blitFbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_blitFbo);
-
-
-		glGenTextures(1, &m_thumbnailRenderTexture_Id);
-		glBindTexture(GL_TEXTURE_2D, m_thumbnailRenderTexture_Id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_thumbnailResolution, m_thumbnailResolution, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_thumbnailRenderTexture_Id, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-
-		MNEMOSY_DEBUG("Renderer: Framebuffer created");
-
-
-	}
-
-	void ThumbnailManager::RenderThumbnail(graphics::Material& activeMaterial) {
-
-		////Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
-
-		//graphics::ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
-		//graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();
-
-
-		//unsigned int width = m_thumbnailResolution;
-		//unsigned int height = m_thumbnailResolution;
-
-		//renderer.SetPbrShaderLightUniforms(thumbScene.GetLight());
-		//renderer.SetShaderSkyboxUniforms(thumbScene.GetSkybox());
-
-		//thumbScene.GetCamera().SetScreenSize(width, height);
-
-		//m_projectionMatrix = thumbScene.GetCamera().GetProjectionMatrix();
-		//m_viewMatrix = thumbScene.GetCamera().GetViewMatrix();
-
-
-		////m_camera->SetScreenSize(instance.GetWindow().GetViewportWidth(), instance.GetWindow().GetViewportHeight());
-		////m_scene->GetCamera().SetScreenSize(m_pWindow->GetWindowWidth(), m_pWindow->GetWindowHeight());
-
-		////instance.GetRenderer().SetViewMatrix(m_camera->GetViewMatrix());
-		////instance.GetRenderer().SetProjectionMatrix(m_camera->GetProjectionMatrix());
-
-
-		//StartFrame(width, height);
-
-
-		////SetPbrShaderGlobalSceneUniforms(scene.GetSkybox(), scene.GetLight(), scene.GetCamera().transform.GetPosition());
-
-		//m_pPbrShader->Use();
-
-
-		//glm::vec3 cameraPosition = thumbScene.GetCamera().transform.GetPosition();
-		//m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-
-		//activeMaterial.setMaterialUniforms(*m_pPbrShader);
-
-		//RenderMeshes(thumbScene.GetMesh());
-
-
-		////RenderGizmo(scene.GetGizmoMesh());
-		//RenderLightMesh(thumbScene.GetLight());
-
-		////RenderSkybox(thumbScene.GetSkybox());
-
-		////EndFrame
-		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitFbo);
-		//glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-		//glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
-
-		//// restore user settings
-
-
-		//graphics::Scene& scene = MnemosyEngine::GetInstance().GetScene();
-		//renderer.SetPbrShaderLightUniforms(scene.GetLight());
-		//renderer.SetShaderSkyboxUniforms(scene.GetSkybox());
-
-
 	}
 
 

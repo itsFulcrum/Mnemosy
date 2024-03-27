@@ -31,7 +31,8 @@ namespace mnemosy::graphics
 		glm::vec3 colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		glm::vec3 backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
-		float opacity = 1.0f;
+		float opacity = 0.0f;
+		float gradientOpacity = 1.0f;
 		int blurSteps = 0;
 		float blurRadius = 0.0f;
 

@@ -11,7 +11,7 @@ out vec4 fragmentOutputColor;
 in vec3 cubeMapSampleVector;
 in vec3 cubeSampleRight;
 in vec3 cubeSampleUp;
-
+in vec2 screenSpacePos;
 
 uniform samplerCube _skybox;
 uniform samplerCube _irradianceMap;
@@ -24,7 +24,7 @@ uniform float _blurRadius;
 uniform int _blurSteps;
 uniform vec3 _backgroundColor;
 uniform float _opacity;
-
+uniform float _gradientOpacity;
 
 void main()
 {
@@ -81,11 +81,18 @@ void main()
 
   skyboxColor.rgb *= _colorTint;
   vec3 background = sRGBToLinear(vec4(_backgroundColor,1.0f)).rgb;
+  //vec2 screenSpace01 = (screenSpacePos + 1) *0.5;
+  float gradient = distance(vec2(0.0f,0.0f),screenSpacePos);
+  gradient = saturate(gradient);
+  background *= 1- (gradient*_gradientOpacity);
+
   fragmenColorLinear.rgb = mix(background.rgb,skyboxColor.rgb,_opacity);
+
 
 
 
   // POST PROCCESSING
   fragmentOutputColor = vec4(0.0f,0.0f,0.0f,1.0f);
+
   fragmentOutputColor = postProcess(fragmenColorLinear,0.0);
 }

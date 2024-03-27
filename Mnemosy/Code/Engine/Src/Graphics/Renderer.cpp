@@ -53,7 +53,7 @@ namespace mnemosy::graphics
 		unsigned int h = engine.GetWindow().GetWindowHeight();
 		CreateRenderingFramebuffer(w,h);
 		CreateBlitFramebuffer(w,h);
-		CreateThumbnailFramebuffer(m_thumbnailResolution,m_thumbnailResolution);
+		CreateThumbnailFramebuffers();
 
 		//SetPbrShaderBrdfLutUniforms();
 	}
@@ -71,67 +71,93 @@ namespace mnemosy::graphics
 		m_pGizmoShader = nullptr;
 
 
+		// deleting MSAA Framebuffer stuff
+		glDeleteRenderbuffers(1, &m_MSAA_RBO);
+		glDeleteFramebuffers(1, &m_MSAA_FBO);
+		glDeleteTextures(1, &m_MSAA_renderTexture_ID);
 
-		glDeleteFramebuffers(1, &m_blitFbo);
-		glDeleteTextures(1, &m_blitedRenderTexture_Id);
+		glDeleteFramebuffers(1, &m_blitFBO);
+		glDeleteTextures(1, &m_blitRenderTexture_ID);
 
-		glDeleteRenderbuffers(1, &m_renderBufferObject);
-		glDeleteFramebuffers(1, &m_frameBufferObject);
-		glDeleteTextures(1, &m_renderTexture_Id);
+		// deleting standard framebuffer stuff (no MSAA)
+		glDeleteFramebuffers(1, &m_standard_FBO);
+		glDeleteRenderbuffers(1, &m_standard_RBO);
+		glDeleteTextures(1, &m_standard_renderTexture_ID);
+		
+		// Delete thumbnail textures and framebuffers
+		glDeleteFramebuffers(1, &m_thumb_MSAA_FBO);
+		glDeleteRenderbuffers(1, &m_thumb_MSAA_RBO);
+
+		glDeleteTextures(1, &m_thumb_MSAA_renderTexture_ID);
+		glDeleteFramebuffers(1, &m_thumb_blitFBO);
+		glDeleteTextures(1, &m_thumb_blitTexture_ID);
 	}
 
 	// bind renderFrameBuffer
-	void Renderer::BindFramebuffer()
-	{
-		MNEMOSY_ASSERT(m_frameBufferObject != 0, "Framebuffer has not be created yet");
-		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
+	void Renderer::BindFramebuffer() {
+
+		if (m_msaaOff) {
+
+			MNEMOSY_ASSERT(m_standard_FBO != 0, "Framebuffer has not be created yet");
+			glBindFramebuffer(GL_FRAMEBUFFER, m_standard_FBO);
+			
+			return;
+		}
+
+		MNEMOSY_ASSERT(m_MSAA_FBO != 0, "Framebuffer has not be created yet");
+		glBindFramebuffer(GL_FRAMEBUFFER, m_MSAA_FBO);
 	}
 
-	void Renderer::UnbindFramebuffer()
-	{
+	void Renderer::UnbindFramebuffer() {
+
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void Renderer::ResizeFramebuffer(unsigned int width, unsigned int height)
 	{
-		
-		// resize multisampled render framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id);
 
+		if (m_msaaOff) { // resizing standard framebuffer and texture
+			
+			glBindFramebuffer(GL_FRAMEBUFFER, m_standard_FBO);
+			glBindTexture(GL_TEXTURE_2D, m_standard_renderTexture_ID);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+			glBindRenderbuffer(GL_RENDERBUFFER, m_standard_RBO);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+			return;
+		}
+
+		// Resizing multisampled (MSAA) framebuffers and textures
+		glBindFramebuffer(GL_FRAMEBUFFER, m_MSAA_FBO);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_renderTexture_ID);
 		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaaSamples, GL_RGB, width, height, GL_TRUE);
-		//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id, 0);
 
-		glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferObject);
+		glBindRenderbuffer(GL_RENDERBUFFER, m_MSAA_RBO);
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER,m_msaaSamples, GL_DEPTH24_STENCIL8, width, height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderBufferObject);
-		
 
 		// resize intermediate blit framebuffer
-		glBindFramebuffer(GL_FRAMEBUFFER,m_blitFbo);
-		glBindTexture(GL_TEXTURE_2D, m_blitedRenderTexture_Id);
+		glBindFramebuffer(GL_FRAMEBUFFER,m_blitFBO);
+		glBindTexture(GL_TEXTURE_2D, m_blitRenderTexture_ID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_blitedRenderTexture_Id, 0);
 	}
 
-	unsigned int Renderer::GetRenderTextureId()
-	{
+	unsigned int Renderer::GetRenderTextureId() {
 
-		return m_blitedRenderTexture_Id;
-		//return m_renderTexture_Id;
+		if (m_msaaOff) {
+			return m_standard_renderTexture_ID;
+		}
+		return m_blitRenderTexture_ID;
 	}
 
 	
 	void Renderer::SetPbrShaderBrdfLutUniforms()
 	{
 		m_pPbrShader->Use();
-		// we should probably only have to do this once not every frame
 		MnemosyEngine::GetInstance().GetIblRenderer().BindBrdfLutTexture(9);
 		m_pPbrShader->SetUniformInt("_brdfLUT", 9);
 
@@ -190,6 +216,7 @@ namespace mnemosy::graphics
 
 		m_pSkyboxShader->SetUniformFloat("_blurRadius", skybox.blurRadius);
 		m_pSkyboxShader->SetUniformFloat3("_backgroundColor", skybox.backgroundColor.r, skybox.backgroundColor.g, skybox.backgroundColor.b);
+		m_pSkyboxShader->SetUniformFloat("_gradientOpacity", skybox.gradientOpacity);
 		m_pSkyboxShader->SetUniformFloat("_opacity", skybox.opacity);
 		m_pSkyboxShader->SetUniformInt("_blurSteps", skybox.blurSteps);
 
@@ -234,18 +261,17 @@ namespace mnemosy::graphics
 		ClearFrame();
 	}
 
-	void Renderer::EndFrame(unsigned int width, unsigned int height)
-	{
-		// now resolve multisampled buffer(s) into intermediate FBO
-		// we dont have to bind m_frameBufferObject here again because it is already bound at framestart.
-		//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_frameBufferObject);
-		
-		
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitFbo);
-		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	void Renderer::EndFrame(unsigned int width, unsigned int height) {
 
-		// now scene is stored as 2D texture image, so use that image for post-processing
+		if (!m_msaaOff) {
 
+			// resolve multisampled buffer into intermediate blit FBO
+			// we dont have to bind m_frameBufferObject here again because it is already bound at framestart.
+			//glBindFramebuffer(GL_READ_FRAMEBUFFER, m_frameBufferObject);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitFBO);
+			glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		}		
+	
 		UnbindFramebuffer();
 	}
 
@@ -369,43 +395,28 @@ namespace mnemosy::graphics
 		EndFrame(width,height);
 	}
 
-	void Renderer::RenderThumbnail(Material& activeMaterial)
-	{
+	void Renderer::RenderThumbnail(Material& activeMaterial) {
 
-		//Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
-
+		unsigned int res = m_thumbnailResolution;
 		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
-		unsigned int thumbnailResolution = 512;
 		
-		MSAAsamples userMSAAsetting =  m_msaaSamplesSettings;
-		SetMSAASamples(MSAAsamples::MSAA4X);
-		
-		unsigned int width = m_thumbnailResolution;
-		unsigned int height = m_thumbnailResolution;
-
+		// Setup Shaders with thumbnail Scene settings
 		SetPbrShaderLightUniforms(thumbScene.GetLight());
 		SetShaderSkyboxUniforms(thumbScene.GetSkybox());
 
-		thumbScene.GetCamera().SetScreenSize(width, height);
+		thumbScene.GetCamera().SetScreenSize(res, res); // we should really only need to do this once..
 
 		m_projectionMatrix = thumbScene.GetCamera().GetProjectionMatrix();
 		m_viewMatrix = thumbScene.GetCamera().GetViewMatrix();
 
+		// Start Frame
+		glViewport(0, 0,res, res);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_MSAA_FBO);
 
-		//m_camera->SetScreenSize(instance.GetWindow().GetViewportWidth(), instance.GetWindow().GetViewportHeight());
-		//m_scene->GetCamera().SetScreenSize(m_pWindow->GetWindowWidth(), m_pWindow->GetWindowHeight());
-
-		//instance.GetRenderer().SetViewMatrix(m_camera->GetViewMatrix());
-		//instance.GetRenderer().SetProjectionMatrix(m_camera->GetProjectionMatrix());
-
-
-		StartFrame(width, height);
-
-
-		//SetPbrShaderGlobalSceneUniforms(scene.GetSkybox(), scene.GetLight(), scene.GetCamera().transform.GetPosition());
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_pPbrShader->Use();
-
 
 		glm::vec3 cameraPosition = thumbScene.GetCamera().transform.GetPosition();
 		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
@@ -413,24 +424,18 @@ namespace mnemosy::graphics
 		activeMaterial.setMaterialUniforms(*m_pPbrShader);
 
 		RenderMeshes(thumbScene.GetMesh());
-		
-		
-		//RenderGizmo(scene.GetGizmoMesh());
-		RenderLightMesh(thumbScene.GetLight());
-
 		RenderSkybox(thumbScene.GetSkybox());
 
-		//EndFrame(width, height);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_thumbnailFbo);
-		glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		// End Frame
+		// blit msaa framebuffer to normal framebuffer
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,m_thumb_blitFBO);
+		glBlitFramebuffer(0, 0, res, res, 0, 0, res, res, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		// unbind frambuffers
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-
-
-		// restore user settings
-		SetMSAASamples(userMSAAsetting);
+		// Restore user pbr shader settings
 		Scene& scene = MnemosyEngine::GetInstance().GetScene();
 		SetPbrShaderLightUniforms(scene.GetLight());
 		SetShaderSkyboxUniforms(scene.GetSkybox());
@@ -439,11 +444,8 @@ namespace mnemosy::graphics
 	void Renderer::SetMSAASamples(const MSAAsamples& samples)
 	{
 		m_msaaOff = false;
-		if (samples == MSAAOFF)
-		{
-			//glDisable(GL_MULTISAMPLE);
+		if (samples == MSAAOFF) {
 			m_msaaOff = true;
-			m_msaaSamples = 2; // this causes crash
 		}
 		else if (samples == MSAA2X) 
 			m_msaaSamples = 2;
@@ -458,30 +460,57 @@ namespace mnemosy::graphics
 	}
 
 	// private
-	void Renderer::CreateRenderingFramebuffer(unsigned int width, unsigned int height)
-	{
-		glGenFramebuffers(1, &m_frameBufferObject);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
-
-		glGenTextures(1, &m_renderTexture_Id);
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id);
+	void Renderer::CreateRenderingFramebuffer(unsigned int width, unsigned int height) {
+		// MSAA FRAMEBUFFERS
+		// Generate MSAA Framebuffer
+		glGenFramebuffers(1, &m_MSAA_FBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_MSAA_FBO);
+		// Generate MSAA Render Texture
+		glGenTextures(1, &m_MSAA_renderTexture_ID);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_renderTexture_ID);
 		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaaSamples , GL_RGB, width, height, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_renderTexture_Id, 0);
+		// bind MSAA render texture to MSAA framebuffer
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_renderTexture_ID, 0);
 		// dont work with multisampling
 		//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glGenRenderbuffers(1, &m_renderBufferObject);
-		glBindRenderbuffer(GL_RENDERBUFFER, m_renderBufferObject);
+		// Generate MSAA Renderbuffer
+		glGenRenderbuffers(1, &m_MSAA_RBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, m_MSAA_RBO);
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER,m_msaaSamples, GL_DEPTH24_STENCIL8, width, height);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renderBufferObject);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_MSAA_RBO);
 
-		MNEMOSY_ASSERT(glad_glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Faild to complete framebuffer");
-		
+		MNEMOSY_ASSERT(glad_glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Faild to complete MSAA framebuffer");
+
+		// STANDARD FRAMEBUFFERS
+		// Generate standart Framebuffer (no MSAA)
+		glGenFramebuffers(1, &m_standard_FBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_standard_FBO);
+		// Generate MSAA Render Texture
+		glGenTextures(1, &m_standard_renderTexture_ID);
+		glBindTexture(GL_TEXTURE_2D, m_standard_renderTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D,0, GL_RGB, width, height,0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// bind standard render texture to standard framebuffer
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_standard_renderTexture_ID, 0);
+	
+		// Generate MSAA Renderbuffer
+		glGenRenderbuffers(1, &m_standard_RBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, m_standard_RBO);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_standard_RBO);
+
+		MNEMOSY_ASSERT(glad_glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Faild to complete standard framebuffer");
+
+		// unbind everything		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 		MNEMOSY_DEBUG("Renderer: Framebuffer created");
@@ -490,36 +519,63 @@ namespace mnemosy::graphics
 
 	void Renderer::CreateBlitFramebuffer(unsigned int width, unsigned int height)
 	{
-		glGenFramebuffers(1, &m_blitFbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_blitFbo);
+		glGenFramebuffers(1, &m_blitFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_blitFBO);
 
 
-		glGenTextures(1, &m_blitedRenderTexture_Id);
-		glBindTexture(GL_TEXTURE_2D,m_blitedRenderTexture_Id);
+		glGenTextures(1, &m_blitRenderTexture_ID);
+		glBindTexture(GL_TEXTURE_2D,m_blitRenderTexture_ID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height,0,GL_RGB,GL_UNSIGNED_BYTE,nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_blitedRenderTexture_Id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_blitRenderTexture_ID, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void Renderer::CreateThumbnailFramebuffer(unsigned int width, unsigned int height) {
+	void Renderer::CreateThumbnailFramebuffers() {
 
-		glGenFramebuffers(1, &m_thumbnailFbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_thumbnailFbo);
+		const int thumbnailMSAA = 4;
+		
+		// Gen msaa framebuffer
+		glGenFramebuffers(1, &m_thumb_MSAA_FBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_MSAA_FBO);
 
+		// Generate msaa render texture
+		glGenTextures(1, &m_thumb_MSAA_renderTexture_ID);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, thumbnailMSAA, GL_RGB, m_thumbnailResolution, m_thumbnailResolution, GL_TRUE);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
-		glGenTextures(1, &m_thumbnailRenderTexture_Id);
-		glBindTexture(GL_TEXTURE_2D, m_thumbnailRenderTexture_Id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID, 0);
+
+		glGenRenderbuffers(1, &m_thumb_MSAA_RBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, m_thumb_MSAA_RBO);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, thumbnailMSAA, GL_DEPTH24_STENCIL8, m_thumbnailResolution, m_thumbnailResolution);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_thumb_MSAA_RBO);
+
+		// check if frambuffer complete
+		MNEMOSY_ASSERT(glad_glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Faild to complete framebuffer");
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0); // might be redundant call
+		glBindRenderbuffer(GL_RENDERBUFFER, 0); // might be redundant call
+
+		// generate standart texture and framebuffers for blitting msaa render output to
+		glGenFramebuffers(1, &m_thumb_blitFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_blitFBO);
+
+		glGenTextures(1, &m_thumb_blitTexture_ID);
+		glBindTexture(GL_TEXTURE_2D, m_thumb_blitTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_thumbnailResolution, m_thumbnailResolution, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_thumbnailRenderTexture_Id, 0);
-
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_thumb_blitTexture_ID, 0);
+		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}

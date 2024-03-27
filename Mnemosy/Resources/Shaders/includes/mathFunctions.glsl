@@ -165,6 +165,39 @@ vec3 Rotate_About_Axis_Radians_float(vec3 In, vec3 Axis, float Rotation)
     return rot_mat * In;
 }
 
+vec3 NormalReconstructZ(vec2 In)
+{
+    float reconstructZ = sqrt(1.0 - saturate(dot(In.xy, In.xy)));
+    vec3 normalVector = vec3(In.x, In.y, reconstructZ);
+    return normalize(normalVector);
+}
+// this scales normal between 0 and 1 // this is honestly weird implmentation
+vec3 NormalStrength(vec3 In, float Strength)
+{
+  return vec3(In.xy * Strength, lerp(1, In.z, saturate(Strength)));
+}
+vec3 NormalStrengthSpherical(vec3 n, float strength)
+{
+  // convert to cartesian to spherical cooridnates
+  float theta = atan(n.y,n.x);
+  float phi = atan(sqrt(n.x*n.x + n.y*n.y),n.z);
+
+  phi = clamp(phi * strength,0,PI*0.5);
+
+
+  // convert back spherical to cartesian coordinates
+  vec3 z = vec3(0.0f,0.0f,1.0f);
+  z = Rotate_About_Axis_Radians_float(z, vec3(0.0f,1.0f,0.0f), phi);
+  z = Rotate_About_Axis_Radians_float(z, vec3(0.0f,0.0f,1.0f), theta);
+  // this version doesnt work idk
+  //vec4 z = vec4(0.0f,0.0f,1.0f,1.0f);
+  //z = RotateY(theta) * z;
+  //z = RotateZ(phi) * z;
+
+  vec3 normalOut = z.xyz;
+  return normalOut;
+}
+
 // random functions
 // bit shifting is not supported on all drivers but anything newer should be fine / webGL and GLES 2.0 wont work for example
 float RadicalInverse_VdC(uint bits)

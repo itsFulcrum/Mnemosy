@@ -3,6 +3,7 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/FileDirectories.h"
 
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/Camera.h"
@@ -11,24 +12,30 @@
 #include "Include/Graphics/Skybox.h"
 #include "Include/Graphics/Material.h"
 
+#include <filesystem>
+
 namespace mnemosy::graphics
 {
-	ThumbnailScene::ThumbnailScene()
-	{
+	ThumbnailScene::ThumbnailScene() {
+
+
+		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+
+		std::filesystem::path cylinderMesh = fd.GetPreviewMeshesPath() / std::filesystem::path("mnemosy_previewMesh_cylinder.fbx");
+		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("brown_photostudio.hdr");
+
+
 		//MNEMOSY_TRACE("Start Init Scene");
 		mnemosy::core::Window& window = MnemosyEngine::GetInstance().GetWindow();
 		
 		m_camera = std::make_unique<Camera>(window.GetWindowWidth(), window.GetWindowHeight());
 		
-		m_mesh = std::make_unique<RenderMesh>("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cylinder.fbx");
-		//m_gizmoMesh = std::make_unique<RenderMesh>("../Resources/Meshes/Gizmo.fbx");
+		m_mesh = std::make_unique<RenderMesh>(cylinderMesh.generic_string().c_str());
+	
 		m_light = std::make_unique<Light>();
 		
-		//MNEMOSY_TRACE("Scene - light Init");
-		m_skybox = std::make_unique<Skybox>("../Resources/Textures/spruit_sunrise.hdr", 1024);
-		//MNEMOSY_TRACE("Scene - Skybox Init");
+		m_skybox = std::make_unique<Skybox>(standardSkybox.generic_string().c_str(), 1024);
 
-		//m_activeMaterial = new Material();
 
 		Setup();
 	}
@@ -129,6 +136,7 @@ namespace mnemosy::graphics
 		m_skybox->blurSteps = 0;
 		m_skybox->backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
 		m_skybox->opacity = 0.0f;
+		m_skybox->gradientOpacity = 1.0f;
 
 
 

@@ -46,6 +46,11 @@ namespace mnemosy::core
 		return meshesPath;
 	}
 
+	const fs::path FileDirectories::GetPreviewMeshesPath()
+	{
+		return m_mnemosyInternalResourcesDirectory.path() / fs::path("Meshes/PreviewMeshes");
+	}
+
 	const fs::path FileDirectories::GetTexturesPath() {
 		fs::path texturesPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Textures");
 		return texturesPath;

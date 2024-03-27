@@ -1,6 +1,7 @@
 #include "Include/Graphics/Texture.h"
 #include "Include/Core/Log.h"
 
+#include "Include/Core/Log.h"
 #include "Include/Graphics/Image.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 
@@ -15,11 +16,19 @@
 namespace mnemosy::graphics
 {
 	Texture::Texture() {
+
 		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+		//MNEMOSY_INFO("Texture object created")
 	}
 
 	Texture::~Texture() {
+
 		clear();
+		if (m_ID > 0) {
+			glDeleteTextures(1, &m_ID);
+			m_ID = 0;
+		}
+
 	}
 
 	bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
@@ -30,7 +39,7 @@ namespace mnemosy::graphics
 		if (pic.empty()) {
 			MNEMOSY_ERROR("Texture::generateFromFile: OpenCV Image read failed");
 			pic.release();
-			m_ID = 0;
+			//m_ID = 0;
 			m_isInitialized = false;
 			return false;					
 		}
@@ -108,7 +117,7 @@ namespace mnemosy::graphics
 			
 		else if (m_channelsAmount == 2) {
 			MNEMOSY_ERROR("Texture::generateFromFile: Loading Texures with only 2 or 1 channels is not supported at the moment \nFilepath: {}", imagePath);
-			m_ID = 0;
+			//m_ID = 0;
 			m_isInitialized = false;
 			glDeleteTextures(1,&m_ID);
 			pic.release();
@@ -127,15 +136,18 @@ namespace mnemosy::graphics
 	bool Texture::LoadFromKtx(const char* imagePath) {
 		clear();
 				
-		glGenTextures(1, &m_ID);
+		//glGenTextures(1, &m_ID);
 		KtxImage ktxImg;
 		bool successfull = ktxImg.LoadKtx(imagePath, m_ID); // should return if successful
 		
 		if (!successfull) {
 			glDeleteTextures(1, &m_ID);
+			m_ID = 0;
 			m_isInitialized = false;
 			return false;
 		}
+		//MNEMOSY_DEBUG("Gen GL Texture ID: {}",m_ID);
+
 
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -160,6 +172,7 @@ namespace mnemosy::graphics
 	void Texture::clear() {
 		if (m_isInitialized)
 		{
+			MNEMOSY_DEBUG("Delete Texture ID: {}", m_ID);
 			UnbindLocation(m_lastBoundLocation);
 			glDeleteTextures(1, &m_ID);
 			m_ID = 0;

@@ -59,7 +59,7 @@ namespace mnemosy::graphics
 
 		void RenderScene(Scene& scene);
 		void RenderThumbnail(Material& activeMaterial);
-		unsigned int GetThumbnailRenderTextureID() { return m_thumbnailRenderTexture_Id; }
+		unsigned int GetThumbnailRenderTextureID() { return m_thumb_blitTexture_ID; }
 
 
 		int GetMSAA() { return (int)m_msaaSamplesSettings; }
@@ -68,15 +68,21 @@ namespace mnemosy::graphics
 	private:
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
-		void CreateThumbnailFramebuffer(unsigned int width, unsigned int height);
+
+		void CreateThumbnailFramebuffers();
 
 		// for rendering with msaa enabled
-		unsigned int m_frameBufferObject = 0;
-		unsigned int m_renderBufferObject = 0;
-		unsigned int m_renderTexture_Id = 0;
+		unsigned int m_MSAA_FBO = 0;
+		unsigned int m_MSAA_RBO = 0;
+		unsigned int m_MSAA_renderTexture_ID = 0;
 
-		unsigned int m_blitFbo = 0;
-		unsigned int m_blitedRenderTexture_Id;
+		unsigned int m_standard_FBO = 0;
+		unsigned int m_standard_RBO = 0;
+		unsigned int m_standard_renderTexture_ID = 0;
+
+
+		unsigned int m_blitFBO = 0;
+		unsigned int m_blitRenderTexture_ID;
 
 
 		glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -94,11 +100,19 @@ namespace mnemosy::graphics
 		MSAAsamples m_msaaSamplesSettings = MSAA4X;
 		bool m_msaaOff = false;
 
+		// Thumbnails
+		unsigned int m_thumbnailResolution = 128;
 
+		unsigned int m_thumb_MSAA_FBO = 0;
+		unsigned int m_thumb_MSAA_RBO = 0;
+		unsigned int m_thumb_MSAA_renderTexture_ID = 0;
 
-		unsigned int m_thumbnailRenderTexture_Id = 0;
-		unsigned int m_thumbnailFbo = 0;
-		unsigned int m_thumbnailResolution = 256;
+		unsigned int m_thumb_blitFBO = 0;
+		unsigned int m_thumb_blitTexture_ID = 0;
+		
+
+		//unsigned int m_thumbnailRenderTexture_Id = 0;
+		//unsigned int m_thumbnailFbo = 0;
 	};
 
 } // mnemosy::graphics
