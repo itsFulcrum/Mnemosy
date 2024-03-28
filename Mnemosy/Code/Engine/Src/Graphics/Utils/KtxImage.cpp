@@ -17,7 +17,7 @@ namespace mnemosy::graphics
 		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		if (errorCode != 0) {
 
-			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
+			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed\nPath:{} \nError code: {}",filepath, ktxErrorString(errorCode));
 			numChannels = 0; width = 0; height = 0;
 			ktxTexture_Destroy(kTexture);
 			return false;

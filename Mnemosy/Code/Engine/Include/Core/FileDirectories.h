@@ -24,19 +24,17 @@ namespace mnemosy::core
 		const fs::path GetShadersPath();
 
 		const fs::path GetLibraryDirectoryPath();
-		void SetUserLibraryDirectory(const fs::directory_entry& directoryPath);
+		void SetNewUserLibraryDirectory(const fs::directory_entry& directoryPath,bool copyOldFiles,bool deleteOldFiles);
+		bool ContainsUserData();
 
 	private:
 		bool prettyPrintDataFile = true;
-
+		std::string m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
 
 		void LoadUserLibraryDirectoryFromDataFile();
 		void SaveUserLibraryDirectoryToDataFile(const fs::directory_entry& libraryDirectoryPath);
 		bool CheckLibraryDataFile();
 		void SetDefaultLibraryPath();
-		//std::filesystem::path m_mnemosyInternalResourcesDirectory;
-
-		//std::filesystem::path m_userLibraryFileDirectory;
 
 		fs::directory_entry m_mnemosyInternalResourcesDirectory;
 		fs::directory_entry m_mnemosyUserLibraryDirectory;

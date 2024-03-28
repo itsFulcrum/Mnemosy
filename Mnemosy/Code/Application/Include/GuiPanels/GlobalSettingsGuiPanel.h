@@ -13,7 +13,9 @@ namespace mnemosy::gui
 		GlobalSettingsGuiPanel();
 
 		virtual void Draw() override;
-
+	private:
+		bool m_openChangeDirectoryModal = false;
+		bool m_changeDirectoryModelState = false;
 	};
 
 

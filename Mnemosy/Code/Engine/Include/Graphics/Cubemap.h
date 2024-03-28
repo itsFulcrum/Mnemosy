@@ -13,7 +13,6 @@ namespace mnemosy::graphics
 
 		bool LoadEquirectangularFromFile(const char* imagePath,const char* name, const unsigned int colorCubemapResolution,const bool savePermanently);
 		
-		
 		void LoadCubemapsFromKtxFiles(const char* colorCubemapPath, const char* irradianceCubemapPath, const char* prefilterCubemapPath);
 
 

@@ -10,8 +10,9 @@ namespace mnemosy::core
 	FileDirectories::FileDirectories()
 	{
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
+		m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
 
-		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MaterialLibrary)");
+		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MnemosyMaterialLibrary)");
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
 			MNEMOSY_WARN("Default Mnemosy Directory does not yet exist. Creating directories {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
 			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
@@ -24,6 +25,7 @@ namespace mnemosy::core
 
 	FileDirectories::~FileDirectories()
 	{
+
 
 	}
 
@@ -72,17 +74,67 @@ namespace mnemosy::core
 		return shadersPath;
 	}
 	
-	const fs::path FileDirectories::GetLibraryDirectoryPath()
-	{
+	const fs::path FileDirectories::GetLibraryDirectoryPath() {
+		
 		return m_mnemosyUserLibraryDirectory.path();
 	}
 
-	void FileDirectories::SetUserLibraryDirectory(const fs::directory_entry& directoryPath) {
-	
+	void FileDirectories::SetNewUserLibraryDirectory(const fs::directory_entry& directoryPath, bool copyOldFiles, bool deleteOldFiles) {
+		
+		// check if new path is a valid path
+		if (!directoryPath.exists()) {
+			MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: Directory entry does not exist: {}", directoryPath.path().generic_string());
+			return;
+		}
+		if (!directoryPath.is_directory()) {
+			MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: Directory entry is not a directory: {}", directoryPath.path().generic_string());
+			return;
+		}
 
+		fs::path newDirPath = directoryPath.path() / fs::path(m_rootMaterialLibraryFolderName);
+		fs::directory_entry newLibraryDirectory = fs::directory_entry(newDirPath);
+
+
+		if (copyOldFiles) {
+			// copy all existing files to the new directory..
+			try {
+				fs::copy(m_mnemosyUserLibraryDirectory.path(), newDirPath, fs::copy_options::recursive);
+			}
+			catch (fs::filesystem_error error) {
+				MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: System Error Copying directory: \nMessage: {}", error.what());
+				return;
+			}
+			
+			
+		}
+		else {
+			
+
+
+			
+		}
+		
+		if (deleteOldFiles) {
+			// delete contents of the old directory 
+			try {
+				fs::remove_all(m_mnemosyUserLibraryDirectory.path());
+			}
+			catch (fs::filesystem_error error) {
+				MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: System Error Removing old directory: \nMessage: {}", error.what());
+				return;
+			}
+		}
 		//MNEMOSY_WARN("Setting library Directories to Path: {}", directoryPath.path().generic_string())
-		SaveUserLibraryDirectoryToDataFile(directoryPath);
 
+
+
+		SaveUserLibraryDirectoryToDataFile(newLibraryDirectory);
+
+	}
+
+	bool FileDirectories::ContainsUserData() {
+
+		return !fs::is_empty(m_mnemosyUserLibraryDirectory.path());
 	}
 
 	// private methods
@@ -202,11 +254,10 @@ namespace mnemosy::core
 		dataFileStream.close();
 	}
 
-	bool FileDirectories::CheckLibraryDataFile()
-	{
+	bool FileDirectories::CheckLibraryDataFile() {
 		
-		if (!m_mnemosyLibraryDataFile.exists())
-		{
+		if (!m_mnemosyLibraryDataFile.exists()) {
+
 			std::string dataFilePath = m_mnemosyLibraryDataFile.path().generic_string();
 			MNEMOSY_WARN("FileDirectories::CheckLibraryDataFile: File did Not Exist: {} \nCreating new file at that location", dataFilePath);
 			std::ofstream file;
@@ -215,8 +266,8 @@ namespace mnemosy::core
 			file.close();
 			return false;
 		}
-		if (!m_mnemosyLibraryDataFile.is_regular_file())
-		{
+		if (!m_mnemosyLibraryDataFile.is_regular_file()) {
+
 			std::string dataFilePath = m_mnemosyLibraryDataFile.path().generic_string();
 			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File is not a regular file: {} \nCreating new file at that location", dataFilePath);
 			// maybe need to delete unregular file first idk should never happen anyhow
@@ -233,13 +284,13 @@ namespace mnemosy::core
 	void FileDirectories::SetDefaultLibraryPath() {
 		// checking if default path  exists if not creating it
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
+
 			MNEMOSY_WARN("FileDirectories::SetDefaultLibraryPath: Default Mnemosy Directory does not exist yet. Creating directories at {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
 			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
 		}
 
 		m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
 		MNEMOSY_ERROR("Setting Library path to default Default path: {} ", m_mnemosyDefaultLibraryDirectory.path().generic_string());
-
 	}
 
 

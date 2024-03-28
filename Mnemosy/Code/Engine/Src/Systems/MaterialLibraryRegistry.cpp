@@ -31,8 +31,8 @@ namespace mnemosy::systems
 		
 		m_rootNodeName = "Root";
 		m_folderNodeOfActiveMaterial = nullptr;
-
 		LoadUserDirectoriesFromFile();
+		m_selectedFolderNode = m_rootFolderNode;
 
 	}
 
@@ -195,7 +195,8 @@ namespace mnemosy::systems
 		m_runtimeIDCounter++;
 		// create system folder 
 		CreateDirectoryForNode(node);
-
+		
+		// we can NOT Call SaveUserDirectoriesData() here because we call this function when initialising and reading from the file..
 		return node;
 	}
 
@@ -273,6 +274,7 @@ namespace mnemosy::systems
 
 		node->subMaterials.push_back(matInfo);
 
+		SaveUserDirectoriesData();
 	}
 
 	void MaterialLibraryRegistry::ChangeMaterialName(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
@@ -460,6 +462,7 @@ namespace mnemosy::systems
 		}
 
 		// maybe save library data file
+		SaveUserDirectoriesData();
 	}
 
 	void MaterialLibraryRegistry::MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo& materialInfo) {
@@ -529,6 +532,7 @@ namespace mnemosy::systems
 		}
 
 		// save
+		SaveUserDirectoriesData();
 	}
 
 	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(fs::path& materialDirectory,systems::MaterialInfo& materialInfo,FolderNode* parentNode) {
@@ -955,6 +959,28 @@ namespace mnemosy::systems
 
 
 
+	}
+
+	void MaterialLibraryRegistry::ClearUserMaterialsAndFolders() {
+
+		// Clearing all User materials and folders from memory but not deleting any files.
+		// root node stays in takt
+		SetDefaultMaterial();
+		m_selectedFolderNode = m_rootFolderNode;
+
+		if (!m_rootFolderNode->IsLeafNode()) {
+
+			for (int i = 0; i < m_rootFolderNode->subNodes.size(); i++) {
+			
+				RecursivCleanFolderTreeMemory(m_rootFolderNode->subNodes[i]);
+			}
+			m_rootFolderNode->subNodes.clear();
+		}
+		if (m_rootFolderNode->HasMaterials()) {
+			m_rootFolderNode->subMaterials.clear();
+		}
+		
+		SaveUserDirectoriesData();
 	}
 
 	

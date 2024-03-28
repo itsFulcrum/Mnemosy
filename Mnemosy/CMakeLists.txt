@@ -13,10 +13,6 @@ project(${APP_PROJECT})
 
 include(GNUInstallDirs)
 
-IF (WIN32)
-ELSE()
-ENDIF()
-
 # ==== Load External libraries
 # =============================================
 #OpenGL
@@ -59,10 +55,6 @@ add_subdirectory(${ktx_software_subDir})
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(nlohmann_json_subDir "Code/Dependencies/json-3.9.1/")
 add_subdirectory(${nlohmann_json_subDir})
-
-#tiny xml
-set(tinyxml2_subDir "Code/Dependencies/tinyxml2/")
-add_subdirectory(${tinyxml2_subDir})
 
 ## OPEN CV
 include(${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/cmake-Mnemosy_OpenCVOptions.cmake)
@@ -118,8 +110,7 @@ target_link_libraries(${ENGINE_PROJECT} PUBLIC
 glfw
 glm
 nlohmann_json::nlohmann_json
-tinyxml2
-#spdlog::spdlog_header_only
+spdlog::spdlog_header_only
 )
 
 target_link_libraries(${ENGINE_PROJECT} PRIVATE
@@ -128,11 +119,11 @@ glad
 assimp
 stbImage
 ktx
-#spdlog::spdlog_header_only
+${OpenCV_LIBS}
 )
-target_link_libraries(${ENGINE_PROJECT} PRIVATE ${OpenCV_LIBS})
+#target_link_libraries(${ENGINE_PROJECT} PRIVATE ${OpenCV_LIBS})
 
-target_link_libraries(${ENGINE_PROJECT} PUBLIC spdlog::spdlog_header_only)
+#target_link_libraries(${ENGINE_PROJECT} PUBLIC spdlog::spdlog_header_only)
 # linking for app project
 target_link_libraries(${APP_PROJECT} PRIVATE ${ENGINE_PROJECT} )
 

@@ -99,7 +99,7 @@ namespace mnemosy::systems
 
 
 		void OpenFolderNode(FolderNode* node);
-
+		void ClearUserMaterialsAndFolders();
 	private:
 
 		core::FileDirectories& m_fileDirectories;

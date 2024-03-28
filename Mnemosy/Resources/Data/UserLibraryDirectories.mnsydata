@@ -10,38 +10,34 @@
             "3_pathFromRoot": "",
             "4_subFolderNames": [
                 "Wood",
-                "Metals",
                 "Stone"
             ],
             "5_subFolders": {
-                "Metals": {
-                    "1_name": "Metals",
-                    "2_isLeaf": true,
-                    "3_pathFromRoot": "Metals",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "UVGrid"
-                    ]
-                },
                 "Stone": {
                     "1_name": "Stone",
                     "2_isLeaf": true,
                     "3_pathFromRoot": "Stone",
                     "6_hasMaterials": true,
                     "6_materialEntries": [
-                        "T",
-                        "Testy",
-                        "Cliff"
+                        "Cliff",
+                        "Rock Mossy"
                     ]
                 },
                 "Wood": {
                     "1_name": "Wood",
                     "2_isLeaf": true,
                     "3_pathFromRoot": "Wood",
-                    "6_hasMaterials": false
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "GridUV",
+                        "GridUV Metallic"
+                    ]
                 }
             },
-            "6_hasMaterials": false
+            "6_hasMaterials": true,
+            "6_materialEntries": [
+                "PrettyDefault"
+            ]
         }
     }
 }

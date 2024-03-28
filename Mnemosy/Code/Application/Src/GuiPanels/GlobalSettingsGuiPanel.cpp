@@ -9,7 +9,7 @@
 #include "Include/Core/Clock.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Core/Window.h"
-
+#include "Include/Systems/MaterialLibraryRegistry.h"
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
@@ -36,7 +36,7 @@ namespace mnemosy::gui
 		ImGui::Begin(panelName.c_str(), &showPanel);
 
 
-
+		// Library Directory
 		{
 			ImGui::SeparatorText("Library Directory");
 			core::FileDirectories& fd = engine.GetFileDirectories();
@@ -46,31 +46,101 @@ namespace mnemosy::gui
 			ImGui::Text("Path: %s", currentLibraryDirectory.c_str());
 
 			if (ImGui::Button("Select Folder...")) {
+				
+				// check if the current library folder contains any data
+				if (fd.ContainsUserData()) {
+					// open popup modal..
+					m_openChangeDirectoryModal = true;
+				}
+				else { // user directory does not contain anything so we can savely set a new path
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
+					if (!directoryPath.empty()) {
+						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath),false,false);
+					}
+					else {
+						MNEMOSY_ERROR("You didnt select a valid folder path");
+					}
+#endif
+				}
+				
+			}
+			//static bool popModal = false;
+
+
+			if (m_openChangeDirectoryModal) {
+							
+				m_openChangeDirectoryModal = false; // to make sure its only called once
+				m_changeDirectoryModelState = true;
+				ImGui::OpenPopup("Change Library Directory");
+			}
+
+
+			if (ImGui::BeginPopupModal("Change Library Directory", &m_changeDirectoryModelState, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+				ImGui::Text("The current library directory has some files in it. \nDo you want to copy all contents over to the new directory? ");
+
+				ImGui::Spacing();
+
+				if (ImGui::Button("No Delete All!", ImVec2(200, 0))) {
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
-				//std::string filepath = mnemosy::core::FileDialogs::OpenFile("All files (*.*)\0*.*\0 hdr (*.hdr)\0*.hdr\0 png (*.png)\0*.png\0 jpg (*.jpg)\0*.jpg\0");
-				std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
-				
-				if (!directoryPath.empty()) {
+					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
+					if (!directoryPath.empty()) {
+						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), false, true);
+						// delete all material and directory data from material registry
+						systems::MaterialLibraryRegistry& registry = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry();
+						registry.ClearUserMaterialsAndFolders();
 
-					fd.SetUserLibraryDirectory(std::filesystem::directory_entry(directoryPath));
-					
-				}
-
+					} else {
+						MNEMOSY_ERROR("You didnt select a valid folder path");
+					}
 #endif
 
+					m_changeDirectoryModelState = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+
+				if (ImGui::Button("Yes Copy!", ImVec2(200, 0))) {
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
+					if (!directoryPath.empty()) {
+						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), true, true);
+					}
+					else {
+						MNEMOSY_ERROR("You didnt select a valid folder path");
+					}
+#endif
+
+					m_changeDirectoryModelState = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+
+				ImGui::Spacing();
+
+				if (ImGui::Button("Cancel", ImVec2(150, 0))) {
+					
+					m_changeDirectoryModelState = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::EndPopup();
 			}
+
+
 
 		}
 
 
 
 
-		ImGui::SeparatorText("Info");
+		ImGui::SeparatorText("Debug Info");
 
 		// show fps and frametime in ms
 		core::Clock& clock = engine.GetClock();
-
 		int fps = clock.GetFPS();
 		float deltaSeconds = clock.GetFrameTime();
 		ImGui::Text("FPS: %d", fps);

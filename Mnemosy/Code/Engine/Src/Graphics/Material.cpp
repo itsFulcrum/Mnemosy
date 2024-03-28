@@ -339,6 +339,7 @@ namespace mnemosy::graphics
 			if(m_pEmissiveTexture)
 				return m_pEmissiveTexture->GetID();
 		}
+		return 0;
 	}
 
 } // !mnemosy::graphics
