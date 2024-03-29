@@ -3,6 +3,8 @@
 
 #include "Include/Core/Log.h"
 #include "Include/Application.h"
+#include "Include/ApplicationConfig.h"
+
 #include "Include/MnemosyEngine.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Core/FileDirectories.h"
@@ -102,9 +104,16 @@ namespace mnemosy::gui
 							}
 						}
 
-						std::string naaame = matName + "  TexID: " + std::to_string(selectedNode->subMaterials[i].thumbnailTexure_ID);
-						ImGui::Text(naaame.c_str());
-						//ImGui::Text(matName.c_str());
+
+#ifdef mnemosy_gui_showDebugInfo
+						std::string nameWithDebugInfo = matName + " -GLTexID: " + std::to_string(selectedNode->subMaterials[i].thumbnailTexure_ID);
+						ImGui::Text(nameWithDebugInfo.c_str());
+#else
+						ImGui::Text(matName.c_str());
+#endif // mnemosy_gui_showDebugInfo
+
+
+
 
 						ImGui::EndGroup();
 
@@ -292,13 +301,20 @@ namespace mnemosy::gui
 
 		for (int i = 0; i < node->subMaterials.size(); i++) {
 				
-			std::string MaterialText = node->subMaterials[i].name + " ID: " + std::to_string(node->subMaterials[i].runtime_ID);
+#ifdef mnemosy_gui_showDebugInfo
+			std::string materialText = node->subMaterials[i].name + " -MatID: " + std::to_string(node->subMaterials[i].runtime_ID);
+#else
+			std::string materialText = node->subMaterials[i].name;
+#endif // !mnemosy_gui_showDebugInfo
 
-			if (ImGui::TreeNodeEx(MaterialText.c_str(), m_materialTreeFlags)) {
 
+			if (ImGui::TreeNodeEx(materialText.c_str(), m_materialTreeFlags)) {
+
+#ifdef mnemosy_gui_showDebugInfo
 				if (ImGui::IsItemClicked()) {
-					MNEMOSY_TRACE("Clicked Material: {}, ID: {}", node->subMaterials[i].name, node->subMaterials[i].runtime_ID);
+					MNEMOSY_DEBUG("Clicked Material: {}, MatID: {}", node->subMaterials[i].name, node->subMaterials[i].runtime_ID);
 				}
+#endif // mnemosy_gui_showDebugInfo
 
 				// === Right Click Options
 				const char* materialOptions[] = { "Rename", "Delete" };

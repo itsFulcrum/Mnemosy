@@ -1,20 +1,24 @@
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
 
+#include "Include/MnemosyConfig.h"
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Window.h"
-
-
-#include <windows.h>
-#include <commdlg.h>
-#include <shobjidl_core.h>
 
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-
 #include <string>
 #include <filesystem>
+
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+
+#include <windows.h>
+#include <commdlg.h>
+#include <shobjidl_core.h>
+
+
 
 namespace mnemosy::core
 {
@@ -97,3 +101,5 @@ namespace mnemosy::core
 	}
 
 } // mnemosy::core
+
+#endif // !MNEMOSY_PLATFORM_WINDOWS

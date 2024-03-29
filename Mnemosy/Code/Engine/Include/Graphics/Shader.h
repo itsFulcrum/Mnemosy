@@ -21,15 +21,15 @@ namespace mnemosy::graphics
 
 		void Use();
 
-		void SetUniformBool(const std::string& name, bool value) const;
+		void SetUniformBool(const char* name, bool value) const;
 
-		void SetUniformInt(const std::string& name, int value) const;
+		void SetUniformInt(const char* name, int value) const;
 
-		void SetUniformFloat(const std::string& name, float value) const;
-		void SetUniformFloat2(const std::string& name, float x, float y) const;
-		void SetUniformFloat3(const std::string& name, float x, float y, float z) const;
-		void SetUniformFloat4(const std::string& name, float x, float y, float z, float w) const;
-		void SetUniformMatrix4(const std::string& name, const glm::mat4& matrix);
+		void SetUniformFloat(const char* name, float value) const;
+		void SetUniformFloat2(const char* name, float x, float y) const;
+		void SetUniformFloat3(const char* name, float x, float y, float z) const;
+		void SetUniformFloat4(const char* name, float x, float y, float z, float w) const;
+		void SetUniformMatrix4(const char* name, const glm::mat4& matrix);
 
 		void DeleteShaderProgram();
 

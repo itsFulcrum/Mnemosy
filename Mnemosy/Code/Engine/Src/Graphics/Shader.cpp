@@ -130,41 +130,41 @@ namespace mnemosy::graphics
 	}
 
 
-	void Shader::SetUniformBool(const std::string& name, bool value) const
+	void Shader::SetUniformBool(const char* name, bool value) const
 	{
-		int uniformLocation = glGetUniformLocation(ID, name.c_str());
+		int uniformLocation = glGetUniformLocation(ID, name);
 		glUniform1i(uniformLocation, (int)value);
 	}
 
-	void Shader::SetUniformInt(const std::string& name, int value) const
+	void Shader::SetUniformInt(const char* name, int value) const
 	{
-		int uniformLocation = glGetUniformLocation(ID, name.c_str());
+		int uniformLocation = glGetUniformLocation(ID, name);
 		glUniform1i(uniformLocation, value);
 	}
 
-	void Shader::SetUniformFloat(const std::string& name, float value) const
+	void Shader::SetUniformFloat(const char* name, float value) const
 	{
-		int uniformLocation = glGetUniformLocation(ID, name.c_str());
+		int uniformLocation = glGetUniformLocation(ID, name);
 		glUniform1f(uniformLocation, value);
 	}
-	void Shader::SetUniformFloat2(const std::string& name, float x, float y) const
+	void Shader::SetUniformFloat2(const char* name, float x, float y) const
 	{
-		int uniformLocation = glGetUniformLocation(ID, name.c_str());
+		int uniformLocation = glGetUniformLocation(ID, name);
 		glUniform2f(uniformLocation, x, y);
 	}
-	void Shader::SetUniformFloat3(const std::string& name, float x, float y, float z) const
+	void Shader::SetUniformFloat3(const char* name, float x, float y, float z) const
 	{
-		int uniformLocation = glGetUniformLocation(ID, name.c_str());
+		int uniformLocation = glGetUniformLocation(ID, name);
 		glUniform3f(uniformLocation, x, y, z);
 	}
-	void Shader::SetUniformFloat4(const std::string& name, float x, float y, float z, float w) const
+	void Shader::SetUniformFloat4(const char* name, float x, float y, float z, float w) const
 	{
-		int uniformLocation = glGetUniformLocation(ID, name.c_str());
+		int uniformLocation = glGetUniformLocation(ID, name);
 		glUniform4f(uniformLocation, x, y, z, w);
 	}
 
-	void Shader::SetUniformMatrix4(const std::string& name, const glm::mat4& matrix) {
-		unsigned int uniformLocation = glGetUniformLocation(ID, name.c_str());
+	void Shader::SetUniformMatrix4(const char* name, const glm::mat4& matrix) {
+		unsigned int uniformLocation = glGetUniformLocation(ID, name);
 
 		glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
 	}

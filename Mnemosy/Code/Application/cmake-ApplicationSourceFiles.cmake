@@ -5,6 +5,8 @@ set(APP_SOURCE_FILES
 # Mnemosy application source files
 #include
 ${APP_SOURCE_PATH}/Include/Application.h
+${APP_SOURCE_PATH}/Include/ApplicationConfig.h
+
 ${APP_SOURCE_PATH}/Include/Input/CameraInputController.h
 ${APP_SOURCE_PATH}/Include/Input/SceneInputController.h
 
