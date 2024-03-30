@@ -53,6 +53,12 @@ namespace mnemosy::graphics
 		EmissionStrength = 0.0f;
 		NormalStrength = 1.0f; // currently not supported by shader
 		UVTiling = glm::vec2(1.0f, 1.0f);
+		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
+	}
+
+	void Material::SetNormalMapFormat(const NormalMapFormat& format) {
+
+		NormalTextureFormat = format;
 	}
 
 	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* texture) {
@@ -201,6 +207,7 @@ namespace mnemosy::graphics
 		{
 			delete m_pNormalTexture;
 			m_pNormalTexture = nullptr;
+			SetNormalMapFormat(MNSY_NORMAL_FORMAT_OPENGl);
 		}
 		else if (pbrTextureType == AMBIENTOCCLUSION)
 		{
@@ -306,6 +313,8 @@ namespace mnemosy::graphics
 		shader.SetUniformInt("_ambientOcculusionMap", 4);
 		shader.SetUniformInt("_emissionMap", 6);
 	}
+
+
 
 	unsigned int Material::DebugGetTextureID(const PBRTextureType& pbrTextureType)
 	{

@@ -34,7 +34,7 @@ namespace mnemosy::graphics
 		if (pic.empty()) {
 			MNEMOSY_ERROR("Texture::generateFromFile: OpenCV Image read failed");
 			pic.release();
-			//m_ID = 0;
+			m_ID = 0;
 			m_isInitialized = false;
 			return false;					
 		}
@@ -135,6 +135,10 @@ namespace mnemosy::graphics
 		KtxImage ktxImg;
 		bool successfull = ktxImg.LoadKtx(imagePath, m_ID); // should return if successful
 		
+		m_width = ktxImg.width;
+		m_height = ktxImg.height;
+		//m_channelsAmount = // not sure how to retrive the num channels but not priority atm
+
 		if (!successfull) {
 			glDeleteTextures(1, &m_ID);
 			m_ID = 0;

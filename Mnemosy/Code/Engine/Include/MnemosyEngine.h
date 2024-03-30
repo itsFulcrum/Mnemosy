@@ -18,6 +18,7 @@ namespace mnemosy::systems
 	class SkyboxAssetRegistry;
 	class MaterialLibraryRegistry;
 	class ThumbnailManager;
+	class TextureGenerationManager;
 }
 
 namespace mnemosy::graphics
@@ -61,7 +62,7 @@ namespace mnemosy
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry() { return *m_pSkyboxAssetRegistry; }
 		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry() { return *m_pMaterialLibraryRegistry; }
 		systems::ThumbnailManager& GetThumbnailManager() { return *m_pThumbnailManger; }
-
+		systems::TextureGenerationManager& GetTextureGenerationManager() { return *m_pTextureGenerationManager; }
 
 		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
@@ -85,7 +86,7 @@ namespace mnemosy
 		
 		std::unique_ptr<systems::MaterialLibraryRegistry> m_pMaterialLibraryRegistry;
 		std::unique_ptr<systems::ThumbnailManager> m_pThumbnailManger;
-
+		std::unique_ptr<systems::TextureGenerationManager> m_pTextureGenerationManager;
 
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
 		std::unique_ptr<graphics::Renderer> m_pRenderer;

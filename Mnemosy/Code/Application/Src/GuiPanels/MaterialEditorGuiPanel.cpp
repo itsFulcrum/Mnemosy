@@ -4,9 +4,14 @@
 #include "Include/ApplicationConfig.h"
 #include "Include/MnemosyEngine.h"
 
-#include "Include/Systems/MaterialLibraryRegistry.h"
-
+#include "Include/Core/FileDirectories.h"
+#include "Include/Core/Log.h"
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
+
+#include "Include/Systems/MaterialLibraryRegistry.h"
+#include "Include/Systems/TextureGenerationManager.h"
+#include "Include/Systems/FolderTreeNode.h"
+
 
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Material.h"
@@ -83,16 +88,24 @@ namespace mnemosy::gui
 
 			bool textureAssigned = activeMat.isAlbedoAssigned();
 
+
+			// we cant merge this with the below if statement because the button can change the state of the texture assigned bool
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Albedo", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::ALBEDO);
+					textureAssigned = false;
 				}
+			}
+
+			if (textureAssigned) {
+
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetAlbedoTexture().GetWidth()) + "x" + std::to_string(activeMat.GetAlbedoTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
 
 				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
-				ImGui::SameLine();
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ALBEDO));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo
@@ -134,11 +147,19 @@ namespace mnemosy::gui
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Roughness", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::ROUGHNESS);
+					textureAssigned = false;
 				}
+			}
+
+			if (textureAssigned) {
+
+				
+
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetRoughnessTexture().GetWidth()) + "x" + std::to_string(activeMat.GetRoughnessTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
 
 				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
-				ImGui::SameLine();
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ROUGHNESS));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo
@@ -176,16 +197,22 @@ namespace mnemosy::gui
 			}
 
 			if (textureAssigned) {
-
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Normal", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::NORMAL);
+					textureAssigned = false;
 				}
+			}
+
+			if (textureAssigned) {
+
+
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetNormalTexture().GetWidth()) + "x" + std::to_string(activeMat.GetNormalTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
 
 				// DEBUG INFO
 #ifdef mnemosy_gui_showDebugInfo
-					ImGui::SameLine();
 					std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::NORMAL));
 					ImGui::Text(TextureID.c_str());
 #endif // mnemosy_gui_showDebugInfo
@@ -196,9 +223,42 @@ namespace mnemosy::gui
 				ImGui::BeginDisabled();
 			{
 				ImGui::DragFloat("Normal Strength", &activeMat.NormalStrength,0.01f, 0.0f, 100.0f, "%.4f");
-			
-				// TODO: 
-				// Normal map format Combo Setting
+				
+				// NORMAL MAP FORMAT
+				
+				if (m_materialRegistry.UserMaterialBound()) { // normal convert feature for now not allowed for the default material because it doesnt have a filepath to save the texture to
+									
+					const char* normalMapFormat[] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
+					int format_current = activeMat.GetNormalFormatAsInt();
+
+					ImGui::Combo("Normal Map Format", &format_current, normalMapFormat, IM_ARRAYSIZE(normalMapFormat));
+					ImGui::SetItemTooltip("Specify the normal map format of the source texture");
+
+					// if format changed
+					if (activeMat.GetNormalFormatAsInt() != format_current) {
+																				
+						fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+						fs::path materialPath = libDir / fs::path( m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+						fs::path normalMapPath = materialPath / fs::path(std::string(activeMat.Name + "_normal.ktx2"));
+										
+						// Generate inverted normal Texture.
+						MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat);
+
+						// save normal format to material data file.
+						if (format_current == 0) {
+							activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+						}
+						else if (format_current == 1) {
+							activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
+						}
+						m_materialRegistry.SaveActiveMaterialToFile();
+
+						// Load newly created texture as new normal map 
+						activeMat.GetNormalTexture().LoadFromKtx(normalMapPath.generic_string().c_str());
+
+					}
+				}
+
 
 			}
 			if (!textureAssigned)
@@ -223,16 +283,22 @@ namespace mnemosy::gui
 			}
 
 			if (textureAssigned) {
-
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Metallic", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::METALLIC);
+					textureAssigned = false;
 				}
+			}
+
+			if (textureAssigned) {
+
+
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetMetallicTexture().GetWidth()) + "x" + std::to_string(activeMat.GetMetallicTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
 
 				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
-				ImGui::SameLine();
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::METALLIC));
 				ImGui::Text(TextureID.c_str());
 #endif // mnemosy_gui_showDebugInfo
@@ -267,16 +333,22 @@ namespace mnemosy::gui
 			}
 
 			if (textureAssigned) {
-
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##AO",buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::AMBIENTOCCLUSION);
+					textureAssigned = false;
 				}
+			}
+
+			if (textureAssigned) {
+
+
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetAOTexture().GetWidth()) + "x" + std::to_string(activeMat.GetAOTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
 
 				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
-				ImGui::SameLine();
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::AMBIENTOCCLUSION));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo
@@ -301,16 +373,21 @@ namespace mnemosy::gui
 			}
 
 			if (textureAssigned) {
-
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Emissive", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::EMISSION);
+					textureAssigned = false;
 				}
+			}
+
+			if (textureAssigned) {
+
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetEmissiveTexture().GetWidth()) + "x" + std::to_string(activeMat.GetEmissiveTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
 
 				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
-				ImGui::SameLine();
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::EMISSION));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo

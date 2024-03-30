@@ -614,6 +614,14 @@ namespace mnemosy::systems
 				graphics::Texture* normalTex = new graphics::Texture();
 				normalTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::NORMAL, normalTex);
+
+				int normalFormat = readFile["normalMapFormat"].get<int>();
+				if (normalFormat == 0) {
+					mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+				}
+				else if (normalFormat == 1) {
+					mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
+				}
 			}
 			if (aoTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["aoPath"].get<std::string>();
@@ -669,6 +677,7 @@ namespace mnemosy::systems
 		MaterialJson["emissionStrength"] = activeMat.EmissionStrength;
 
 		MaterialJson["normalStrength"] = activeMat.NormalStrength;
+		MaterialJson["normalMapFormat"] = activeMat.GetNormalFormatAsInt(); // 0 = OpenGl, 1 = DirectX
 		MaterialJson["uvScale_x"] = activeMat.UVTiling.x;
 		MaterialJson["uvScale_y"] = activeMat.UVTiling.y;
 
@@ -735,44 +744,53 @@ namespace mnemosy::systems
 		// save texture to disk with correct filename to folder of active material
 
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		
+		if (!UserMaterialBound()) {
+			graphics::Texture* tex = new graphics::Texture();
+			tex->generateFromFile(filepath.c_str(), true, true);
+
+			activeMat.assignTexture(textureType, tex);
+			return;
+		}
+
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) ;
 		
-		std::string filename;
 		
 		graphics::Texture* tex = new graphics::Texture();
 		tex->generateFromFile(filepath.c_str(),true,true);
-		graphics::KtxImage ktxImg;
 
+		std::string filename;
+		graphics::KtxImage ktxImg;
 		if (textureType == graphics::ALBEDO) {
 			
 			filename = activeMat.Name + "_albedo.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_COLOR, true);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
 		}
 		else if (textureType == graphics::NORMAL) {
 			filename = activeMat.Name + "_normal.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_NORMAL, true);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_NORMAL, true);
 		}
 		else if (textureType == graphics::ROUGHNESS) {
 			filename = activeMat.Name + "_roughness.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_LINEAR_CHANNEL, true);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
 		}
 		else if (textureType == graphics::METALLIC) {
 			filename = activeMat.Name + "_metallic.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_LINEAR_CHANNEL, true);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
 		}
 		else if (textureType == graphics::AMBIENTOCCLUSION) {
 			filename = activeMat.Name + "_ambientOcclusion.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_LINEAR_CHANNEL, true);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
 		}
 		else if (textureType == graphics::EMISSION) {
 			filename = activeMat.Name + "_emissive.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetWidth(), graphics::MNSY_COLOR, true);
+			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
 		}
 
 		// save material data file
@@ -829,6 +847,9 @@ namespace mnemosy::systems
 
 		outFileStream.close();
 
+	
+
+
 
 		// load texture to material
 
@@ -839,6 +860,11 @@ namespace mnemosy::systems
 
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
 		
+		if (!UserMaterialBound()) { // if its default aterial
+			activeMat.removeTexture(textureType);
+			return;
+		}
+
 		std::ifstream readFileStream;
 		readFileStream.open(m_activeMaterialDataFilePath.generic_string());
 
@@ -874,6 +900,7 @@ namespace mnemosy::systems
 
 			outFile["normalAssigned"] = false;
 			outFile["normalPath"] = "notAssigned";
+			outFile["normalMapFormat"] = 0;
 		}
 		else if (textureType == graphics::ROUGHNESS) {
 			fs::path textureFile = materialDir / fs::path(outFile["roughPath"].get<std::string>());
@@ -896,6 +923,7 @@ namespace mnemosy::systems
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
+			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
 			outFile["aoAssigned"] = false;
 			outFile["aoPath"] = "notAssigned";
 		}
@@ -933,9 +961,6 @@ namespace mnemosy::systems
 			
 			m_selectedFolderNode = node;
 		}
-
-		// TODO: loading / deleting thumbnails should be handled by a thumbnail manger class
-
 
 		MnemosyEngine::GetInstance().GetThumbnailManager().DeleteLoadedThumbnailsOfActiveFolder(m_selectedFolderNode);
 
@@ -1095,6 +1120,8 @@ namespace mnemosy::systems
 		MaterialJson["emissionStrength"]	= 0.0f;
 
 		MaterialJson["normalStrength"]		= 1.0f;
+		MaterialJson["normalMapFormat"]		= 0; // 0 = OpenGl, 1 = DirectX
+
 		MaterialJson["uvScale_x"]	= 1.0f;
 		MaterialJson["uvScale_y"]	= 1.0f;
 

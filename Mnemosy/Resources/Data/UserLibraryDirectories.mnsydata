@@ -9,7 +9,7 @@
             "2_isLeaf": false,
             "3_pathFromRoot": "",
             "4_subFolderNames": [
-                "Wood",
+                "UV Grids",
                 "Stone",
                 "Test Materials"
             ],
@@ -34,10 +34,10 @@
                         "All Texture Types"
                     ]
                 },
-                "Wood": {
-                    "1_name": "Wood",
+                "UV Grids": {
+                    "1_name": "UV Grids",
                     "2_isLeaf": true,
-                    "3_pathFromRoot": "Wood",
+                    "3_pathFromRoot": "UV Grids",
                     "6_hasMaterials": true,
                     "6_materialEntries": [
                         "GridUV",

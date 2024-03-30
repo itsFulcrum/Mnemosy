@@ -19,6 +19,7 @@ namespace mnemosy::core {
 }
 namespace mnemosy::graphics {
 	enum PBRTextureType;
+	enum NormapMapFormat;
 }
 
 namespace mnemosy::systems

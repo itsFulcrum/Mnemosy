@@ -18,6 +18,11 @@ namespace mnemosy::graphics
 		AMBIENTOCCLUSION,
 		EMISSION
 	};
+	enum NormalMapFormat
+	{
+		MNSY_NORMAL_FORMAT_OPENGl = 0,
+		MNSY_NORMAL_FORMAT_DIRECTX = 1
+	};
 
 	class Material
 	{
@@ -34,9 +39,11 @@ namespace mnemosy::graphics
 		float NormalStrength = 1.0f; // not supported by shader at the moment
 		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
 
+		NormalMapFormat NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
 
 		void setDefaults();
 
+		void SetNormalMapFormat(const NormalMapFormat& format);
 		void assignTexture(const PBRTextureType& pbrType, Texture* texture);
 		void assignTexture(const PBRTextureType& pbrType, const std::string& filePath);
 		void removeTexture(const PBRTextureType& pbrType);
@@ -50,7 +57,20 @@ namespace mnemosy::graphics
 		bool isEmissiveAssigned()	{ return m_pEmissiveTexture; }
 		bool isAoAssigned()			{ return m_pAmbientOcclusionTexture; }
 
+
+		// These DO NOT check if textures exist yet
+		Texture& GetAlbedoTexture()		{ return *m_pAlbedoTexture; }
+		Texture& GetNormalTexture()		{ return *m_pNormalTexture; }
+		Texture& GetRoughnessTexture()	{ return *m_pRoughnessTexture; }
+		Texture& GetMetallicTexture()	{ return *m_pMetallicTexture; }
+		Texture& GetEmissiveTexture()	{ return *m_pEmissiveTexture; }
+		Texture& GetAOTexture()			{ return *m_pAmbientOcclusionTexture; }
+		
+
+		int GetNormalFormatAsInt() { return (int)NormalTextureFormat; }
 		unsigned int DebugGetTextureID(const PBRTextureType& pbrType);
+
+
 	private:
 		Texture* m_pAlbedoTexture = nullptr;
 		Texture* m_pNormalTexture = nullptr;

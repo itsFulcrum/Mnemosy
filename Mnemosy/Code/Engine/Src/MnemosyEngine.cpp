@@ -13,6 +13,7 @@
 #include "Include/Systems/SkyboxAssetRegistry.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/ThumbnailManager.h"
+#include "Include/Systems/TextureGenerationManager.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -97,7 +98,7 @@ namespace mnemosy
 		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
 		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
 		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
-
+		m_pTextureGenerationManager = std::make_unique<systems::TextureGenerationManager>();
 
 		// menmosy::graphcs
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();

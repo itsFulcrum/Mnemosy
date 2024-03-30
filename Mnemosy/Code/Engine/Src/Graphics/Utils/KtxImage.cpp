@@ -34,6 +34,10 @@ namespace mnemosy::graphics
 		}
 		//MNEMOSY_DEBUG("KTX Gen GL Tex ID {}", glTextureID);
 
+		width = kTexture->baseWidth;
+		height = kTexture->baseHeight;
+		// numChannels = // dont know how i would get the channels
+
 		ktxTexture_Destroy(kTexture);
 		return true;
 		
@@ -480,7 +484,7 @@ namespace mnemosy::graphics
 		glActiveTexture(GL_TEXTURE0); // just to make sure
 		glBindTexture(GL_TEXTURE_2D, glTextureID);
 				
-		int mip = 0;
+		//int mip = 0;
 		int nextMip_Width  = createInfo.baseWidth;
 		int nextMip_Height = createInfo.baseHeight;
 

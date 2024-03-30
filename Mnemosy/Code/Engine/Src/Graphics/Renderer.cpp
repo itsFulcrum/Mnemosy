@@ -286,11 +286,10 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
 
 		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
-
 			glBindVertexArray(renderMesh.GetModelData().meshes[i].vertexArrayObject);
 			glDrawElements(GL_TRIANGLES, (GLsizei)renderMesh.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
 		}
+		glBindVertexArray(0);
 
 		// Mesh Shader Experiment
 		/*
@@ -321,8 +320,8 @@ namespace mnemosy::graphics
 		{
 			glBindVertexArray(renderMesh.GetModelData().meshes[i].vertexArrayObject);
 			glDrawElements(GL_TRIANGLES, (GLsizei)renderMesh.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
 		}
+		glBindVertexArray(0);
 	}
 
 	void Renderer::RenderLightMesh(Light& light)
@@ -346,8 +345,8 @@ namespace mnemosy::graphics
 		{
 			glBindVertexArray(light.GetModelData().meshes[i].vertexArrayObject);
 			glDrawElements(GL_TRIANGLES, (GLsizei)light.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
 		}
+		glBindVertexArray(0);
 
 	}
 
@@ -367,8 +366,8 @@ namespace mnemosy::graphics
 		{
 			glBindVertexArray(skybox.GetModelData().meshes[i].vertexArrayObject);
 			glDrawElements(GL_TRIANGLES, (GLsizei)skybox.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
 		}
+		glBindVertexArray(0);
 
 		glDepthFunc(GL_LESS);
 		glCullFace(GL_FRONT);

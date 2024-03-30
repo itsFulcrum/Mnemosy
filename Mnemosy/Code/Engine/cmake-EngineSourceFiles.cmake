@@ -29,6 +29,8 @@ ${ENGINE_SOURCE_PATH}/Include/Systems/FolderTreeNode.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/FolderTreeNode.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/ThumbnailManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/ThumbnailManager.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/TextureGenerationManager.h
+${ENGINE_SOURCE_PATH}/Src/Systems/TextureGenerationManager.cpp
 
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
