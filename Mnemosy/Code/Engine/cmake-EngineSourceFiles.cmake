@@ -31,6 +31,8 @@ ${ENGINE_SOURCE_PATH}/Include/Systems/ThumbnailManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/ThumbnailManager.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/TextureGenerationManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/TextureGenerationManager.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/ExportManager.h
+${ENGINE_SOURCE_PATH}/Src/Systems/ExportManager.cpp
 
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h

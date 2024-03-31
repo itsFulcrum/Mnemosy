@@ -14,6 +14,7 @@
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/ThumbnailManager.h"
 #include "Include/Systems/TextureGenerationManager.h"
+#include "Include/Systems/ExportManager.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -99,6 +100,7 @@ namespace mnemosy
 		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
 		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
 		m_pTextureGenerationManager = std::make_unique<systems::TextureGenerationManager>();
+		m_pExportManager = std::make_unique<systems::ExportManager>();
 
 		// menmosy::graphcs
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();

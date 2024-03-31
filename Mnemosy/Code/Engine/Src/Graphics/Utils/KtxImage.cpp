@@ -11,34 +11,62 @@ namespace mnemosy::graphics
 {
 	const bool KtxImage::LoadKtx(const char* filepath, unsigned int& glTextureID) {
 		
-		ktxTexture* kTexture;
+		ktxTexture2* kTexture;
 		KTX_error_code errorCode;
-			
-		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+		
+		errorCode = ktxTexture2_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+		//errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		if (errorCode != 0) {
 
 			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed\nPath:{} \nError code: {}",filepath, ktxErrorString(errorCode));
 			numChannels = 0; width = 0; height = 0;
-			ktxTexture_Destroy(kTexture);
+			ktxTexture_Destroy(ktxTexture(kTexture));
 			return false;
 		}
-
+		
 		GLenum target, glerror;
 		errorCode = ktxTexture_GLUpload(ktxTexture(kTexture), &glTextureID, &target, &glerror);
 		if (errorCode != 0)
 		{
 			MNEMOSY_ERROR("KtxImage::LoadKtx: GLUpload Failed \nError code: {}", ktxErrorString(errorCode));
 			numChannels = 0; width = 0; height = 0;
-			ktxTexture_Destroy(kTexture);
+			ktxTexture_Destroy(ktxTexture(kTexture));
 			return false;
 		}
 		//MNEMOSY_DEBUG("KTX Gen GL Tex ID {}", glTextureID);
 
 		width = kTexture->baseWidth;
 		height = kTexture->baseHeight;
+
+		// all used formats
+		// 4
+		// VK_FORMAT_R8G8B8A8_UNORM
+		// VK_FORMAT_R8G8B8A8_SRGB
+		// 3
+		// VK_FORMAT_R8G8B8_UNORM
+		// VK_FORMAT_R8G8B8_SRGB
+		// VK_FORMAT_R16G16B16_SFLOAT
+		// VK_FORMAT_R32G32B32_SFLOAT
+		// 2
+		// VK_FORMAT_R32G32_SFLOAT
+		// VK_FORMAT_R16G16_SFLOAT
+		// 1
+		// VK_FORMAT_R16_SFLOAT
+		// VK_FORMAT_R8_UNORM
+
+		if (kTexture->vkFormat == VK_FORMAT_R8G8B8A8_UNORM || kTexture->vkFormat == VK_FORMAT_R8G8B8A8_SRGB)
+			numChannels = 4;
+		else if (kTexture->vkFormat == VK_FORMAT_R8G8B8_UNORM || kTexture->vkFormat == VK_FORMAT_R8G8B8_SRGB || kTexture->vkFormat == VK_FORMAT_R16G16B16_SFLOAT || kTexture->vkFormat == VK_FORMAT_R32G32B32_SFLOAT)
+			numChannels = 3;
+		else if (kTexture->vkFormat == VK_FORMAT_R32G32_SFLOAT || kTexture->vkFormat == VK_FORMAT_R16G16_SFLOAT)
+			numChannels = 2;
+		else if (kTexture->vkFormat == VK_FORMAT_R16_SFLOAT || kTexture->vkFormat == VK_FORMAT_R8_UNORM)
+			numChannels = 1;
+
 		// numChannels = // dont know how i would get the channels
 
-		ktxTexture_Destroy(kTexture);
+
+		ktxTexture_Destroy(ktxTexture(kTexture));
 		return true;
 		
 	}
@@ -439,6 +467,23 @@ namespace mnemosy::graphics
 			}
 		}
 
+		else if (imgFormat == MNSY_COLOR_SRGB) {
+
+			if (numChannels == 4) {
+				createInfo.glInternalformat = GL_RGBA8;
+				createInfo.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
+				channels = 4;
+				bytesOfPixel = (sizeof(char) * 4);
+			}
+			else if (numChannels == 3) {
+				createInfo.glInternalformat = GL_RGB8;
+				createInfo.vkFormat = VK_FORMAT_R8G8B8_SRGB;
+				channels = 3;
+				bytesOfPixel = (sizeof(char) * 3);
+			}
+		}
+
+
 		else if (imgFormat == MNSY_NORMAL) {
 			createInfo.glInternalformat = GL_RGB16F;
 			createInfo.vkFormat = VK_FORMAT_R16G16B16_SFLOAT;
@@ -488,7 +533,7 @@ namespace mnemosy::graphics
 		int nextMip_Width  = createInfo.baseWidth;
 		int nextMip_Height = createInfo.baseHeight;
 
-		if (imgFormat == MNSY_COLOR) {
+		if (imgFormat == MNSY_COLOR || imgFormat == MNSY_COLOR_SRGB) {
 			for (int mip = 0; mip < (int)createInfo.numLevels; mip++) {
 				unsigned char* pixels = new unsigned char[nextMip_Width * nextMip_Height * channels];
 				ktx_size_t srcSize = (nextMip_Width * nextMip_Height) * bytesOfPixel;

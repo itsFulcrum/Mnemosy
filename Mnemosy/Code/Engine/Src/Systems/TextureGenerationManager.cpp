@@ -45,7 +45,7 @@ namespace mnemosy::systems
 		}
 	}
 	
-	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::Material& material) {
+	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::Material& material, bool exportKtx2) {
 		
 		if (!material.isNormalAssigned()) // should never happen but lets be save
 			return;
@@ -91,8 +91,10 @@ namespace mnemosy::systems
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Export to ktx2 file
-		graphics::KtxImage img;
-		img.ExportGlTexture(exportPath, m_renderTexture_ID, 3, width, height, graphics::MNSY_NORMAL, true);
+		if (exportKtx2) {
+			graphics::KtxImage img;
+			img.ExportGlTexture(exportPath, m_renderTexture_ID, 3, width, height, graphics::MNSY_NORMAL, true);
+		}
 
 		// === END FRAME
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

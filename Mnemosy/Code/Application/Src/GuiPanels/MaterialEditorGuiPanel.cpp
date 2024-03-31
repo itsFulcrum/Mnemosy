@@ -10,6 +10,7 @@
 
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/TextureGenerationManager.h"
+#include "Include/Systems/ExportManager.h"
 #include "Include/Systems/FolderTreeNode.h"
 
 
@@ -38,9 +39,18 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		graphics::Material& activeMat = ENGINE_INSTANCE().GetScene().GetActiveMaterial();
-
 		ImGui::Begin(panelName.c_str(), &showPanel);
+
+
+
+
+		// variables used across entire method
+		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		ImVec2 buttonSize = ImVec2(120, 0);
+		const char* normalMapFormats[] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
+		const char* exportFormats[] = { "ktx2", "png","tiff"}; // they need to be ordered the same as in ExportManager ExportImageFormats
+		fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+
 
 		std::string displayText = "Material: " + activeMat.Name;
 		ImGui::SeparatorText(displayText.c_str());
@@ -61,16 +71,62 @@ namespace mnemosy::gui
 				
 			ImGui::Spacing();
 
-			if (ImGui::Button("Save Material")) {
+			if (ImGui::Button("Save Material",buttonSize)) {
 					
 				m_materialRegistry.SaveActiveMaterialToFile();
 			}
+
+			// Export Settings
+			{
+				systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
+
+				if (ImGui::TreeNode("Export Settings")) {
+
+					int exportImageFormat_current = exporter.GetExportImageFormatInt();
+					ImGui::Combo("Image Format ##Export", &exportImageFormat_current, exportFormats, IM_ARRAYSIZE(exportFormats));
+					ImGui::SetItemTooltip("Specify the image format used for exporting");
+
+					// if format changed
+					if (exporter.GetExportImageFormatInt() != exportImageFormat_current) {
+						exporter.SetExportImageFormatInt(exportImageFormat_current);
+
+					}
+
+
+					// Normal Map Format
+					int exportNormalFormat_current = exporter.GetNormalMapExportFormatInt();
+					ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, normalMapFormats, IM_ARRAYSIZE(normalMapFormats));
+					ImGui::SetItemTooltip("Specify the normal map format to export normal maps with");
+
+					// if format changed
+					if (exporter.GetNormalMapExportFormatInt() != exportNormalFormat_current) {
+						exporter.SetNormalMapExportFormatInt(exportNormalFormat_current);
+					} 
+
+					if (ImGui::Button("Export To...",buttonSize)) {
+
+						std::string exportFolder = mnemosy::core::FileDialogs::SelectFolder("");
+						if (!exportFolder.empty()) {
+
+							m_materialRegistry.SaveActiveMaterialToFile();
+							fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+							fs::path exportPath = fs::path(exportFolder);
+							exporter.ExportMaterialTextures(exportPath,materialFolderPath, activeMat);
+						}
+					}
+
+					ImGui::TreePop();
+				}
+
+			}// End Export Settings
+
+
 
 		}
 
 		ImGui::Spacing();
 		ImGui::Spacing();
-		const char* fileFormats = "TIF (*.tif)\0*.tif\0 HDR (*.hdr)\0*.hdr\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0";
+		const char* readImageFormats = "TIF (*.tif)\0*.tif\0 HDR (*.hdr)\0*.hdr\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0";
 		ImVec2 buttonSizeLoad = ImVec2(120, 0);
 		ImVec2 buttonSizeDelete = ImVec2(80, 0);
 
@@ -80,7 +136,7 @@ namespace mnemosy::gui
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Albedo",buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(fileFormats);
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::ALBEDO, filepath);
 				}
@@ -135,7 +191,7 @@ namespace mnemosy::gui
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Roughness",buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(fileFormats);
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::ROUGHNESS, filepath);
 				}
@@ -190,7 +246,7 @@ namespace mnemosy::gui
 			//  Load Texture
 			if (ImGui::Button("Load Texture...##Normal",buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(fileFormats);
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::NORMAL, filepath);
 				}
@@ -228,21 +284,19 @@ namespace mnemosy::gui
 				
 				if (m_materialRegistry.UserMaterialBound()) { // normal convert feature for now not allowed for the default material because it doesnt have a filepath to save the texture to
 									
-					const char* normalMapFormat[] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
+					
 					int format_current = activeMat.GetNormalFormatAsInt();
 
-					ImGui::Combo("Normal Map Format", &format_current, normalMapFormat, IM_ARRAYSIZE(normalMapFormat));
+					ImGui::Combo("Normal Map Format", &format_current, normalMapFormats, IM_ARRAYSIZE(normalMapFormats));
 					ImGui::SetItemTooltip("Specify the normal map format of the source texture");
 
 					// if format changed
 					if (activeMat.GetNormalFormatAsInt() != format_current) {
-																				
-						fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-						fs::path materialPath = libDir / fs::path( m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-						fs::path normalMapPath = materialPath / fs::path(std::string(activeMat.Name + "_normal.ktx2"));
+						fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+						fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + "_normal.ktx2"));
 										
 						// Generate inverted normal Texture.
-						MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat);
+						MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat,true);
 
 						// save normal format to material data file.
 						if (format_current == 0) {
@@ -276,7 +330,7 @@ namespace mnemosy::gui
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Metallic", buttonSizeLoad)) {
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(fileFormats);
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::METALLIC, filepath);
 				}
@@ -326,7 +380,7 @@ namespace mnemosy::gui
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##AO", buttonSizeLoad)) {
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(fileFormats);
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::AMBIENTOCCLUSION, filepath);
 				}
@@ -366,7 +420,7 @@ namespace mnemosy::gui
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Emissive", buttonSizeLoad)) {
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(fileFormats);
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::EMISSION, filepath);
 				}

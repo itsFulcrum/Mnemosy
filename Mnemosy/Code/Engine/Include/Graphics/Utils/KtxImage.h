@@ -5,6 +5,7 @@ namespace mnemosy::graphics
 {
 	enum ktxImgFormat {
 		MNSY_COLOR,			// RGB8 or RGBA8 - for color textures 
+		MNSY_COLOR_SRGB,	// RGB8 or RGBA8 - for color textures, but srgb encoded
 		MNSY_NORMAL,		// RGB32 - for normal maps
 		MNSY_LINEAR_CHANNEL // R32 - for roghtness, metallic etc
 	};

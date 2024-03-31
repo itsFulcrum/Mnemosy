@@ -137,7 +137,7 @@ namespace mnemosy::graphics
 		
 		m_width = ktxImg.width;
 		m_height = ktxImg.height;
-		//m_channelsAmount = // not sure how to retrive the num channels but not priority atm
+		m_channelsAmount = ktxImg.numChannels;
 
 		if (!successfull) {
 			glDeleteTextures(1, &m_ID);
