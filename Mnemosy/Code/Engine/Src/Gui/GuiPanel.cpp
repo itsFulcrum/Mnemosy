@@ -6,10 +6,16 @@
 
 namespace mnemosy::gui
 {
-	GuiPanel::GuiPanel()
-	{
+	GuiPanel::GuiPanel() {
 		//MNEMOSY_TRACE("GuiPanel Constructor");
 	}
+
+	GuiPanel::~GuiPanel() {
+		//MNEMOSY_TRACE("GuiPanel: Destructor");
+
+	}
+
+
 	void GuiPanel::Render()
 	{
 		Draw();

@@ -40,6 +40,16 @@ namespace mnemosy::systems
 		delete inputSystem;
 	}
 
+	void drop_callback(GLFWwindow* window, int count, const char** paths)
+	{
+
+		InputSystem* inputSystem = (InputSystem*)glfwGetWindowUserPointer(window);
+		//inputSystem->UpdateMouseScrollInputs(offsetX, offsetY);
+		inputSystem->UpdateDropCallback(count,paths);
+		inputSystem = nullptr;
+		delete inputSystem;
+	}
+
 // inputSystem.RegisterKeyboardInput(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS, true, std::bind(&SceneInputController::OnKeyPressed_LEFT_SHIFT, this, std::placeholders::_1));
 // #define MNEMOSY_ASSERT(x, msg)	if((x)) {} else { MNEMOSY_CRITICAL("ASSERT - {}\n\t{}\n\tin file {}\n\ton line {}", #x, msg, __FILE__, __LINE__); MNEMOSY_BREAK}
 
@@ -54,6 +64,8 @@ namespace mnemosy::systems
 		glfwSetScrollCallback(m_pWindow, mouse_scroll_callback);
 		glfwSetCursorPosCallback(m_pWindow, mouse_cursor_callback);
 
+		glfwSetDropCallback(m_pWindow, drop_callback);
+
 	}
 
 	InputSystem::~InputSystem()
@@ -64,7 +76,7 @@ namespace mnemosy::systems
 		m_mouseCursorEntries.clear();
 		m_mouseScrollEntries.clear();
 		m_windowResizeEntries.clear();
-		
+		m_dropEntries.clear();
 
 		m_pWindow = nullptr;
 	}
@@ -140,6 +152,19 @@ namespace mnemosy::systems
 		return newEntry.id;
 	}
 
+	int InputSystem::RegisterDropInput(TCallbackSingatureDrop callbackFunction)
+	{
+		m_dropIdCounter++;
+
+		DropInputEntry newEntry;
+		newEntry.id = m_dropIdCounter;
+		newEntry.callbackFunction = callbackFunction;
+
+		m_dropEntries.push_back(newEntry);
+
+		return 0;
+	}
+
 
 	void InputSystem::UnregisterKeyboardInput(int callbackId)
 	{
@@ -207,6 +232,21 @@ namespace mnemosy::systems
 		return;
 	}
 
+	void InputSystem::UnregisterDropInput(int callbackId)
+	{
+		for (int i = 0; i < m_dropEntries.size(); i++)
+		{
+			if (m_dropEntries[i].id == callbackId)
+			{
+				m_dropEntries.erase(m_dropEntries.begin() + i);
+				return;
+			}
+		}
+		return;
+
+	}
+
+	// Update on calback
 	void InputSystem::UpdateKeyboardInputs()
 	{
 		if (!m_processUserInputs)
@@ -320,6 +360,31 @@ namespace mnemosy::systems
 		{
 			entry.callbackFunction(width, height);
 		}
+	}
+
+	void InputSystem::UpdateDropCallback(int count, const char** paths)
+	{
+		//MNEMOSY_DEBUG("InputSystem::UpdateDropCallback: Drop Count {}",count);
+		
+		if (!m_dropEntries.empty()) {
+
+			int dropCount = count;
+			std::vector<std::string> dropedPathsStrings;
+			// populate vector
+			for (int i = 0; i < count; i++) {
+				dropedPathsStrings.push_back(paths[i]);
+			}
+
+
+			for (int i = 0; i < m_dropEntries.size();i++) {
+
+				m_dropEntries[i].callbackFunction(dropCount, dropedPathsStrings);
+			}
+
+			// clear vector
+			dropedPathsStrings.clear();
+		}
+
 	}
 
 	void InputSystem::Update(double deltaSeconds)

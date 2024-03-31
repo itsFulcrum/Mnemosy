@@ -137,6 +137,7 @@ namespace mnemosy
 
 	void MnemosyEngine::Run()
 	{
+		
 		while (!glfwWindowShouldClose(&m_pWindow->GetWindow())) 
 		{
 			m_clock->Update();

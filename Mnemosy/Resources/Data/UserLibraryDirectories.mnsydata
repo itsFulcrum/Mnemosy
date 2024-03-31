@@ -11,9 +11,19 @@
             "4_subFolderNames": [
                 "UV Grids",
                 "Stone",
-                "Test Materials"
+                "Test Materials",
+                "DropTests"
             ],
             "5_subFolders": {
+                "DropTests": {
+                    "1_name": "DropTests",
+                    "2_isLeaf": true,
+                    "3_pathFromRoot": "DropTests",
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "DropTestMat"
+                    ]
+                },
                 "Stone": {
                     "1_name": "Stone",
                     "2_isLeaf": true,

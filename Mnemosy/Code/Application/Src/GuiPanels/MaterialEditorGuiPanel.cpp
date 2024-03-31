@@ -8,11 +8,11 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
 
+#include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/TextureGenerationManager.h"
 #include "Include/Systems/ExportManager.h"
 #include "Include/Systems/FolderTreeNode.h"
-
 
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Material.h"
@@ -21,7 +21,6 @@
 
 #include "External/ImGui/imgui.h"
 
-#include <string>
 #include <glm/glm.hpp>
 #include <filesystem>
 
@@ -32,6 +31,15 @@ namespace mnemosy::gui
 		: m_materialRegistry{ ENGINE_INSTANCE().GetMaterialLibraryRegistry() }
 	{
 		panelName = "Material Editor";
+
+		m_onFileDropInput_callback_id = MnemosyEngine::GetInstance().GetInputSystem().REGISTER_DROP_INPUT(&MaterialEditorGuiPanel::OnFileDropInput);
+	}
+
+	MaterialEditorGuiPanel::~MaterialEditorGuiPanel()
+	{
+		//MNEMOSY_TRACE("MaterialEditorGuiPanel: Destructor");
+
+		MnemosyEngine::GetInstance().GetInputSystem().UnregisterDropInput(m_onFileDropInput_callback_id);
 	}
 
 	void MaterialEditorGuiPanel::Draw()
@@ -41,7 +49,7 @@ namespace mnemosy::gui
 
 		ImGui::Begin(panelName.c_str(), &showPanel);
 
-
+		m_isPanelHovered = ImGui::IsWindowHovered();
 
 
 		// variables used across entire method
@@ -141,6 +149,8 @@ namespace mnemosy::gui
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::ALBEDO, filepath);
 				}
 			}
+			m_isAbedoButtonHovered = ImGui::IsItemHovered();
+
 
 			bool textureAssigned = activeMat.isAlbedoAssigned();
 
@@ -196,6 +206,9 @@ namespace mnemosy::gui
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::ROUGHNESS, filepath);
 				}
 			}
+			m_isRoughnessButtonHovered = ImGui::IsItemHovered();
+
+
 
 			if (textureAssigned) {
 
@@ -251,6 +264,7 @@ namespace mnemosy::gui
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::NORMAL, filepath);
 				}
 			}
+			m_isNormalButtonHovered = ImGui::IsItemHovered();
 
 			if (textureAssigned) {
 				// Remove Texture
@@ -335,6 +349,7 @@ namespace mnemosy::gui
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::METALLIC, filepath);
 				}
 			}
+			m_isMetallicButtonHovered = ImGui::IsItemHovered();
 
 			if (textureAssigned) {
 				// Remove Texture
@@ -385,6 +400,7 @@ namespace mnemosy::gui
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::AMBIENTOCCLUSION, filepath);
 				}
 			}
+			m_isAmbientOcclusionButtonHovered = ImGui::IsItemHovered();
 
 			if (textureAssigned) {
 				// Remove Texture
@@ -425,6 +441,8 @@ namespace mnemosy::gui
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::EMISSION, filepath);
 				}
 			}
+			m_isEmissionButtonHovered = ImGui::IsItemHovered();
+
 
 			if (textureAssigned) {
 				// Remove Texture
@@ -480,5 +498,63 @@ namespace mnemosy::gui
 		ImGui::End();
 
 	} // End Draw()
+
+	// Callback when files are droped into mnemosy
+	void MaterialEditorGuiPanel::OnFileDropInput(int count, std::vector<std::string>& dropedFilePaths) {
+		if (m_isPanelHovered) {
+
+			if (count > 0) {
+
+				if (!dropedFilePaths.empty()) { // just making sure
+
+					// we kinda only want to handle the first one.
+					std::string firstPath = dropedFilePaths[0];
+					//MNEMOSY_TRACE("MaterialEditorGuiPanel::OnFileDropInput: fist droped File: {}", firstPath);
+					fs::directory_entry firstFile = fs::directory_entry(firstPath);
+
+					if (firstFile.exists()) {
+
+						if (firstFile.is_regular_file()) {
+
+							std::string extention = firstFile.path().extension().generic_string();
+							if (extention == ".png" || extention == ".tif" || extention == ".tiff" || extention == ".jpg" || extention == ".jpeg") {
+								//MNEMOSY_DEBUG("MaterialEditorGuiPanel::OnFileDropInput: FirstFile is Valid File. Filetype: {}",extention);
+								// Valid texture file
+
+								// albedo 
+								if (m_isAbedoButtonHovered) {
+									m_materialRegistry.LoadTextureForActiveMaterial(graphics::ALBEDO, firstPath);
+								}
+								// roughness
+								if (m_isRoughnessButtonHovered) {
+									m_materialRegistry.LoadTextureForActiveMaterial(graphics::ROUGHNESS, firstPath);
+								}
+								// normal
+								if (m_isNormalButtonHovered) {
+									m_materialRegistry.LoadTextureForActiveMaterial(graphics::NORMAL, firstPath);
+								}
+								// metallic
+								if (m_isMetallicButtonHovered) {
+									m_materialRegistry.LoadTextureForActiveMaterial(graphics::METALLIC, firstPath);
+								}
+								// ao
+								if (m_isAmbientOcclusionButtonHovered) {
+									m_materialRegistry.LoadTextureForActiveMaterial(graphics::AMBIENTOCCLUSION, firstPath);
+								}
+								// emission
+								if (m_isEmissionButtonHovered) {
+									m_materialRegistry.LoadTextureForActiveMaterial(graphics::EMISSION, firstPath);
+								}
+
+
+
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
 
 } // !mnemosy::gui

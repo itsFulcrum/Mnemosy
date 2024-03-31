@@ -9,7 +9,7 @@ namespace mnemosy::gui
 	{
 	public:
 		GuiPanel();
-		~GuiPanel() = default;
+		~GuiPanel();
 
 		void Render();
 

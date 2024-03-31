@@ -4,7 +4,7 @@
 
 // Application specific defines
 
-//#define mnemosy_gui_showDebugInfo
+#define mnemosy_gui_showDebugInfo
 
 
 
