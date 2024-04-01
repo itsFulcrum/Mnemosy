@@ -52,6 +52,7 @@ namespace mnemosy::gui
 		m_isPanelHovered = ImGui::IsWindowHovered();
 
 
+
 		// variables used across entire method
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
 		ImVec2 buttonSize = ImVec2(120, 0);
@@ -83,6 +84,20 @@ namespace mnemosy::gui
 					
 				m_materialRegistry.SaveActiveMaterialToFile();
 			}
+
+			if (ImGui::Button("Start Drag", buttonSize)) {
+
+			}
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+
+				//unsigned int sourceNodeID = node->runtime_ID;
+				//ImGui::SetDragDropPayload("DragPayload_ID", &sourceNodeID, sizeof(unsigned int));
+				core::FileDialogs::StartDrag();
+				
+				ImGui::EndDragDropSource();
+			}
+
 
 			// Export Settings
 			{
