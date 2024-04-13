@@ -162,13 +162,11 @@ namespace mnemosy::core
 		// TODO Clear this
 		std::vector<std::string> filesToDrag;
 	
-		std::filesystem::path p1 = std::filesystem::path(R"(C:/Users/janis/Documents/UNI/bricks_color.tif)");
-		std::filesystem::path p2 = std::filesystem::path(R"(C:/Users/janis/Documents/UNI/bricks_normal.tif)");
-		std::filesystem::path p3 = std::filesystem::path(R"(C:/Users/janis/Documents/UNI/bricks_normal2.tif)");
+		std::filesystem::path p1 = std::filesystem::path(R"(D:/Drop1.png)");
+		std::filesystem::path p2 = std::filesystem::path(R"(D:/Drop2.png)");
 
 		filesToDrag.push_back(p1.generic_string());
 		filesToDrag.push_back(p2.generic_string());
-		filesToDrag.push_back(p3.generic_string());
 		{
 
 		//std::filesystem::directory_entry d1 = std::filesystem::directory_entry(filesToDrag[0]);
@@ -258,12 +256,12 @@ namespace mnemosy::core
 		HRESULT hr;
 		
 
-		IDropSource* pDropSource = new DropS();
+		IDropSource* pDropSource;
 		hr = CoCreateInstance(CLSID_DropSource,NULL, CLSCTX_INPROC_SERVER, IID_IDropSource,reinterpret_cast<void**>(&pDropSource));
 		CheckComError("CoCreateInstance for DropSource",hr);
 
 		 // Create data object
-		FileDataObject* pDataObject = new FileDataObject();
+		FileDataObject* pDataObject;
 		hr = CoCreateInstance(CLSID_FileDataObject, NULL, CLSCTX_INPROC_SERVER, IID_IDataObject, reinterpret_cast<void**>(&pDataObject));
 		CheckComError("CoCreateInstance for FileDataObject",hr);
 
@@ -296,7 +294,6 @@ namespace mnemosy::core
 
 	void FileDataObject::Init(const std::vector<std::string>& filePaths)
 	{
-
 		m_filePaths = filePaths;
 	}
 
@@ -406,7 +403,7 @@ namespace mnemosy::core
 
 			// Fill in the DROPFILES struct.
 			pDrop->pFiles = sizeof(DROPFILES);
-			pDrop->fWide = TRUE;
+			pDrop->fWide = FALSE;
 
 
 
