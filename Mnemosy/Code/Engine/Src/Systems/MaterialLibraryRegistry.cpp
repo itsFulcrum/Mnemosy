@@ -741,13 +741,19 @@ namespace mnemosy::systems
 	}
 
 	void MaterialLibraryRegistry::LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath) {
-		// save texture to disk with correct filename to folder of active material
-
+		
+		graphics::Texture* tex = new graphics::Texture();
+		bool success =  tex->generateFromFile(filepath.c_str(),true,true);		
+		
+		if (!success) {
+			MNEMOSY_ERROR("Loading Texture Failed: {}", filepath);
+			delete tex;
+			return;
+		}
+		
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
 		
 		if (!UserMaterialBound()) {
-			graphics::Texture* tex = new graphics::Texture();
-			tex->generateFromFile(filepath.c_str(), true, true);
 
 			activeMat.assignTexture(textureType, tex);
 			return;
@@ -755,12 +761,10 @@ namespace mnemosy::systems
 
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) ;
 		
-		
-		graphics::Texture* tex = new graphics::Texture();
-		tex->generateFromFile(filepath.c_str(),true,true);
 
 		std::string filename;
 		graphics::KtxImage ktxImg;
+
 		if (textureType == graphics::ALBEDO) {
 			
 			filename = activeMat.Name + "_albedo.ktx2";
@@ -846,13 +850,8 @@ namespace mnemosy::systems
 			outFileStream << outFile.dump(-1);
 
 		outFileStream.close();
-
-	
-
-
-
+		
 		// load texture to material
-
 		activeMat.assignTexture(textureType, tex);
 	}
 

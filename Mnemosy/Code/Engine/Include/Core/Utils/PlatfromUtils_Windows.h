@@ -31,15 +31,19 @@ DEFINE_GUID(CLSID_FileDataObject,0x7f0276eb,0x4541,0x41f4,0xa1,0xcb, 0x57, 0x39,
 DEFINE_GUID(CLSID_DropSource, 0x39749376, 0x11c1, 0x4b4e, 0x93, 0xc5, 0x0d, 0x4e, 0xc3, 0x8f, 0x91, 0x36);
 
 // cda0beb2-1aed-4aab-8b94-ac3c4a9be5ca
-//DEFINE_GUID(IID_DropSource,0xcda0beb2, 0x1aed, 0x4aab, 0x8b, 0x94, 0xac, 0x3c, 0x4a, 0x9b, 0xe5, 0xca);
+DEFINE_GUID(CLSID_DataFormatEtc,0xcda0beb2, 0x1aed, 0x4aab, 0x8b, 0x94, 0xac, 0x3c, 0x4a, 0x9b, 0xe5, 0xca);
 
     class DropManager;
 
     static void CheckComError(const char* ClassAndfunctionName,HRESULT hr);
 
-	class FileDialogs
+    static UINT CF_filename;
+	
+    
+    class FileDialogs
 	{
 	public:
+
 		static std::string OpenFile(const char* filter);
 		static std::string SaveFile(const char* filter);
 		static std::string SelectFolder(const char* filter);
@@ -107,6 +111,7 @@ DEFINE_GUID(CLSID_DropSource, 0x39749376, 0x11c1, 0x4b4e, 0x93, 0xc5, 0x0d, 0x4e
         void Init(const std::vector<std::string>& filePaths);
     };
 
+    // Factories
     class DataObjectClassFactory : public IClassFactory {
     public:
 
@@ -150,6 +155,46 @@ DEFINE_GUID(CLSID_DropSource, 0x39749376, 0x11c1, 0x4b4e, 0x93, 0xc5, 0x0d, 0x4e
 
     };
 
+    class EnumFormatEtcClassFactory : public IClassFactory {
+    public:
+
+        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) override;
+
+        ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
+
+        ULONG STDMETHODCALLTYPE Release() override { return 1; }
+
+        HRESULT STDMETHODCALLTYPE LockServer(BOOL flock) override {
+            return NOERROR;
+        }
+        HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
+
+
+    };
+
+
+    class DataEnumFormatEtc : public IEnumFORMATETC {
+    private:
+        ULONG m_cRef = 1;
+    public:
+        int m_fIndex = 0;
+
+        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) override;
+
+        ULONG STDMETHODCALLTYPE AddRef() override;
+
+        ULONG STDMETHODCALLTYPE Release() override;
+
+
+        HRESULT STDMETHODCALLTYPE Clone(IEnumFORMATETC** ppenum) override;
+        
+        HRESULT STDMETHODCALLTYPE Next(ULONG celt, FORMATETC* rgelt, ULONG* pceltFetched) override;
+
+        HRESULT STDMETHODCALLTYPE Reset() override;
+
+        HRESULT STDMETHODCALLTYPE Skip(ULONG celt) override;
+
+    };
 }
 
 #endif // !PLATFORM_UTILS_WINDOWS_H

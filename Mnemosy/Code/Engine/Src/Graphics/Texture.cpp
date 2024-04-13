@@ -98,15 +98,15 @@ namespace mnemosy::graphics
 			//cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
 			
 			if (bitDepth == 0) {
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pic.ptr());
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pic.ptr());
 
 			}
 			else if (bitDepth == 2) { // not tested
 
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_SHORT, pic.ptr());
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_SHORT, pic.ptr());
 			}
 			else if (bitDepth == 4) { // not tested
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_FLOAT, pic.ptr());
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, pic.ptr());
 			}
 		}
 			
