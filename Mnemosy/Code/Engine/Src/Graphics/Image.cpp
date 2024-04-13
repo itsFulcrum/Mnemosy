@@ -12,8 +12,7 @@ namespace mnemosy::graphics
 		FreeData();
 	}
 
-	bool Image::LoadImageFromFile(const char* imagePath, bool flipImageVertically)
-	{
+	bool Image::LoadImageFromFile(const char* imagePath, bool flipImageVertically) {
 
 		stbi_set_flip_vertically_on_load(flipImageVertically);
 		
@@ -21,16 +20,16 @@ namespace mnemosy::graphics
 
 		imageData = stbi_load(imagePath, &width_, &height_, &channels_, 0);
 
-		if (imageData)
-		{
+		if (imageData) {
+
 			channels = unsigned int(channels_);
 			width = unsigned int(width_);
 			height = unsigned int(height_);
 
 			return true;
 		}
-		else
-		{
+		else {
+
 			imageData = nullptr;
 			return false;
 		}

@@ -18,6 +18,10 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/FileDirectories.h
 ${ENGINE_SOURCE_PATH}/Src/Core/FileDirectories.cpp
 
+
+
+
+
 #Systems
 ${ENGINE_SOURCE_PATH}/Include/Systems/Input/InputSystem.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/Input/InputSystem.cpp
@@ -37,6 +41,8 @@ ${ENGINE_SOURCE_PATH}/Src/Systems/ExportManager.cpp
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/PlatfromUtils_Windows.cpp
+${ENGINE_SOURCE_PATH}/Include/Core/Utils/DropManager_Windows.h
+${ENGINE_SOURCE_PATH}/Src/Core/Utils/DropManager_Windows.cpp
 
 # Graphics
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/ShaderIncludeParser.h

@@ -9,49 +9,17 @@
             "2_isLeaf": false,
             "3_pathFromRoot": "",
             "4_subFolderNames": [
-                "UV Grids",
-                "Stone",
-                "Test Materials",
-                "DropTests"
+                "StoneTiles"
             ],
             "5_subFolders": {
-                "DropTests": {
-                    "1_name": "DropTests",
+                "StoneTiles": {
+                    "1_name": "StoneTiles",
                     "2_isLeaf": true,
-                    "3_pathFromRoot": "DropTests",
+                    "3_pathFromRoot": "StoneTiles",
                     "6_hasMaterials": true,
                     "6_materialEntries": [
-                        "DropTestMat"
-                    ]
-                },
-                "Stone": {
-                    "1_name": "Stone",
-                    "2_isLeaf": true,
-                    "3_pathFromRoot": "Stone",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "Cliff",
-                        "Rock Mossy"
-                    ]
-                },
-                "Test Materials": {
-                    "1_name": "Test Materials",
-                    "2_isLeaf": true,
-                    "3_pathFromRoot": "Test Materials",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "PrettyDefault",
-                        "All Texture Types"
-                    ]
-                },
-                "UV Grids": {
-                    "1_name": "UV Grids",
-                    "2_isLeaf": true,
-                    "3_pathFromRoot": "UV Grids",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "GridUV",
-                        "GridUV Metallic"
+                        "StoneWall2",
+                        "New Material"
                     ]
                 }
             },

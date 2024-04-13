@@ -11,6 +11,10 @@
 #include <TCHAR.H>
 #include <oleidl.h>
 
+#include <objbase.h>
+#include <initguid.h>
+
+
 #include <vector>
 #include <string>
 
@@ -18,6 +22,20 @@
 
 namespace mnemosy::core
 {
+//7f0276eb - 4541 - 41f4 - a1cb - 573911e9af42
+DEFINE_GUID(CLSID_FileDataObject,0x7f0276eb,0x4541,0x41f4,0xa1,0xcb, 0x57, 0x39, 0x11, 0xe9, 0xaf, 0x42);
+//71a260bb-52b0-4016-8125-07ba49bf9088
+//DEFINE_GUID(IID_FileDataObject,0x71a260bb,0x52b0,0x4016,0x81,0x25, 0x07, 0xba, 0x49, 0xbf, 0x90, 0x88);
+
+// 39749376-11c1-4b4e-93c5-0d4ec38f9136
+DEFINE_GUID(CLSID_DropSource, 0x39749376, 0x11c1, 0x4b4e, 0x93, 0xc5, 0x0d, 0x4e, 0xc3, 0x8f, 0x91, 0x36);
+
+// cda0beb2-1aed-4aab-8b94-ac3c4a9be5ca
+//DEFINE_GUID(IID_DropSource,0xcda0beb2, 0x1aed, 0x4aab, 0x8b, 0x94, 0xac, 0x3c, 0x4a, 0x9b, 0xe5, 0xca);
+
+    class DropManager;
+
+    static void CheckComError(const char* ClassAndfunctionName,HRESULT hr);
 
 	class FileDialogs
 	{
@@ -26,163 +44,111 @@ namespace mnemosy::core
 		static std::string SaveFile(const char* filter);
 		static std::string SelectFolder(const char* filter);
 
-
+        static void RegisterDropManager(DropManager* dropManager);
 		static void StartDrag();
-
 	};
 
-    /*
+
+
+    class DropS : public IDropSource
+    {
+    public:
+        
+
+        virtual STDMETHODIMP QueryInterface(REFIID riid, void** ppvObj) override;
+
+        virtual STDMETHODIMP_(ULONG) AddRef() override;
+        
+        virtual STDMETHODIMP_(ULONG) Release() override;
+
+        virtual HRESULT STDMETHODCALLTYPE QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState) override;
+          
+        virtual HRESULT STDMETHODCALLTYPE GiveFeedback(DWORD dwEffect) override;
+    private:
+        ULONG m_cRef = 1;
+    };
+    
     class FileDataObject : public IDataObject {
     private:
         std::vector<std::string> m_filePaths;
 
+        ULONG m_cRef = 1;
     public:
-        FileDataObject(const std::vector<std::string>& filePaths) : m_filePaths(filePaths) {}
-
-        //// Implement the IDataObject interface methods
-        STDMETHODIMP QueryInterface(REFIID riid, void** ppvObj) {
-            // Implement according to your needs
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP_(ULONG) AddRef() {
-            // Implement according to your needs
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP_(ULONG) Release() {
-            // Implement according to your needs
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP GetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium) {
-            if (pFormatetc->cfFormat == CF_HDROP && pFormatetc->tymed == TYMED_HGLOBAL) {
-                // Prepare file drop data
-                //std::vector<wchar_t> buffer;
-                //for (const auto& filePath : m_filePaths) {
-                //    buffer.insert(buffer.end(), filePath.begin(), filePath.end());
-                //    buffer.push_back(L'\0');
-                //}
-                //buffer.push_back(L'\0'); // Double null-terminated
-                //
-                //// Allocate memory for file drop structure
-                //HGLOBAL hGlobal = GlobalAlloc(GHND, sizeof(DROPFILES) + (buffer.size() * sizeof(wchar_t)));
-                //
-                //DROPFILES* pDropFiles = reinterpret_cast<DROPFILES*>(GlobalLock(hGlobal));
-                //pDropFiles->pFiles = sizeof(DROPFILES);
-                //pDropFiles->fWide = TRUE; // Indicate Unicode file paths
-                //memcpy((char*)pDropFiles + sizeof(DROPFILES), buffer.data(), buffer.size() * sizeof(wchar_t));
-                //GlobalUnlock(hGlobal);
-                //
-                
-                UINT uBuffSize = 0;
-
-                for (int i = 0; i < m_filePaths.size(); i++) {
-                    uBuffSize += lstrlen(m_filePaths[i].c_str()) + 1;
-
-                }
-                uBuffSize = sizeof(DROPFILES) + sizeof(TCHAR) * (uBuffSize + 1);
 
 
-                // Allocate memory from the heap for the DROPFILES struct.
-                HGLOBAL hGlobal = GlobalAlloc(GHND, uBuffSize);;
-
-                //if (NULL == hGlobal)
-                    //return;
+        FileDataObject(){}
 
 
-                DROPFILES* pDrop = reinterpret_cast<DROPFILES*>(GlobalLock(hGlobal));
-                //pDrop = (DROPFILES*)GlobalLock(hGlobal);
+        STDMETHODIMP QueryInterface(REFIID riid, void** ppvObj) override;
 
-                //if (NULL == pDrop) {
-                  //  GlobalFree(hGlobal);
-                    //return;
-                //}
+        STDMETHODIMP_(ULONG) AddRef() override;
 
+        STDMETHODIMP_(ULONG) Release() override;
 
-                // Fill in the DROPFILES struct.
-                pDrop->pFiles = sizeof(DROPFILES);
-                pDrop->fWide = TRUE;
+        STDMETHODIMP GetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium);
 
-                //#ifdef _UNICODE
-                //		// If we're compiling for Unicode, set the Unicode flag in the struct to
-                //		// indicate it contains Unicode strings.
-                //#endif
+        STDMETHODIMP GetDataHere(FORMATETC* pFormatetc, STGMEDIUM* pmedium);
 
+        STDMETHODIMP QueryGetData(FORMATETC* pFormatetc);
 
-                        //Now we can copy all of the filenames into memory, and then unlock the buffer.
+        STDMETHODIMP GetCanonicalFormatEtc(FORMATETC* pFormatetcIn, FORMATETC* pFormatetcOut);
 
-                TCHAR* pszBuff;
+        STDMETHODIMP SetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium, BOOL fRelease);
 
-                // Copy all the filenames into memory after
-                // the end of the DROPFILES struct.
-                //pos = lsDraggedFiles.GetHeadPosition();
-                pszBuff = (TCHAR*)(LPBYTE(pDrop) + sizeof(DROPFILES));
+        STDMETHODIMP EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC** ppenumFormatetc);
 
-                //while (NULL != pos)
-                //{
-                //	lstrcpy(pszBuff, (LPCTSTR)lsDraggedFiles.GetNext(pos));
-                //	pszBuff = 1 + _tcschr(pszBuff, '\0');
-                //}
-                for (int i = 0; i < m_filePaths.size(); i++) {
-                    //uBuffSize += lstrlen(filesToDrag[i].c_str()) + 1;
-                    lstrcpy(pszBuff, (LPCTSTR)m_filePaths[i].c_str());
-                    pszBuff = 1 + _tcschr(pszBuff, '\0');
+        STDMETHODIMP DAdvise(FORMATETC* pFormatetc, DWORD advf, IAdviseSink* pAdvSink, DWORD* pdwConnection);
 
-                }
+        STDMETHODIMP DUnadvise(DWORD dwConnection);
+
+        STDMETHODIMP EnumDAdvise(IEnumSTATDATA** ppenumAdvise);
 
 
-                GlobalUnlock(hGlobal);
-
-
-                //// Set data medium
-                pmedium->hGlobal = hGlobal;
-                pmedium->tymed = TYMED_HGLOBAL;
-                pmedium->pUnkForRelease = nullptr;
-
-
-
-                return S_OK;
-            }
-            return DV_E_FORMATETC;
-        }
-
-        STDMETHODIMP GetDataHere(FORMATETC* pFormatetc, STGMEDIUM* pmedium) {
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP QueryGetData(FORMATETC* pFormatetc) {
-            if (pFormatetc->cfFormat == CF_HDROP && pFormatetc->tymed == TYMED_HGLOBAL) {
-                return S_OK;
-            }
-            return DV_E_FORMATETC;
-        }
-
-        STDMETHODIMP GetCanonicalFormatEtc(FORMATETC* pFormatetcIn, FORMATETC* pFormatetcOut) {
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP SetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium, BOOL fRelease) {
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC** ppenumFormatetc) {
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP DAdvise(FORMATETC* pFormatetc, DWORD advf, IAdviseSink* pAdvSink, DWORD* pdwConnection) {
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP DUnadvise(DWORD dwConnection) {
-            return E_NOTIMPL;
-        }
-
-        STDMETHODIMP EnumDAdvise(IEnumSTATDATA** ppenumAdvise) {
-            return E_NOTIMPL;
-        }
+        void Init(const std::vector<std::string>& filePaths);
     };
-    */
+
+    class DataObjectClassFactory : public IClassFactory {
+    public:
+
+        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) override {
+            if (riid != IID_IUnknown && riid != IID_IClassFactory) {
+                *ppvObj = 0;
+                return E_NOINTERFACE;
+            }
+
+            *ppvObj = this;
+            AddRef();
+            return NOERROR;
+        }
+
+        ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
+
+        ULONG STDMETHODCALLTYPE Release() override { return 1; }
+
+        HRESULT STDMETHODCALLTYPE LockServer(BOOL flock) override {
+            return NOERROR;
+        }
+        HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
+
+
+    };
+
+    class DropSourceClassFactory : public IClassFactory {
+    public:
+
+        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) override;
+
+        ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
+
+        ULONG STDMETHODCALLTYPE Release() override { return 1; }
+
+        HRESULT STDMETHODCALLTYPE LockServer(BOOL flock) override {
+            return NOERROR;
+        }
+        HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
+
+
+    };
 
 }
 

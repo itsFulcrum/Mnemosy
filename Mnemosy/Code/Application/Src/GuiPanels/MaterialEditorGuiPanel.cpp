@@ -87,14 +87,15 @@ namespace mnemosy::gui
 
 			if (ImGui::Button("Start Drag", buttonSize)) {
 
+				core::FileDialogs::StartDrag();
 			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
 
 				//unsigned int sourceNodeID = node->runtime_ID;
 				//ImGui::SetDragDropPayload("DragPayload_ID", &sourceNodeID, sizeof(unsigned int));
-				core::FileDialogs::StartDrag();
 				
+				//core::FileDialogs::StartDrag();
 				ImGui::EndDragDropSource();
 			}
 

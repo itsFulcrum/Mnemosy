@@ -99,8 +99,7 @@ namespace mnemosy::graphics
 		if (m_msaaOff) {
 
 			MNEMOSY_ASSERT(m_standard_FBO != 0, "Framebuffer has not be created yet");
-			glBindFramebuffer(GL_FRAMEBUFFER, m_standard_FBO);
-			
+			glBindFramebuffer(GL_FRAMEBUFFER, m_standard_FBO);			
 			return;
 		}
 
@@ -127,6 +126,8 @@ namespace mnemosy::graphics
 
 			glBindRenderbuffer(GL_RENDERBUFFER, m_standard_RBO);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+			
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			return;
 		}
 

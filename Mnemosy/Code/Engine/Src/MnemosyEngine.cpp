@@ -28,6 +28,9 @@
 
 #include "Include/Gui/UserInterface.h"
 
+#include "Include/Core/Utils/PlatfromUtils_Windows.h"
+#include "Include/Core/Utils/DropManager_Windows.h"
+
 namespace mnemosy
 {
 	// private singleton stuff
@@ -76,6 +79,9 @@ namespace mnemosy
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
 
+		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
+		//MNEMOSY_TRACE("FileDirectories Initialized");
+		
 
 		MNEMOSY_TRACE("Initializing Subsystems");
 		m_pWindow = new core::Window(WindowTitle);
@@ -84,13 +90,10 @@ namespace mnemosy
 
 
 		// subsystems
-		// order of initialization here matters
-		
 		// Mnemosy::core
 		m_clock = std::make_unique<core::Clock>();
 		//MNEMOSY_TRACE("Clock Initialized");
-		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
-		//MNEMOSY_TRACE("FileDirectories Initialized");
+		// order of initialization here matters
 		
 		// mnemosy::systems
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
@@ -137,6 +140,11 @@ namespace mnemosy
 
 	void MnemosyEngine::Run()
 	{
+
+		core::DropManager* dm = new core::DropManager();
+		core::FileDialogs::RegisterDropManager(dm);
+		//core::FileDialogs::RegisterDropManager(dm);
+
 		
 		while (!glfwWindowShouldClose(&m_pWindow->GetWindow())) 
 		{

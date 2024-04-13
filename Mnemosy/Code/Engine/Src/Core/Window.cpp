@@ -3,6 +3,8 @@
 #include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
 
+#include "Include/Graphics/Image.h"
+
 #include <string>
 #define GLFW_INCLUDE_NONE
 #include <glad/glad.h>
@@ -97,6 +99,22 @@ namespace mnemosy::core
 			MNEMOSY_ERROR("Failed to initialize Glad");
 			Shutdown();
 		}
+
+		// Load and set Window Icon
+		graphics::Image* icon = new graphics::Image();
+		bool success = icon->LoadImageFromFile("../Resources/Textures/mnemosy_logo_icon_RGBA_256px.png",true);
+		if (success) {
+
+			GLFWimage glfwImages[1];
+			glfwImages[0].width		= icon->width;
+			glfwImages[0].height	= icon->height;
+			glfwImages[0].pixels	= icon->imageData;
+			glfwSetWindowIcon(m_pWindow,1,glfwImages);
+		}
+		delete icon;
+		icon = nullptr;
+
+
 
 		glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
