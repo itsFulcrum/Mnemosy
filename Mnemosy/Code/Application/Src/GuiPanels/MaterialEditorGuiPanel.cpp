@@ -87,7 +87,8 @@ namespace mnemosy::gui
 
 			if (ImGui::Button("Start Drag", buttonSize)) {
 
-				core::FileDialogs::StartDrag();
+				//core::FileDialogs::StartDrag();
+				m_isDraggingOnce = true;
 			}
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
@@ -95,7 +96,16 @@ namespace mnemosy::gui
 				//unsigned int sourceNodeID = node->runtime_ID;
 				//ImGui::SetDragDropPayload("DragPayload_ID", &sourceNodeID, sizeof(unsigned int));
 				
-				//core::FileDialogs::StartDrag();
+				if (m_isDraggingOnce) {
+					MNEMOSY_WARN("===================\n====START DRAG DRAGGING");
+					core::FileDialogs::StartDrag();
+				}
+				m_isDraggingOnce = false;
+				
+				//MNEMOSY_TRACE("DRAGGING");
+
+				
+				
 				ImGui::EndDragDropSource();
 			}
 

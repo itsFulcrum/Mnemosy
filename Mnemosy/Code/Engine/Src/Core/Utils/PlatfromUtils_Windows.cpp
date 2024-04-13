@@ -164,9 +164,11 @@ namespace mnemosy::core
 	
 		std::filesystem::path p1 = std::filesystem::path(R"(C:/Users/janis/Documents/UNI/bricks_color.tif)");
 		std::filesystem::path p2 = std::filesystem::path(R"(C:/Users/janis/Documents/UNI/bricks_normal.tif)");
+		std::filesystem::path p3 = std::filesystem::path(R"(C:/Users/janis/Documents/UNI/bricks_normal2.tif)");
 
 		filesToDrag.push_back(p1.generic_string());
 		filesToDrag.push_back(p2.generic_string());
+		filesToDrag.push_back(p3.generic_string());
 		{
 
 		//std::filesystem::directory_entry d1 = std::filesystem::directory_entry(filesToDrag[0]);
@@ -256,7 +258,7 @@ namespace mnemosy::core
 		HRESULT hr;
 		
 
-		IDropSource* pDropSource;
+		IDropSource* pDropSource = new DropS();
 		hr = CoCreateInstance(CLSID_DropSource,NULL, CLSCTX_INPROC_SERVER, IID_IDropSource,reinterpret_cast<void**>(&pDropSource));
 		CheckComError("CoCreateInstance for DropSource",hr);
 
@@ -277,8 +279,13 @@ namespace mnemosy::core
 		DWORD dwEffect = 0;
 		
 		hr =  DoDragDrop(pDataObject,pDropSource, DROPEFFECT_COPY, &dwEffect );
+		if (SUCCEEDED(hr)) {
+			MNEMOSY_INFO("DoDragDrop SUCCESS!!");
+		}
 		CheckComError("DoDragDrop():",hr);
 
+		
+		MNEMOSY_INFO("End of StartDrag");
 		
 		pDataObject->Release();
 		pDropSource->Release();
@@ -301,7 +308,7 @@ namespace mnemosy::core
 		}
 
 		*ppvObj = NULL;
-		if (riid == IID_IUnknown || riid == CLSID_FileDataObject)
+		if (riid == IID_IUnknown || riid == CLSID_FileDataObject || riid == IID_IDataObject)
 		{
 			// Increment the reference count and return the pointer.
 			*ppvObj = (LPVOID)this;
@@ -534,7 +541,7 @@ namespace mnemosy::core
 		}
 
 		*ppvObj = NULL;
-		if (riid == IID_IUnknown || riid == CLSID_DropSource )
+		if (riid == IID_IUnknown || riid == CLSID_DropSource || riid == IID_IDropSource)
 		{
 			// Increment the reference count and return the pointer.
 			*ppvObj = (LPVOID)this;
@@ -569,7 +576,7 @@ namespace mnemosy::core
 
 		bool haveMouseButton = (grfKeyState && MK_LBUTTON) || (grfKeyState && MK_RBUTTON);
 
-		MNEMOSY_TRACE("DropS::QueryContinueDrag: haveMouseButton = {}", haveMouseButton);
+		//MNEMOSY_TRACE("DropS::QueryContinueDrag: haveMouseButton = {}", haveMouseButton);
 
 		if (fEscapePressed && haveMouseButton) {
 			return DRAGDROP_S_CANCEL;
@@ -584,7 +591,7 @@ namespace mnemosy::core
 	HRESULT __stdcall DropS::GiveFeedback(DWORD dwEffect) {
 		// Give Feedback allows the implementor to set the cusror 
 		// or implement some other visual effect so the user is aware of what is happening 
-		MNEMOSY_TRACE("DropS::GiveFeedback: Called return DRAGDROP_S_USEDEFAULTCURSORS");
+		//MNEMOSY_TRACE("DropS::GiveFeedback: Called return DRAGDROP_S_USEDEFAULTCURSORS");
 		return DRAGDROP_S_USEDEFAULTCURSORS;
 
 		//return E_NOTIMPL;
@@ -621,6 +628,8 @@ namespace mnemosy::core
 		}
 		else {
 			IDropSource* obj = new DropS();
+
+			//*ppvObj = obj;
 
 			hr = obj->QueryInterface(riid, ppvObj);
 
