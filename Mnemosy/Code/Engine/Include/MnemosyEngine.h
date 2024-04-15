@@ -10,6 +10,7 @@ namespace mnemosy::core
 	class Logger;
 	class Window;
 	class FileDirectories;
+	class DropHandler;
 }
 
 namespace mnemosy::systems
@@ -58,8 +59,8 @@ namespace mnemosy
 		// Getters
 		core::Window& GetWindow()					{ return *m_pWindow; }
 		core::FileDirectories& GetFileDirectories() { return *m_pFileDirectories; }
-		core::Clock& GetClock()						{ return *m_clock; }
-		
+		core::Clock& GetClock()						{ return *m_pClock; }
+		core::DropHandler& GetDropHandler()			{ return *m_pDropHandler; }
 		systems::InputSystem& GetInputSystem() { return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry() { return *m_pSkyboxAssetRegistry; }
 		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry() { return *m_pMaterialLibraryRegistry; }
@@ -81,8 +82,11 @@ namespace mnemosy
 		core::Window* m_pWindow = nullptr;
 		
 		std::unique_ptr<core::Logger> m_pLogger;
-		std::unique_ptr<core::Clock> m_clock;
+		std::unique_ptr<core::Clock> m_pClock;
 		std::unique_ptr<core::FileDirectories> m_pFileDirectories;
+		std::unique_ptr<core::DropHandler> m_pDropHandler;
+		
+
 
 		std::unique_ptr<systems::InputSystem> m_pInputSystem;
 		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;		

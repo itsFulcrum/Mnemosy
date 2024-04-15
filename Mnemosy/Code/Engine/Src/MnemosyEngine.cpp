@@ -28,8 +28,9 @@
 
 #include "Include/Gui/UserInterface.h"
 
-#include "Include/Core/Utils/PlatfromUtils_Windows.h"
-#include "Include/Core/Utils/DropManager_Windows.h"
+//#include "Include/Core/Utils/PlatfromUtils_Windows.h"
+//#include "Include/Core/Utils/DropManager_Windows.h"
+#include "Include/Core/Utils/DropHandler_Windows.h"
 
 namespace mnemosy
 {
@@ -91,10 +92,13 @@ namespace mnemosy
 
 		// subsystems
 		// Mnemosy::core
-		m_clock = std::make_unique<core::Clock>();
+		m_pClock = std::make_unique<core::Clock>();
 		//MNEMOSY_TRACE("Clock Initialized");
 		// order of initialization here matters
 		
+		m_pDropHandler = std::make_unique<core::DropHandler>();
+
+
 		// mnemosy::systems
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
 		//MNEMOSY_TRACE("InputSystem Initialized");
@@ -104,6 +108,8 @@ namespace mnemosy
 		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
 		m_pTextureGenerationManager = std::make_unique<systems::TextureGenerationManager>();
 		m_pExportManager = std::make_unique<systems::ExportManager>();
+
+
 
 		// menmosy::graphcs
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
@@ -128,7 +134,7 @@ namespace mnemosy
 		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
 		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->GetSkybox());
 
-		m_clock->capDeltaTime = true;
+		m_pClock->capDeltaTime = true;
 
 		m_isInitialized = true;
 
@@ -141,14 +147,16 @@ namespace mnemosy
 	void MnemosyEngine::Run()
 	{
 
-		core::DropManager* dm = new core::DropManager();
-		core::FileDialogs::RegisterDropManager(dm);
+
+
+		//core::DropManager* dm = new core::DropManager();
+		//core::FileDialogs::RegisterDropManager(dm);
 		//core::FileDialogs::RegisterDropManager(dm);
 
 		
 		while (!glfwWindowShouldClose(&m_pWindow->GetWindow())) 
 		{
-			m_clock->Update();
+			m_pClock->Update();
 			//MNEMOSY_TRACE("FPS: {} ", m_clock->GetFPS());
 
 			
@@ -164,7 +172,7 @@ namespace mnemosy
 				m_pInputSystem->ProcessUserInputs();
 			}
 
-			m_pInputSystem->Update(m_clock->GetDeltaSeconds());
+			m_pInputSystem->Update(m_pClock->GetDeltaSeconds());
 
 
 			m_pScene->Update();
@@ -185,7 +193,9 @@ namespace mnemosy
 	}
 
 	void MnemosyEngine::Shutdown()
-	{
+	{		
+
+
 
 		m_pWindow->Shutdown();
 		delete m_pWindow;

@@ -23,10 +23,7 @@
                     "1_name": "Wood",
                     "2_isLeaf": true,
                     "3_pathFromRoot": "Wood",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "New Material"
-                    ]
+                    "6_hasMaterials": false
                 }
             },
             "6_hasMaterials": true,

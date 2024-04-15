@@ -7,6 +7,7 @@
 #include "Include/Core/FileDirectories.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
+#include "Include/Core/Utils/DropHandler_Windows.h"
 
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
@@ -51,14 +52,27 @@ namespace mnemosy::gui
 
 		m_isPanelHovered = ImGui::IsWindowHovered();
 
-
+		
 
 		// variables used across entire method
-		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		MnemosyEngine& engineInstance = MnemosyEngine::GetInstance();
+		graphics::Material& activeMat = engineInstance.GetScene().GetActiveMaterial();
 		ImVec2 buttonSize = ImVec2(120, 0);
 		const char* normalMapFormats[] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
 		const char* exportFormats[] = { "ktx2", "png","tiff"}; // they need to be ordered the same as in ExportManager ExportImageFormats
-		fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+		fs::path libDir = engineInstance.GetFileDirectories().GetLibraryDirectoryPath();
+
+		if (m_isAbedoButtonHovered 
+			|| m_isNormalButtonHovered
+			|| m_isRoughnessButtonHovered 
+			|| m_isMetallicButtonHovered
+			|| m_isAmbientOcclusionButtonHovered
+			|| m_isEmissionButtonHovered ) {
+			engineInstance.GetDropHandler().SetDropTargetActive(true);
+		}
+		else {
+			engineInstance.GetDropHandler().SetDropTargetActive(false);
+		}
 
 
 		std::string displayText = "Material: " + activeMat.Name;
@@ -97,8 +111,8 @@ namespace mnemosy::gui
 				//ImGui::SetDragDropPayload("DragPayload_ID", &sourceNodeID, sizeof(unsigned int));
 				
 				if (m_isDraggingOnce) {
-					MNEMOSY_WARN("===================\n====START DRAG DRAGGING");
-					core::FileDialogs::StartDrag();
+					
+					engineInstance.GetDropHandler().BeginDrag();
 				}
 				m_isDraggingOnce = false;
 				
