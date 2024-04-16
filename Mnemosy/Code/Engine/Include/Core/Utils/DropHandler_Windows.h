@@ -24,7 +24,7 @@ namespace mnemosy::core {
 		void Initialize();
 		void Uninitialize();
 
-        void BeginDrag();
+        void BeginDrag(std::vector<std::string>& filesToDrag);
 
 
         /// <summary>

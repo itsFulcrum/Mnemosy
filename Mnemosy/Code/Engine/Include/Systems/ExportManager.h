@@ -3,7 +3,7 @@
 
 #include "Include/Graphics/Material.h"
 
-
+#include <vector>
 #include <string>
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -44,9 +44,13 @@ namespace mnemosy::systems
 		void SetNormalMapExportFormat(graphics::NormalMapFormat format) { m_exportNormalFormat = format; }
 		const int GetNormalMapExportFormatInt() { return (const int)m_exportNormalFormat; }
 
+		std::vector<std::string>& GetLastExportedFilePaths();
 	private:
 		void ExportAsKtx2(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material);
 		void ExportMaterialTexturePngOrTif(fs::path& exportPath,graphics::Texture& texture,bool singleChannelTexture,bool bits16);
+
+
+		std::vector<std::string> m_lastExportedFilePaths;
 
 		std::string GetExportNormalFormatString();
 		std::string GetExportImageFormatString();

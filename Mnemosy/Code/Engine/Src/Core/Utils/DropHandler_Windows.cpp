@@ -111,23 +111,23 @@ namespace mnemosy::core {
 		}
 	}
 
-	void DropHandler::BeginDrag() {
+	void DropHandler::BeginDrag(std::vector<std::string>& filesToDrag) {
 		
 
 		// TODO: Pass the actule list of filepath and dont just hard code it here:
 		// Debug Make a vector of string filepath to copy  
 		// for now its just hardcoded filepaths for Debug
-		std::vector<std::string> filesToDrag;
-
-		std::filesystem::path p1 = std::filesystem::path(R"(D:/Drop (1).png)");
-		std::filesystem::path p2 = std::filesystem::path(R"(D:/Drop (2).png)");
-		std::filesystem::path p3 = std::filesystem::path(R"(D:/Drop (3).png)");
-		std::filesystem::path p4 = std::filesystem::path(R"(D:/Drop (4).png)");
-
-		filesToDrag.push_back(p1.generic_string());
-		filesToDrag.push_back(p2.generic_string());
-		filesToDrag.push_back(p3.generic_string());
-		filesToDrag.push_back(p4.generic_string());
+		//std::vector<std::string> filesToDrag;
+		//
+		//std::filesystem::path p1 = std::filesystem::path(R"(D:/Drop (1).png)");
+		//std::filesystem::path p2 = std::filesystem::path(R"(D:/Drop (2).png)");
+		//std::filesystem::path p3 = std::filesystem::path(R"(D:/Drop (3).png)");
+		//std::filesystem::path p4 = std::filesystem::path(R"(D:/Drop (4).png)");
+		//
+		//filesToDrag.push_back(p1.generic_string());
+		//filesToDrag.push_back(p2.generic_string());
+		//filesToDrag.push_back(p3.generic_string());
+		//filesToDrag.push_back(p4.generic_string());
 
 
 		MNEMOSY_TRACE("DropHandler::BeginDrag:");

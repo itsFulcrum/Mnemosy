@@ -28,12 +28,18 @@ namespace mnemosy::systems
 
 	ExportManager::~ExportManager() {
 
+		if (!m_lastExportedFilePaths.empty())
+			m_lastExportedFilePaths.clear();
 
 	}
 
 	bool ExportManager::ExportMaterialTextures(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material) {
 
 		MNEMOSY_INFO("Exporting Material: {}, as {} using {} normal map format \nExport Path: {}", material.Name, GetExportImageFormatString(), GetExportNormalFormatString(), exportPath.generic_string());
+
+		// store the filepath of every file we export in this vector so we can use it when dragging files out of mnemosy
+		if (!m_lastExportedFilePaths.empty())
+			m_lastExportedFilePaths.clear();
 
 		if (m_exportImageFormat == MNSY_KTX2) {
 			
@@ -51,12 +57,16 @@ namespace mnemosy::systems
 			fs::path to = exportPath / fs::path(material.Name + "_albedo_sRGB" + fileExtention);
 			graphics::Texture& tex = material.GetAlbedoTexture();
 			ExportMaterialTexturePngOrTif(to, tex,false,false);
+
+			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 		if (material.isEmissiveAssigned()) {
 
 			fs::path to = exportPath / fs::path(material.Name + "_emissive_sRGB" + fileExtention);
 			graphics::Texture& tex = material.GetEmissiveTexture();
 			ExportMaterialTexturePngOrTif(to, tex,false,false);
+
+			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 		if (material.isNormalAssigned()) {
 
@@ -64,6 +74,7 @@ namespace mnemosy::systems
 				fs::path to = exportPath / fs::path(material.Name + "_normal_gl_raw" + fileExtention);
 				graphics::Texture& tex = material.GetNormalTexture();
 				ExportMaterialTexturePngOrTif(to, tex,false,true);
+				m_lastExportedFilePaths.push_back(to.generic_string());
 			}
 			else if (m_exportNormalFormat == graphics::MNSY_NORMAL_FORMAT_DIRECTX) {
 			// Convert and then export
@@ -92,22 +103,26 @@ namespace mnemosy::systems
 
 				free(gl_texture_bytes);
 				MNEMOSY_INFO("Exported: {}", exportPath.generic_string());
+				m_lastExportedFilePaths.push_back(to.generic_string());
 			}
 		}
 		if (material.isRoughnessAssigned()) {
 			fs::path to = exportPath / fs::path(material.Name + "_roughness_raw" + fileExtention);
 			graphics::Texture& tex = material.GetRoughnessTexture();
 			ExportMaterialTexturePngOrTif(to, tex,true,true);
+			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 		if (material.isMetallicAssigned()) {
 			fs::path to = exportPath / fs::path(material.Name + "_metallic_raw" + fileExtention);
 			graphics::Texture& tex = material.GetMetallicTexture();
 			ExportMaterialTexturePngOrTif(to, tex,true,true);
+			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 		if (material.isAoAssigned()) {
 			fs::path to = exportPath / fs::path(material.Name + "_ambientOcclusion_raw" + fileExtention);
 			graphics::Texture& tex = material.GetAOTexture();
 			ExportMaterialTexturePngOrTif(to, tex,true,true);
+			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 
 		return false;
@@ -149,6 +164,18 @@ namespace mnemosy::systems
 		return exportFormats[m_exportImageFormat];
 	}
 
+	std::vector<std::string>& ExportManager::GetLastExportedFilePaths() {
+
+		if (!m_lastExportedFilePaths.empty()) {
+			return m_lastExportedFilePaths;
+		}
+
+		MNEMOSY_WARN("ExportManager::GetLastExportedFilePaths: Vector of filepaths is empty.");
+
+		return m_lastExportedFilePaths;
+		// TODO: insert return statement here
+	}
+
 	void ExportManager::ExportAsKtx2(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material) {
 
 		// For ktx2 we can just copy some of the files but we have to check
@@ -163,6 +190,7 @@ namespace mnemosy::systems
 			graphics::KtxImage img;
 			graphics::Texture& albedo = material.GetAlbedoTexture();
 			img.ExportGlTexture(to.generic_string().c_str(), albedo.GetID(), albedo.GetChannelsAmount(), albedo.GetWidth(), albedo.GetHeight(), graphics::MNSY_COLOR_SRGB, true);
+			m_lastExportedFilePaths.push_back(to.generic_string());
 			MNEMOSY_INFO("Exported: {}", to.generic_string());
 		}
 
@@ -172,6 +200,7 @@ namespace mnemosy::systems
 			graphics::KtxImage img;
 			graphics::Texture& emissive = material.GetEmissiveTexture();
 			img.ExportGlTexture(to.generic_string().c_str(), emissive.GetID(), emissive.GetChannelsAmount(), emissive.GetWidth(), emissive.GetHeight(), graphics::MNSY_COLOR_SRGB, true);
+			m_lastExportedFilePaths.push_back(to.generic_string());
 			MNEMOSY_INFO("Exported: {}", to.generic_string());
 		}
 
@@ -183,6 +212,7 @@ namespace mnemosy::systems
 					fs::path from = materialFolderPath / fs::path(material.Name + "_normal.ktx2");
 					fs::path to = exportPath / fs::path(material.Name + "_normal_gl_raw.ktx2");
 					fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+					m_lastExportedFilePaths.push_back(to.generic_string());
 					MNEMOSY_INFO("Exported: {}", to.generic_string());
 				}
 				catch (fs::filesystem_error error) {
@@ -196,6 +226,7 @@ namespace mnemosy::systems
 				fs::path to = exportPath / fs::path(material.Name + "_normal_dx_raw.ktx2");
 
 				texGenerator.FlipNormalMap(to.generic_string().c_str(), material,true);
+				m_lastExportedFilePaths.push_back(to.generic_string());
 				MNEMOSY_INFO("Exported: {}", to.generic_string());
 			}
 		}
@@ -206,6 +237,7 @@ namespace mnemosy::systems
 				fs::path from = materialFolderPath / fs::path(material.Name + "_roughness.ktx2");
 				fs::path to = exportPath / fs::path(material.Name + "_roughness_raw.ktx2");
 				fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+				m_lastExportedFilePaths.push_back(to.generic_string());
 				MNEMOSY_INFO("Exported: {}", to.generic_string());
 			}
 			catch (fs::filesystem_error error) {
@@ -217,6 +249,7 @@ namespace mnemosy::systems
 				fs::path from = materialFolderPath / fs::path(material.Name + "_metallic.ktx2");
 				fs::path to = exportPath / fs::path(material.Name + "_metallic_raw.ktx2");
 				fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+				m_lastExportedFilePaths.push_back(to.generic_string());
 				MNEMOSY_INFO("Exported: {}", to.generic_string());
 			}
 			catch (fs::filesystem_error error) {
@@ -228,6 +261,7 @@ namespace mnemosy::systems
 				fs::path from = materialFolderPath / fs::path(material.Name + "_ambientOcclusion.ktx2");
 				fs::path to = exportPath / fs::path(material.Name + "_ambientOcclusion_raw.ktx2");
 				fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+				m_lastExportedFilePaths.push_back(to.generic_string());
 				MNEMOSY_INFO("Exported: {}", to.generic_string());
 			}
 			catch (fs::filesystem_error error) {

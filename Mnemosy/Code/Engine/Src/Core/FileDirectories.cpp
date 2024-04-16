@@ -7,10 +7,11 @@
 
 namespace mnemosy::core
 {
-	FileDirectories::FileDirectories()
-	{
+	FileDirectories::FileDirectories() {
+
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
 		m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
+		m_tempExportTextureFolderName = "__Temp_Mnemosy_Export__";
 
 		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MnemosyMaterialLibrary)");
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
@@ -21,12 +22,13 @@ namespace mnemosy::core
 		m_mnemosyLibraryDataFile = fs::directory_entry(R"(../Resources/Data/LibraryDirectory.mnsydata)");
 
 		LoadUserLibraryDirectoryFromDataFile();
+		
+		DeleteTempFolder();
 	}
 
-	FileDirectories::~FileDirectories()
-	{
+	FileDirectories::~FileDirectories() {
 
-
+		DeleteTempFolder();
 	}
 
 	const fs::path FileDirectories::GetResourcesPath() {
@@ -72,6 +74,24 @@ namespace mnemosy::core
 
 		fs::path shadersPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Shaders");
 		return shadersPath;
+	}
+
+	const fs::path FileDirectories::GetTempExportFolderPath()
+	{
+		fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);
+		
+		if (!TempFolderExist()) {
+
+			if (CreateTempFolder()) {				
+				return tempFolderPath;
+			}
+			else {
+				MNEMOSY_ERROR("FileDirectories::ErrorCreatingTempFolder:");
+				return fs::path();
+			}			
+		}
+
+		return tempFolderPath;
 	}
 	
 	const fs::path FileDirectories::GetLibraryDirectoryPath() {
@@ -291,6 +311,47 @@ namespace mnemosy::core
 
 		m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
 		MNEMOSY_ERROR("Setting Library path to default Default path: {} ", m_mnemosyDefaultLibraryDirectory.path().generic_string());
+	}
+
+	bool FileDirectories::CreateTempFolder() {
+
+		if (!TempFolderExist()) {
+			fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);
+			try {
+				fs::create_directories(tempFolderPath);
+			}
+			catch (fs::filesystem_error err) {
+				MNEMOSY_ERROR("FileDirectories::CreateTempFolder: System error creating directory {} \nError Message: {}", tempFolderPath.generic_string(), err.what());
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	void FileDirectories::DeleteTempFolder() {
+
+		fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);		
+		
+		if (TempFolderExist()) {
+			fs::remove_all(tempFolderPath);
+		}
+
+	}
+
+	bool FileDirectories::TempFolderExist(){
+
+		fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);
+		fs::directory_entry tempFolderDir = fs::directory_entry(tempFolderPath);
+
+		if (tempFolderDir.exists()) {
+			if (tempFolderDir.is_directory()) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 

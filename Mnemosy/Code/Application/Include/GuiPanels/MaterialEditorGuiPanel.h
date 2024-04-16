@@ -32,10 +32,13 @@ namespace mnemosy::gui
 		bool m_isAmbientOcclusionButtonHovered = false;
 
 		bool m_isDraggingOnce = false;
+		bool m_readyToDragMaterial = false;
 
 		int m_onFileDropInput_callback_id = -1;
 		void OnFileDropInput(int count,std::vector<std::string>& dropedFilePaths);
 
+
+		int m_currentActiveMaterialID = -1;
 		systems::MaterialLibraryRegistry& m_materialRegistry;
 	};
 }
