@@ -30,82 +30,65 @@
 namespace mnemosy::core {
 	
 	//==== public methods
-	// {5D23E357-A104-413F-A7FE-31EC9713C2B1}
 
 	DropHandler::DropHandler() {
 
-
 		Initialize();
-		RegisterDropTarget();	
 	}
 
 	DropHandler::~DropHandler() {
 		
 	}
 
-	// maybe drop DropHandler can keep drop manager pointer istead of engine
-	void DropHandler::RegisterDropTarget() {
+	void DropHandler::Initialize() {
 
 		HRESULT hr;
-
-		//m_pDropManagerFactory = new DropManagerClassFactory();
 		
-		//DWORD class_reg;
-		//hr = CoRegisterClassObject(CLSID_DropManager, (IUnknown*)m_pDropManagerFactory, CLSCTX_INPROC_SERVER, REGCLS_SINGLEUSE, &class_reg);
-		//Check_HRESULT_Error("CoRegisterClassObject DropManager", hr);
+		// Dont need this if we initialize ole
+		//hr = CoInitialize(NULL); // we probably dont need this
+		//Check_HRESULT_Error("DropHandler::Initialize::CoInitialize() ", hr);
 
-		//hr = CoCreateInstance(CLSID_DropManager, NULL, CLSCTX_INPROC_SERVER, IID_IDropTarget, reinterpret_cast<void**>(&m_pDropManager));
-		//Check_HRESULT_Error("CoCreateInstance for DropManager", hr);
+		hr = OleInitialize(NULL);
+		Check_HRESULT_Error("DropHandler::Initialize::OleInitialize() ", hr);
+		
 
 		m_pDropManager = new DropManager();
 
 		hr = RegisterDragDrop(glfwGetWin32Window(&MnemosyEngine::GetInstance().GetWindow().GetWindow()), static_cast<IDropTarget*>(m_pDropManager));
 		Check_HRESULT_Error("DropHandler::RegisterDropTarget: ", hr);
 
-	}
-
-	void DropHandler::Initialize() {
-
-		HRESULT hr;
-		{
-			hr = CoInitialize(NULL); // we probably dont need this
-			Check_HRESULT_Error("DropHandler::Initialize::CoInitialize() ", hr);
-
-			hr = OleInitialize(NULL);
-			Check_HRESULT_Error("DropHandler::Initialize::OleInitialize() ", hr);
-		}
 		
+		
+		// Apperently I don't need the factory stuff at all..
+		/*
+		m_pDropSourceFactory	= new DropSourceClassFactory();
+		m_pDataObjectFactory	= new DataObjectClassFactory();
+		m_pEnumFormatEtcFactory = new EnumFormatEtcClassFactory();
 
-		{
-			m_pDropSourceFactory	= new DropSourceClassFactory();
-			m_pDataObjectFactory	= new DataObjectClassFactory();
-			m_pEnumFormatEtcFactory = new EnumFormatEtcClassFactory();
-
-			DWORD class_reg2;
-			hr = CoRegisterClassObject(CLSID_DropSource, (IUnknown*)m_pDropSourceFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg2);
-			Check_HRESULT_Error("CoRegisterClassObject DropSource", hr);
+		//DWORD class_reg2;
+		//hr = CoRegisterClassObject(CLSID_DropSource, (IUnknown*)m_pDropSourceFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg2);
+		//Check_HRESULT_Error("CoRegisterClassObject DropSource", hr);
 			
 			
-			DWORD class_reg;
-			hr = CoRegisterClassObject(CLSID_FileDataObject, (IUnknown*)m_pDataObjectFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg);
-			Check_HRESULT_Error("CoRegisterClassObject FileDataObject", hr);
+		DWORD class_reg;
+		hr = CoRegisterClassObject(CLSID_FileDataObject, (IUnknown*)m_pDataObjectFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg);
+		Check_HRESULT_Error("CoRegisterClassObject FileDataObject", hr);
 
 
-			DWORD class_reg3;
-			hr = CoRegisterClassObject(CLSID_DataFormatEtc, (IUnknown*)m_pEnumFormatEtcFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg3);
-			Check_HRESULT_Error("CoRegisterClassObject DataEnumFormatEtc", hr);
-		}
+		DWORD class_reg3;
+		hr = CoRegisterClassObject(CLSID_DataFormatEtc, (IUnknown*)m_pEnumFormatEtcFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg3);
+		Check_HRESULT_Error("CoRegisterClassObject DataEnumFormatEtc", hr);
+		
+		*/
 
 
 	}
 
 	void DropHandler::Uninitialize() {
 		
-
-
-		CoUninitialize(); // we may dont need this at all
 		OleUninitialize();
 
+		/*
 		if(m_pDropSourceFactory)
 			delete m_pDropSourceFactory;
 		if(m_pDataObjectFactory)
@@ -116,6 +99,7 @@ namespace mnemosy::core {
 		m_pDropSourceFactory = nullptr;
 		m_pDataObjectFactory = nullptr;
 		m_pEnumFormatEtcFactory = nullptr;
+		*/
 
 		// I think the reason this crashes is because glfw already calls this function when we close the window..
 		//HRESULT hr = RevokeDragDrop(glfwGetWin32Window(&MnemosyEngine::GetInstance().GetWindow().GetWindow()));
@@ -130,21 +114,25 @@ namespace mnemosy::core {
 	void DropHandler::BeginDrag() {
 		
 
-		//check out this maybe https://stackoverflow.com/questions/449872/how-drag-and-drop-of-files-is-done
-		MNEMOSY_DEBUG("DropHandler::BeginDrag:");
-
-		// TODO Clear this
+		// TODO: Pass the actule list of filepath and dont just hard code it here:
+		// Debug Make a vector of string filepath to copy  
+		// for now its just hardcoded filepaths for Debug
 		std::vector<std::string> filesToDrag;
 
-		std::filesystem::path p1 = std::filesystem::path(R"(D:/Drop1.png)");
-		std::filesystem::path p2 = std::filesystem::path(R"(D:/Drop2.png)");
+		std::filesystem::path p1 = std::filesystem::path(R"(D:/Drop (1).png)");
+		std::filesystem::path p2 = std::filesystem::path(R"(D:/Drop (2).png)");
+		std::filesystem::path p3 = std::filesystem::path(R"(D:/Drop (3).png)");
+		std::filesystem::path p4 = std::filesystem::path(R"(D:/Drop (4).png)");
 
 		filesToDrag.push_back(p1.generic_string());
 		filesToDrag.push_back(p2.generic_string());
+		filesToDrag.push_back(p3.generic_string());
+		filesToDrag.push_back(p4.generic_string());
 
 
+		MNEMOSY_TRACE("DropHandler::BeginDrag:");
 
-		FORMATETC* etc = new FORMATETC();// = { CF_HDROP, NULL, DVASPECT_DOCPRINT, -1, TYMED_HGLOBAL };
+		FORMATETC* etc = new FORMATETC();
 		etc->cfFormat = CF_HDROP;
 		etc->dwAspect = DVASPECT_CONTENT;
 		etc->tymed = TYMED_HGLOBAL;
@@ -156,35 +144,33 @@ namespace mnemosy::core {
 		HRESULT hr;
 
 		DropSource* pDropSource = new DropSource();
+		FileDataObject* pDataObject = new FileDataObject();
+
+		// It seems we dont need this but I'll keep it around for now
 		//hr = CoCreateInstance(CLSID_DropSource, NULL, CLSCTX_INPROC_SERVER, IID_IDropSource, reinterpret_cast<void**>(&pDropSource));
 		//Check_HRESULT_Error("CoCreateInstance for DropSource", hr);
-
-		// Create data object
-		FileDataObject* pDataObject = new FileDataObject(etc,stg);
 		//hr = CoCreateInstance(CLSID_FileDataObject, NULL, CLSCTX_INPROC_SERVER, IID_IDataObject, reinterpret_cast<void**>(&pDataObject));
 		//Check_HRESULT_Error("CoCreateInstance for FileDataObject", hr);
 
 
+		// just pass the vector of string filepaths to the FileDataObject
 		pDataObject->Init(filesToDrag);
 
-		//hr = pDataObject->GetData(etc, stg);
-		//Check_HRESULT_Error("FileDataObject::GetData:", hr);
-
-
-
-		// // Start drag operation
+		// Start drag operation
 		DWORD dwEffect = 0;
-
 		hr = DoDragDrop(pDataObject, pDropSource, DROPEFFECT_COPY | DROPEFFECT_MOVE, &dwEffect);
 		if (SUCCEEDED(hr)) {
-			MNEMOSY_INFO("DropHandler::BeginDrag:DoDragDrop() Succeeded");
+			MNEMOSY_TRACE("DropHandler::BeginDrag:DoDragDrop() Succeeded");
 		}
 		else {
 			Check_HRESULT_Error("DoDragDrop():", hr);
 		}
 
+		// release dataObject and dropSource
 		pDataObject->Release();
 		pDropSource->Release();
+
+
 	}
 
 	void DropHandler::SetDropTargetActive(bool state) {
@@ -213,11 +199,11 @@ namespace mnemosy::core {
 		}
 
 		*ppvObj = NULL;
-		if (riid == IID_IUnknown || riid == CLSID_DropSource || riid == IID_IDropSource)
+		if (riid == IID_IUnknown  || riid == IID_IDropSource)
 		{
 			// Increment the reference count and return the pointer.
 			AddRef();
-			*ppvObj = reinterpret_cast<void*>(this); //(LPVOID)this;
+			*ppvObj = reinterpret_cast<void*>(this);
 			//MNEMOSY_TRACE("DropSource::QuearyInterface: NOERROR");
 			return S_OK;
 		}
@@ -269,61 +255,34 @@ namespace mnemosy::core {
 		m_filePaths = filePaths;
 	}
 
-	bool FileDataObject::LookupFormatEtc(FORMATETC* pfmtetc) {
-
-		
-		if (pfmtetc->cfFormat == m_pfmtetc->cfFormat &&
-			pfmtetc->tymed == m_pfmtetc->tymed) {
-
-			MNEMOSY_TRACE("IDataObject::LookupFormat: Match");
-			return true;
-		}
-
-		return false;
-	}
-
-	FileDataObject::FileDataObject(FORMATETC* fmtetc, STGMEDIUM* stgmed) {
-
-		m_nNumFormats = 1;
-		m_pfmtetc = fmtetc;
-		m_pstgmed = stgmed;
-
-		MNEMOSY_TRACE("IDataObject::Constructor:")
+	FileDataObject::FileDataObject() {
+		//MNEMOSY_TRACE("IDataObject::Constructor:")
 	}
 
 	FileDataObject::~FileDataObject() {
 
-		if (m_pfmtetc) {
-			delete m_pfmtetc;
-			m_pfmtetc = nullptr;
-		}
-
-		if (m_pstgmed) {
-			delete m_pstgmed;
-			m_pstgmed = nullptr;
-		}
-
-		MNEMOSY_TRACE("IDataObject::Destructor:")
+		if (!m_filePaths.empty())
+			m_filePaths.clear();
+		//MNEMOSY_TRACE("IDataObject::Destructor:")
 	}
 
 	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::QueryInterface(REFIID riid, void** ppvObj) {
 
-		//MNEMOSY_TRACE("IDataObject::QuearyInterface:");
 		if (!ppvObj) {
 			//MNEMOSY_TRACE("IDataObject::QuearyInterface: E_INVALIDARG");
 			return E_INVALIDARG;
 		}
 
 		*ppvObj = NULL;
-		if (riid == IID_IUnknown || riid == CLSID_FileDataObject || riid == IID_IDataObject)
+		if (riid == IID_IUnknown || riid == IID_IDataObject)
 		{
 			// Increment the reference count and return the pointer.
 			AddRef();
 			*ppvObj = reinterpret_cast<void*>(this);// (LPVOID)this;
-			MNEMOSY_TRACE("IDataObject::QuearyInterface: NOERROR");
+			//MNEMOSY_TRACE("IDataObject::QuearyInterface: NOERROR");
 			return S_OK;
 		}
-		MNEMOSY_TRACE("IDataObject::QuearyInterface:E_NOINTERFACE");
+		//MNEMOSY_TRACE("IDataObject::QuearyInterface:E_NOINTERFACE");
 		
 		return E_NOINTERFACE;
 	}
@@ -331,15 +290,14 @@ namespace mnemosy::core {
 	STDMETHODIMP_(ULONG __stdcall) FileDataObject::AddRef() {
 
 		InterlockedIncrement(&m_cRef);
-		MNEMOSY_TRACE("IDataObject::AddRef: Count: {}", (int)m_cRef);
+		//MNEMOSY_TRACE("IDataObject::AddRef: Count: {}", (int)m_cRef);
 		return m_cRef;
 	}
 
 	STDMETHODIMP_(ULONG __stdcall) FileDataObject::Release() {
-		// Decrement the object's internal counter.
-		ULONG ulRefCount = InterlockedDecrement(&m_cRef);
-		MNEMOSY_TRACE("IDataObject::Release: Count: {}",int(m_cRef));
 
+		ULONG ulRefCount = InterlockedDecrement(&m_cRef);
+		//MNEMOSY_TRACE("IDataObject::Release: Count: {}",int(m_cRef));
 		if (m_cRef == 0) {
 			delete this;
 		}
@@ -382,6 +340,8 @@ namespace mnemosy::core {
 						wcscpy_s(pszBuff, filePath.size() + 1, filePath.c_str());
 						pszBuff += filePath.size() + 1; // Move to the next position after null terminator
 					}
+					// clear the vector after we have copied it to the end of DROPFILES.
+					unicodeFilePaths.clear();
 
 					GlobalUnlock(hGlobal);
 
@@ -400,38 +360,20 @@ namespace mnemosy::core {
 
 	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::GetDataHere(FORMATETC* pFormatetc, STGMEDIUM* pmedium) {
 
-		MNEMOSY_DEBUG("IDataObject::GetDataHere: NotImpl");
+		//MNEMOSY_DEBUG("IDataObject::GetDataHere: NotImpl");
 		return E_NOTIMPL;
 	}
 
 	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::QueryGetData(FORMATETC* pFormatetc) {
 
 
-
-		if (LookupFormatEtc(pFormatetc)) {
-
-			MNEMOSY_TRACE("IDataObject::QueryGetData: S_OK");
-			return S_OK;
-		}
-
-		MNEMOSY_TRACE("IDataObject::QueryGetData: DV_E_FORMATETC");
-		return DV_E_FORMATETC;
-
-		//return S_OK;
-		if (pFormatetc->cfFormat == CF_HDROP) {
-
-			//MNEMOSY_DEBUG("FileDataObject::QueryGetData: CF_HDROP ACCEPT");
-			//pFormatetc->dwAspect = DVASPECT_DOCPRINT;
-		}
-
 		if (pFormatetc->cfFormat == CF_HDROP && pFormatetc->tymed == TYMED_HGLOBAL) {
 
-			MNEMOSY_TRACE("IDataObject::QueryGetData: S_OK");
-			//pFormatetc->dwAspect = DVASPECT_CONTENT;
+			//MNEMOSY_TRACE("IDataObject::QueryGetData: S_OK");
 			return S_OK;
 		}
 
-		MNEMOSY_TRACE("IDataObject::QueryGetData: DV_E_FORMATETC");
+		//MNEMOSY_TRACE("IDataObject::QueryGetData: DV_E_FORMATETC");
 		return DV_E_FORMATETC;
 	}
 
@@ -440,8 +382,7 @@ namespace mnemosy::core {
 		return E_NOTIMPL;
 	}
 
-	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::SetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium, BOOL fRelease)
-	{
+	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::SetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium, BOOL fRelease) {
 		
 		//MNEMOSY_DEBUG("FileDataObject::SetData:");
 		return E_NOTIMPL;		
@@ -469,14 +410,10 @@ namespace mnemosy::core {
 
 	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC** ppenumFormatetc) {
 
-		
-
-			//return S_OK;
 		if (dwDirection == DATADIR_GET) {
 			
-			MNEMOSY_DEBUG("IDataObject::EnumFormatEtc: CreateInstance of EnumFormatEtc");
+			//MNEMOSY_DEBUG("IDataObject::EnumFormatEtc: CreateInstance of EnumFormatEtc");
 			DataEnumFormatEtc* formatic = new DataEnumFormatEtc();
-			//HRESULT hr = CoCreateInstance(CLSID_DataFormatEtc, NULL, CLSCTX_INPROC_SERVER, IID_IEnumFORMATETC, reinterpret_cast<void**>(&formatic));
 			//HRESULT hr = CoCreateInstance(CLSID_DataFormatEtc, NULL, CLSCTX_INPROC_SERVER, IID_IEnumFORMATETC, reinterpret_cast<void**>(&formatic));
 			//Check_HRESULT_Error("IDataObject::EnumFormatEtc::CoCreateInstance for DataFormatEtc", hr);
 			
@@ -485,7 +422,7 @@ namespace mnemosy::core {
 
 		}
 
-		MNEMOSY_TRACE("IDataObject::EnumFormatEtc: E_NOTIMPL");
+		//MNEMOSY_TRACE("IDataObject::EnumFormatEtc: E_NOTIMPL");
 		*ppenumFormatetc = NULL;
 		return E_NOTIMPL;
 	}
@@ -508,10 +445,12 @@ namespace mnemosy::core {
 
 	// ==== DataEnumFormatEtc
 	
-	DataEnumFormatEtc::DataEnumFormatEtc( )
-	{
+	DataEnumFormatEtc::DataEnumFormatEtc( ) {
+
 		m_nIndex = 0;
 		m_nNumFormats = 1; // hardcoded for now
+
+
 		m_pFormatetc = new FORMATETC();
 		m_pFormatetc->cfFormat = CF_HDROP;
 		m_pFormatetc->dwAspect = DVASPECT_CONTENT;
@@ -520,34 +459,33 @@ namespace mnemosy::core {
 		m_pFormatetc->lindex = -1;
 	}
 
-	DataEnumFormatEtc::~DataEnumFormatEtc()
-	{
-		MNEMOSY_TRACE("DataEnumFormatEtc::Release: Destructor");
+	DataEnumFormatEtc::~DataEnumFormatEtc() {
+
+		//MNEMOSY_TRACE("DataEnumFormatEtc::Release: Destructor");
 		if (m_pFormatetc) {
-			//CoTaskMemFree(m_pFormatetc);
 			delete m_pFormatetc;
 			m_pFormatetc = nullptr;
 		}
 	}
 
 	HRESULT __stdcall DataEnumFormatEtc::QueryInterface(REFIID riid, void** ppvObj) {
+		
 		if (!ppvObj) {
 			//MNEMOSY_TRACE("DataEnumFormatEtc::QuearyInterface: E_INVALIDARG");
 			return E_INVALIDARG;
 		}
-		if (riid == IID_IUnknown || riid == IID_IEnumFORMATETC || riid == CLSID_DataFormatEtc)
-		{
+
+		if (riid == IID_IUnknown || riid == IID_IEnumFORMATETC ) {
 			// Increment the reference count and return the pointer.
 			*ppvObj =  reinterpret_cast<void*>(this); //(LPVOID)this; 
 			AddRef();
-			MNEMOSY_TRACE("DataEnumFormatEtc::QueryInterface: S_OK");
+			//MNEMOSY_TRACE("DataEnumFormatEtc::QueryInterface: S_OK");
 			return S_OK;
 
 		}
 
-		MNEMOSY_TRACE("DataEnumFormatEtc::QueryInterface: E_NOINTERFACE");
 		*ppvObj = NULL;
-
+		//MNEMOSY_TRACE("DataEnumFormatEtc::QueryInterface: E_NOINTERFACE");
 		return E_NOINTERFACE;
 	}
 
@@ -559,7 +497,7 @@ namespace mnemosy::core {
 	ULONG __stdcall DataEnumFormatEtc::Release() {
 
 		ULONG ulRefCount = InterlockedDecrement(&m_cRef);
-		MNEMOSY_TRACE("DataEnumFormatEtc::Release: RefCount: {}",int(m_cRef));
+		//MNEMOSY_TRACE("DataEnumFormatEtc::Release: RefCount: {}",int(m_cRef));
 
 		if (0 == m_cRef) {
 			delete this;
@@ -569,20 +507,23 @@ namespace mnemosy::core {
 
 	HRESULT __stdcall DataEnumFormatEtc::Clone(IEnumFORMATETC** ppenum) {
 
-		DataEnumFormatEtc* formatic;
+		// never seen this method be called
+		return E_NOTIMPL;
 
-		MNEMOSY_DEBUG("DataEnumFormatEtc::Clone: CreateInstance of EnumFormatEtc");
-		HRESULT hr = CoCreateInstance(CLSID_DataFormatEtc, NULL, CLSCTX_INPROC_SERVER, IID_IEnumFORMATETC, reinterpret_cast<void**>(&formatic));
-		Check_HRESULT_Error("DataEnumFormatEtc::CoCreateInstance: ",hr);
+		/*
+		DataEnumFormatEtc* formatic = new DataEnumFormatEtc();
+		//MNEMOSY_DEBUG("DataEnumFormatEtc::Clone: CreateInstance of EnumFormatEtc");
+		//HRESULT hr = CoCreateInstance(CLSID_DataFormatEtc, NULL, CLSCTX_INPROC_SERVER, IID_IEnumFORMATETC, reinterpret_cast<void**>(&formatic));
+		//Check_HRESULT_Error("DataEnumFormatEtc::CoCreateInstance: ",hr);
 
-		formatic->m_fIndex = m_nIndex;
-		//formatic->m_fIndex = m_fIndex;
+
+		formatic->m_nIndex = m_nIndex;
 		*ppenum = formatic;
 		//formatic->Release();
 		
-
 		//MNEMOSY_TRACE("DataEnumFormatEtc::Clone: S_OK");
 		return S_OK;
+		*/
 	}
 
 	HRESULT __stdcall DataEnumFormatEtc::Next(ULONG celt, FORMATETC* rgelt, ULONG* pceltFetched) {
@@ -594,12 +535,19 @@ namespace mnemosy::core {
 
 		int copied = 0;
 		while (m_nIndex < m_nNumFormats && copied < celt) {
-			DeepCopyFormatEtx(rgelt,m_pFormatetc);
+
+			rgelt = m_pFormatetc;
+
+			if (rgelt->ptd) {
+				m_pFormatetc->ptd = reinterpret_cast<DVTARGETDEVICE*>(CoTaskMemAlloc(sizeof(DVTARGETDEVICE)));
+				m_pFormatetc->ptd = rgelt->ptd;
+			}
+
 			copied++;
 			m_nIndex++;
 		}
 
-		MNEMOSY_TRACE("DataEnumFormatEtc::Next: Copied: {} ", copied);
+		//MNEMOSY_TRACE("DataEnumFormatEtc::Next: Copied: {} ", copied);
 
 		if (pceltFetched == NULL) {
 			pceltFetched = new ULONG(copied);
@@ -610,67 +558,13 @@ namespace mnemosy::core {
 			return S_OK;
 		}
 
-
 		return S_FALSE;
-		//////
-		// this function looks fuckting scary man
-		MNEMOSY_TRACE("DataEnumFormatEtc::Next:");
-		int cc = 0; // copiedCount
-		FORMATETC* pf = nullptr;
-		pf = rgelt;
-
-		FORMATETC F;
-		F.ptd = NULL;
-		F.dwAspect = DVASPECT_CONTENT;
-		F.lindex = -1;
-		// maybe they should not be here
-		F.tymed = TYMED_HGLOBAL;
-		F.cfFormat = CF_HDROP;
-
-
-
-
-		while (m_fIndex < 2 && celt>0) {
-			cc++;
-
-			if (m_fIndex == 0) {
-				MNEMOSY_TRACE("DataEnumFormatEtc::Next: index is 0");
-				F.tymed = TYMED_HGLOBAL;
-				F.cfFormat = CF_HDROP;
-			}
-			else if (m_fIndex == 1) {
-				MNEMOSY_WARN("DataEnumFormatEtc::Next: index is 1");
-				//return E_NOTIMPL;
-			}
-			// Move into place.
-			memmove(pf, &F, sizeof(FORMATETC));
-
-			// Prepare for next iteration.
-			celt--;
-			m_fIndex++;
-			pf = pf + sizeof(FORMATETC);
-
-		}
-
-		if (pceltFetched == NULL) {
-			pceltFetched = new ULONG(cc);
-		}
-
-		if (cc > 0) {
-			MNEMOSY_TRACE("DataEnumFormatEtc::Next: S_OK");
-			return S_OK;
-		}
-
-
-
-		return E_NOTIMPL;
 	}
 
 	HRESULT __stdcall DataEnumFormatEtc::Reset() {
 
-		MNEMOSY_TRACE("DataEnumFormatEtc::Reset:");
+		//MNEMOSY_TRACE("DataEnumFormatEtc::Reset:");
 		m_nIndex = 0;
-		m_fIndex = 0;
 		return S_OK;
 	}
 
@@ -686,24 +580,14 @@ namespace mnemosy::core {
 		return S_FALSE;
 	}
 
-	HRESULT DataEnumFormatEtc::DeepCopyFormatEtx(FORMATETC* dest, FORMATETC* source) {
-
-		dest = source;
-
-		if (source->ptd) {
-			dest->ptd = reinterpret_cast<DVTARGETDEVICE*>(CoTaskMemAlloc(sizeof(DVTARGETDEVICE))); //CoTaskMemAlloc(sizeof(DVTARGETDEVICE));
-			dest->ptd = source->ptd;
-		}				
-
-		return S_OK;
-		//return E_NOTIMPL;
-	}
 
 
 	// ========= Com Class Factories =========================================
 	// =======================================================================
-	
+	// It seems i dont need these at all... but keeping them around if it turns out i need them it in the future
+	/*
 	// == DropSourceFactory
+
 	HRESULT __stdcall DropSourceClassFactory::QueryInterface(REFIID riid, void** ppvObj) {
 
 		if (riid == IID_IUnknown || riid == IID_IClassFactory) {
@@ -829,6 +713,7 @@ namespace mnemosy::core {
 		return E_NOINTERFACE;
 	}
 
+	*/
 
 	// ========= Utility Methods =============================================
 	// =======================================================================
@@ -838,7 +723,7 @@ namespace mnemosy::core {
 
 			_com_error comError(hr);
 			LPCTSTR errorMsg = comError.ErrorMessage();
-			MNEMOSY_WARN("ComError: {} Failed: {}", prefixMessage, std::string(errorMsg));
+			MNEMOSY_WARN("windows com error: {} Failed: {}", prefixMessage, std::string(errorMsg));
 		}
 	}
 

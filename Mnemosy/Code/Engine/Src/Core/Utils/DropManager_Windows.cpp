@@ -15,7 +15,7 @@ namespace mnemosy::core
 		}
 
 		*ppvObj = NULL;
-		if (riid == IID_IUnknown || riid == CLSID_DropManager || riid == IID_IDropTarget)
+		if (riid == IID_IUnknown || riid == IID_IDropTarget)
 		{
 			// Increment the reference count and return the pointer.
 			*ppvObj = (LPVOID)this;
@@ -31,18 +31,16 @@ namespace mnemosy::core
 
 	STDMETHODIMP_(ULONG __stdcall) DropManager::AddRef()
 	{
-		//MNEMOSY_WARN("DropManager::AddRef: ");
 		InterlockedIncrement(&m_cRef);
+		//MNEMOSY_WARN("DropManager::AddRef: ");
 		return m_cRef;
 	}
 
 	STDMETHODIMP_(ULONG __stdcall) DropManager::Release()
 	{
-		//MNEMOSY_WARN("DropManager::Release: RefCount: {}", (int)m_cRef);
 		ULONG ulRefCount = InterlockedDecrement(&m_cRef);
-
-		if (0 == m_cRef)
-		{
+		//MNEMOSY_WARN("DropManager::Release: RefCount: {}", (int)m_cRef);
+		if (0 == m_cRef) {
 			delete this;
 		}
 		return ulRefCount;
@@ -54,11 +52,11 @@ namespace mnemosy::core
 		return DROPEFFECT_NONE;
 
 		if (m_CanDrop) {
-			MNEMOSY_WARN("OnDragEnter canDrop");
+			//MNEMOSY_WARN("OnDragEnter canDrop");
 			return DROPEFFECT_COPY || DROPEFFECT_MOVE;
 		}
 
-		MNEMOSY_WARN("OnDragEnter NoDrop");
+		//MNEMOSY_WARN("OnDragEnter NoDrop");
 
 
 		//return E_NOTIMPL;

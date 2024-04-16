@@ -11,24 +11,9 @@
 
 namespace mnemosy::core {
 	class DropManager;
-    class DropSourceClassFactory;
-    class DataObjectClassFactory;
-    class EnumFormatEtcClassFactory;
 }
 
 namespace mnemosy::core {
-
-    //7f0276eb - 4541 - 41f4 - a1cb - 573911e9af42
-    DEFINE_GUID(CLSID_FileDataObject, 0x7f0276eb, 0x4541, 0x41f4, 0xa1, 0xcb, 0x57, 0x39, 0x11, 0xe9, 0xaf, 0x42);
-
-    // 39749376-11c1-4b4e-93c5-0d4ec38f9136
-    DEFINE_GUID(CLSID_DropSource, 0x39749376, 0x11c1, 0x4b4e, 0x93, 0xc5, 0x0d, 0x4e, 0xc3, 0x8f, 0x91, 0x36);
-
-    // cda0beb2-1aed-4aab-8b94-ac3c4a9be5ca
-    DEFINE_GUID(CLSID_DataFormatEtc, 0xcda0beb2, 0x1aed, 0x4aab, 0x8b, 0x94, 0xac, 0x3c, 0x4a, 0x9b, 0xe5, 0xca);
-
-    //static UINT CF_filename;
-
 
 	class DropHandler
 	{
@@ -36,21 +21,26 @@ namespace mnemosy::core {
 		DropHandler();
 		~DropHandler();
 
-		void RegisterDropTarget();
 		void Initialize();
 		void Uninitialize();
 
         void BeginDrag();
 
 
+        /// <summary>
+        /// Set a bool in the drop manager witch is just for cosmetic purposes. it changes the mouse cursor to display when an area is valid to drop files to. Set true to make the area valid.
+        /// </summary>
+        /// <param name="state"></param>
         void SetDropTargetActive(bool state);
+
 	private:
 
         DropManager* m_pDropManager = nullptr;
 
-        DropSourceClassFactory*     m_pDropSourceFactory = nullptr;
-        DataObjectClassFactory*     m_pDataObjectFactory = nullptr;
-        EnumFormatEtcClassFactory*  m_pEnumFormatEtcFactory = nullptr;
+        // if we need them again we need to forward declare them after DropManager at the top of this file
+        //DropSourceClassFactory*     m_pDropSourceFactory = nullptr;
+        //DataObjectClassFactory*     m_pDataObjectFactory = nullptr;
+        //EnumFormatEtcClassFactory*  m_pEnumFormatEtcFactory = nullptr;
 	};
 
     // ========= Interface Implementations ====================================
@@ -81,12 +71,9 @@ namespace mnemosy::core {
 
     class FileDataObject : public IDataObject {
     private:
-        // TODO: make sure to clear this at some point
-        std::vector<std::string> m_filePaths; 
-
-        ULONG m_cRef = 1;
+       
     public:
-        FileDataObject(FORMATETC* fmtetc,STGMEDIUM* stgmed);
+        FileDataObject();
         ~FileDataObject();
 
         STDMETHODIMP QueryInterface(REFIID riid, void** ppvObj) override;
@@ -116,11 +103,10 @@ namespace mnemosy::core {
         void Init(const std::vector<std::string>& filePaths);
 
     private:
-        bool LookupFormatEtc(FORMATETC* pfmtetc);
+        ULONG m_cRef = 1;
+        int m_nNumFormats = 1;
 
-        int m_nNumFormats = 0;
-        STGMEDIUM* m_pstgmed = nullptr;
-        FORMATETC* m_pfmtetc = nullptr;
+        std::vector<std::string> m_filePaths;
     };
 
 
@@ -147,10 +133,8 @@ namespace mnemosy::core {
         HRESULT STDMETHODCALLTYPE Reset() override;
 
         HRESULT STDMETHODCALLTYPE Skip(ULONG celt) override;
-        
-        HRESULT DeepCopyFormatEtx(FORMATETC* dest,FORMATETC* source);
 
-        int m_fIndex = 0;
+       // int m_fIndex = 0;
     private:
         ULONG m_cRef = 1;
 
@@ -163,22 +147,8 @@ namespace mnemosy::core {
 
     // ========= Com Class Factories =========================================
     // =======================================================================
-
-    class DataObjectClassFactory : public IClassFactory {
-    public:
-
-        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) override;
-
-        ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
-
-        ULONG STDMETHODCALLTYPE Release() override { return 1; }
-
-        HRESULT STDMETHODCALLTYPE LockServer(BOOL flock) override { return NOERROR; }
-
-        HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
-
-    };
-
+    // It seems i dont need these at all... but keeping them around if it turns out i need them it in the future
+    /*
     class DropSourceClassFactory : public IClassFactory {
     public:
 
@@ -192,6 +162,21 @@ namespace mnemosy::core {
 
         HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
 
+
+    };
+    
+    class DataObjectClassFactory : public IClassFactory {
+    public:
+
+        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObj) override;
+
+        ULONG STDMETHODCALLTYPE AddRef() override { return 1; }
+
+        ULONG STDMETHODCALLTYPE Release() override { return 1; }
+
+        HRESULT STDMETHODCALLTYPE LockServer(BOOL flock) override { return NOERROR; }
+
+        HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
 
     };
 
@@ -209,6 +194,7 @@ namespace mnemosy::core {
         HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
 
     };
+    */
 
 
 	// Utility Methods
