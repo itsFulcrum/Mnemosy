@@ -118,6 +118,7 @@ namespace mnemosy::systems
 
 		// data file 
 		bool prettyPrintDataFile = true;
+		bool prettyPrintMaterialFiles = true;
 		fs::directory_entry m_userDirectoriesDataFile;
 		std::string m_rootNodeName = "Root";
 		void RecursivLoadDirectories(FolderNode* node, json& json);

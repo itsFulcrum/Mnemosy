@@ -10,28 +10,51 @@
             "3_pathFromRoot": "",
             "4_subFolderNames": [
                 "Wood",
-                "Stone"
+                "Stone",
+                "Nature"
             ],
             "5_subFolders": {
+                "Nature": {
+                    "1_name": "Nature",
+                    "2_isLeaf": true,
+                    "3_pathFromRoot": "Nature",
+                    "6_hasMaterials": false
+                },
                 "Stone": {
                     "1_name": "Stone",
-                    "2_isLeaf": true,
+                    "2_isLeaf": false,
                     "3_pathFromRoot": "Stone",
-                    "6_hasMaterials": false
+                    "4_subFolderNames": [
+                        "Indoor"
+                    ],
+                    "5_subFolders": {
+                        "Indoor": {
+                            "1_name": "Indoor",
+                            "2_isLeaf": true,
+                            "3_pathFromRoot": "Stone/Indoor",
+                            "6_hasMaterials": true,
+                            "6_materialEntries": [
+                                "New Material",
+                                "New Material_1"
+                            ]
+                        }
+                    },
+                    "6_hasMaterials": true,
+                    "6_materialEntries": [
+                        "Rock",
+                        "Cliff mossy"
+                    ]
                 },
                 "Wood": {
                     "1_name": "Wood",
                     "2_isLeaf": true,
                     "3_pathFromRoot": "Wood",
-                    "6_hasMaterials": true,
-                    "6_materialEntries": [
-                        "Wood"
-                    ]
+                    "6_hasMaterials": false
                 }
             },
             "6_hasMaterials": true,
             "6_materialEntries": [
-                "Test"
+                "AllTexturesFiles"
             ]
         }
     }

@@ -8,6 +8,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Core/Utils/DropHandler_Windows.h"
 
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
@@ -27,10 +28,6 @@
 #include "Include/Graphics/ThumbnailScene.h"
 
 #include "Include/Gui/UserInterface.h"
-
-//#include "Include/Core/Utils/PlatfromUtils_Windows.h"
-//#include "Include/Core/Utils/DropManager_Windows.h"
-#include "Include/Core/Utils/DropHandler_Windows.h"
 
 namespace mnemosy
 {
@@ -54,9 +51,8 @@ namespace mnemosy
 		return *m_sInstance;
 	}
 
-	void MnemosyEngine::Initialize(const char* WindowTitle)
-	{
-		double timeBegin = glfwGetTime();
+	void MnemosyEngine::Initialize(const char* WindowTitle) {
+		//double timeBegin = glfwGetTime();
 
 		MNEMOSY_ASSERT(!m_isInitialized, "Engine::Initialize() has already been called");
 
@@ -79,42 +75,54 @@ namespace mnemosy
 			MNEMOSY_INFO("Platform Linux");
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
+		MNEMOSY_TRACE("Initializing Subsystems");
 
 		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
-		//MNEMOSY_TRACE("FileDirectories Initialized");
+		MNEMOSY_TRACE("FileDirectories Initialized");
 		
 
-		MNEMOSY_TRACE("Initializing Subsystems");
 		m_pWindow = new core::Window(WindowTitle);
-		//MNEMOSY_TRACE("Window Initialized");
+		MNEMOSY_TRACE("Window Initialized");
 		
-
-
 		// subsystems
 		// Mnemosy::core
 		m_pClock = std::make_unique<core::Clock>();
-		//MNEMOSY_TRACE("Clock Initialized");
+		m_pClock->capDeltaTime = true;
+		MNEMOSY_TRACE("Clock Initialized");
 		// order of initialization here matters
 		
+		
 		m_pDropHandler = std::make_unique<core::DropHandler>();
-
+		m_pDropHandler->Initialize(m_pWindow->GetWindow());
+		MNEMOSY_TRACE("DropHandler Initialized");
 
 		// mnemosy::systems
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
-		//MNEMOSY_TRACE("InputSystem Initialized");
+		MNEMOSY_TRACE("InputSystem Initialized");
 		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
-		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
+		MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
 		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
+		MNEMOSY_TRACE("MaterialRegistry Initialized");
 		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
+		MNEMOSY_TRACE("ThumbnailManager Initialized");
 		m_pTextureGenerationManager = std::make_unique<systems::TextureGenerationManager>();
+		MNEMOSY_TRACE("TextureGenManager Initialized");
 		m_pExportManager = std::make_unique<systems::ExportManager>();
+		MNEMOSY_TRACE("ExportManager Initialized");
 
 
 
 		// menmosy::graphcs
+		double ibl_timeBegin = glfwGetTime();
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
-		//MNEMOSY_TRACE("ibl_Renderer Initialized");
+		double ibl_timeEnd = glfwGetTime();
+		MNEMOSY_TRACE("ibl_Renderer Initialdized in {} Seconds", (ibl_timeEnd - ibl_timeBegin));
+		
+
+		double ren_timeBegin = glfwGetTime();
 		m_pRenderer = std::make_unique<graphics::Renderer>();
+		double ren_timeEnd = glfwGetTime();
+		MNEMOSY_TRACE("Renderer Initialdized in {} Seconds", (ren_timeEnd - ren_timeBegin));
 		//MNEMOSY_TRACE("Renderer Initialized");
 
 		double timeSceneStart = glfwGetTime();
@@ -124,78 +132,54 @@ namespace mnemosy
 
 		MNEMOSY_TRACE("Scene Initialized {} seconds ",timeSceneEnd-timeSceneStart);
 
-
-
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
-		//MNEMOSY_TRACE("UserInterface Initialized");
+		MNEMOSY_TRACE("UserInterface Initialized");
 
 		
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
 		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
 		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->GetSkybox());
 
-		m_pClock->capDeltaTime = true;
 
 		m_isInitialized = true;
 
 
-		double timeEnd = glfwGetTime();
-		MNEMOSY_INFO("Mnemosy Engine Initialized {} Seconds", (timeEnd - timeBegin));
+		//double timeEnd = glfwGetTime();
+		//MNEMOSY_INFO("Mnemosy Engine Initialized {} Seconds", (timeEnd - timeBegin)); 
 
 	}
 
-	void MnemosyEngine::Run()
-	{
+	void MnemosyEngine::Run() {
 
+		while (!glfwWindowShouldClose(&m_pWindow->GetWindow()))  {
 
-
-		//core::DropManager* dm = new core::DropManager();
-		//core::FileDialogs::RegisterDropManager(dm);
-		//core::FileDialogs::RegisterDropManager(dm);
-
-		
-		while (!glfwWindowShouldClose(&m_pWindow->GetWindow())) 
-		{
 			m_pClock->Update();
-			//MNEMOSY_TRACE("FPS: {} ", m_clock->GetFPS());
-
-			
+						
 			glfwPollEvents();
-
-			
-			if (m_pUserInterface->WantCaptureInput())
-			{
+						
+			if (m_pUserInterface->WantCaptureInput()) {
 				m_pInputSystem->DontProcessUserInputs();
 			}
-			else
-			{
+			else {
 				m_pInputSystem->ProcessUserInputs();
 			}
 
 			m_pInputSystem->Update(m_pClock->GetDeltaSeconds());
 
-
-			m_pScene->Update();
 			m_pThumbnailManger->Update();
-
-			//m_pThumbnailScene->Update();
+			m_pScene->Update();
 
 			// Rendering
 			m_pRenderer->RenderScene(*m_pScene);
-			//m_pRenderer->RenderThumbnailScene();
-
 			m_pUserInterface->Render();
 
-
 			glfwSwapBuffers(&m_pWindow->GetWindow());
-		}
+		
+		} // End of main loop
 
 	}
 
-	void MnemosyEngine::Shutdown()
-	{		
-
-
+	void MnemosyEngine::Shutdown() {	
 
 		m_pWindow->Shutdown();
 		delete m_pWindow;

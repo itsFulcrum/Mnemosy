@@ -1,6 +1,9 @@
 #ifndef DROP_HANDLER_WINDOWS_H
 #define DROP_HANDLER_WINDOWS_H
 
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 #include <windows.h>
 #include <objbase.h>
@@ -11,9 +14,25 @@
 
 namespace mnemosy::core {
 	class DropManager;
+
+    class DropSourceClassFactory;
+    class DataObjectClassFactory;
+    class EnumFormatEtcClassFactory;
 }
 
 namespace mnemosy::core {
+
+    // {EF7660D0-0FCE-4A79-BBC1-DDDA71BDA23D}
+    DEFINE_GUID(CLSID_DropSource,
+        0xef7660d0, 0xfce, 0x4a79, 0xbb, 0xc1, 0xdd, 0xda, 0x71, 0xbd, 0xa2, 0x3d);
+    // {163438E1-8AB4-4CB1-8EE5-D4EBC5FF9626}
+    DEFINE_GUID(CLSID_FileDataObject,
+        0x163438e1, 0x8ab4, 0x4cb1, 0x8e, 0xe5, 0xd4, 0xeb, 0xc5, 0xff, 0x96, 0x26);
+    // {5519EBB5-2116-43F6-A2ED-59F3C32188B3}
+    DEFINE_GUID(CLSID_DataFormatEtc,
+        0x5519ebb5, 0x2116, 0x43f6, 0xa2, 0xed, 0x59, 0xf3, 0xc3, 0x21, 0x88, 0xb3);
+
+    
 
 	class DropHandler
 	{
@@ -21,7 +40,7 @@ namespace mnemosy::core {
 		DropHandler();
 		~DropHandler();
 
-		void Initialize();
+		void Initialize(GLFWwindow& window);
 		void Uninitialize();
 
         void BeginDrag(std::vector<std::string>& filesToDrag);
@@ -38,9 +57,9 @@ namespace mnemosy::core {
         DropManager* m_pDropManager = nullptr;
 
         // if we need them again we need to forward declare them after DropManager at the top of this file
-        //DropSourceClassFactory*     m_pDropSourceFactory = nullptr;
-        //DataObjectClassFactory*     m_pDataObjectFactory = nullptr;
-        //EnumFormatEtcClassFactory*  m_pEnumFormatEtcFactory = nullptr;
+        DropSourceClassFactory*     m_pDropSourceFactory = nullptr;
+        DataObjectClassFactory*     m_pDataObjectFactory = nullptr;
+        EnumFormatEtcClassFactory*  m_pEnumFormatEtcFactory = nullptr;
 	};
 
     // ========= Interface Implementations ====================================
@@ -134,7 +153,6 @@ namespace mnemosy::core {
 
         HRESULT STDMETHODCALLTYPE Skip(ULONG celt) override;
 
-       // int m_fIndex = 0;
     private:
         ULONG m_cRef = 1;
 
@@ -148,7 +166,7 @@ namespace mnemosy::core {
     // ========= Com Class Factories =========================================
     // =======================================================================
     // It seems i dont need these at all... but keeping them around if it turns out i need them it in the future
-    /*
+    
     class DropSourceClassFactory : public IClassFactory {
     public:
 
@@ -194,7 +212,7 @@ namespace mnemosy::core {
         HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* punkOuter, REFIID riid, void** ppvObj) override;
 
     };
-    */
+    
 
 
 	// Utility Methods

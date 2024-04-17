@@ -12,13 +12,10 @@ namespace mnemosy::systems
 {
 	// Public Methods
 
-	SkyboxAssetRegistry::SkyboxAssetRegistry()
-	{
-
-		mnemosy::core::FileDirectories& FD = MnemosyEngine::GetInstance().GetFileDirectories();
+	SkyboxAssetRegistry::SkyboxAssetRegistry() {
 
 		m_dataFileName = "SkyboxAssetsRegistry.mnsydata";
-		m_pathToDatafile = FD.GetDataPath().generic_string() + "/" + m_dataFileName;
+		m_pathToDatafile = MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath().generic_string() + "/" + m_dataFileName;
 
 		LoadEntriesFromSavedData();
 	}
@@ -65,8 +62,8 @@ namespace mnemosy::systems
 		SaveAllEntriesToDataFile();
 	}
 
-	void SkyboxAssetRegistry::RemoveEntry(const std::string& name)
-	{
+	void SkyboxAssetRegistry::RemoveEntry(const std::string& name) {
+
 		// delete the files
 		//mnemosy::core::FileDirectories& FD = MnemosyEngine::GetInstance().GetFileDirectories();
 		std::filesystem::path pathToCubemaps = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
@@ -86,10 +83,10 @@ namespace mnemosy::systems
 		std::filesystem::remove(pathToPrefilter);
 
 		// removing from saved data
-		for (int i = 0; i < m_skyboxAssets.size(); i++)
-		{
-			if (m_skyboxAssets[i].skyName == name)
-			{
+		for (int i = 0; i < m_skyboxAssets.size(); i++) {
+
+			if (m_skyboxAssets[i].skyName == name) {
+
 				m_skyboxAssets.erase(m_skyboxAssets.begin() + i);
 				m_orderedEntryNames.erase(m_orderedEntryNames.begin() + i);
 				break;
@@ -134,8 +131,8 @@ namespace mnemosy::systems
 	}
 
 	// Private Methods
-	void SkyboxAssetRegistry::LoadEntriesFromSavedData()
-	{
+	void SkyboxAssetRegistry::LoadEntriesFromSavedData() {
+
 		//MNEMOSY_TRACE("LOADING FILE..")
 		std::filesystem::directory_entry dataFile = std::filesystem::directory_entry(m_pathToDatafile);
 		if (!CheckDataFile(dataFile))
@@ -152,20 +149,30 @@ namespace mnemosy::systems
 			MNEMOSY_ERROR("SkyboxAssetRegistry::LoadEntriesFromSavedData: Error Parsing File. Message: {}", err.what());
 			return;
 		}
+		dataFileStream.close();
 
-		int amountOfEntries = readFile["2_Header_Info"]["entriesAmount"].get<int>();
+		//int amountOfEntries = readFile["2_Header_Info"]["entriesAmount"].get<int>();
 		std::vector<std::string> entryNames = readFile["2_Header_Info"]["entryNames"].get<std::vector<std::string>>();
 		
 		// just in case we ever want to load from file while app is already running clear vectors first
 		m_skyboxAssets.clear();
 		m_orderedEntryNames.clear();
-		for (int i = 0; i < entryNames.size(); i++) 
-		{
-			AddEntry(entryNames[i]);
-		}
+		for (int i = 0; i < entryNames.size(); i++)  {
 
+
+			SkyboxAssetEntry newEntry;
+			newEntry.skyName = entryNames[i];
+			newEntry.colorCubeFile = entryNames[i] + "_cubeColor.ktx2";
+			newEntry.irradianceCubeFile = entryNames[i] + "_cubeIrradiance.ktx2";
+			newEntry.prefilterCubeFile = entryNames[i] + "_cubePrefilter.ktx2";
+
+			m_skyboxAssets.push_back(newEntry);
+			m_orderedEntryNames.push_back(entryNames[i]);
+
+			//AddEntry(entryNames[i]);
+		}
 		entryNames.clear();
-		dataFileStream.close();
+
 	}
 
 	void SkyboxAssetRegistry::SaveAllEntriesToDataFile()

@@ -23,9 +23,9 @@ namespace mnemosy::graphics
 	ImageBasedLightingRenderer::ImageBasedLightingRenderer() {
 		m_framebufferGenerated = false;
 		m_brdfLutTexture_isGenerated = false;
-		LoadBrdfLutTexture();
 
-		InitializeMeshAndShader();
+		LoadBrdfLutTexture();
+		//InitializeMeshAndShader();
 	}
 
 	ImageBasedLightingRenderer::~ImageBasedLightingRenderer() {
@@ -72,7 +72,7 @@ namespace mnemosy::graphics
 
 			DrawIntoFramebuffer();
 		}
-		MNEMOSY_DEBUG("RENDERED EQURECTANGULAR TO CUBEMAP..");
+		MNEMOSY_DEBUG("Rendered Equirectangular to Cubemap..");
 	}
 
 	void ImageBasedLightingRenderer::RenderEquirectangularToIrradianceCubemapTexture(unsigned int& irradianceCubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes)
@@ -108,7 +108,7 @@ namespace mnemosy::graphics
 			DrawIntoFramebuffer();
 		}
 
-		MNEMOSY_DEBUG("RENDERED EQURECTANGULAR TO Irradiance..");
+		MNEMOSY_DEBUG("Rendered Equirectangular to Irradiance..");
 	}
 
 	void ImageBasedLightingRenderer::RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& prefilterCubemapID, unsigned int& equirectangularTextureID, unsigned int resolution) {
@@ -149,6 +149,7 @@ namespace mnemosy::graphics
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
+		MNEMOSY_DEBUG("Rendered Equirectangular to Prefilter..");
 	}
 
 	void ImageBasedLightingRenderer::PrepareCubemapRendering() {
@@ -168,7 +169,6 @@ namespace mnemosy::graphics
 			m_framebufferGenerated = false;
 			m_fbo = 0;
 		}
-
 	}
 
 	void ImageBasedLightingRenderer::BindBrdfLutTexture(unsigned int location)
@@ -179,8 +179,7 @@ namespace mnemosy::graphics
 			glBindTexture(GL_TEXTURE_2D, m_brdfLutTextureID);
 
 		}
-		else
-		{
+		else {
 			MNEMOSY_ERROR("ImageBaseLightingRenderer::BindBrdfLutTexture: brdf lut texture is not yet generated");
 		}
 
@@ -421,7 +420,7 @@ namespace mnemosy::graphics
 		if (!m_framebufferGenerated) {
 			glGenFramebuffers(1, &m_fbo);
 			m_framebufferGenerated = true;
-		}		
+		}
 
 		if (m_unitCube == nullptr) {
 
@@ -438,6 +437,7 @@ namespace mnemosy::graphics
 			std::string vertex = shaders.generic_string()	+ "/imageBasedLighting.vert";
 			std::string fragment = shaders.generic_string() + "/imageBasedLighting.frag";
 
+			
 			m_imagedBasedLightingShader = std::make_unique<Shader>(vertex.c_str(), fragment.c_str());
 		}
 	}

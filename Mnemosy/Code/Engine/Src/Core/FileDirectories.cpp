@@ -10,6 +10,7 @@ namespace mnemosy::core
 	FileDirectories::FileDirectories() {
 
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
+
 		m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
 		m_tempExportTextureFolderName = "__Temp_Mnemosy_Export__";
 
@@ -175,12 +176,9 @@ namespace mnemosy::core
 		// read data file and extract path;
 		std::string pathToDataFile = m_mnemosyLibraryDataFile.path().generic_string();
 
-		std::string libraryPathFromFile = "";
 
 		std::fstream dataFileStream;
 		dataFileStream.open(pathToDataFile);
-
-
 
 		nlohmann::json readFile;
 		try {
@@ -190,11 +188,11 @@ namespace mnemosy::core
 			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Error Parsing File. Message: {}", err.what());
 			return;
 		}
-
-		libraryPathFromFile = readFile["Directories"]["MaterialLibraryDirectory"].get<std::string>();
 		dataFileStream.close();
 
+		std::string libraryPathFromFile = readFile["Directories"]["MaterialLibraryDirectory"].get<std::string>();
 		readFile.clear();
+
 		
 		// checking if path is valid
 		fs::directory_entry directoryEntryFromFile;
@@ -209,7 +207,6 @@ namespace mnemosy::core
 
 		// final check if the path is valid
 		if (!directoryEntryFromFile.exists()) {
-
 			// if not create it
 			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Directory Does not exists..  did you delete it ? {} ", directoryEntryFromFile.path().generic_string());
 			SetDefaultLibraryPath();
@@ -336,7 +333,6 @@ namespace mnemosy::core
 		if (TempFolderExist()) {
 			fs::remove_all(tempFolderPath);
 		}
-
 	}
 
 	bool FileDirectories::TempFolderExist(){

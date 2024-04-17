@@ -10,25 +10,23 @@ namespace mnemosy::graphics
 {
 	// public
 
-	Shader::Shader(const char* vertexPath, const char* fragmentPath)
-	{
+	Shader::Shader(const char* vertexPath, const char* fragmentPath) {
+
 		CreateShaderProgram(vertexPath, fragmentPath);
 	}
-	Shader::Shader(const char* MeshPath, const char* fragmentPath, bool isMeshShader)
-	{
+
+	Shader::Shader(const char* MeshPath, const char* fragmentPath, bool isMeshShader) {
 
 		CreateMeshShaderProgramm(MeshPath,fragmentPath);
 	}
 
-	Shader::~Shader()
-	{
+	Shader::~Shader() {
 		DeleteShaderProgram();
 	}
 
 	void Shader::CreateShaderProgram(const char* vertexPath, const char* fragmentPath)
 	{
-		if (ID)
-		{
+		if (ID) {
 			MNEMOSY_WARN("A Shader program already exists under this ID: {} \nFilepath Vertex Shader: {}\nFilepath Fragment Shader: {} \n -> Proceding to override shader program", ID, m_pathVertex, m_pathFragment);
 			DeleteShaderProgram();
 		}

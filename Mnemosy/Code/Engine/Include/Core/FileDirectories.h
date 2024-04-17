@@ -32,9 +32,9 @@ namespace mnemosy::core
 		
 
 	private:
-		bool prettyPrintDataFile = true;
-		std::string m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
-		std::string m_tempExportTextureFolderName = "__Temp_Mnemosy_Export__";
+		bool prettyPrintDataFile = false;
+		std::string m_rootMaterialLibraryFolderName;// = "MnemosyMaterialLibrary";
+		std::string m_tempExportTextureFolderName;// = "__Temp_Mnemosy_Export__";
 
 		void LoadUserLibraryDirectoryFromDataFile();
 		void SaveUserLibraryDirectoryToDataFile(const fs::directory_entry& libraryDirectoryPath);

@@ -103,7 +103,6 @@ namespace mnemosy::gui
 		if (m_materialRegistry.UserMaterialBound()) {
 
 			
-
 			// DEBUG INFO
 #ifdef mnemosy_gui_showDebugInfo
 				std::filesystem::path matDataFile = m_materialRegistry.GetActiveMaterialDataFilePath();
@@ -117,13 +116,7 @@ namespace mnemosy::gui
 #endif // mnemosy_gui_showDebugInfo
 				
 			ImGui::Spacing();
-
 			
-
-
-			
-
-
 			// Export Settings
 			{
 

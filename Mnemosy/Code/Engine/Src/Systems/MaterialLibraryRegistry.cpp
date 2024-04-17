@@ -22,10 +22,9 @@ namespace mnemosy::systems
 	MaterialLibraryRegistry::MaterialLibraryRegistry() 
 		: m_fileDirectories{ MnemosyEngine::GetInstance().GetFileDirectories()}
 	{
-
 		m_runtimeIDCounter = 1;
 		m_runtimeMaterialIDCounter = 1;
-		//mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+
 		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetDataPath() / fs::path("UserLibraryDirectories.mnsydata");
 		m_userDirectoriesDataFile = fs::directory_entry(pathToUserDirectoriesDataFile); 
 		
@@ -119,17 +118,13 @@ namespace mnemosy::systems
 		// should prob save to data
 		SaveUserDirectoriesData();
 
-
-
-		// check if the folder  we renamed  included the active material in its hierarchy
+		// check if the folder  we moved included the active material in its hierarchy
 		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
 		if (!activeMaterialDataFile.exists()) {
-			MNEMOSY_WARN("MaterialLibraryRegistry::MoveDirectory: active material path doesnt exist anymore");
+			MNEMOSY_TRACE("MaterialLibraryRegistry::MoveDirectory: Active material moved.");
 			std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
 			m_activeMaterialDataFilePath = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
 		}
-
-
 	}
 
 	void MaterialLibraryRegistry::DeleteFolderHierarchy(FolderNode* node) {
@@ -653,9 +648,7 @@ namespace mnemosy::systems
 			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailOfActiveMaterial(thumbnailAbsolutePath,m_selectedFolderNode, m_activeMaterialID);
 									
 		}
-			
 		
-
 		std::ofstream dataFileStream;
 		dataFileStream.open(m_activeMaterialDataFilePath.generic_string());		
 		
@@ -718,10 +711,9 @@ namespace mnemosy::systems
 		MaterialJson["normalPath"]		= normalPath;
 		MaterialJson["aoPath"]			= aoPath;
 
-		//fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
 		MaterialJson["thumbnailPath"] = thumbnailPath.generic_string();
-
-		if (prettyPrintDataFile)
+				
+		if (prettyPrintMaterialFiles)
 			dataFileStream << MaterialJson.dump(4);
 		else
 			dataFileStream << MaterialJson.dump(-1);

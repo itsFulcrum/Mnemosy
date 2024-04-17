@@ -50,8 +50,8 @@ namespace mnemosy::systems
 
 		bool CheckDataFile(std::filesystem::directory_entry dataFile);
 
-		std::string m_dataFileName = "SkyboxAssetsRegistry.mnsydata";
-		std::string m_pathToDatafile = "";
+		std::string m_dataFileName;// = "SkyboxAssetsRegistry.mnsydata";
+		std::string m_pathToDatafile;// = "";
 
 		std::vector<SkyboxAssetEntry> m_skyboxAssets;
 		std::vector<std::string> m_orderedEntryNames; // ordered just means that they should always be in the same order as the entries are in the m_skyboxAsstes;
