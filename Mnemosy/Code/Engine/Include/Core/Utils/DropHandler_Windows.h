@@ -22,6 +22,7 @@ namespace mnemosy::core {
 
 namespace mnemosy::core {
 
+    // GUIDs for registering interfaces with windows com api
     // {EF7660D0-0FCE-4A79-BBC1-DDDA71BDA23D}
     DEFINE_GUID(CLSID_DropSource,
         0xef7660d0, 0xfce, 0x4a79, 0xbb, 0xc1, 0xdd, 0xda, 0x71, 0xbd, 0xa2, 0x3d);
@@ -31,9 +32,7 @@ namespace mnemosy::core {
     // {5519EBB5-2116-43F6-A2ED-59F3C32188B3}
     DEFINE_GUID(CLSID_DataFormatEtc,
         0x5519ebb5, 0x2116, 0x43f6, 0xa2, 0xed, 0x59, 0xf3, 0xc3, 0x21, 0x88, 0xb3);
-
     
-
 	class DropHandler
 	{
 	public:
@@ -53,10 +52,9 @@ namespace mnemosy::core {
         void SetDropTargetActive(bool state);
 
 	private:
-
         DropManager* m_pDropManager = nullptr;
 
-        // if we need them again we need to forward declare them after DropManager at the top of this file
+        // It seems i dont need the factories at all... but it's probably a good idea to register with windows
         DropSourceClassFactory*     m_pDropSourceFactory = nullptr;
         DataObjectClassFactory*     m_pDataObjectFactory = nullptr;
         EnumFormatEtcClassFactory*  m_pEnumFormatEtcFactory = nullptr;
@@ -128,7 +126,6 @@ namespace mnemosy::core {
         std::vector<std::string> m_filePaths;
     };
 
-
     // ==== DataEnumFormatEtc
 
     class DataEnumFormatEtc : public IEnumFORMATETC {
@@ -165,7 +162,7 @@ namespace mnemosy::core {
 
     // ========= Com Class Factories =========================================
     // =======================================================================
-    // It seems i dont need these at all... but keeping them around if it turns out i need them it in the future
+    // It seems i dont need the factories at all... but it's probably a good idea to register with windows
     
     class DropSourceClassFactory : public IClassFactory {
     public:
@@ -214,8 +211,9 @@ namespace mnemosy::core {
     };
     
 
+    // ========= Utility Methods =============================================
+    // =======================================================================
 
-	// Utility Methods
 	static void Check_HRESULT_Error(const char* prefixMessage, HRESULT hr);
 
 
