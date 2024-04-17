@@ -102,7 +102,7 @@ namespace mnemosy::core
 
 		// Load and set Window Icon
 		graphics::Image* icon = new graphics::Image();
-		bool success = icon->LoadImageFromFile("../Resources/Textures/mnemosy_logo_icon_RGBA_256px.png",true);
+		bool success = icon->LoadImageFromFile("../Resources/Textures/mnemosy_logo_icon_RGBA_256px.png",false);
 		if (success) {
 
 			GLFWimage glfwImages[1];
