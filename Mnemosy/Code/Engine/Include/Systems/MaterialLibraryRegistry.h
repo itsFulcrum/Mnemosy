@@ -117,7 +117,7 @@ namespace mnemosy::systems
 
 
 		// data file 
-		bool prettyPrintDataFile = true;
+		bool prettyPrintDataFile = false;
 		bool prettyPrintMaterialFiles = true;
 		fs::directory_entry m_userDirectoriesDataFile;
 		std::string m_rootNodeName = "Root";

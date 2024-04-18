@@ -75,65 +75,69 @@ namespace mnemosy
 			MNEMOSY_INFO("Platform Linux");
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
-		MNEMOSY_TRACE("Initializing Subsystems");
+		//MNEMOSY_TRACE("Initializing Subsystems");
 
 		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
-		MNEMOSY_TRACE("FileDirectories Initialized");
+		//MNEMOSY_TRACE("FileDirectories Initialized");
 		
 
 		m_pWindow = new core::Window(WindowTitle);
-		MNEMOSY_TRACE("Window Initialized");
+		//MNEMOSY_TRACE("Window Initialized");
 		
 		// subsystems
 		// Mnemosy::core
 		m_pClock = std::make_unique<core::Clock>();
 		m_pClock->capDeltaTime = true;
-		MNEMOSY_TRACE("Clock Initialized");
+		//MNEMOSY_TRACE("Clock Initialized");
 		// order of initialization here matters
 		
 		
 		m_pDropHandler = std::make_unique<core::DropHandler>();
 		m_pDropHandler->Initialize(m_pWindow->GetWindow());
-		MNEMOSY_TRACE("DropHandler Initialized");
+		//MNEMOSY_TRACE("DropHandler Initialized");
 
 		// mnemosy::systems
 		m_pInputSystem = std::make_unique<systems::InputSystem>();
-		MNEMOSY_TRACE("InputSystem Initialized");
+		//MNEMOSY_TRACE("InputSystem Initialized");
 		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
-		MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
+		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
 		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
-		MNEMOSY_TRACE("MaterialRegistry Initialized");
+		//MNEMOSY_TRACE("MaterialRegistry Initialized");
 		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
-		MNEMOSY_TRACE("ThumbnailManager Initialized");
+		//MNEMOSY_TRACE("ThumbnailManager Initialized");
 		m_pTextureGenerationManager = std::make_unique<systems::TextureGenerationManager>();
-		MNEMOSY_TRACE("TextureGenManager Initialized");
+		//MNEMOSY_TRACE("TextureGenManager Initialized");
 		m_pExportManager = std::make_unique<systems::ExportManager>();
-		MNEMOSY_TRACE("ExportManager Initialized");
+		//MNEMOSY_TRACE("ExportManager Initialized");
 
 
 
 		// menmosy::graphcs
-		double ibl_timeBegin = glfwGetTime();
+		//double ibl_timeBegin = glfwGetTime();
+		MNEMOSY_INFO("Initializing ibl-Renderer");
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
-		double ibl_timeEnd = glfwGetTime();
-		MNEMOSY_TRACE("ibl_Renderer Initialdized in {} Seconds", (ibl_timeEnd - ibl_timeBegin));
+		//double ibl_timeEnd = glfwGetTime();
+		//MNEMOSY_TRACE("ibl_Renderer Initialdized in {} Seconds", (ibl_timeEnd - ibl_timeBegin));
 		
 
-		double ren_timeBegin = glfwGetTime();
+		//double ren_timeBegin = glfwGetTime();
+		MNEMOSY_INFO("Initializing Renderer");
 		m_pRenderer = std::make_unique<graphics::Renderer>();
-		double ren_timeEnd = glfwGetTime();
-		MNEMOSY_TRACE("Renderer Initialdized in {} Seconds", (ren_timeEnd - ren_timeBegin));
+		//double ren_timeEnd = glfwGetTime();
+		//MNEMOSY_TRACE("Renderer Initialdized in {} Seconds", (ren_timeEnd - ren_timeBegin));
 		//MNEMOSY_TRACE("Renderer Initialized");
 
-		double timeSceneStart = glfwGetTime();
+		//double timeSceneStart = glfwGetTime();
+		MNEMOSY_INFO("Loading main Scene");
 		m_pScene = std::make_unique<graphics::Scene>();
-		double timeSceneEnd = glfwGetTime();
+		//double timeSceneEnd = glfwGetTime();
+		MNEMOSY_INFO("Loading thumbnail Scene");
 		m_pThumbnailScene = std::make_unique<graphics::ThumbnailScene>();
 
-		MNEMOSY_TRACE("Scene Initialized {} seconds ",timeSceneEnd-timeSceneStart);
+		//MNEMOSY_TRACE("Scene Initialized {} seconds ",timeSceneEnd-timeSceneStart);
 
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
-		MNEMOSY_TRACE("UserInterface Initialized");
+		//MNEMOSY_TRACE("UserInterface Initialized");
 
 		
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();

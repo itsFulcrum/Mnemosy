@@ -56,7 +56,13 @@ namespace mnemosy::gui
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
 					if (!directoryPath.empty()) {
-						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath),false,false);
+						
+						
+						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath),false,true);
+
+
+
+
 					}
 					else {
 						MNEMOSY_ERROR("You didnt select a valid folder path");

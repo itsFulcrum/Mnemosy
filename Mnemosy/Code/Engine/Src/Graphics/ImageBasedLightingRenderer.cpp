@@ -325,7 +325,7 @@ namespace mnemosy::graphics
 			brdfLut.LoadBrdfKTX(pathToFileString.c_str(), m_brdfLutTextureID);
 			
 			m_brdfLutTexture_isGenerated = true;
-			MNEMOSY_DEBUG("Loaded brdf lut texture from .ktx");
+			MNEMOSY_DEBUG("Loaded BRDF-Lut texture");
 			return;
 		}
 		else // !fileExists 
