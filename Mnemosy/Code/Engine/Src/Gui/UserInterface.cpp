@@ -6,8 +6,8 @@
 
 namespace mnemosy::gui
 {
-	UserInterface::UserInterface()
-	{
+	UserInterface::UserInterface() {
+
 		// ImGui Setup
 		// 
 		// GL 4.5 + GLSL 130

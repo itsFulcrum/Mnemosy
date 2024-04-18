@@ -30,7 +30,7 @@ namespace mnemosy::gui
 		void UnregisterMainMenuBarGuiPanel();
 
 
-		bool show_demo_window = true;
+		bool show_demo_window = false;
 	private:
 		void SetupImGuiStyle();
 		void StartFrame();

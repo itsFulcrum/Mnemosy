@@ -107,23 +107,43 @@ namespace mnemosy::systems
 		}
 		dragSource->parent = dragTarget; // set new parent
 		dragTarget->subNodes.push_back(dragSource); // enlist into target subNodes
-		// update path from root
-		if (dragSource->parent->name == m_rootNodeName) {
-			dragSource->pathFromRoot = dragSource->name; 
-		}
-		else {
-			dragSource->pathFromRoot = dragSource->parent->pathFromRoot + "/" + dragSource->name; 
-		}
+
+		// Recursivly update path from root
+		RecursivUpadtePathFromRoot(dragSource);
+
 
 		// should prob save to data
 		SaveUserDirectoriesData();
 
-		// check if the folder  we moved included the active material in its hierarchy
-		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
-		if (!activeMaterialDataFile.exists()) {
-			MNEMOSY_TRACE("MaterialLibraryRegistry::MoveDirectory: Active material moved.");
-			std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
-			m_activeMaterialDataFilePath = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
+		// check if the folder  we moved included the active material in its hierarchy by checking if the activeMaterialDataFile still exists at its last location
+
+		if (UserMaterialBound()) {
+
+			fs::directory_entry activeMaterialDataFile;
+			try {
+				activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
+			}
+			catch (fs::filesystem_error err) {
+				MNEMOSY_TRACE("MaterialLibraryRegistry::MoveDirectory: cant create directory entry {}",err.what());
+			}
+
+			if (!activeMaterialDataFile.exists()) {
+
+				//SetDefaultMaterial();
+				std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
+
+				fs::path newLocation; 
+				try {
+					newLocation = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_TRACE("MaterialLibraryRegistry::MoveDirectory: cant create path {}", err.what());
+				}
+
+				MNEMOSY_TRACE("MaterialLibraryRegistry::MoveDirectory: Active material moved To: {}",newLocation.generic_string());
+
+				m_activeMaterialDataFilePath = newLocation;
+			}
 		}
 	}
 

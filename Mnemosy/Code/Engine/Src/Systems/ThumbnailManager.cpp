@@ -142,16 +142,27 @@ namespace mnemosy::systems {
 
 				fs::path thumbnailPath = folderDirectory / fs::path(activeFolder->subMaterials[i].name) / fs::path(activeFolder->subMaterials[i].name + "_thumbnail.ktx2");
 
-				graphics::KtxImage ktxThumbnail;
-				bool success = ktxThumbnail.LoadKtx(thumbnailPath.generic_string().c_str(), activeFolder->subMaterials[i].thumbnailTexure_ID);
-				if (!success) {
+				fs::directory_entry thumbnailFile = fs::directory_entry(thumbnailPath);
+				if (thumbnailFile.exists()) {
 
-					MNEMOSY_WARN("Loaded thumbnail FAILED: {}", activeFolder->subMaterials[i].name);
-					glDeleteTextures(1, &activeFolder->subMaterials[i].thumbnailTexure_ID);
-					return;
+					graphics::KtxImage ktxThumbnail;
+					bool success = ktxThumbnail.LoadKtx(thumbnailPath.generic_string().c_str(), activeFolder->subMaterials[i].thumbnailTexure_ID);
+					if (success) {
+						activeFolder->subMaterials[i].thumbnailLoaded = true;
+					}
+					else {
+						MNEMOSY_WARN("Loaded thumbnail FAILED: {}", activeFolder->subMaterials[i].name);
+						glDeleteTextures(1, &activeFolder->subMaterials[i].thumbnailTexure_ID);
+						return;
+
+					}
+
+				}
+				else {
+					MNEMOSY_WARN("Loaded thumbnail FAILED: {}, thumbnail file does not exist at {}", activeFolder->subMaterials[i].name,thumbnailPath.generic_string());
 				}
 
-				activeFolder->subMaterials[i].thumbnailLoaded = true;
+
 				//MNEMOSY_DEBUG("Loaded Thumbnail for {} GLTex ID: {}", activeFolder->subMaterials[i].name,activeFolder->subMaterials[i].thumbnailTexure_ID);
 
 

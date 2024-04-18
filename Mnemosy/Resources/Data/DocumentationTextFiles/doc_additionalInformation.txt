@@ -1,0 +1,21 @@
+
+How Mnemosy handles texture data:
+
+Internally Mnemosy stores textures in the .ktx2 image format.
+ktx2 is an image format specification developed by the khronos-group and it is specifically designed for the use with 3D graphics.
+It's main advantage is that loading the pixel data from file and uploading it to the GPU is much faster compared to more general purpose formats like .png or .jpg
+Although lossless, formats like .png or .tiff still compress the image data to reduce file size.
+They do this in a way that is not practical for GPU rendering which means that they need to be uncompressed first.
+This can actually take a lot of time when dealing with many images.
+ktx2 also allows to store Mip-Maps, Cubemaps or texture arrays.
+For the same reason most game engine use their own internal texture format to ship games.
+
+Mnemosy stores colored textures (Albedo, Emissive) internally with 8 bits per pixel.
+Non-Colored textures (Normal, Roughness, Metallic etc.) are stored with 16 bits per pixel.
+The same is true for exporting textures out of Mnemosy.
+Of course if the source image has less data then this Mnemosy can't magically make it more.
+
+Normal maps internally are stored in the OpenGl format.
+One because Mnemosy has an OpenGl renderer and second, because most normal maps found online are in this format.
+However if you import custom made textures, like from Substance, you should specify this in the material editor.
+Upon export you can also choose which normal format to use.

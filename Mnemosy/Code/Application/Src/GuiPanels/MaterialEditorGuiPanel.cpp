@@ -117,6 +117,53 @@ namespace mnemosy::gui
 				
 			ImGui::Spacing();
 			
+			// Drag Material 
+			{
+				std::string dragButtonName = "Drag";
+				ImVec2 dragButton = ImVec2(120.0f, 20.0f);
+				if (m_readyToDragMaterial) {
+					dragButtonName = "Drag Me";
+				}
+				else {
+					dragButtonName = "Prepare Drag";
+				}
+
+				if (ImGui::Button(dragButtonName.c_str(), ImVec2(120.0f, 45.0f))) {
+
+
+					if (!m_readyToDragMaterial) {
+
+						// Export Active Material Texture to a temporary folder so we can drag them.
+						// Temp Folder is delete if we close menmosy or when we start it.
+						fs::path tempFolder = engineInstance.GetFileDirectories().GetTempExportFolderPath();
+						if (!tempFolder.empty()) {
+							fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+							exportManager.ExportMaterialTextures(tempFolder, materialFolderPath, activeMat);
+						}
+					}
+
+					m_readyToDragMaterial = true;
+					m_isDraggingOnce = true;
+				}
+
+				if (m_readyToDragMaterial) {
+
+					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+
+						if (m_isDraggingOnce) {
+
+							engineInstance.GetDropHandler().BeginDrag(exportManager.GetLastExportedFilePaths());
+						}
+						m_isDraggingOnce = false;
+						ImGui::EndDragDropSource();
+					}
+				}
+
+			} // End Drag Material 
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
 			// Export Settings
 			{
 
@@ -162,44 +209,7 @@ namespace mnemosy::gui
 
 			}// End Export Settings
 
-			// Drag Material 
-			{
-				std::string dragButtonName = "Drag";
-				ImVec2 dragButton = ImVec2(120.0f, 20.0f);
-				if (m_readyToDragMaterial) {
-					dragButtonName = "Drag Me";
-				}
-				else {
-					dragButtonName = "Prepare Drag";
-				}
 
-				if (ImGui::Button(dragButtonName.c_str(), ImVec2(120.0f, 45.0f))) {
-					// Export Active Material Texture to a temporary folder so we can drag them.
-					// Temp Folder is delete if we close menmosy or when we start it.
-					fs::path tempFolder = engineInstance.GetFileDirectories().GetTempExportFolderPath();
-					if (!tempFolder.empty()) {
-						fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-						exportManager.ExportMaterialTextures(tempFolder, materialFolderPath, activeMat);
-					}
-
-					m_readyToDragMaterial = true;
-					m_isDraggingOnce = true;
-				}
-
-				if (m_readyToDragMaterial) {
-
-					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-
-						if (m_isDraggingOnce) {
-
-							engineInstance.GetDropHandler().BeginDrag(exportManager.GetLastExportedFilePaths());
-						}
-						m_isDraggingOnce = false;
-						ImGui::EndDragDropSource();
-					}
-				}
-
-			} // End Drag Material 
 
 
 

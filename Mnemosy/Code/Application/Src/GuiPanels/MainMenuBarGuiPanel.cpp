@@ -7,71 +7,68 @@
 #include "Include/GuiPanels/SceneSettingsGuiPanel.h"
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
+#include "Include/GuiPanels/DocumentationGuiPanel.h"
 
 
 #include "External/ImGui/imgui.h"
 
 namespace mnemosy::gui
 {
-	MainMenuBarGuiPanel::MainMenuBarGuiPanel()
-	{
+	MainMenuBarGuiPanel::MainMenuBarGuiPanel() {
+
+		//m_panelManager = &Application::GetInstance().GetGuiPanelManager();
 		panelName = "Main Menu Bar";
 	}
 
 	void MainMenuBarGuiPanel::Draw()
 	{
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("Windows"))
-			{
-				GuiPanelManager& panelManager = Application::GetInstance().GetGuiPanelManager();
+		if (ImGui::BeginMainMenuBar()) {
+
+			if (ImGui::BeginMenu("Windows")) {
+
+				GuiPanelManager& m_panelManager = Application::GetInstance().GetGuiPanelManager();
 
 
-				bool viewportPanel = panelManager.GetViewportPanel().isActive();
-				if (ImGui::MenuItem("Viewport", "", viewportPanel, !viewportPanel))
-				{
-					panelManager.GetViewportPanel().setActive();
+				viewportPanel = m_panelManager.GetViewportPanel().isActive();
+				if (ImGui::MenuItem("Viewport", "", viewportPanel, !viewportPanel)) {
+					m_panelManager.GetViewportPanel().setActive();
 				}
 
-
-				bool globalSettingsPanel = panelManager.GetGlobalSettingsPanel().isActive();
-				if (ImGui::MenuItem("Global Settings", "",globalSettingsPanel,!globalSettingsPanel)) 
-				{
-					panelManager.GetGlobalSettingsPanel().setActive();
+				globalSettingsPanel = m_panelManager.GetGlobalSettingsPanel().isActive();
+				if (ImGui::MenuItem("Global Settings", "",globalSettingsPanel,!globalSettingsPanel))  {
+					m_panelManager.GetGlobalSettingsPanel().setActive();
 				}
 
-				bool sceneSettings = panelManager.GetSceneSettingsPanel().isActive();
-				if (ImGui::MenuItem("Scene Settings", "", sceneSettings, !sceneSettings))
-				{
-					panelManager.GetSceneSettingsPanel().setActive();
+				sceneSettings = m_panelManager.GetSceneSettingsPanel().isActive();
+				if (ImGui::MenuItem("Scene Settings", "", sceneSettings, !sceneSettings)) {
+					m_panelManager.GetSceneSettingsPanel().setActive();
 				}
 
-				bool materialEditorPanel = panelManager.GetMaterialEditorPanel().isActive();
-				if (ImGui::MenuItem("Material Editor", "", materialEditorPanel, !materialEditorPanel))
-				{
-					panelManager.GetMaterialEditorPanel().setActive();
+				materialEditorPanel = m_panelManager.GetMaterialEditorPanel().isActive();
+				if (ImGui::MenuItem("Material Editor", "", materialEditorPanel, !materialEditorPanel)) {
+					m_panelManager.GetMaterialEditorPanel().setActive();
 				}
-				bool materialLibraryPanel = panelManager.GetMaterialLibraryPanel().isActive();
-				if (ImGui::MenuItem("Material Library", "", materialLibraryPanel, !materialLibraryPanel))
-				{
-					panelManager.GetMaterialLibraryPanel().setActive();
+
+				materialLibraryPanel = m_panelManager.GetMaterialLibraryPanel().isActive();
+				if (ImGui::MenuItem("Material Library", "", materialLibraryPanel, !materialLibraryPanel)) {
+					m_panelManager.GetMaterialLibraryPanel().setActive();
+				}
+
+				documentationPanel = m_panelManager.GetDocumentationPanel().isActive();
+				if (ImGui::MenuItem("Documentation", "", documentationPanel, !documentationPanel)) {
+					m_panelManager.GetDocumentationPanel().setActive();
 				}
 
 				ImGui::EndMenu();
-			}
+			} // End Menu Windows
 
-			//if (ImGui::BeginMenu("Edit"))
-			//{
-			//	if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-			//	if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-			//	ImGui::Separator();
-			//	if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-			//	if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-			//	if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-			//	ImGui::EndMenu();
-			//}
+
+
+
+
 
 			ImGui::EndMainMenuBar();
-		}
-	}
+		} // End ImGui::BeginMainMenuBar()
+
+	} // End Draw()
 }

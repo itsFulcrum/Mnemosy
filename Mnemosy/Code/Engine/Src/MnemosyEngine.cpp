@@ -62,7 +62,7 @@ namespace mnemosy
 		m_pLogger = std::make_unique<core::Logger>();
 
 
-		MNEMOSY_INFO("Starting Mnemosy v{}.{}", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR);
+		MNEMOSY_INFO("Starting Mnemosy v{}.{} - alpha", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR);
 
 		#ifdef MNEMOSY_CONFIG_DEBUG
 			MNEMOSY_INFO("Configuration Debug");

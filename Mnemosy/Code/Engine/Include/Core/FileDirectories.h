@@ -23,6 +23,8 @@ namespace mnemosy::core
 		const fs::path GetCubemapsPath();
 		const fs::path GetShadersPath();
 		const fs::path GetTempExportFolderPath();
+		const fs::path GetDocumentationFilesPath();
+
 
 		const fs::path GetLibraryDirectoryPath();
 		void SetNewUserLibraryDirectory(const fs::directory_entry& directoryPath,bool copyOldFiles,bool deleteOldFiles);

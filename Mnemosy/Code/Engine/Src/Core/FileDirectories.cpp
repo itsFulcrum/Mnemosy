@@ -94,6 +94,10 @@ namespace mnemosy::core
 
 		return tempFolderPath;
 	}
+
+	const fs::path FileDirectories::GetDocumentationFilesPath() {
+		return GetDataPath() / fs::path("DocumentationTextFiles");
+	}
 	
 	const fs::path FileDirectories::GetLibraryDirectoryPath() {
 		

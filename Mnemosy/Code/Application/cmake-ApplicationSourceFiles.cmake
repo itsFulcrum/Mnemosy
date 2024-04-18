@@ -36,4 +36,7 @@ ${APP_SOURCE_PATH}/Src/GuiPanels/MaterialLibraryGuiPanel.cpp
 ${APP_SOURCE_PATH}/Include/GuiPanels/MaterialEditorGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/MaterialEditorGuiPanel.cpp
 
+${APP_SOURCE_PATH}/Include/GuiPanels/DocumentationGuiPanel.h
+${APP_SOURCE_PATH}/Src/GuiPanels/DocumentationGuiPanel.cpp
+
 )

@@ -125,7 +125,7 @@ namespace mnemosy::core {
 
 		// Start drag operation
 		DWORD dwEffect = 0;
-		hr = DoDragDrop(pDataObject, pDropSource, DROPEFFECT_COPY , &dwEffect);
+		hr = DoDragDrop(pDataObject, pDropSource, DROPEFFECT_COPY | DROPEFFECT_MOVE, &dwEffect);
 		if (SUCCEEDED(hr)) {
 			MNEMOSY_TRACE("DropHandler::BeginDrag::DoDragDrop() Succeeded");
 		}
@@ -516,6 +516,7 @@ namespace mnemosy::core {
 				f.tymed = TYMED_HGLOBAL;
 			}
 			else if (m_nIndex == 1) {
+				// i know. okey i know..
 				f.cfFormat = CF_HDROP;
 				f.tymed = TYMED_HGLOBAL;
 			}

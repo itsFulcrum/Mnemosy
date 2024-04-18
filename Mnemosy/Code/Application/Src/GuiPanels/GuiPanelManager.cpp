@@ -5,7 +5,10 @@
 #include "Include/GuiPanels/SceneSettingsGuiPanel.h"
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
+#include "Include/GuiPanels/DocumentationGuiPanel.h"
+
 #include "Include/Application.h"
+#include "Include/ApplicationConfig.h"
 
 #include "Include/MnemosyEngine.h"
 #include "Include/Gui/UserInterface.h"
@@ -28,6 +31,17 @@ namespace mnemosy::gui
 		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
 		m_pMaterialLibraryPanel = new MaterialLibraryGuiPanel();
 		userInterface.RegisterGuiPanel(m_pMaterialLibraryPanel);
+		m_pDocumentationPanel = new DocumentationGuiPanel();
+		userInterface.RegisterGuiPanel(m_pDocumentationPanel);
+
+#ifdef mnemosy_gui_showDebugInfo
+
+	userInterface.show_demo_window = true;
+#else
+	userInterface.show_demo_window = false;
+#endif // !mnemosy_gui_showDebugInfo
+
+
 	}
 
 	GuiPanelManager::~GuiPanelManager()
@@ -57,6 +71,10 @@ namespace mnemosy::gui
 		userInterface.UnregisterGuiPanel(m_pMaterialLibraryPanel);
 		delete m_pMaterialLibraryPanel;
 		m_pMaterialLibraryPanel = nullptr;
+
+		userInterface.UnregisterGuiPanel(m_pDocumentationPanel);
+		delete m_pDocumentationPanel;
+		m_pDocumentationPanel = nullptr;
 
 	}
 }

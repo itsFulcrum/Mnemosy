@@ -9,15 +9,14 @@
             "2_isLeaf": false,
             "3_pathFromRoot": "",
             "4_subFolderNames": [
-                "Wood",
-                "Stone",
-                "Nature"
+                "New Folder",
+                "Stone"
             ],
             "5_subFolders": {
-                "Nature": {
-                    "1_name": "Nature",
+                "New Folder": {
+                    "1_name": "New Folder",
                     "2_isLeaf": true,
-                    "3_pathFromRoot": "Nature",
+                    "3_pathFromRoot": "New Folder",
                     "6_hasMaterials": false
                 },
                 "Stone": {
@@ -25,36 +24,38 @@
                     "2_isLeaf": false,
                     "3_pathFromRoot": "Stone",
                     "4_subFolderNames": [
-                        "Indoor"
+                        "Nature",
+                        "Wood"
                     ],
                     "5_subFolders": {
-                        "Indoor": {
-                            "1_name": "Indoor",
+                        "Nature": {
+                            "1_name": "Nature",
                             "2_isLeaf": true,
-                            "3_pathFromRoot": "Stone/Indoor",
+                            "3_pathFromRoot": "Stone/Nature",
                             "6_hasMaterials": true,
                             "6_materialEntries": [
-                                "New Material",
-                                "New Material_1"
+                                "NatureMat"
+                            ]
+                        },
+                        "Wood": {
+                            "1_name": "Wood",
+                            "2_isLeaf": true,
+                            "3_pathFromRoot": "Stone/Wood",
+                            "6_hasMaterials": true,
+                            "6_materialEntries": [
+                                "WoodMat"
                             ]
                         }
                     },
                     "6_hasMaterials": true,
                     "6_materialEntries": [
-                        "Rock",
-                        "Cliff mossy"
+                        "StoneMat"
                     ]
-                },
-                "Wood": {
-                    "1_name": "Wood",
-                    "2_isLeaf": true,
-                    "3_pathFromRoot": "Wood",
-                    "6_hasMaterials": false
                 }
             },
             "6_hasMaterials": true,
             "6_materialEntries": [
-                "AllTexturesFiles"
+                "TestMat"
             ]
         }
     }

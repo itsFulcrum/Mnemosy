@@ -1,0 +1,23 @@
+
+1.
+  To begin with you should select a folder location where all your texture files will be stored.
+  You should choose a location that has enough disk space available.
+  In the "Global Settings" window panel you can select a new folder by pressing the "Select Folder..." button.
+  You should NEVER manually move, delete, rename or mess with this folder in any way. You may lose all your files!!
+  If you want to move this directory to another location simply click the "Select Folder..." button and if it contains any files you can choose to copy your existing files to the new location.
+
+2.
+  Mnemosy has a fully customizable UI. You can close and open subwindows.
+  You can drag them and dock them into any configuration.
+
+3.
+  The "Material Library" window panel show all your materials. There will always be a Root directory.
+  From the root you can create subfolders and materials by right clicking on a directory.
+  You can Drag materials or Folder into other folder and organize them.
+
+  Below the folder tree view, thumbnails of all materials in the selected folder are shown.
+  You can select any material here and then modify it in the "Material Editor" window panel.
+  (by default it is located below the viewport)
+
+4.
+  In the "Scene Settings" window panel you can change a bunch of other settings like changing the preview mesh or skybox texture.

@@ -136,16 +136,18 @@ namespace mnemosy::gui
 
 
 
+#ifdef mnemosy_gui_showDebugInfo
+
 
 		ImGui::SeparatorText("Debug Info");
 
 		// show fps and frametime in ms
-		core::Clock& clock = engine.GetClock();
 		int fps = clock.GetFPS();
 		float deltaSeconds = clock.GetFrameTime();
 		ImGui::Text("FPS: %d", fps);
 		ImGui::Text("FrameTime: %f ms", deltaSeconds);
 
+#endif // mnemosy_gui_showDebugInfo
 
 		// --- Render Settings
 		ImGui::SeparatorText("Render Settings");
@@ -153,6 +155,7 @@ namespace mnemosy::gui
 		{
 			graphics::Renderer& renderer = engine.GetRenderer();
 			core::Window& window = engine.GetWindow();
+			core::Clock& clock = engine.GetClock();
 
 			const char* MSAA_Settings[5] = { "OFF","2X","4X","8X","16X"}; // they need to be ordered the same as in renderer MSAAsamples Enum
 			int previewMSAA_Current = renderer.GetMSAA();

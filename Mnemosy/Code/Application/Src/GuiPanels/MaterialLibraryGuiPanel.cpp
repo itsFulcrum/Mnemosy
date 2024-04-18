@@ -25,7 +25,7 @@ namespace mnemosy::gui
 		m_materialRegistry.OpenFolderNode(rootNode);
 
 
-		m_directoryTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns;
+		m_directoryTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		m_materialTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
 	}
@@ -91,7 +91,8 @@ namespace mnemosy::gui
 
 						//delete texID;
 						//MNEMOSY_DEBUG("Texture ID:{}", selectedNode->subMaterials[i].thumbnailTexure_ID);
-						bool pressed = ImGui::ImageButton((void*)selectedNode->subMaterials[i].thumbnailTexure_ID, button_size, ImVec2(0, 1), ImVec2(1, 0));
+						
+						bool pressed = ImGui::ImageButton(reinterpret_cast<void*>(selectedNode->subMaterials[i].thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
 						
 
 						if (pressed) {
@@ -152,12 +153,13 @@ namespace mnemosy::gui
 
 		bool nodeOpen = ImGui::TreeNodeEx(node->name.c_str(), node_flags);
 			
-		if (ImGui::IsItemClicked() && !nodeOpen) {
+		//if (ImGui::IsItemClicked() && !nodeOpen) {
+		if (ImGui::IsItemClicked()) {
 
 			m_materialRegistry.OpenFolderNode(node);
 		}
 
-		if (nodeOpen) {
+		//if (nodeOpen) {
 
 			ImGui::SameLine();
 			
@@ -200,6 +202,7 @@ namespace mnemosy::gui
 
 			ImGui::Spacing();
 
+		if (nodeOpen) {
 			// == DRAG AND DROP
 			
 			if (!node->IsRoot())  {  // dont allow root to be a drag and drop source
