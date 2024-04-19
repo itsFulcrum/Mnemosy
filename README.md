@@ -1,5 +1,5 @@
 
-![Alt text](\Mnemosy/Resources/Textures/ApplicationScreenshot.png?raw=true "screenshot")
+![Alt text](Mnemosy/Resources/Textures/ApplicationScreenshot.png?raw=true "screenshot")
 
 #  About Mnemosy
 
