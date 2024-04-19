@@ -44,7 +44,17 @@ namespace mnemosy::graphics
 		m_height = pic.rows;
 		int bitDepth = pic.depth();
 		cv::flip(pic, pic, 0);
-			
+		
+		if (m_width != m_height) {
+
+			MNEMOSY_WARN("Texture::gnerateFromFile: Loading Image Failed: \nFilepath: {} \nImages with non square aspect ratios cause crashes upon export so they are not supported at the moment. \nThis is a known issue I want to fix", imagePath);
+			pic.release();
+			m_ID = 0;
+			m_isInitialized = false;
+			return false;
+
+		}
+
 		MNEMOSY_DEBUG("Texture::gnerateFromFile: Loading image: {}\nWidht: {} Height: {} Channels: {} Depth: {}", imagePath, m_width, m_height, m_channelsAmount, pic.depth());
 					
 		glGenTextures(1, &m_ID);

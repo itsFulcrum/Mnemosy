@@ -781,32 +781,70 @@ namespace mnemosy::systems
 			
 			filename = activeMat.Name + "_albedo.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
+			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
+			if (!success) {
+				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+				activeMat.removeTexture(graphics::ALBEDO);
+				delete tex;
+				return;
+			}
+
 		}
 		else if (textureType == graphics::NORMAL) {
 			filename = activeMat.Name + "_normal.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_NORMAL, true);
+			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_NORMAL, true);
+			if (!success) {
+				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+				activeMat.removeTexture(graphics::NORMAL);
+				delete tex;
+				return;
+			}
+
 		}
 		else if (textureType == graphics::ROUGHNESS) {
 			filename = activeMat.Name + "_roughness.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			if (!success) {
+				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+				activeMat.removeTexture(graphics::ROUGHNESS);
+				delete tex;
+				return;
+			}
 		}
 		else if (textureType == graphics::METALLIC) {
 			filename = activeMat.Name + "_metallic.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			if (!success) {
+				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+				activeMat.removeTexture(graphics::METALLIC);
+				delete tex;
+				return;
+			}
 		}
 		else if (textureType == graphics::AMBIENTOCCLUSION) {
 			filename = activeMat.Name + "_ambientOcclusion.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			if (!success) {
+				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+				activeMat.removeTexture(graphics::AMBIENTOCCLUSION);
+				delete tex;
+				return;
+			}
 		}
 		else if (textureType == graphics::EMISSION) {
 			filename = activeMat.Name + "_emissive.ktx2";
 			fs::path exportPath = materialDir / fs::path(filename);
-			ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
+			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
+			if (!success) {
+				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+				activeMat.removeTexture(graphics::EMISSION);
+				delete tex;
+				return;
+			}
 		}
 
 		// save material data file

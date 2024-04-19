@@ -457,13 +457,13 @@ namespace mnemosy::graphics
 				createInfo.glInternalformat = GL_RGBA8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM; // this should really be srgb but it works rn, just the output texture is in linear space
 				channels = 4;
-				bytesOfPixel = (sizeof(char) * 4);
+				bytesOfPixel = (sizeof(unsigned char) * 4);
 			}
 			else if (numChannels == 3) {
 				createInfo.glInternalformat = GL_RGB8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_UNORM;
 				channels = 3;
-				bytesOfPixel = (sizeof(char) * 3);
+				bytesOfPixel = (sizeof(unsigned char) * 3);
 			}
 		}
 
@@ -473,13 +473,13 @@ namespace mnemosy::graphics
 				createInfo.glInternalformat = GL_RGBA8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
 				channels = 4;
-				bytesOfPixel = (sizeof(char) * 4);
+				bytesOfPixel = (sizeof(unsigned char) * 4);
 			}
 			else if (numChannels == 3) {
 				createInfo.glInternalformat = GL_RGB8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_SRGB;
 				channels = 3;
-				bytesOfPixel = (sizeof(char) * 3);
+				bytesOfPixel = (sizeof(unsigned char) * 3);
 			}
 		}
 
@@ -530,11 +530,15 @@ namespace mnemosy::graphics
 		glBindTexture(GL_TEXTURE_2D, glTextureID);
 				
 		//int mip = 0;
-		int nextMip_Width  = createInfo.baseWidth;
-		int nextMip_Height = createInfo.baseHeight;
+		double nextMip_Width  = createInfo.baseWidth;
+		double nextMip_Height = createInfo.baseHeight;
 
 		if (imgFormat == MNSY_COLOR || imgFormat == MNSY_COLOR_SRGB) {
 			for (int mip = 0; mip < (int)createInfo.numLevels; mip++) {
+
+				if (nextMip_Width <= 2 || nextMip_Height <= 2)
+					break;
+
 				unsigned char* pixels = new unsigned char[nextMip_Width * nextMip_Height * channels];
 				ktx_size_t srcSize = (nextMip_Width * nextMip_Height) * bytesOfPixel;
 				// RGB or RGBA texture
@@ -554,8 +558,8 @@ namespace mnemosy::graphics
 				// if it becomes < 2 we cant devide anymore and it causes frees on the math operation
 				if (nextMip_Width <= 2 || nextMip_Height <= 2)
 					break;
-				nextMip_Width  = (int)round((double)nextMip_Width / 2);
-				nextMip_Height = (int)round((double)nextMip_Height / 2);
+				nextMip_Width  = round(nextMip_Width / 2);
+				nextMip_Height = round(nextMip_Height / 2);
 			}
 		}
 		else if (imgFormat == MNSY_NORMAL) {
@@ -575,6 +579,7 @@ namespace mnemosy::graphics
 				}
 				delete[] pixels;
 				pixels = nullptr;
+				
 				// if it becomes < 2 we cant devide anymore and it causes frees on the math operation
 				if (nextMip_Width <= 2 || nextMip_Height <= 2)
 					break;

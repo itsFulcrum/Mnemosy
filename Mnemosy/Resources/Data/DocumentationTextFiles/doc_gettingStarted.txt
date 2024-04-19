@@ -13,7 +13,7 @@
 3.
   The "Material Library" window panel show all your materials. There will always be a Root directory.
   From the root you can create subfolders and materials by right clicking on a directory.
-  You can Drag materials or Folder into other folder and organize them.
+  You can Drag materials or folders into other folders and organize them however you want.
 
   Below the folder tree view, thumbnails of all materials in the selected folder are shown.
   You can select any material here and then modify it in the "Material Editor" window panel.
