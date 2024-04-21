@@ -130,7 +130,6 @@ namespace mnemosy::gui
 
 				if (ImGui::Button(dragButtonName.c_str(), ImVec2(120.0f, 45.0f))) {
 
-
 					if (!m_readyToDragMaterial) {
 
 						// Export Active Material Texture to a temporary folder so we can drag them.
@@ -149,12 +148,16 @@ namespace mnemosy::gui
 				if (m_readyToDragMaterial) {
 
 					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+						
+						// works but if we escape or drop into our own app it repeatadly calls this witch is not ideal
+						engineInstance.GetDropHandler().BeginDrag(exportManager.GetLastExportedFilePaths());
 
+						/*
 						if (m_isDraggingOnce) {
-
-							engineInstance.GetDropHandler().BeginDrag(exportManager.GetLastExportedFilePaths());
+							m_isDraggingOnce = true;
 						}
 						m_isDraggingOnce = false;
+						*/
 						ImGui::EndDragDropSource();
 					}
 				}
@@ -166,7 +169,6 @@ namespace mnemosy::gui
 
 			// Export Settings
 			{
-
 				if (ImGui::TreeNode("Export Settings")) {
 
 					int exportImageFormat_current = exportManager.GetExportImageFormatInt();
@@ -190,7 +192,7 @@ namespace mnemosy::gui
 					if (exportManager.GetNormalMapExportFormatInt() != exportNormalFormat_current) {
 						m_readyToDragMaterial = false;
 						exportManager.SetNormalMapExportFormatInt(exportNormalFormat_current);
-					} 
+					}
 
 					if (ImGui::Button("Export To...",buttonSize)) {
 
@@ -261,8 +263,6 @@ namespace mnemosy::gui
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ALBEDO));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo
-
-
 			}
 
 			// Disabled widgets if texture is assigned 

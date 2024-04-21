@@ -465,6 +465,21 @@ namespace mnemosy::graphics
 				channels = 3;
 				bytesOfPixel = (sizeof(unsigned char) * 3);
 			}
+			else if (numChannels == 1) {
+				createInfo.glInternalformat = GL_RGB8;
+				createInfo.vkFormat = VK_FORMAT_R8G8B8_UNORM;
+				channels = 3;
+				bytesOfPixel = (sizeof(unsigned char) * 3);
+
+
+				//MNEMOSY_ERROR("You cannot export this texture as a color map because it only has one channel.");
+				//return false;
+			}
+			else {
+				MNEMOSY_ERROR("You cannot use this texture because it has a weird amount of channels: {}", numChannels);
+				return false;
+			}
+
 		}
 
 		else if (imgFormat == MNSY_COLOR_SRGB) {
@@ -480,6 +495,15 @@ namespace mnemosy::graphics
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_SRGB;
 				channels = 3;
 				bytesOfPixel = (sizeof(unsigned char) * 3);
+			}
+			else if (numChannels == 1) { // this should not happen
+				createInfo.glInternalformat = GL_RGB8;
+				createInfo.vkFormat = VK_FORMAT_R8G8B8_SRGB;
+				channels = 3;
+				bytesOfPixel = (sizeof(unsigned char) * 3);
+
+				//MNEMOSY_ERROR("You cannot export this texture as a color map because it only has one channel.");
+				//return false;
 			}
 		}
 
@@ -512,6 +536,10 @@ namespace mnemosy::graphics
 			createInfo.numLevels = 1;
 			createInfo.generateMipmaps = KTX_TRUE;
 		}
+		// Force Mip export always off
+		//createInfo.numLevels = 1;
+		//createInfo.generateMipmaps = KTX_TRUE;
+
 
 		createInfo.numLayers = 1; // num of array elements should be 0 no array
 		createInfo.numFaces = 1; // must be 6 if cubemap
@@ -528,87 +556,109 @@ namespace mnemosy::graphics
 
 		glActiveTexture(GL_TEXTURE0); // just to make sure
 		glBindTexture(GL_TEXTURE_2D, glTextureID);
-				
-		//int mip = 0;
-		double nextMip_Width  = createInfo.baseWidth;
-		double nextMip_Height = createInfo.baseHeight;
+		
+		int nextMip_Width  = createInfo.baseWidth;
+		int nextMip_Height = createInfo.baseHeight;
+		float InitialAspectRatio = (float)nextMip_Width / (float)nextMip_Height;;
 
+		// TODO: At the moment this method crashes when exporting lower mips, especially with non square aspect ratios.
+		// this likely has to do with some rounding issues when it gets to a point and the aspect ratio becomes different it allocates the wrong amount of bytes.
+		// for now exporting mipmaps is compleatly disables and we always generate them new on import.
 		if (imgFormat == MNSY_COLOR || imgFormat == MNSY_COLOR_SRGB) {
 			for (int mip = 0; mip < (int)createInfo.numLevels; mip++) {
 
+				// break because we cant go lower thant 2x2 pixels
 				if (nextMip_Width <= 2 || nextMip_Height <= 2)
 					break;
 
-				unsigned char* pixels = new unsigned char[nextMip_Width * nextMip_Height * channels];
-				ktx_size_t srcSize = (nextMip_Width * nextMip_Height) * bytesOfPixel;
+				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(unsigned char);
+
+				float aspectRatio = (float)nextMip_Width / (float)nextMip_Height;
+				MNEMOSY_TRACE("ExportingMip: {}, Width: {}	Height: {}	Channels: {}	Bytes: {}	Aspect Ratio: {}", mip, nextMip_Width, nextMip_Height, channels, (float)mipSizeBytes, aspectRatio);
+
+				/*if (aspectRatio != InitialAspectRatio) {
+					break;
+				}*/
+
+				//unsigned char* pixels = new unsigned char[mipSizeBytes];
+				void* pixels = malloc(mipSizeBytes);
+
 				// RGB or RGBA texture
+				// get pixel data from a glUploadedTexture
 				if (channels == 4) {
-					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGBA, GL_UNSIGNED_BYTE, pixels); 
 				}
-				if (channels == 3) {
+				else if (channels == 3) {
 					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 				}
 
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, srcSize);
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, static_cast<unsigned char*>(pixels), mipSizeBytes); //
 				if (errorCode != 0) {
 					MNEMOSY_ERROR("KtxImage::ExportGlTexture: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
 					ktxTexture_Destroy(ktxTexture(texture));
+					//delete[] pixels;
+					free(pixels);
 					return false;
 				}
-				// if it becomes < 2 we cant devide anymore and it causes frees on the math operation
-				if (nextMip_Width <= 2 || nextMip_Height <= 2)
-					break;
-				nextMip_Width  = round(nextMip_Width / 2);
-				nextMip_Height = round(nextMip_Height / 2);
+				//delete[] pixels;
+				free(pixels);
+
+				nextMip_Width  = (int)((double)nextMip_Width * 0.5f);
+				nextMip_Height = (int)((double)nextMip_Height * 0.5f);
+
 			}
 		}
 		else if (imgFormat == MNSY_NORMAL) {
 			// loop over mipmaps
 			for (int mip = 0; mip < (int)createInfo.numLevels; mip++) {
 
-				short* pixels = new short[nextMip_Width * nextMip_Height * channels];
-				ktx_size_t srcSize = (nextMip_Width * nextMip_Height) * bytesOfPixel;				
+				if (nextMip_Width <= 2 || nextMip_Height <= 2)
+					break;
+				
+				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(short);
+
+				short* pixels = new short[mipSizeBytes];
+					
 				glGetTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_HALF_FLOAT, pixels);
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, srcSize);
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, reinterpret_cast<unsigned char*>(pixels), mipSizeBytes);
 				if (errorCode != 0) {
+
 					MNEMOSY_ERROR("KtxImage::ExportGLTexture: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
 					ktxTexture_Destroy(ktxTexture(texture));
 					delete[] pixels;
-					pixels = nullptr;
 					return false;
 				}
 				delete[] pixels;
-				pixels = nullptr;
-				
-				// if it becomes < 2 we cant devide anymore and it causes frees on the math operation
-				if (nextMip_Width <= 2 || nextMip_Height <= 2)
-					break;
-				nextMip_Width  = (int)round((double)nextMip_Width / 2);
-				nextMip_Height = (int)round((double)nextMip_Height / 2);
+
+				nextMip_Width	= (int)((double)nextMip_Width  * 0.5f);
+				nextMip_Height	= (int)((double)nextMip_Height * 0.5f);
 			}
 		}
 		else if (imgFormat == MNSY_LINEAR_CHANNEL) {
 			// loop over mipmaps
 			for (int mip = 0; mip < (int)createInfo.numLevels; mip++) {
 
-				short* pixels = new short[nextMip_Width * nextMip_Height * channels];
-				ktx_size_t srcSize = (nextMip_Width * nextMip_Height) * bytesOfPixel;
+				// if it becomes < 2 we cant devide anymore
+				if (nextMip_Width <= 2 || nextMip_Height <= 2)
+					break;
+				
+				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(short);
+				short* pixels = new short[mipSizeBytes];
+
 				glGetTexImage(GL_TEXTURE_2D, mip, GL_RED, GL_HALF_FLOAT, pixels);
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, srcSize);
+
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, reinterpret_cast<unsigned char*>(pixels), mipSizeBytes);
 				if (errorCode != 0) {
 					MNEMOSY_ERROR("KtxImage::ExportGLTexure: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
 					ktxTexture_Destroy(ktxTexture(texture));
 					delete[] pixels;
-					pixels = nullptr;
 					return false;
 				}
 				delete[] pixels;
-				pixels = nullptr;
-				// if it becomes < 2 we cant devide anymore and it causes frees on the math operation
-				if (nextMip_Width <= 2 || nextMip_Height <= 2)
-					break;
-				nextMip_Width  = (int)round((double)nextMip_Width / 2);
-				nextMip_Height = (int)round((double)nextMip_Height / 2);
+
+				// Calculate next mip size
+				nextMip_Width  = (int)((double)nextMip_Width  * 0.5f);
+				nextMip_Height = (int)((double)nextMip_Height * 0.5f);
 			}
 		}
 
