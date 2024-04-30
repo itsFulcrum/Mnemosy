@@ -54,9 +54,9 @@ namespace mnemosy::graphics
 		// VK_FORMAT_R16_SFLOAT
 		// VK_FORMAT_R8_UNORM
 
-		if (kTexture->vkFormat == VK_FORMAT_R8G8B8A8_UNORM || kTexture->vkFormat == VK_FORMAT_R8G8B8A8_SRGB)
+		if (kTexture->vkFormat == VK_FORMAT_R8G8B8A8_UNORM || kTexture->vkFormat == VK_FORMAT_R8G8B8A8_SRGB || VK_FORMAT_R8G8B8A8_USCALED || VK_FORMAT_R8G8B8A8_UINT)
 			numChannels = 4;
-		else if (kTexture->vkFormat == VK_FORMAT_R8G8B8_UNORM || kTexture->vkFormat == VK_FORMAT_R8G8B8_SRGB || kTexture->vkFormat == VK_FORMAT_R16G16B16_SFLOAT || kTexture->vkFormat == VK_FORMAT_R32G32B32_SFLOAT)
+		else if (kTexture->vkFormat == VK_FORMAT_R8G8B8_UNORM || kTexture->vkFormat == VK_FORMAT_R8G8B8_SRGB || kTexture->vkFormat == VK_FORMAT_R16G16B16_SFLOAT || kTexture->vkFormat == VK_FORMAT_R32G32B32_SFLOAT || VK_FORMAT_R8G8B8_USCALED || VK_FORMAT_R8G8B8_UINT)
 			numChannels = 3;
 		else if (kTexture->vkFormat == VK_FORMAT_R32G32_SFLOAT || kTexture->vkFormat == VK_FORMAT_R16G16_SFLOAT)
 			numChannels = 2;
@@ -455,21 +455,21 @@ namespace mnemosy::graphics
 
 			if (numChannels == 4) {
 				createInfo.glInternalformat = GL_RGBA8;
-				createInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM; // this should really be srgb but it works rn, just the output texture is in linear space
+				createInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM; // this should really be srgb but it works rn, just the output texture is in linear spaceVK_FORMAT_R8G8B8_SNORM
 				channels = 4;
-				bytesOfPixel = (sizeof(unsigned char) * 4);
+				bytesOfPixel = (sizeof(ktx_uint8_t) * 4);
 			}
 			else if (numChannels == 3) {
 				createInfo.glInternalformat = GL_RGB8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_UNORM;
 				channels = 3;
-				bytesOfPixel = (sizeof(unsigned char) * 3);
+				bytesOfPixel = (sizeof(ktx_uint8_t) * 3);
 			}
 			else if (numChannels == 1) {
 				createInfo.glInternalformat = GL_RGB8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_UNORM;
 				channels = 3;
-				bytesOfPixel = (sizeof(unsigned char) * 3);
+				bytesOfPixel = (sizeof(ktx_uint8_t) * 3);
 
 
 				//MNEMOSY_ERROR("You cannot export this texture as a color map because it only has one channel.");
@@ -488,19 +488,19 @@ namespace mnemosy::graphics
 				createInfo.glInternalformat = GL_RGBA8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8A8_SRGB;
 				channels = 4;
-				bytesOfPixel = (sizeof(unsigned char) * 4);
+				bytesOfPixel = (sizeof(ktx_uint8_t) * 4);
 			}
 			else if (numChannels == 3) {
 				createInfo.glInternalformat = GL_RGB8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_SRGB;
 				channels = 3;
-				bytesOfPixel = (sizeof(unsigned char) * 3);
+				bytesOfPixel = (sizeof(ktx_uint8_t) * 3);
 			}
 			else if (numChannels == 1) { // this should not happen
 				createInfo.glInternalformat = GL_RGB8;
 				createInfo.vkFormat = VK_FORMAT_R8G8B8_SRGB;
 				channels = 3;
-				bytesOfPixel = (sizeof(unsigned char) * 3);
+				bytesOfPixel = (sizeof(ktx_uint8_t) * 3);
 
 				//MNEMOSY_ERROR("You cannot export this texture as a color map because it only has one channel.");
 				//return false;
@@ -529,16 +529,16 @@ namespace mnemosy::graphics
 
 		// Number of mipmaps
 		if (exportMips) {
-			createInfo.numLevels = (ktx_uint32_t)log2(createInfo.baseWidth) + 1;
-			createInfo.generateMipmaps = KTX_FALSE;
+			// Force Mip export always off for now because there is issue with some texture not able to export on lower mips
+			createInfo.numLevels = 1;
+			createInfo.generateMipmaps = KTX_TRUE;
+			//createInfo.numLevels = (ktx_uint32_t)log2(createInfo.baseWidth) + 1;  
+			//createInfo.generateMipmaps = KTX_FALSE;
 		}
 		else {
 			createInfo.numLevels = 1;
 			createInfo.generateMipmaps = KTX_TRUE;
 		}
-		// Force Mip export always off
-		//createInfo.numLevels = 1;
-		//createInfo.generateMipmaps = KTX_TRUE;
 
 
 		createInfo.numLayers = 1; // num of array elements should be 0 no array
@@ -571,7 +571,7 @@ namespace mnemosy::graphics
 				if (nextMip_Width <= 2 || nextMip_Height <= 2)
 					break;
 
-				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(unsigned char);
+				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(uint8_t);
 
 				float aspectRatio = (float)nextMip_Width / (float)nextMip_Height;
 				MNEMOSY_TRACE("ExportingMip: {}, Width: {}	Height: {}	Channels: {}	Bytes: {}	Aspect Ratio: {}", mip, nextMip_Width, nextMip_Height, channels, (float)mipSizeBytes, aspectRatio);
@@ -581,27 +581,33 @@ namespace mnemosy::graphics
 				}*/
 
 				//unsigned char* pixels = new unsigned char[mipSizeBytes];
-				void* pixels = malloc(mipSizeBytes);
+
+				//void* pixels = malloc(mipSizeBytes);
+
+				uint8_t* pixels = new uint8_t[mipSizeBytes];
 
 				// RGB or RGBA texture
 				// get pixel data from a glUploadedTexture
 				if (channels == 4) {
-					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGBA, GL_UNSIGNED_BYTE, pixels); 
+					glGetnTexImage(GL_TEXTURE_2D, mip, GL_RGBA, GL_UNSIGNED_BYTE, mipSizeBytes, pixels);
+					//glGetTextureImage(glTextureID, mip, GL_RGBA, GL_UNSIGNED_BYTE, mipSizeBytes, pixels);
 				}
 				else if (channels == 3) {
-					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+					//glGetTextureImage(glTextureID, mip, GL_RGBA, GL_UNSIGNED_BYTE, mipSizeBytes, pixels);
+					glGetnTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_UNSIGNED_BYTE,mipSizeBytes, pixels);
 				}
 
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, static_cast<unsigned char*>(pixels), mipSizeBytes); //
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, mipSizeBytes); //
 				if (errorCode != 0) {
 					MNEMOSY_ERROR("KtxImage::ExportGlTexture: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
 					ktxTexture_Destroy(ktxTexture(texture));
-					//delete[] pixels;
-					free(pixels);
+					delete[] pixels;
+					//free(pixels);
 					return false;
 				}
-				//delete[] pixels;
-				free(pixels);
+				delete[] pixels;
+				//free(pixels);
+							
 
 				nextMip_Width  = (int)((double)nextMip_Width * 0.5f);
 				nextMip_Height = (int)((double)nextMip_Height * 0.5f);
@@ -615,12 +621,16 @@ namespace mnemosy::graphics
 				if (nextMip_Width <= 2 || nextMip_Height <= 2)
 					break;
 				
-				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(short);
+				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(ktx_uint16_t);
 
-				short* pixels = new short[mipSizeBytes];
+				float aspectRatio = (float)nextMip_Width / (float)nextMip_Height;
+				MNEMOSY_TRACE("ExportingMip: {}, Width: {}	Height: {}	Channels: {}	Bytes: {}	Aspect Ratio: {}", mip, nextMip_Width, nextMip_Height, channels, (float)mipSizeBytes, aspectRatio);
+
 					
+				ktx_uint16_t* pixels = new ktx_uint16_t[mipSizeBytes];
+
 				glGetTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_HALF_FLOAT, pixels);
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, reinterpret_cast<unsigned char*>(pixels), mipSizeBytes);
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, mipSizeBytes);
 				if (errorCode != 0) {
 
 					MNEMOSY_ERROR("KtxImage::ExportGLTexture: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
@@ -642,12 +652,12 @@ namespace mnemosy::graphics
 				if (nextMip_Width <= 2 || nextMip_Height <= 2)
 					break;
 				
-				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(short);
-				short* pixels = new short[mipSizeBytes];
+				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(ktx_uint16_t);
+				ktx_uint16_t* pixels = new ktx_uint16_t[mipSizeBytes];
 
 				glGetTexImage(GL_TEXTURE_2D, mip, GL_RED, GL_HALF_FLOAT, pixels);
 
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, reinterpret_cast<unsigned char*>(pixels), mipSizeBytes);
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, mipSizeBytes);
 				if (errorCode != 0) {
 					MNEMOSY_ERROR("KtxImage::ExportGLTexure: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
 					ktxTexture_Destroy(ktxTexture(texture));
