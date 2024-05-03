@@ -20,9 +20,9 @@ namespace mnemosy::systems
 {
 	enum ExportImageFormat
 	{
-		MNSY_KTX2 = 0,
-		MNSY_PNG = 1,
-		MNSY_TIF = 2
+		//MNSY_KTX2 = 0,
+		MNSY_TIF = 0,
+		MNSY_PNG = 1
 	};
 
 	class ExportManager
@@ -43,11 +43,13 @@ namespace mnemosy::systems
 		void SetNormalMapExportFormatInt(int format);
 		void SetNormalMapExportFormat(graphics::NormalMapFormat format) { m_exportNormalFormat = format; }
 		const int GetNormalMapExportFormatInt() { return (const int)m_exportNormalFormat; }
+		void ExportMaterialTexturePngOrTif(fs::path& exportPath,graphics::Texture& texture,bool singleChannelTexture,bool bits16);
+		void ExportGlTexturePngOrTiff(fs::path& exportPath, int glTextureId, int width, int height);
+
 
 		std::vector<std::string>& GetLastExportedFilePaths();
 	private:
 		void ExportAsKtx2(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material);
-		void ExportMaterialTexturePngOrTif(fs::path& exportPath,graphics::Texture& texture,bool singleChannelTexture,bool bits16);
 
 
 		std::vector<std::string> m_lastExportedFilePaths;

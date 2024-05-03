@@ -125,7 +125,7 @@ namespace mnemosy::core {
 
 		// Start drag operation
 		DWORD dwEffect = 0;
-		hr = DoDragDrop(pDataObject, pDropSource, DROPEFFECT_COPY | DROPEFFECT_MOVE, &dwEffect);
+		hr = DoDragDrop(pDataObject, pDropSource, DROPEFFECT_COPY, &dwEffect);
 		if (SUCCEEDED(hr)) {
 			MNEMOSY_TRACE("DropHandler::BeginDrag::DoDragDrop() Succeeded");
 		}
@@ -198,11 +198,15 @@ namespace mnemosy::core {
 		bool haveMouseButton = (grfKeyState && MK_LBUTTON) || (grfKeyState && MK_RBUTTON);
 
 		if (fEscapePressed && haveMouseButton) {
+		//MNEMOSY_TRACE("ContinueDrag CANCEL");
 			return DRAGDROP_S_CANCEL;
 		}
 		else if (!haveMouseButton) {
+		//MNEMOSY_TRACE("ContinueDrag DROP");
 			return DRAGDROP_S_DROP;
 		}
+
+		//MNEMOSY_TRACE("ContinueDrag S_OK");
 		return S_OK;
 	}
 

@@ -6,6 +6,7 @@
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/Utils/KtxImage.h"
+#include "Include/Systems/ExportManager.h"
 
 #include <glad/glad.h>
 
@@ -57,6 +58,7 @@ namespace mnemosy::systems
 		unsigned int width = material.GetNormalTexture().GetWidth();
 		unsigned int height = material.GetNormalTexture().GetHeight();
 		
+
 		// === START FRAME
 		glViewport(0,0,width, height);
 
@@ -90,10 +92,22 @@ namespace mnemosy::systems
 		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
+
+		
 		// Export to ktx2 file
 		if (exportKtx2) {
-			graphics::KtxImage img;
-			img.ExportGlTexture(exportPath, m_renderTexture_ID, 3, width, height, graphics::MNSY_NORMAL, true);
+
+			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
+			fs::path p = fs::path(exportPath);
+			//exporter.ExportMaterialTexturePngOrTif(p, false, true);
+			exporter.ExportGlTexturePngOrTiff(p, m_renderTexture_ID, width, height);
+
+
+
+
+
+			//graphics::KtxImage img;
+			//img.ExportGlTexture(exportPath, m_renderTexture_ID, 3, width, height, graphics::MNSY_NORMAL, true);
 		}
 
 		// === END FRAME

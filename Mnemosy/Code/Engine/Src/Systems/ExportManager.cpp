@@ -41,11 +41,11 @@ namespace mnemosy::systems
 		if (!m_lastExportedFilePaths.empty())
 			m_lastExportedFilePaths.clear();
 
-		if (m_exportImageFormat == MNSY_KTX2) {
-			
-			ExportAsKtx2(exportPath,materialFolderPath,material);
-			return true;
-		}
+		//if (m_exportImageFormat == MNSY_KTX2) {
+		//	
+		//	ExportAsKtx2(exportPath,materialFolderPath,material);
+		//	return true;
+		//}
 
 		std::string fileExtention = ".png";
 		if (m_exportImageFormat == MNSY_TIF) {
@@ -133,15 +133,17 @@ namespace mnemosy::systems
 		//MNSY_PNG = 1;
 		//MNSY_TIF = 2;
 		
+
+
 		if (format == 0) {
-			m_exportImageFormat = MNSY_KTX2;
+			m_exportImageFormat = MNSY_TIF;
 		}
 		else if (format == 1) {
 			m_exportImageFormat = MNSY_PNG;
 		}
-		else if (format == 2) {
-			m_exportImageFormat = MNSY_TIF;
-		}
+		//else if (format == 2) {
+		//	m_exportImageFormat = MNSY_TIF;
+		//}
 	}
 
 	
@@ -159,7 +161,7 @@ namespace mnemosy::systems
 
 	std::string ExportManager::GetExportImageFormatString() {
 
-		const char* exportFormats[] = { "ktx2", "png","tiff" }; // they need to be ordered the same as in ExportManager ExportImageFormats
+		const char* exportFormats[] = { "tiff", "png"}; // they need to be ordered the same as in ExportManager ExportImageFormats
 
 		return exportFormats[m_exportImageFormat];
 	}
@@ -334,6 +336,28 @@ namespace mnemosy::systems
 
 
 		MNEMOSY_INFO("Exported: {}", exportPath.generic_string());
+	}
+
+	void ExportManager::ExportGlTexturePngOrTiff(fs::path& exportPath, int glTextureId, int width, int height)
+	{
+		// TODO: Make this function work for all types of textures 
+		// Only designed to be used with normal maps atm
+
+		cv::Mat img;
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, glTextureId);
+		
+		unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * 3);
+
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_SHORT, gl_texture_bytes);
+		img = cv::Mat(height, width, CV_16UC3, gl_texture_bytes);
+
+
+		cv::flip(img, img, 0);
+		cv::imwrite(exportPath.generic_string().c_str(), img);
+		img.release();
+
+		free(gl_texture_bytes);
 	}
 
 	std::string ExportManager::GetExportNormalFormatString()

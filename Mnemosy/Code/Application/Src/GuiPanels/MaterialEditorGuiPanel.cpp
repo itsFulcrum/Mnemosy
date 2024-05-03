@@ -59,7 +59,7 @@ namespace mnemosy::gui
 		graphics::Material& activeMat = engineInstance.GetScene().GetActiveMaterial();
 		ImVec2 buttonSize = ImVec2(120, 0);
 		const char* normalMapFormats[] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
-		const char* exportFormats[] = { "ktx2", "png","tiff"}; // they need to be ordered the same as in ExportManager ExportImageFormats
+		const char* exportFormats[] = { "tiff","png"}; // they need to be ordered the same as in ExportManager ExportImageFormats
 		fs::path libDir = engineInstance.GetFileDirectories().GetLibraryDirectoryPath();
 		systems::ExportManager& exportManager = engineInstance.GetExportManager();
 
@@ -121,7 +121,7 @@ namespace mnemosy::gui
 			{
 				std::string dragButtonName = "Drag";
 				ImVec2 dragButton = ImVec2(120.0f, 20.0f);
-				if (m_readyToDragMaterial) {
+				if (m_isDraggingOnce) {
 					dragButtonName = "Drag Me";
 				}
 				else {
@@ -130,27 +130,54 @@ namespace mnemosy::gui
 
 				if (ImGui::Button(dragButtonName.c_str(), ImVec2(120.0f, 45.0f))) {
 
-					if (!m_readyToDragMaterial) {
-
-						// Export Active Material Texture to a temporary folder so we can drag them.
-						// Temp Folder is delete if we close menmosy or when we start it.
-						fs::path tempFolder = engineInstance.GetFileDirectories().GetTempExportFolderPath();
-						if (!tempFolder.empty()) {
-							fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-							exportManager.ExportMaterialTextures(tempFolder, materialFolderPath, activeMat);
-						}
-					}
-
-					m_readyToDragMaterial = true;
+					//if (!m_readyToDragMaterial) {
+					//
+					//	// Export Active Material Texture to a temporary folder so we can drag them.
+					//	// Temp Folder is delete if we close menmosy or when we start it.
+					//	fs::path tempFolder = engineInstance.GetFileDirectories().GetTempExportFolderPath();
+					//	if (!tempFolder.empty()) {
+					//		fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+					//		exportManager.ExportMaterialTextures(tempFolder, materialFolderPath, activeMat);
+					//	}
+					//}
+					//
+					//m_readyToDragMaterial = true;
 					m_isDraggingOnce = true;
 				}
 
+				m_readyToDragMaterial = true;
 				if (m_readyToDragMaterial) {
 
 					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
 						
 						// works but if we escape or drop into our own app it repeatadly calls this witch is not ideal
-						engineInstance.GetDropHandler().BeginDrag(exportManager.GetLastExportedFilePaths());
+
+						// get files to drag
+
+
+						if (m_isDraggingOnce) {
+
+							std::vector<std::string> filepaths = m_materialRegistry.GetFilepathsOfActiveMat(activeMat);
+
+							if (!filepaths.empty()) {
+								m_isDraggingOnce = false;
+
+								engineInstance.GetDropHandler().BeginDrag(filepaths);
+
+								filepaths.clear();
+							}
+							else {
+
+								MNEMOSY_WARN("No texture files to drag in this material");
+							}
+
+
+						}
+
+
+
+
+
 
 						/*
 						if (m_isDraggingOnce) {
@@ -397,10 +424,12 @@ namespace mnemosy::gui
 					// if format changed
 					if (activeMat.GetNormalFormatAsInt() != format_current) {
 						fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-						fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + "_normal.ktx2"));
+						fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + "_normal.tif"));
 										
 						// Generate inverted normal Texture.
 						MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat,true);
+
+						
 
 						// save normal format to material data file.
 						if (format_current == 0) {
@@ -412,7 +441,9 @@ namespace mnemosy::gui
 						m_materialRegistry.SaveActiveMaterialToFile();
 
 						// Load newly created texture as new normal map 
-						activeMat.GetNormalTexture().LoadFromKtx(normalMapPath.generic_string().c_str());
+
+						activeMat.GetNormalTexture().generateFromFile(normalMapPath.generic_string().c_str(),true,true);
+						//activeMat.GetNormalTexture().LoadFromKtx(normalMapPath.generic_string().c_str());
 						m_readyToDragMaterial = false;
 
 					}
@@ -595,9 +626,12 @@ namespace mnemosy::gui
 		ImGui::Spacing();
 
 
-		if (ImGui::Button("Save Material", buttonSize)) {
+		if (m_materialRegistry.UserMaterialBound()) {
 
-			m_materialRegistry.SaveActiveMaterialToFile();
+			if (ImGui::Button("Save Material", buttonSize)) {
+
+				m_materialRegistry.SaveActiveMaterialToFile();
+			}
 		}
 
 

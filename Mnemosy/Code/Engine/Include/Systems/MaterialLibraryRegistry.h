@@ -20,6 +20,7 @@ namespace mnemosy::core {
 namespace mnemosy::graphics {
 	enum PBRTextureType;
 	enum NormapMapFormat;
+	class Material;
 }
 
 namespace mnemosy::systems
@@ -101,6 +102,9 @@ namespace mnemosy::systems
 
 		void OpenFolderNode(FolderNode* node);
 		void ClearUserMaterialsAndFolders();
+
+		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
+
 	private:
 
 		core::FileDirectories& m_fileDirectories;

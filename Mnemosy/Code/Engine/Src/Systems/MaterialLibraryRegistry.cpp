@@ -7,6 +7,8 @@
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Utils/KtxImage.h"
+#include "Include/Systems/ExportManager.h"
+
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/ThumbnailManager.h"
@@ -341,7 +343,7 @@ namespace mnemosy::systems
 			// Renaming all accosiated textures
 			if (readFile["albedoAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["albedoPath"].get<std::string>();
-				std::string newFileName = finalName + "_albedo.ktx2";
+				std::string newFileName = finalName + "_albedo.tif";
 				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 				fs::path newTextureFile = materialDir / fs::path(newFileName);				
 				try { fs::rename(oldTextureFile, newTextureFile); } 
@@ -350,7 +352,7 @@ namespace mnemosy::systems
 			}
 			if (readFile["normalAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["normalPath"].get<std::string>();
-				std::string newFileName = finalName + "_normal.ktx2";
+				std::string newFileName = finalName + "_normal.tif";
 				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 				fs::path newTextureFile = materialDir / fs::path(newFileName);
 				try { fs::rename(oldTextureFile, newTextureFile);}
@@ -359,7 +361,7 @@ namespace mnemosy::systems
 			}
 			if (readFile["roughAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["roughPath"].get<std::string>();
-				std::string newFileName = finalName + "_roughness.ktx2";
+				std::string newFileName = finalName + "_roughness.tif";
 				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 				fs::path newTextureFile = materialDir / fs::path(newFileName);
 				try { fs::rename(oldTextureFile, newTextureFile);}
@@ -368,7 +370,7 @@ namespace mnemosy::systems
 			}
 			if (readFile["metalAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["metalPath"].get<std::string>();
-				std::string newFileName = finalName + "_metallic.ktx2";
+				std::string newFileName = finalName + "_metallic.tif";
 				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 				fs::path newTextureFile = materialDir / fs::path(newFileName);
 				try { fs::rename(oldTextureFile, newTextureFile);}
@@ -377,7 +379,7 @@ namespace mnemosy::systems
 			}
 			if (readFile["emissionAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["emissionPath"].get<std::string>();
-				std::string newFileName = finalName + "_emissive.ktx2";
+				std::string newFileName = finalName + "_emissive.tif";
 				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 				fs::path newTextureFile = materialDir / fs::path(newFileName);
 				try { fs::rename(oldTextureFile, newTextureFile);}
@@ -386,7 +388,7 @@ namespace mnemosy::systems
 			}
 			if (readFile["aoAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["aoPath"].get<std::string>();
-				std::string newFileName = finalName + "_ambientOcclusion.ktx2";
+				std::string newFileName = finalName + "_ambientOcclusion.tif";
 				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 				fs::path newTextureFile = materialDir / fs::path(newFileName);
 				try {fs::rename(oldTextureFile, newTextureFile);}
@@ -603,31 +605,38 @@ namespace mnemosy::systems
 			if (albedoTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["albedoPath"].get<std::string>();
 				graphics::Texture* albedoTex = new graphics::Texture();
-				albedoTex->LoadFromKtx(path.c_str());
+
+				albedoTex->generateFromFile(path.c_str(), true, true);
+				//albedoTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::ALBEDO, albedoTex);
 			}
 			if (roughnessTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["roughPath"].get<std::string>();
 				graphics::Texture* roughnessTex = new graphics::Texture();
-				roughnessTex->LoadFromKtx(path.c_str());
+				
+				roughnessTex->generateFromFile(path.c_str(), true, true);
+				//roughnessTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::ROUGHNESS, roughnessTex);
 			}
 			if (metalTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["metalPath"].get<std::string>();
 				graphics::Texture* metallicTex = new graphics::Texture();
-				metallicTex->LoadFromKtx(path.c_str());
+				metallicTex->generateFromFile(path.c_str(), true, true);
+				//metallicTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::METALLIC, metallicTex);
 			}
 			if (emissionTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["emissionPath"].get<std::string>();
 				graphics::Texture* emissionTex = new graphics::Texture();
-				emissionTex->LoadFromKtx(path.c_str());
+				emissionTex->generateFromFile(path.c_str(), true, true);
+				//emissionTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::EMISSION, emissionTex);
 			}
 			if (normalTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["normalPath"].get<std::string>();
 				graphics::Texture* normalTex = new graphics::Texture();
-				normalTex->LoadFromKtx(path.c_str());
+				normalTex->generateFromFile(path.c_str(), true, true);
+				//normalTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::NORMAL, normalTex);
 
 				int normalFormat = readFile["normalMapFormat"].get<int>();
@@ -641,7 +650,8 @@ namespace mnemosy::systems
 			if (aoTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile["aoPath"].get<std::string>();
 				graphics::Texture* aoTex = new graphics::Texture();
-				aoTex->LoadFromKtx(path.c_str());
+				aoTex->generateFromFile(path.c_str(), true, true);
+				//aoTex->LoadFromKtx(path.c_str());
 				mat->assignTexture(graphics::PBRTextureType::AMBIENTOCCLUSION, aoTex);
 			}
 			// load thumbnail
@@ -710,12 +720,12 @@ namespace mnemosy::systems
 
 		std::string matName = activeMat.Name;
 
-		if (albedoAssigned)		{ albedoPath	= matName	+ "_albedo.ktx2"; }
-		if (roughAssigned)		{ roughnessPath = matName	+ "_roughness.ktx2"; }
-		if (metalAssigned)		{ metallicPath	= matName	+ "_metallic.ktx2"; }
-		if (emissionAssigned)	{ emissionPath	= matName	+ "_emissive.ktx2"; }
-		if (normalAssigned)		{ normalPath	= matName	+ "_normal.ktx2"; }
-		if (aoAssigned)			{ aoPath		= matName	+ "_ambientOcclusion.ktx2"; }
+		if (albedoAssigned)		{ albedoPath	= matName	+ "_albedo.tif"; }
+		if (roughAssigned)		{ roughnessPath = matName	+ "_roughness.tif"; }
+		if (metalAssigned)		{ metallicPath	= matName	+ "_metallic.tif"; }
+		if (emissionAssigned)	{ emissionPath	= matName	+ "_emissive.tif"; }
+		if (normalAssigned)		{ normalPath	= matName	+ "_normal.tif"; }
+		if (aoAssigned)			{ aoPath		= matName	+ "_ambientOcclusion.tif"; }
 
 		MaterialJson["albedoAssigned"]		= albedoAssigned;
 		MaterialJson["roughAssigned"]		= roughAssigned;
@@ -764,7 +774,9 @@ namespace mnemosy::systems
 		}
 		
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
-		
+		systems::ExportManager& exportManager = MnemosyEngine::GetInstance().GetExportManager();
+
+
 		if (!UserMaterialBound()) {
 
 			activeMat.assignTexture(textureType, tex);
@@ -779,72 +791,82 @@ namespace mnemosy::systems
 
 		if (textureType == graphics::ALBEDO) {
 			
-			filename = activeMat.Name + "_albedo.ktx2";
+			filename = activeMat.Name + "_albedo.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
-			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
-			if (!success) {
-				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-				activeMat.removeTexture(graphics::ALBEDO);
-				delete tex;
-				return;
-			}
+			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
+
+
+			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
+			//if (!success) {
+			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+			//	activeMat.removeTexture(graphics::ALBEDO);
+			//	delete tex;
+			//	return;
+			//}
 
 		}
 		else if (textureType == graphics::NORMAL) {
-			filename = activeMat.Name + "_normal.ktx2";
+			filename = activeMat.Name + "_normal.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
-			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_NORMAL, true);
-			if (!success) {
-				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-				activeMat.removeTexture(graphics::NORMAL);
-				delete tex;
-				return;
-			}
+			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, true);
+
+			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_NORMAL, true);
+			//if (!success) {
+			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+			//	activeMat.removeTexture(graphics::NORMAL);
+			//	delete tex;
+			//	return;
+			//}
 
 		}
 		else if (textureType == graphics::ROUGHNESS) {
-			filename = activeMat.Name + "_roughness.ktx2";
+			filename = activeMat.Name + "_roughness.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
-			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
-			if (!success) {
-				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-				activeMat.removeTexture(graphics::ROUGHNESS);
-				delete tex;
-				return;
-			}
+			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
+
+			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			//if (!success) {
+			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+			//	activeMat.removeTexture(graphics::ROUGHNESS);
+			//	delete tex;
+			//	return;
+			//}
 		}
 		else if (textureType == graphics::METALLIC) {
-			filename = activeMat.Name + "_metallic.ktx2";
+			filename = activeMat.Name + "_metallic.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
-			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
-			if (!success) {
-				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-				activeMat.removeTexture(graphics::METALLIC);
-				delete tex;
-				return;
-			}
+			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
+			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			//if (!success) {
+			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+			//	activeMat.removeTexture(graphics::METALLIC);
+			//	delete tex;
+			//	return;
+			//}
 		}
 		else if (textureType == graphics::AMBIENTOCCLUSION) {
-			filename = activeMat.Name + "_ambientOcclusion.ktx2";
+			filename = activeMat.Name + "_ambientOcclusion.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
-			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
-			if (!success) {
-				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-				activeMat.removeTexture(graphics::AMBIENTOCCLUSION);
-				delete tex;
-				return;
-			}
+			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
+			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
+			//if (!success) {
+			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+			//	activeMat.removeTexture(graphics::AMBIENTOCCLUSION);
+			//	delete tex;
+			//	return;
+			//}
 		}
 		else if (textureType == graphics::EMISSION) {
-			filename = activeMat.Name + "_emissive.ktx2";
+			filename = activeMat.Name + "_emissive.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
-			bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
-			if (!success) {
-				MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-				activeMat.removeTexture(graphics::EMISSION);
-				delete tex;
-				return;
-			}
+			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
+			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
+			//if (!success) {
+			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
+			//	activeMat.removeTexture(graphics::EMISSION);
+			//	delete tex;
+			//	return;
+			//}
 		}
 
 		// save material data file
@@ -1055,6 +1077,57 @@ namespace mnemosy::systems
 		}
 		
 		SaveUserDirectoriesData();
+	}
+
+	std::vector<std::string> MaterialLibraryRegistry::GetFilepathsOfActiveMat(graphics::Material& activeMat)
+	{
+		std::vector<std::string> paths;
+
+
+		if (!UserMaterialBound()) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::GetFilepathsOfActiveMat: No active material");
+			return paths;
+		}
+
+
+
+		fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+
+		fs::path materialFolder = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+
+		if (activeMat.isAlbedoAssigned()) {
+			fs::path p = materialFolder / fs::path(activeMat.Name + "_albedo.tif");
+			paths.push_back(p.generic_string());
+			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
+		}
+		if (activeMat.isNormalAssigned()) {
+			fs::path p = materialFolder / fs::path(activeMat.Name + "_normal.tif");
+			paths.push_back(p.generic_string());
+			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
+		}
+		if (activeMat.isRoughnessAssigned()) {
+			fs::path p = materialFolder / fs::path(activeMat.Name + "_roughness.tif");
+			paths.push_back(p.generic_string());
+			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
+		}
+		if (activeMat.isMetallicAssigned()) {
+			fs::path p = materialFolder / fs::path(activeMat.Name + "_metallic.tif");
+			paths.push_back(p.generic_string());
+			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
+		}
+		if (activeMat.isAoAssigned()) {
+			fs::path p = materialFolder / fs::path(activeMat.Name + "_ambientOcclusion.tif");
+			paths.push_back(p.generic_string());
+			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
+		}
+		if (activeMat.isEmissiveAssigned()) {
+			fs::path p = materialFolder / fs::path(activeMat.Name + "_emissive.tif");
+			paths.push_back(p.generic_string());
+			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
+		}
+
+		return paths;
+
 	}
 
 	
