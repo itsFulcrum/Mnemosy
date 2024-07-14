@@ -4,6 +4,7 @@
 #include "Include/Core/FileDirectories.h"
 #include "Include/Core/Log.h"
 #include "Include/Graphics/Material.h"
+#include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 #include "Include/Systems/ExportManager.h"

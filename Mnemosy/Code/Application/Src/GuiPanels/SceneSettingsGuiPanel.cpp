@@ -35,7 +35,7 @@ namespace mnemosy::gui
 		graphics::Scene& scene = engine.GetScene();
 		graphics::Renderer& renderer = engine.GetRenderer();
 
-		ImGui::Begin(panelName.c_str(), &showPanel);
+		ImGui::Begin(panelName, &showPanel);
 		
 		// --- Render Mesh settings
 		if (ImGui::TreeNode("Mesh Settings"))

@@ -9,7 +9,6 @@ using namespace nlohmann;
 namespace mnemosy::systems {
 	struct MaterialInfo;
 	struct FolderNode;
-	struct JsonLibKeys;
 }
 
 namespace mnemosy::systems {
@@ -50,7 +49,7 @@ namespace mnemosy::systems {
 		void RecursivDeleteHierarchy(FolderNode* node);
 		void RecursivUpdatePathFromRoot(FolderNode* node);
 
-		unsigned int RecursivCheckNames(FolderNode* node, const std::string& name, const unsigned int suffixNbr);
+		bool RecursivDoesNameExist(FolderNode* node, const std::string& name);
 
 
 		json RecursivWriteToJson(FolderNode* node);
@@ -61,8 +60,6 @@ namespace mnemosy::systems {
 
 		std::string m_rootNodeName;
 		FolderNode* m_rootNode = nullptr;
-
-		JsonLibKeys* m_jsonLibKeys = nullptr;
 	}; 
 
 

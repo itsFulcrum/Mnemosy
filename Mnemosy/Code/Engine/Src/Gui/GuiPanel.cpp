@@ -7,15 +7,12 @@
 namespace mnemosy::gui
 {
 	GuiPanel::GuiPanel() {
-		//MNEMOSY_TRACE("GuiPanel Constructor");
+
 	}
 
 	GuiPanel::~GuiPanel() {
-		//MNEMOSY_TRACE("GuiPanel: Destructor");
 
 	}
-
-
 	void GuiPanel::Render()
 	{
 		Draw();
@@ -23,7 +20,7 @@ namespace mnemosy::gui
 
 	std::string GuiPanel::GetName()
 	{
-		return panelName;
+		return std::string(panelName);
 	}
 
 } // !mnemosy::gui

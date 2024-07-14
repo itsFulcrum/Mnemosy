@@ -36,7 +36,6 @@ ${ENGINE_SOURCE_PATH}/Src/Systems/TextureGenerationManager.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/ExportManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/ExportManager.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/JsonKeys.h
-${ENGINE_SOURCE_PATH}/Src/Systems/JsonKeys.cpp
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/PlatfromUtils_Windows.cpp
@@ -58,6 +57,7 @@ ${ENGINE_SOURCE_PATH}/include/Graphics/MeshData.h
 ${ENGINE_SOURCE_PATH}/include/Graphics/ModelData.h
 ${ENGINE_SOURCE_PATH}/include/Graphics/ModelLoader.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/ModelLoader.cpp
+${ENGINE_SOURCE_PATH}/Include/Graphics/TextureDefinitions.h
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Texture.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Texture.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Material.h

@@ -1,7 +1,6 @@
 #ifndef EXPORT_MANAGER_H
 #define EXPORT_MANAGER_H
 
-#include "Include/Graphics/Material.h"
 
 #include <vector>
 #include <string>
@@ -13,17 +12,13 @@ namespace mnemosy::graphics
 {
 	class Material;
 	class Texture;
+	enum ExportImageFormat;
 	enum NormalMapFormat;
 }
 
 namespace mnemosy::systems
 {
-	enum ExportImageFormat
-	{
-		//MNSY_KTX2 = 0,
-		MNSY_TIF = 0,
-		MNSY_PNG = 1
-	};
+
 
 	class ExportManager
 	{
@@ -37,7 +32,7 @@ namespace mnemosy::systems
 
 
 		void SetExportImageFormatInt(int format);
-		void SetExportImageFormat(ExportImageFormat format) { m_exportImageFormat = format; }
+		void SetExportImageFormat(graphics::ExportImageFormat format) { m_exportImageFormat = format; }
 		const int GetExportImageFormatInt() { return (const int)m_exportImageFormat; }
 
 		void SetNormalMapExportFormatInt(int format);
@@ -57,8 +52,8 @@ namespace mnemosy::systems
 		std::string GetExportNormalFormatString();
 		std::string GetExportImageFormatString();
 
-		ExportImageFormat m_exportImageFormat = systems::MNSY_PNG;
-		graphics::NormalMapFormat m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_OPENGl;
+		graphics::ExportImageFormat m_exportImageFormat;
+		graphics::NormalMapFormat m_exportNormalFormat;
 
 	};
 

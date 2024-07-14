@@ -75,7 +75,9 @@ namespace mnemosy
 			MNEMOSY_INFO("Platform Linux");
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
+		
 		//MNEMOSY_TRACE("Initializing Subsystems");
+		//  === !!!  order of initialization here matters !!!! ===
 
 		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
 		//MNEMOSY_TRACE("FileDirectories Initialized");
@@ -89,7 +91,6 @@ namespace mnemosy
 		m_pClock = std::make_unique<core::Clock>();
 		m_pClock->capDeltaTime = true;
 		//MNEMOSY_TRACE("Clock Initialized");
-		// order of initialization here matters
 		
 		
 		m_pDropHandler = std::make_unique<core::DropHandler>();

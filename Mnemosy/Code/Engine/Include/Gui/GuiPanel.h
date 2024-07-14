@@ -22,7 +22,7 @@ namespace mnemosy::gui
 		std::string GetName();
 	protected:
 		bool showPanel = true;
-		std::string panelName = "";
+		const char* panelName = "";
 
 	};
 } // mnemosy::gui

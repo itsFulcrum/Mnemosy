@@ -101,6 +101,10 @@ namespace mnemosy::systems
 		fs::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
 		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath);
 		void DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType);
+		
+		fs::path GetLibraryPath();
+		fs::path GetFolderPath(FolderNode* node);
+		fs::path GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo);
 
 
 		void OpenFolderNode(FolderNode* node);

@@ -5,6 +5,8 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+
 
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -14,18 +16,15 @@
 #include <commdlg.h>
 #include <shobjidl_core.h>
 //#include <shlobj_core.h>
-//#include <Shellapi.h>
+#include <Shellapi.h>
 
 
 #include <filesystem>
 
 
-#ifdef MNEMOSY_PLATFORM_WINDOWS
 
 namespace mnemosy::core
 {
-
-
 	// functions return empty string if it didn't work so check for empty string pls
 
 	// filter can be like this ->     "png (*.png)\0*.png"
@@ -103,6 +102,31 @@ namespace mnemosy::core
 		
 	
 		return std::string();
+	}
+
+	void FileDialogs::OpenFolderAt(const char* filepath)
+	{
+		// check if filepath exists 
+
+		std::filesystem::path path = std::filesystem::path(filepath);
+
+		std::filesystem::directory_entry dir = std::filesystem::directory_entry(path);
+
+		if (dir.exists()) {
+
+			if (dir.is_directory()) {
+
+
+				ShellExecute(NULL, "open", path.generic_string().c_str() , NULL, NULL, SW_SHOWNORMAL);
+			}
+			else {
+				MNEMOSY_ERROR("PlatformUtils_Windows::OpenFolderAt:  filepath is not a directory: \nPath: {}", filepath);
+			}
+
+		}
+		else {
+			MNEMOSY_ERROR("PlatformUtils_Windows::OpenFolderAt:  filepath does not exists: \nPath: {}", filepath);
+		}
 	}
 
 

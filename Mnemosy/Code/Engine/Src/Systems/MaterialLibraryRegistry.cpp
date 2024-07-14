@@ -1,16 +1,19 @@
 #include "Include/Systems/MaterialLibraryRegistry.h"
 
+#include "Include/MnemosyEngine.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
-#include "Include/MnemosyEngine.h"
+#include "Include/Core/FileDirectories.h"
 #include "Include/Graphics/Renderer.h"
+#include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Utils/KtxImage.h"
-#include "Include/Systems/ExportManager.h"
 
-#include "Include/Core/FileDirectories.h"
+
+#include "Include/Systems/JsonKeys.h"
+#include "Include/Systems/ExportManager.h"
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/FolderTree.h"
 #include "Include/Systems/ThumbnailManager.h"
@@ -26,7 +29,7 @@ namespace mnemosy::systems
 	MaterialLibraryRegistry::MaterialLibraryRegistry() 
 		: m_fileDirectories{MnemosyEngine::GetInstance().GetFileDirectories()}
 	{
-		m_folderTree = new FolderTree("Root");
+		m_folderTree = new FolderTree(jsonLibKey_RootNodeName);
 		
 
 		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetDataPath() / fs::path("UserLibraryDirectories.mnsydata");
@@ -281,9 +284,21 @@ namespace mnemosy::systems
 
 		// Copy Default thumbnail image
 		fs::path pathToDefaultThumbnail = m_fileDirectories.GetTexturesPath() / fs::path("default_thumbnail.ktx2");
-		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(matInfo.name + "_thumbnail.ktx2");
-		fs::copy_file(pathToDefaultThumbnail,pathToMaterialThumbnail);
-						
+		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(matInfo.name + texture_fileSuffix_thumbnail);
+		
+		try {
+			fs::copy_file(pathToDefaultThumbnail, pathToMaterialThumbnail);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error copyingFile. \nError message: {}", error.what());
+
+			return;
+		}
+
+				
+
+
+
 		CreateNewMaterialDataFile(materialDirectory, matInfo.name);
 
 		// check if it was created in the currently opend folder
@@ -331,73 +346,106 @@ namespace mnemosy::systems
 			}
 			dataFileStream.close();
 
-			readFile["name"] = finalName;
+			readFile[jsonMatKey_name] = finalName;
 			
-			// TODO: simplify this into a funciton
 			// Renaming all accosiated textures
-			if (readFile["albedoAssigned"].get<bool>()) {
-				std::string oldFileName = readFile["albedoPath"].get<std::string>();
-				std::string newFileName = finalName + "_albedo.tif";
-				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
-				fs::path newTextureFile = materialDir / fs::path(newFileName);				
-				try { fs::rename(oldTextureFile, newTextureFile); } 
-				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}				
-				readFile["albedoPath"] = newFileName;
-			}
-			if (readFile["normalAssigned"].get<bool>()) {
-				std::string oldFileName = readFile["normalPath"].get<std::string>();
-				std::string newFileName = finalName + "_normal.tif";
-				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
-				fs::path newTextureFile = materialDir / fs::path(newFileName);
-				try { fs::rename(oldTextureFile, newTextureFile);}
-				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
-				readFile["normalPath"] = newFileName;
-			}
-			if (readFile["roughAssigned"].get<bool>()) {
-				std::string oldFileName = readFile["roughPath"].get<std::string>();
-				std::string newFileName = finalName + "_roughness.tif";
-				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
-				fs::path newTextureFile = materialDir / fs::path(newFileName);
-				try { fs::rename(oldTextureFile, newTextureFile);}
-				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
-				readFile["roughPath"] = newFileName;
-			}
-			if (readFile["metalAssigned"].get<bool>()) {
-				std::string oldFileName = readFile["metalPath"].get<std::string>();
-				std::string newFileName = finalName + "_metallic.tif";
-				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
-				fs::path newTextureFile = materialDir / fs::path(newFileName);
-				try { fs::rename(oldTextureFile, newTextureFile);}
-				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); }
-				readFile["metalPath"] = newFileName;
-			}
-			if (readFile["emissionAssigned"].get<bool>()) {
-				std::string oldFileName = readFile["emissionPath"].get<std::string>();
-				std::string newFileName = finalName + "_emissive.tif";
-				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
-				fs::path newTextureFile = materialDir / fs::path(newFileName);
-				try { fs::rename(oldTextureFile, newTextureFile);}
-				catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
-				readFile["emissionPath"] = newFileName;
-			}
-			if (readFile["aoAssigned"].get<bool>()) {
-				std::string oldFileName = readFile["aoPath"].get<std::string>();
-				std::string newFileName = finalName + "_ambientOcclusion.tif";
-				fs::path oldTextureFile = materialDir / fs::path(oldFileName);
-				fs::path newTextureFile = materialDir / fs::path(newFileName);
-				try {fs::rename(oldTextureFile, newTextureFile);}
-				catch (fs::filesystem_error e) {MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
-				readFile["aoPath"] = newFileName;
+			// loops through possilbe texture types as defined in PBRTextureType enum 
+			// TODO: extend to 7 to include height and opacity once they are implemented
+			for (size_t i = 0; i <= 5; i++) {
+
+				std::string assignedKey = graphics::TextureDefinitions::GetJsonMatKey_assigned_FromTextureType((graphics::PBRTextureType)i);
+				bool textureTypeIsAssigned = readFile[assignedKey].get<bool>();
+
+				if (textureTypeIsAssigned) {
+
+
+					std::string pathJsonKey = graphics::TextureDefinitions::GetJsonMatKey_path_FromTextureType((graphics::PBRTextureType)i);
+
+					std::string oldFileName = readFile[pathJsonKey].get<std::string>();
+					std::string newFileName = graphics::TextureDefinitions::GetTextureFileNameFromTextureType(finalName, (graphics::PBRTextureType)i);
+					
+					fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+					fs::path newTextureFile = materialDir / fs::path(newFileName);
+
+					try { 
+						fs::rename(oldTextureFile, newTextureFile); 
+					}
+					catch (fs::filesystem_error e) { 
+						MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); 
+					}
+					
+					readFile[pathJsonKey] = newFileName;
+				}
 			}
 
+			// TODO: simplify this into a funciton
+			//if (readFile["albedoAssigned"].get<bool>()) {
+			//	std::string oldFileName = readFile["albedoPath"].get<std::string>();
+			//	std::string newFileName = finalName + "_albedo.tif";
+			//	fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			//	fs::path newTextureFile = materialDir / fs::path(newFileName);				
+			//	try { fs::rename(oldTextureFile, newTextureFile); } 
+			//	catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}				
+			//	readFile["albedoPath"] = newFileName;
+			//}
+			//if (readFile["normalAssigned"].get<bool>()) {
+			//	std::string oldFileName = readFile["normalPath"].get<std::string>();
+			//	std::string newFileName = finalName + "_normal.tif";
+			//	fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			//	fs::path newTextureFile = materialDir / fs::path(newFileName);
+			//	try { fs::rename(oldTextureFile, newTextureFile);}
+			//	catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+			//	readFile["normalPath"] = newFileName;
+			//}
+			//if (readFile["roughAssigned"].get<bool>()) {
+			//	std::string oldFileName = readFile["roughPath"].get<std::string>();
+			//	std::string newFileName = finalName + "_roughness.tif";
+			//	fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			//	fs::path newTextureFile = materialDir / fs::path(newFileName);
+			//	try { fs::rename(oldTextureFile, newTextureFile);}
+			//	catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+			//	readFile["roughPath"] = newFileName;
+			//}
+			//if (readFile["metalAssigned"].get<bool>()) {
+			//	std::string oldFileName = readFile["metalPath"].get<std::string>();
+			//	std::string newFileName = finalName + "_metallic.tif";
+			//	fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			//	fs::path newTextureFile = materialDir / fs::path(newFileName);
+			//	try { fs::rename(oldTextureFile, newTextureFile);}
+			//	catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); }
+			//	readFile["metalPath"] = newFileName;
+			//}
+			//if (readFile["emissionAssigned"].get<bool>()) {
+			//	std::string oldFileName = readFile["emissionPath"].get<std::string>();
+			//	std::string newFileName = finalName + "_emissive.tif";
+			//	fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			//	fs::path newTextureFile = materialDir / fs::path(newFileName);
+			//	try { fs::rename(oldTextureFile, newTextureFile);}
+			//	catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+			//	readFile["emissionPath"] = newFileName;
+			//}
+			//if (readFile["aoAssigned"].get<bool>()) {
+			//	std::string oldFileName = readFile["aoPath"].get<std::string>();
+			//	std::string newFileName = finalName + "_ambientOcclusion.tif";
+			//	fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			//	fs::path newTextureFile = materialDir / fs::path(newFileName);
+			//	try {fs::rename(oldTextureFile, newTextureFile);}
+			//	catch (fs::filesystem_error e) {MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());}
+			//	readFile["aoPath"] = newFileName;
+			//}
+
+
+
 			// change name of thumbnail file
-			std::string oldFileName = readFile["thumbnailPath"].get<std::string>();
-			std::string newFileName = finalName + "_thumbnail.ktx2";
+			std::string oldFileName = readFile[jsonMatKey_thumbnailPath].get<std::string>();
+			std::string newFileName = finalName + texture_fileSuffix_thumbnail;
 			fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 			fs::path newTextureFile = materialDir / fs::path(newFileName);
 			try { fs::rename(oldTextureFile, newTextureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); }
-			readFile["thumbnailPath"] = newFileName;
+			readFile[jsonMatKey_thumbnailPath] = newFileName;
+
+
 
 			// outputting updated file
 			std::ofstream outFileStream;
@@ -543,68 +591,66 @@ namespace mnemosy::systems
 
 		graphics::Material* mat = new graphics::Material();
 		{
-			mat->Name = readFile["name"].get<std::string>();
-			mat->Albedo.r = readFile["albedo_r"].get<float>();
-			mat->Albedo.g = readFile["albedo_g"].get<float>();
-			mat->Albedo.b = readFile["albedo_b"].get<float>();
-			mat->Roughness = readFile["roughness"].get<float>();
-			mat->Metallic = readFile["metallic"].get<float>();
+			mat->Name		= readFile[jsonMatKey_name].get<std::string>();
+			mat->Albedo.r	= readFile[jsonMatKey_albedo_r].get<float>();
+			mat->Albedo.g	= readFile[jsonMatKey_albedo_g].get<float>();
+			mat->Albedo.b	= readFile[jsonMatKey_albedo_b].get<float>();
+			mat->Roughness	= readFile[jsonMatKey_roughness].get<float>();
+			mat->Metallic	= readFile[jsonMatKey_metallic].get<float>();
 
-			mat->Emission.r = readFile["emission_r"].get<float>();
-			mat->Emission.g = readFile["emission_g"].get<float>();
-			mat->Emission.b = readFile["emission_b"].get<float>();
-			mat->EmissionStrength = readFile["emissionStrength"].get<float>();
+			mat->Emission.r = readFile[jsonMatKey_emission_r].get<float>();
+			mat->Emission.g = readFile[jsonMatKey_emission_g].get<float>();
+			mat->Emission.b = readFile[jsonMatKey_emission_b].get<float>();
+			mat->EmissionStrength = readFile[jsonMatKey_emissionStrength].get<float>();
 
-			mat->NormalStrength = readFile["normalStrength"].get<float>();
+			mat->NormalStrength = readFile[jsonMatKey_normalStrength].get<float>();
 
-			mat->UVTiling.x = readFile["uvScale_x"].get<float>();
-			mat->UVTiling.y = readFile["uvScale_y"].get<float>();
+			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
+			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
 		
-			bool albedoTexture		= readFile["albedoAssigned"].get<bool>();
-			bool roughnessTexture	= readFile["roughAssigned"].get<bool>();
-			bool metalTexture		= readFile["metalAssigned"].get<bool>();
-			bool emissionTexture	= readFile["emissionAssigned"].get<bool>();
-			bool normalTexture		= readFile["normalAssigned"].get<bool>();
-			bool aoTexture			= readFile["aoAssigned"].get<bool>();
+			bool albedoTexture		= readFile[jsonMatKey_albedoAssigned].get<bool>();
+			bool roughnessTexture	= readFile[jsonMatKey_roughAssigned].get<bool>();
+			bool metalTexture		= readFile[jsonMatKey_metalAssigned].get<bool>();
+			bool emissionTexture	= readFile[jsonMatKey_emissionAssigned].get<bool>();
+			bool normalTexture		= readFile[jsonMatKey_normalAssigned].get<bool>();
+			bool aoTexture			= readFile[jsonMatKey_aoAssigned].get<bool>();
+			//bool heightTexture		= readFile[jsonMatKey_heightAssigned].get<bool>();
+			//bool opacityTexture		= readFile[jsonMatKey_opacityAssigned].get<bool>();
 
 			if (albedoTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile["albedoPath"].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
 				graphics::Texture* albedoTex = new graphics::Texture();
 
 				albedoTex->generateFromFile(path.c_str(), true, true);
-				//albedoTex->LoadFromKtx(path.c_str());
-				mat->assignTexture(graphics::PBRTextureType::ALBEDO, albedoTex);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO, albedoTex);
 			}
 			if (roughnessTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile["roughPath"].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
 				graphics::Texture* roughnessTex = new graphics::Texture();
 				
 				roughnessTex->generateFromFile(path.c_str(), true, true);
-				//roughnessTex->LoadFromKtx(path.c_str());
-				mat->assignTexture(graphics::PBRTextureType::ROUGHNESS, roughnessTex);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughnessTex);
 			}
 			if (metalTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile["metalPath"].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_metalPath].get<std::string>();
 				graphics::Texture* metallicTex = new graphics::Texture();
+
 				metallicTex->generateFromFile(path.c_str(), true, true);
-				//metallicTex->LoadFromKtx(path.c_str());
-				mat->assignTexture(graphics::PBRTextureType::METALLIC, metallicTex);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_METALLIC, metallicTex);
 			}
 			if (emissionTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile["emissionPath"].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_emissionPath].get<std::string>();
 				graphics::Texture* emissionTex = new graphics::Texture();
 				emissionTex->generateFromFile(path.c_str(), true, true);
-				//emissionTex->LoadFromKtx(path.c_str());
-				mat->assignTexture(graphics::PBRTextureType::EMISSION, emissionTex);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_EMISSION, emissionTex);
 			}
 			if (normalTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile["normalPath"].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
 				graphics::Texture* normalTex = new graphics::Texture();
 				normalTex->generateFromFile(path.c_str(), true, true);
-				//normalTex->LoadFromKtx(path.c_str());
-				mat->assignTexture(graphics::PBRTextureType::NORMAL, normalTex);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_NORMAL, normalTex);
 
-				int normalFormat = readFile["normalMapFormat"].get<int>();
+				int normalFormat = readFile[jsonMatKey_normalMapFormat].get<int>();
 				if (normalFormat == 0) {
 					mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
 				}
@@ -613,13 +659,28 @@ namespace mnemosy::systems
 				}
 			}
 			if (aoTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile["aoPath"].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
 				graphics::Texture* aoTex = new graphics::Texture();
+
 				aoTex->generateFromFile(path.c_str(), true, true);
-				//aoTex->LoadFromKtx(path.c_str());
-				mat->assignTexture(graphics::PBRTextureType::AMBIENTOCCLUSION, aoTex);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION, aoTex);
 			}
-			// load thumbnail
+			// TODO add height and opacity map
+			//if (heightTexture) {
+			//	std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
+			//	graphics::Texture* heightTex = new graphics::Texture();
+			//
+			//	heightTex->generateFromFile(path.c_str(), true, true);
+			//	mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT, heightTex);
+			//}
+			//if (opacityTexture) {
+			//	std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
+			//	graphics::Texture* opacityTex = new graphics::Texture();
+			//
+			//	opacityTex->generateFromFile(path.c_str(), true, true);
+			//	mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_OPACITY, opacityTex);
+			//}
+
 
 			dataFileStream.close();
 		}
@@ -634,8 +695,13 @@ namespace mnemosy::systems
 
 	void MaterialLibraryRegistry::SaveActiveMaterialToFile() {
 
+		if (!m_userMaterialBound)
+			return;
+
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
-		fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
+
+
+		fs::path thumbnailPath = fs::path(activeMat.Name + texture_fileSuffix_thumbnail);
 				
 		{ // Render thumbnail of active material
 			fs::path libDir = m_fileDirectories.GetLibraryDirectoryPath();
@@ -648,26 +714,26 @@ namespace mnemosy::systems
 		dataFileStream.open(m_activeMaterialDataFilePath.generic_string());		
 		
 		json MaterialJson; // top level json object
-		MaterialJson["1_Mnemosy_Data_File"] = "Material Meta Data";
+		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
 
-		MaterialJson["name"] = activeMat.Name;
+		MaterialJson[jsonMatKey_name] = activeMat.Name;
 		
-		MaterialJson["albedo_r"] = activeMat.Albedo.r; // maybe convert from range 0-255 to 0-1 range by deviding by 255
-		MaterialJson["albedo_g"] = activeMat.Albedo.g;
-		MaterialJson["albedo_b"] = activeMat.Albedo.b;
+		MaterialJson[jsonMatKey_albedo_r] = activeMat.Albedo.r; // maybe convert from range 0-255 to 0-1 range by deviding by 255
+		MaterialJson[jsonMatKey_albedo_g] = activeMat.Albedo.g;
+		MaterialJson[jsonMatKey_albedo_b] = activeMat.Albedo.b;
 
-		MaterialJson["roughness"] = activeMat.Roughness;
-		MaterialJson["metallic"] = activeMat.Metallic;
+		MaterialJson[jsonMatKey_roughness] = activeMat.Roughness;
+		MaterialJson[jsonMatKey_metallic] = activeMat.Metallic;
 
-		MaterialJson["emission_r"] = activeMat.Emission.r;
-		MaterialJson["emission_g"] = activeMat.Emission.r;
-		MaterialJson["emission_b"] = activeMat.Emission.r;
-		MaterialJson["emissionStrength"] = activeMat.EmissionStrength;
+		MaterialJson[jsonMatKey_emission_r] = activeMat.Emission.r;
+		MaterialJson[jsonMatKey_emission_g] = activeMat.Emission.r;
+		MaterialJson[jsonMatKey_emission_b] = activeMat.Emission.r;
+		MaterialJson[jsonMatKey_emissionStrength] = activeMat.EmissionStrength;
 
-		MaterialJson["normalStrength"] = activeMat.NormalStrength;
-		MaterialJson["normalMapFormat"] = activeMat.GetNormalFormatAsInt(); // 0 = OpenGl, 1 = DirectX
-		MaterialJson["uvScale_x"] = activeMat.UVTiling.x;
-		MaterialJson["uvScale_y"] = activeMat.UVTiling.y;
+		MaterialJson[jsonMatKey_normalStrength] = activeMat.NormalStrength;
+		MaterialJson[jsonMatKey_normalMapFormat] = activeMat.GetNormalFormatAsInt(); // 0 = OpenGl, 1 = DirectX
+		MaterialJson[jsonMatKey_uvScale_x] = activeMat.UVTiling.x;
+		MaterialJson[jsonMatKey_uvScale_y] = activeMat.UVTiling.y;
 
 		bool albedoAssigned		= activeMat.isAlbedoAssigned();
 		bool roughAssigned		= activeMat.isRoughnessAssigned();
@@ -675,38 +741,52 @@ namespace mnemosy::systems
 		bool emissionAssigned	= activeMat.isEmissiveAssigned();
 		bool normalAssigned		= activeMat.isNormalAssigned();
 		bool aoAssigned			= activeMat.isAoAssigned();
-		
-		std::string albedoPath		= "notAssigned";
-		std::string roughnessPath	= "notAssigned";
-		std::string metallicPath	= "notAssigned";
-		std::string emissionPath	= "notAssigned";
-		std::string normalPath		= "notAssigned";
-		std::string aoPath			= "notAssigned";
+		//bool heightAssinged = activeMat.isHeightAssigned();
+		//bool opacityAssigned = activeMat.isOpacityAssigned();
+
+		std::string albedoPath		= jsonMatKey_pathNotAssigned;
+		std::string roughnessPath	= jsonMatKey_pathNotAssigned;
+		std::string metallicPath	= jsonMatKey_pathNotAssigned;
+		std::string emissionPath	= jsonMatKey_pathNotAssigned;
+		std::string normalPath		= jsonMatKey_pathNotAssigned;
+		std::string aoPath			= jsonMatKey_pathNotAssigned;
+		//std::string heightPath	= jsonMatKey_pathNotAssigned;
+		//std::string opacityPath	= jsonMatKey_pathNotAssigned;
+
 
 		std::string matName = activeMat.Name;
 
-		if (albedoAssigned)		{ albedoPath	= matName	+ "_albedo.tif"; }
-		if (roughAssigned)		{ roughnessPath = matName	+ "_roughness.tif"; }
-		if (metalAssigned)		{ metallicPath	= matName	+ "_metallic.tif"; }
-		if (emissionAssigned)	{ emissionPath	= matName	+ "_emissive.tif"; }
-		if (normalAssigned)		{ normalPath	= matName	+ "_normal.tif"; }
-		if (aoAssigned)			{ aoPath		= matName	+ "_ambientOcclusion.tif"; }
+		if (albedoAssigned)		{ albedoPath	= matName	+ texture_fileSuffix_albedo; }
+		if (roughAssigned)		{ roughnessPath = matName	+ texture_fileSuffix_roughness; }
+		if (metalAssigned)		{ metallicPath	= matName	+ texture_fileSuffix_metallic; }
+		if (emissionAssigned)	{ emissionPath	= matName	+ texture_fileSuffix_emissive; }
+		if (normalAssigned)		{ normalPath	= matName	+ texture_fileSuffix_normal; }
+		if (aoAssigned)			{ aoPath		= matName	+ texture_fileSuffix_ambientOcclusion; }
+		//if (heightAssigned)		{ heightPath	= matName	+ texture_fileSuffix_height; }
+		//if (opacityAssigned)	{ opacityPath	= matName	+ texture_fileSuffix_opacity; }
 
-		MaterialJson["albedoAssigned"]		= albedoAssigned;
-		MaterialJson["roughAssigned"]		= roughAssigned;
-		MaterialJson["metalAssigned"]		= metalAssigned;
-		MaterialJson["emissionAssigned"]	= emissionAssigned;
-		MaterialJson["normalAssigned"]		= normalAssigned;
-		MaterialJson["aoAssigned"]			= aoAssigned;
 
-		MaterialJson["albedoPath"]		= albedoPath;
-		MaterialJson["roughPath"]		= roughnessPath;
-		MaterialJson["metalPath"]		= metallicPath;
-		MaterialJson["emissionPath"]	= emissionPath;
-		MaterialJson["normalPath"]		= normalPath;
-		MaterialJson["aoPath"]			= aoPath;
+		MaterialJson[jsonMatKey_albedoAssigned]		= albedoAssigned;
+		MaterialJson[jsonMatKey_roughAssigned]		= roughAssigned;
+		MaterialJson[jsonMatKey_metalAssigned]		= metalAssigned;
+		MaterialJson[jsonMatKey_emissionAssigned]	= emissionAssigned;
+		MaterialJson[jsonMatKey_normalAssigned]		= normalAssigned;
+		MaterialJson[jsonMatKey_aoAssigned]			= aoAssigned;
+		//MaterialJson[jsonMatKey_heightAssigned]	= heightAssigned;
+		//MaterialJson[jsonMatKey_opacityAssigned]	= opacityAssigned;
 
-		MaterialJson["thumbnailPath"] = thumbnailPath.generic_string();
+		MaterialJson[jsonMatKey_albedoPath]		= albedoPath;
+		MaterialJson[jsonMatKey_roughPath]		= roughnessPath;
+		MaterialJson[jsonMatKey_metalPath]		= metallicPath;
+		MaterialJson[jsonMatKey_emissionPath]	= emissionPath;
+		MaterialJson[jsonMatKey_normalPath]		= normalPath;
+		MaterialJson[jsonMatKey_aoPath]			= aoPath;
+		//MaterialJson[jsonMatKey_heightPath]		= heightPath;
+		//MaterialJson[jsonMatKey_opacityPath]		= opacityPath;
+
+
+
+		MaterialJson[jsonMatKey_thumbnailPath] = thumbnailPath.generic_string();
 				
 		if (prettyPrintMaterialFiles)
 			dataFileStream << MaterialJson.dump(4);
@@ -752,46 +832,35 @@ namespace mnemosy::systems
 		
 
 		std::string filename;
-		graphics::KtxImage ktxImg;
 
-		if (textureType == graphics::ALBEDO) {
+		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
 			
-			filename = activeMat.Name + "_albedo.tif";
+			filename = activeMat.Name + texture_fileSuffix_albedo;
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
-
-
-			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
-			//if (!success) {
-			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-			//	activeMat.removeTexture(graphics::ALBEDO);
-			//	delete tex;
-			//	return;
-			//}
-
 		}
-		else if (textureType == graphics::NORMAL) {
-			filename = activeMat.Name + "_normal.tif";
+		else if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
+			filename = activeMat.Name + texture_fileSuffix_normal;
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, true);
 		}
-		else if (textureType == graphics::ROUGHNESS) {
-			filename = activeMat.Name + "_roughness.tif";
+		else if (textureType == graphics::MNSY_TEXTURE_ROUGHNESS) {
+			filename = activeMat.Name + texture_fileSuffix_roughness;
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
 		}
-		else if (textureType == graphics::METALLIC) {
-			filename = activeMat.Name + "_metallic.tif";
+		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
+			filename = activeMat.Name + texture_fileSuffix_metallic;
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
 		}
-		else if (textureType == graphics::AMBIENTOCCLUSION) {
-			filename = activeMat.Name + "_ambientOcclusion.tif";
+		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
+			filename = activeMat.Name + texture_fileSuffix_ambientOcclusion;
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
 		}
-		else if (textureType == graphics::EMISSION) {
-			filename = activeMat.Name + "_emissive.tif";
+		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
+			filename = activeMat.Name + texture_fileSuffix_emissive;
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
 		}
@@ -817,29 +886,29 @@ namespace mnemosy::systems
 		std::ofstream outFileStream;
 		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
 		
-		if (textureType == graphics::ALBEDO) {
-			outFile["albedoAssigned"] = true;
-			outFile["albedoPath"] = filename;
+		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
+			outFile[jsonMatKey_albedoAssigned] = true;
+			outFile[jsonMatKey_albedoPath] = filename;
 		}
-		else if (textureType == graphics::NORMAL){
-			outFile["normalAssigned"] = true;
-			outFile["normalPath"] = filename;
+		else if (textureType == graphics::MNSY_TEXTURE_NORMAL){
+			outFile[jsonMatKey_normalAssigned] = true;
+			outFile[jsonMatKey_normalPath] = filename;
 		}
-		else if (textureType == graphics::ROUGHNESS) {
-			outFile["roughAssigned"] = true;
-			outFile["roughPath"] = filename;
+		else if (textureType == graphics::MNSY_TEXTURE_ROUGHNESS) {
+			outFile[jsonMatKey_roughAssigned] = true;
+			outFile[jsonMatKey_roughPath] = filename;
 		}
-		else if (textureType == graphics::METALLIC) {
-			outFile["metalAssigned"] = true;
-			outFile["metalPath"] = filename;
+		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
+			outFile[jsonMatKey_metalAssigned] = true;
+			outFile[jsonMatKey_metalPath] = filename;
 		}
-		else if (textureType == graphics::AMBIENTOCCLUSION) {
-			outFile["aoAssigned"] = true;
-			outFile["aoPath"] = filename;
+		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
+			outFile[jsonMatKey_aoAssigned] = true;
+			outFile[jsonMatKey_aoPath] = filename;
 		}
-		else if (textureType == graphics::EMISSION) {
-			outFile["emissionAssigned"] = true;
-			outFile["emissionPath"] = filename;
+		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
+			outFile[jsonMatKey_emissionAssigned] = true;
+			outFile[jsonMatKey_emissionPath] = filename;
 		}
 
 
@@ -862,7 +931,7 @@ namespace mnemosy::systems
 			activeMat.removeTexture(textureType);
 			return;
 		}
-
+		// read file into json object
 		std::ifstream readFileStream;
 		readFileStream.open(m_activeMaterialDataFilePath.generic_string());
 
@@ -876,63 +945,66 @@ namespace mnemosy::systems
 			return;
 		}
 		readFileStream.close();
-		json outFile = readFile;
 
-		std::ofstream outFileStream;
-		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
+		// write to json object
+		json outFile = readFile;
 
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
-		if (textureType == graphics::ALBEDO) {
-			fs::path textureFile = materialDir / fs::path(outFile["albedoPath"].get<std::string>());
+		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
+			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_albedoPath].get<std::string>());
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			outFile["albedoAssigned"] = false;
-			outFile["albedoPath"] = "notAssigned";
+			outFile[jsonMatKey_albedoAssigned] = false;
+			outFile[jsonMatKey_albedoPath] = jsonMatKey_pathNotAssigned;
 		}
-		else if (textureType == graphics::NORMAL) {
-			fs::path textureFile = materialDir / fs::path(outFile["normalPath"].get<std::string>());
+		else if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
+			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_normalPath].get<std::string>());
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			outFile["normalAssigned"] = false;
-			outFile["normalPath"] = "notAssigned";
-			outFile["normalMapFormat"] = 0;
+			outFile[jsonMatKey_normalAssigned] = false;
+			outFile[jsonMatKey_normalPath] = jsonMatKey_pathNotAssigned;
+			outFile[jsonMatKey_normalMapFormat] = 0;
 		}
-		else if (textureType == graphics::ROUGHNESS) {
-			fs::path textureFile = materialDir / fs::path(outFile["roughPath"].get<std::string>());
+		else if (textureType == graphics::MNSY_TEXTURE_ROUGHNESS) {
+			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_roughPath].get<std::string>());
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			outFile["roughAssigned"] = false;
-			outFile["roughPath"] = "notAssigned";
+			outFile[jsonMatKey_roughAssigned] = false;
+			outFile[jsonMatKey_roughPath] = jsonMatKey_pathNotAssigned;
 		}
-		else if (textureType == graphics::METALLIC) {
-			fs::path textureFile = materialDir / fs::path(outFile["metalPath"].get<std::string>());
+		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
+			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_metalPath].get<std::string>());
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			outFile["metalAssigned"] = false;
-			outFile["metalPath"] = "notAssigned";
+			outFile[jsonMatKey_metalAssigned] = false;
+			outFile[jsonMatKey_metalPath] = jsonMatKey_pathNotAssigned;
 		}
-		else if (textureType == graphics::AMBIENTOCCLUSION) {
-			fs::path textureFile = materialDir / fs::path(outFile["aoPath"].get<std::string>());
+		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
+			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_aoPath].get<std::string>());
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
 			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
-			outFile["aoAssigned"] = false;
-			outFile["aoPath"] = "notAssigned";
+			outFile[jsonMatKey_aoAssigned] = false;
+			outFile[jsonMatKey_aoPath] = jsonMatKey_pathNotAssigned;
 		}
-		else if (textureType == graphics::EMISSION) {
-			fs::path textureFile = materialDir / fs::path(outFile["emissionPath"].get<std::string>());
+		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
+			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_emissionPath].get<std::string>());
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			outFile["emissionAssigned"] = false;
-			outFile["emissionPath"] = "notAssigned";
+			outFile[jsonMatKey_emissionAssigned] = false;
+			outFile[jsonMatKey_emissionPath] = jsonMatKey_pathNotAssigned;
 		}
+
+
+		std::ofstream outFileStream;
+		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
 
 		if (prettyPrintDataFile)
 			outFileStream << outFile.dump(4);
@@ -943,7 +1015,24 @@ namespace mnemosy::systems
 		activeMat.removeTexture(textureType);
 	}
 
+	fs::path MaterialLibraryRegistry::GetLibraryPath()
+	{
+		return m_fileDirectories.GetLibraryDirectoryPath();
+	}
+
+	fs::path MaterialLibraryRegistry::GetFolderPath(FolderNode* node)
+	{
+		return m_fileDirectories.GetLibraryDirectoryPath() / node->pathFromRoot;
+	}
+
+	fs::path MaterialLibraryRegistry::GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo)
+	{
+		return m_fileDirectories.GetLibraryDirectoryPath() / folderNode->pathFromRoot / fs::path(matInfo.name);
+	}
+
 	void MaterialLibraryRegistry::OpenFolderNode(FolderNode* node){
+		
+		SaveActiveMaterialToFile();
 
 		if (node == nullptr) {
 			MNEMOSY_WARN("MaterialLibraryRegistry::OpenFolderNode: Node is nullptr");
@@ -981,34 +1070,28 @@ namespace mnemosy::systems
 		fs::path materialFolder = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
 		if (activeMat.isAlbedoAssigned()) {
-			fs::path p = materialFolder / fs::path(activeMat.Name + "_albedo.tif");
+			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_albedo);
 			paths.push_back(p.generic_string());
-			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
 		}
 		if (activeMat.isNormalAssigned()) {
-			fs::path p = materialFolder / fs::path(activeMat.Name + "_normal.tif");
+			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_normal);
 			paths.push_back(p.generic_string());
-			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
 		}
 		if (activeMat.isRoughnessAssigned()) {
-			fs::path p = materialFolder / fs::path(activeMat.Name + "_roughness.tif");
+			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_roughness);
 			paths.push_back(p.generic_string());
-			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
 		}
 		if (activeMat.isMetallicAssigned()) {
-			fs::path p = materialFolder / fs::path(activeMat.Name + "_metallic.tif");
+			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_metallic);
 			paths.push_back(p.generic_string());
-			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
 		}
 		if (activeMat.isAoAssigned()) {
-			fs::path p = materialFolder / fs::path(activeMat.Name + "_ambientOcclusion.tif");
+			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_ambientOcclusion);
 			paths.push_back(p.generic_string());
-			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
 		}
 		if (activeMat.isEmissiveAssigned()) {
-			fs::path p = materialFolder / fs::path(activeMat.Name + "_emissive.tif");
+			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_emissive);
 			paths.push_back(p.generic_string());
-			//MNEMOSY_TRACE("AddFilepath: {}", p.generic_string());
 		}
 
 		return paths;
@@ -1076,44 +1159,44 @@ namespace mnemosy::systems
 
 
 		json MaterialJson; // top level json object
-		MaterialJson["1_Mnemosy_Data_File"] = "Material Meta Data";
-		MaterialJson["name"]		= name;
+		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
+		MaterialJson[jsonMatKey_name]		= name;
 
-		MaterialJson["albedo_r"]	= 0.8f;
-		MaterialJson["albedo_g"]	= 0.8f;
-		MaterialJson["albedo_b"]	= 0.8f;
+		MaterialJson[jsonMatKey_albedo_r]	= 0.8f;
+		MaterialJson[jsonMatKey_albedo_g]	= 0.8f;
+		MaterialJson[jsonMatKey_albedo_b]	= 0.8f;
 
-		MaterialJson["roughness"]	= 0.5f;
-		MaterialJson["metallic"]	= 0.0f;
+		MaterialJson[jsonMatKey_roughness]	= 0.5f;
+		MaterialJson[jsonMatKey_metallic]	= 0.0f;
 
-		MaterialJson["emission_r"]	= 0.0f;
-		MaterialJson["emission_g"]	= 0.0f;
-		MaterialJson["emission_b"]	= 0.0f;
-		MaterialJson["emissionStrength"]	= 0.0f;
+		MaterialJson[jsonMatKey_emission_r]	= 0.0f;
+		MaterialJson[jsonMatKey_emission_g]	= 0.0f;
+		MaterialJson[jsonMatKey_emission_b]	= 0.0f;
+		MaterialJson[jsonMatKey_emissionStrength]	= 0.0f;
 
-		MaterialJson["normalStrength"]		= 1.0f;
-		MaterialJson["normalMapFormat"]		= 0; // 0 = OpenGl, 1 = DirectX
+		MaterialJson[jsonMatKey_normalStrength]		= 1.0f;
+		MaterialJson[jsonMatKey_normalMapFormat]		= 0; // 0 = OpenGl, 1 = DirectX
 
-		MaterialJson["uvScale_x"]	= 1.0f;
-		MaterialJson["uvScale_y"]	= 1.0f;
+		MaterialJson[jsonMatKey_uvScale_x]	= 1.0f;
+		MaterialJson[jsonMatKey_uvScale_y]	= 1.0f;
 
 		
-		MaterialJson["albedoAssigned"]		= false;
-		MaterialJson["roughAssigned"]		= false;
-		MaterialJson["metalAssigned"]		= false;
-		MaterialJson["emissionAssigned"]	= false;
-		MaterialJson["normalAssigned"]		= false;
-		MaterialJson["aoAssigned"]			= false;
+		MaterialJson[jsonMatKey_albedoAssigned]		= false;
+		MaterialJson[jsonMatKey_roughAssigned]		= false;
+		MaterialJson[jsonMatKey_metalAssigned]		= false;
+		MaterialJson[jsonMatKey_emissionAssigned]	= false;
+		MaterialJson[jsonMatKey_normalAssigned]		= false;
+		MaterialJson[jsonMatKey_aoAssigned]			= false;
 		
-		MaterialJson["albedoPath"]		= "notAssigned";
-		MaterialJson["roughPath"]		= "notAssigned";
-		MaterialJson["metalPath"]		= "notAssigned";
-		MaterialJson["emissionPath"]	= "notAssigned";
-		MaterialJson["normalPath"]		= "notAssigned";
-		MaterialJson["aoPath"]			= "notAssigned";
+		MaterialJson[jsonMatKey_albedoPath]		= jsonMatKey_pathNotAssigned;
+		MaterialJson[jsonMatKey_roughPath]		= jsonMatKey_pathNotAssigned;
+		MaterialJson[jsonMatKey_metalPath]		= jsonMatKey_pathNotAssigned;
+		MaterialJson[jsonMatKey_emissionPath]	= jsonMatKey_pathNotAssigned;
+		MaterialJson[jsonMatKey_normalPath]		= jsonMatKey_pathNotAssigned;
+		MaterialJson[jsonMatKey_aoPath]			= jsonMatKey_pathNotAssigned;
 
-		fs::path thumbnailPath = fs::path(name + "_thumbnail.ktx2");
-		MaterialJson["thumbnailPath"] = thumbnailPath.generic_string();
+		//fs::path thumbnailPath = fs::path(name + jsonMatKey_thumbnailFileName);
+		MaterialJson[jsonMatKey_thumbnailPath] = name + texture_fileSuffix_thumbnail;
 
 
 		if (prettyPrintDataFile)
@@ -1126,9 +1209,7 @@ namespace mnemosy::systems
 
 	void MaterialLibraryRegistry::CreateDirectoryForNode(FolderNode* node) {
 
-		mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
-		fs::path libraryDir = fd.GetLibraryDirectoryPath();
-
+		fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 		fs::path directoryPath = libraryDir / fs::path(node->pathFromRoot);
 
 		fs::directory_entry newDir;

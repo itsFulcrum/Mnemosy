@@ -4,7 +4,10 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/TextureGenerationManager.h"
+#include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
+#include "Include/Graphics/Material.h"
+
 #include "Include/Graphics/Utils/KtxImage.h"
 
 #include <glad/glad.h>
@@ -17,10 +20,13 @@ namespace mnemosy::systems
 {
 	// public methods
 
-	ExportManager::ExportManager() {
+	ExportManager::ExportManager() 
+		: m_exportImageFormat(graphics::MNSY_PNG)
+		, m_exportNormalFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl)
+	{
 
-		m_exportImageFormat = systems::MNSY_PNG;
-		m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_OPENGl;
+		/*m_exportImageFormat = graphics::MNSY_PNG;
+		m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_OPENGl;*/
 
 		// shut up openCV logging
 		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
@@ -48,7 +54,7 @@ namespace mnemosy::systems
 		//}
 
 		std::string fileExtention = ".png";
-		if (m_exportImageFormat == MNSY_TIF) {
+		if (m_exportImageFormat == graphics::MNSY_TIF) {
 			fileExtention = ".tif";
 		}
 
@@ -136,10 +142,10 @@ namespace mnemosy::systems
 
 
 		if (format == 0) {
-			m_exportImageFormat = MNSY_TIF;
+			m_exportImageFormat = graphics::MNSY_TIF;
 		}
 		else if (format == 1) {
-			m_exportImageFormat = MNSY_PNG;
+			m_exportImageFormat = graphics::MNSY_PNG;
 		}
 		//else if (format == 2) {
 		//	m_exportImageFormat = MNSY_TIF;

@@ -34,7 +34,7 @@ namespace mnemosy::gui
 		m_pDocumentationPanel = new DocumentationGuiPanel();
 		userInterface.RegisterGuiPanel(m_pDocumentationPanel);
 
-#ifdef mnemosy_gui_showDebugInfo
+#ifdef mnemosy_gui_showImGuiDemoWindow
 
 	userInterface.show_demo_window = true;
 #else

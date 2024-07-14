@@ -12,6 +12,11 @@
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/ThumbnailManager.h"
 
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+#include "Include/Core/Utils/PlatfromUtils_Windows.h"
+#endif // MNEMOSY_PLATFORM_WINDOWS
+
+
 #include <string>
 
 namespace mnemosy::gui
@@ -25,7 +30,7 @@ namespace mnemosy::gui
 		m_materialRegistry.OpenFolderNode(rootNode);
 
 
-		m_directoryTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		m_directoryTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
 		m_materialTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
 	}
@@ -35,7 +40,7 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		ImGui::Begin(panelName.c_str(), &showPanel);
+		ImGui::Begin(panelName, &showPanel);
 		{
 			ImGui::BeginChild("Library", ImVec2(0, 350), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
 			{
@@ -95,6 +100,8 @@ namespace mnemosy::gui
 						//delete texID;
 						//MNEMOSY_DEBUG("Texture ID:{}", selectedNode->subMaterials[i].thumbnailTexure_ID);
 						
+
+						ImTextureID;
 						bool pressed = ImGui::ImageButton(reinterpret_cast<void*>(selectedNode->subMaterials[i].thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
 						
 
@@ -142,75 +149,95 @@ namespace mnemosy::gui
 		if (node == nullptr)
 			return;
 
-		// Makes leaf Folder not have expanding behavior
-		//ImGuiTreeNodeFlags thisNodeFlags = treeNodeFlags;
-		//if (node->IsLeafNode() && node->subMaterialNames.empty()) {
-		//	thisNodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-		//}
-
+		
+		// prepare node flags
 		ImGuiTreeNodeFlags node_flags = m_directoryTreeFlags;
 
-		if (m_materialRegistry.GetSelectedNode()->runtime_ID == node->runtime_ID)
-			node_flags |= ImGuiTreeNodeFlags_Selected;
+		if (node->IsRoot()) {
+			node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
+		}
 
+
+		if (m_setFolderOpenNextFrame ) {
+
+			if (node->runtime_ID == m_folderIdToOpenNextFrame) {
+				//m_materialRegistry.OpenFolderNode(node);
+				ImGui::SetNextItemOpen(true);
+				m_setFolderOpenNextFrame = false;
+
+			}
+		}
+
+		if (m_materialRegistry.GetSelectedNode()->runtime_ID == node->runtime_ID) {
+			node_flags |= ImGuiTreeNodeFlags_Selected;
+		}
 
 		bool nodeOpen = ImGui::TreeNodeEx(node->name.c_str(), node_flags);
 			
-		//if (ImGui::IsItemClicked() && !nodeOpen) {
+		
 		if (ImGui::IsItemClicked()) {
 
 			m_materialRegistry.OpenFolderNode(node);
 		}
 
-		//if (nodeOpen) {
-
-			ImGui::SameLine();
+		ImGui::SameLine();
 			
-			// === Right Click Options
-			const char* options[] = { "Rename", "Add Subfolder", "Add Material","Delete", "Delete Hierarchy"};
-			// right click on open folder to rename
-			if (ImGui::BeginPopupContextItem()) {
+		// === Right Click Options
+		if (ImGui::BeginPopupContextItem()) {
 				
-				static std::string newName = "New Folder";
+			bool isRoot = node->IsRoot();
+			if (!isRoot) {
+				m_renameFolderText = node->name;
 
-				ImGui::Text("Name: ");
+				ImGui::Text("Rename: ");
 				ImGui::SameLine();
-				ImGui::InputText("##edit", &newName);
 
-				for (int i = 0; i < IM_ARRAYSIZE(options); i++) {
+				bool renamed = ImGui::InputText("##RenameFolderInputField", &m_renameFolderText, m_textInputFlags);
+				if (renamed) {
 
-					if (ImGui::Selectable(options[i])) {
+					RenameFolder(node, m_renameFolderText);
+				}
+			}
 
-						if (i == 0)  { // rename
-							// need to open another popup probably
-							RenameFolder(node, newName);
-						}
-						else if (i == 1) { // Add Subfolder
 
-							AddSubfolder(node, newName);
-						}
-						else if (i == 2) { // Add material 
-							AddMaterial(node,newName);
-						}
-						else if (i == 3) { // delete but keep children
-							DeleteButKeepChildren(node);
-						}
-						else if (i == 4) { // delete hierarchy
-						
-							m_nodeDeleteHierarchy = node;
-							showDeleteHierarchyModel = true;
-						}
 
+			for (int i = 0; i < IM_ARRAYSIZE(m_rightClickFolderOptions); i++) {
+
+				if (ImGui::Selectable(m_rightClickFolderOptions[i])) {
+
+					
+					if (i == 0) { // Add Subfolder
+
+						AddSubfolder(node);
 					}
-				} // end options loop
-				ImGui::EndPopup();
-			} // End Popup Context Item
+					else if (i == 1) { // Add material 
+						AddMaterial(node);
+					}
+					else if (i == 2) { // delete but keep children
+						DeleteButKeepChildren(node);
+					}
+					else if (i == 3) { // delete hierarchy
+						
+						m_nodeDeleteHierarchy = node;
+						showDeleteHierarchyModel = true;
+					}
+					else if (i == 4) { // open in explorer
+						
+						fs::path pathToFolder = m_materialRegistry.GetFolderPath(node);
+						mnemosy::core::FileDialogs::OpenFolderAt(pathToFolder.generic_string().c_str());
+					}
 
-			ImGui::Spacing();
+				}
 
-		if (nodeOpen) {
-			// == DRAG AND DROP
-			
+			} // end options loop
+			ImGui::EndPopup();
+		} // End Popup Right Click Options
+
+		ImGui::Spacing();
+
+		// == DRAG AND DROP
+		{
+
 			if (!node->IsRoot())  {  // dont allow root to be a drag and drop source
 
 				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
@@ -220,70 +247,75 @@ namespace mnemosy::gui
 					ImGui::EndDragDropSource();
 				}
 			}
-			
+
 			if (ImGui::BeginDragDropTarget()) {
 
-				// Directory DragDrop Target For moving a directory underneith
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DragPayload_ID")) {
-					//MNEMOSY_TRACE("Directory dragdrop target");
+					// Directory DragDrop Target For moving a directory underneith
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DragPayload_ID")) {
+						//MNEMOSY_TRACE("Directory dragdrop target");
 
-					IM_ASSERT(payload->DataSize == sizeof(unsigned int));
-					unsigned int sourceNodeID = *(const unsigned int*)payload->Data;
+						IM_ASSERT(payload->DataSize == sizeof(unsigned int));
+						unsigned int sourceNodeID = *(const unsigned int*)payload->Data;
 					
-					systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(),sourceNodeID);
+						systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(),sourceNodeID);
 
-					if (sourceNode != nullptr) { // just in case. This should never happen.
+						if (sourceNode != nullptr) { // just in case. This should never happen.
 
-						if (sourceNode->parent->name != node->name) { // dont copy if it is already in that directory
-							m_materialRegistry.MoveFolder(sourceNode, node);
-						}
+							if (sourceNode->parent->name != node->name) { // dont copy if it is already in that directory
+								m_materialRegistry.MoveFolder(sourceNode, node);
+							}
+							else {
+								MNEMOSY_WARN("Dirctory is already inside this directory");
+							}
+						} 
 						else {
-							MNEMOSY_WARN("Dirctory is already inside this directory");
+							MNEMOSY_ERROR("Could not move directory, because it didn't find the source node by its id. \nThis should not happen and is most likely a bug");
 						}
-					} 
-					else {
-						MNEMOSY_ERROR("Could not move directory, because it didn't find the source node by its id. \nThis should not happen and is most likely a bug");
+
 					}
 
-				}
+					// Material dragDrop target for moving a material underneith
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DragDropMaterialPayload")) {
+						//MNEMOSY_TRACE("Material dragdrop target");
 
-				// Material dragDrop target for moving a material underneith
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DragDropMaterialPayload")) {
-					//MNEMOSY_TRACE("Material dragdrop target");
+						IM_ASSERT(payload->DataSize == sizeof(MaterialDragDropPayload));
+						MaterialDragDropPayload materialPayload = *(const MaterialDragDropPayload*)payload->Data;
 
-					IM_ASSERT(payload->DataSize == sizeof(MaterialDragDropPayload));
-					MaterialDragDropPayload materialPayload = *(const MaterialDragDropPayload*)payload->Data;
-
-					systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(), materialPayload.nodeRuntimeID);
+						systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(), materialPayload.nodeRuntimeID);
 					
-					std::string matName = sourceNode->subMaterials[materialPayload.nodeMaterialIndex].name;
+						std::string matName = sourceNode->subMaterials[materialPayload.nodeMaterialIndex].name;
 
 
-					MNEMOSY_TRACE("Material payload: SourceNode: {}, Material {}", sourceNode->name,matName);
-					if (sourceNode != nullptr) { // just in case. This should never happen.
+						MNEMOSY_TRACE("Material payload: SourceNode: {}, Material {}", sourceNode->name,matName);
+						if (sourceNode != nullptr) { // just in case. This should never happen.
 
 
-						if (node->SubMaterialExistsAlready(matName)) {
+							if (node->SubMaterialExistsAlready(matName)) {
 							
-							MNEMOSY_WARN("This Material already exists in the target folder");
-						}
-						else {
+								MNEMOSY_WARN("This Material already exists in the target folder");
+							}
+							else {
 
-							systems::MaterialInfo matInfoTemp = sourceNode->subMaterials[materialPayload.nodeMaterialIndex];
-							m_materialRegistry.MoveMaterial(sourceNode,node, matInfoTemp);
-						}
+								systems::MaterialInfo matInfoTemp = sourceNode->subMaterials[materialPayload.nodeMaterialIndex];
+								m_materialRegistry.MoveMaterial(sourceNode,node, matInfoTemp);
+							}
 
 						
-					}
-					else {
-						MNEMOSY_ERROR("Could not move material, because it didn't find the source node by its id. \nThis should not happen and is most likely a bug");
+						}
+						else {
+							MNEMOSY_ERROR("Could not move material, because it didn't find the source node by its id. \nThis should not happen and is most likely a bug");
+						}
+
 					}
 
+
+					ImGui::EndDragDropTarget();
 				}
+		
+		} // Drag and drop
 
-
-				ImGui::EndDragDropTarget();
-			}
+		if (nodeOpen) {
+			
 
 			// === Recusivly draw Sub directories
 
@@ -298,7 +330,6 @@ namespace mnemosy::gui
 
 		
 			ImGui::TreePop();
-		
 		}
 		
 	}
@@ -317,7 +348,18 @@ namespace mnemosy::gui
 #endif // !mnemosy_gui_showDebugInfo
 
 
-			if (ImGui::TreeNodeEx(materialText.c_str(), m_materialTreeFlags)) {
+			bool matIsOpen = ImGui::TreeNodeEx(materialText.c_str(), m_materialTreeFlags);
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+
+				MaterialDragDropPayload materialPayload = MaterialDragDropPayload(node->runtime_ID, i);
+				//unsigned int sourceNodeID = node->runtime_ID;
+				ImGui::SetDragDropPayload("DragDropMaterialPayload", &materialPayload, sizeof(MaterialDragDropPayload));
+
+				ImGui::EndDragDropSource();
+			}
+
+			if (matIsOpen) {
 
 #ifdef mnemosy_gui_showDebugInfo
 				if (ImGui::IsItemClicked()) {
@@ -326,44 +368,42 @@ namespace mnemosy::gui
 #endif // mnemosy_gui_showDebugInfo
 
 				// === Right Click Options
-				const char* materialOptions[] = { "Rename", "Delete" };
-				// right click on open folder to rename
+				// right click on open folder to open options
 				if (ImGui::BeginPopupContextItem()) {
 
-					static std::string newMaterialName = "New Material";
+					m_renameMaterialText = node->subMaterials[i].name;
 
-					ImGui::Text("Name: ");
+
+					ImGui::Text("Rename: ");
 					ImGui::SameLine();
-					ImGui::InputText("##edit", &newMaterialName);
 
-					for (int b = 0; b < IM_ARRAYSIZE(materialOptions); b++) {
+					bool renamed = ImGui::InputText("##RenameMaterialInputField", &m_renameMaterialText,m_textInputFlags);
+					if (renamed) {
+						RenameMaterial(node, node->subMaterials[i], m_renameMaterialText, i);
+					}
 
-						if (ImGui::Selectable(materialOptions[b])) {
-							if (b == 0) { // rename
-								MNEMOSY_TRACE("Selection rename: material: {}, new Name: {}", node->subMaterials[i].name, newMaterialName);
-								//materialName = newMaterialName;
-								RenameMaterial(node, node->subMaterials[i], newMaterialName,i);
-							}
-							else if (b == 1) { // delete
-								MNEMOSY_TRACE("Selection delete");
-								// TODO make PopupModal for delete 
+					for (size_t option = 0; option < IM_ARRAYSIZE(m_rightClickMaterialOptions); option++) {
+
+						if (ImGui::Selectable(m_rightClickMaterialOptions[option])) {
+							
+							if (option == 0) { // delete
+								
 								DeleteMaterial(node, node->subMaterials[i], i);
 							}
+							
+							else if (option == 1) { // open in FileExplorer
 
+								fs::path pathToMaterialFolder = m_materialRegistry.GetMaterialPath(node, node->subMaterials[i]);
+								mnemosy::core::FileDialogs::OpenFolderAt(pathToMaterialFolder.generic_string().c_str());
+							}
 						}
+
 					} // end options loop
 					ImGui::EndPopup();
 				} // End Popup Context Item
 
 
-				if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-
-					MaterialDragDropPayload materialPayload = MaterialDragDropPayload(node->runtime_ID,i);
-					//unsigned int sourceNodeID = node->runtime_ID;
-					ImGui::SetDragDropPayload("DragDropMaterialPayload", &materialPayload, sizeof(MaterialDragDropPayload));
-
-					ImGui::EndDragDropSource();
-				}
+		
 
 
 				ImGui::TreePop();
@@ -378,9 +418,16 @@ namespace mnemosy::gui
 
 
 
-	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node, std::string name) {
+	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node) {
 
-		m_materialRegistry.AddNewFolder(node, name);
+		std::string newName = "New Folder";
+		systems::FolderNode* newFolder = m_materialRegistry.AddNewFolder(node, newName);
+
+		m_materialRegistry.OpenFolderNode(newFolder);
+
+		m_setFolderOpenNextFrame = true;
+		m_folderIdToOpenNextFrame = node->runtime_ID;
+		
 	}
 
 	void MaterialLibraryGuiPanel::HandleDeleteHierarchyModal() {
@@ -432,19 +479,28 @@ namespace mnemosy::gui
 	}
 
 	void MaterialLibraryGuiPanel::RenameFolder(systems::FolderNode* node, std::string newName) {
-		m_materialRegistry.RenameFolder(node, newName);
+
+		if (newName != node->name) {
+			m_materialRegistry.RenameFolder(node, newName);
+		}
 	}
 	
 	
-	void MaterialLibraryGuiPanel::AddMaterial(systems::FolderNode* node,std::string name) {
+	void MaterialLibraryGuiPanel::AddMaterial(systems::FolderNode* node) {
 
 		std::string matName = "New Material";
 		m_materialRegistry.AddNewMaterial(node, matName);
+
+		m_materialRegistry.OpenFolderNode(node);
+		m_setFolderOpenNextFrame = true;
+		m_folderIdToOpenNextFrame = node->runtime_ID;
+
 	}
 	void MaterialLibraryGuiPanel::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
 
-		m_materialRegistry.RenameMaterial(node, materialInfo, newName,positionInVector);
-
+		if (newName != materialInfo.name) {
+			m_materialRegistry.RenameMaterial(node, materialInfo, newName,positionInVector);
+		}
 	}
 
 	void MaterialLibraryGuiPanel::DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector) {

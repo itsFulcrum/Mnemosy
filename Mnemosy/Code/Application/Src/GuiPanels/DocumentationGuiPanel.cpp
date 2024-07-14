@@ -32,7 +32,7 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		ImGui::Begin(panelName.c_str(), &showPanel);
+		ImGui::Begin(panelName, &showPanel);
 
 		if (ImGui::CollapsingHeader("About Mnemosy")) {
 

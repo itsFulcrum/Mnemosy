@@ -8,6 +8,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
 #include "Include/Core/Utils/DropHandler_Windows.h"
+#include "Include/Core/Clock.h"
 
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
@@ -16,8 +17,9 @@
 #include "Include/Systems/FolderTreeNode.h"
 
 #include "Include/Graphics/Scene.h"
-#include "Include/Graphics/Material.h"
 #include "Include/Graphics/RenderMesh.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
 
 #include "External/ImGui/imgui.h"
@@ -48,42 +50,54 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		ImGui::Begin(panelName.c_str(), &showPanel);
-
-		m_isPanelHovered = ImGui::IsWindowHovered();
-
-		
+		ImGui::Begin(panelName, &showPanel);
 
 		// variables used across entire method
 		MnemosyEngine& engineInstance = MnemosyEngine::GetInstance();
 		graphics::Material& activeMat = engineInstance.GetScene().GetActiveMaterial();
+
+
+		std::string displayText = "Material: " + activeMat.Name;
+		ImGui::SeparatorText(displayText.c_str());
+
+		bool materialSelected = m_materialRegistry.UserMaterialBound();
+
+		// return early if no material is selcted yet
+		if (!materialSelected) {
+		
+			ImGui::Spacing();
+
+			ImGui::Text("No material selected yet");
+			ImGui::End();
+
+			m_currentActiveMaterialID = -1;
+
+			return;
+		}
+
+		CheckToSaveMaterial(engineInstance.GetClock().GetDeltaSeconds());
+
+		m_isPanelHovered = ImGui::IsWindowHovered();
+
 		ImVec2 buttonSize = ImVec2(120, 0);
+
 		const char* normalMapFormats[] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
 		const char* exportFormats[] = { "tiff","png"}; // they need to be ordered the same as in ExportManager ExportImageFormats
+		
 		fs::path libDir = engineInstance.GetFileDirectories().GetLibraryDirectoryPath();
 		systems::ExportManager& exportManager = engineInstance.GetExportManager();
 
 
-		// Check and see if the active material changed
-		if (m_materialRegistry.UserMaterialBound()) {
-			
-			int nowActiveMaterialID = m_materialRegistry.GetActiveMaterialID();
+		// Check if the active material changed			
+		int nowActiveMaterialID = m_materialRegistry.GetActiveMaterialID();
 
-			if (m_currentActiveMaterialID != nowActiveMaterialID) {
-				// Active material Changed
-				m_currentActiveMaterialID = nowActiveMaterialID;
-
-
-				m_readyToDragMaterial = false;
-			}
+		if (m_currentActiveMaterialID != nowActiveMaterialID) {
+			// Active material Changed
+			m_currentActiveMaterialID = nowActiveMaterialID;
 		}
-		else {
-			m_currentActiveMaterialID = -1;
-			m_readyToDragMaterial = false;
-		}
-
 		
 
+		// Set Drop manager to display cursor if files can be dropped or not
 		if (m_isAbedoButtonHovered 
 			|| m_isNormalButtonHovered
 			|| m_isRoughnessButtonHovered 
@@ -97,10 +111,8 @@ namespace mnemosy::gui
 		}
 
 
-		std::string displayText = "Material: " + activeMat.Name;
-		ImGui::SeparatorText(displayText.c_str());
 
-		if (m_materialRegistry.UserMaterialBound()) {
+		{
 
 			
 			// DEBUG INFO
@@ -117,79 +129,25 @@ namespace mnemosy::gui
 				
 			ImGui::Spacing();
 			
-			// Drag Material 
-			{
-				std::string dragButtonName = "Drag";
-				ImVec2 dragButton = ImVec2(120.0f, 20.0f);
-				if (m_isDraggingOnce) {
-					dragButtonName = "Drag Me";
+
+			// === Drag Material to other applications
+			bool btn = ImGui::Button("Drag Me", ImVec2(120.0f, 45.0f));
+
+			if (ImGui::IsItemClicked()) {
+
+				std::vector<std::string> filepaths = m_materialRegistry.GetFilepathsOfActiveMat(activeMat);
+
+				if (!filepaths.empty()) {
+
+					engineInstance.GetDropHandler().BeginDrag(filepaths);
+
+					filepaths.clear();
 				}
 				else {
-					dragButtonName = "Prepare Drag";
+
+					MNEMOSY_WARN("No texture files to drag in this material");
 				}
-
-				if (ImGui::Button(dragButtonName.c_str(), ImVec2(120.0f, 45.0f))) {
-
-					//if (!m_readyToDragMaterial) {
-					//
-					//	// Export Active Material Texture to a temporary folder so we can drag them.
-					//	// Temp Folder is delete if we close menmosy or when we start it.
-					//	fs::path tempFolder = engineInstance.GetFileDirectories().GetTempExportFolderPath();
-					//	if (!tempFolder.empty()) {
-					//		fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-					//		exportManager.ExportMaterialTextures(tempFolder, materialFolderPath, activeMat);
-					//	}
-					//}
-					//
-					//m_readyToDragMaterial = true;
-					m_isDraggingOnce = true;
-				}
-
-				m_readyToDragMaterial = true;
-				if (m_readyToDragMaterial) {
-
-					if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
-						
-						// works but if we escape or drop into our own app it repeatadly calls this witch is not ideal
-
-						// get files to drag
-
-
-						if (m_isDraggingOnce) {
-
-							std::vector<std::string> filepaths = m_materialRegistry.GetFilepathsOfActiveMat(activeMat);
-
-							if (!filepaths.empty()) {
-								m_isDraggingOnce = false;
-
-								engineInstance.GetDropHandler().BeginDrag(filepaths);
-
-								filepaths.clear();
-							}
-							else {
-
-								MNEMOSY_WARN("No texture files to drag in this material");
-							}
-
-
-						}
-
-
-
-
-
-
-						/*
-						if (m_isDraggingOnce) {
-							m_isDraggingOnce = true;
-						}
-						m_isDraggingOnce = false;
-						*/
-						ImGui::EndDragDropSource();
-					}
-				}
-
-			} // End Drag Material 
+			}
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -204,8 +162,6 @@ namespace mnemosy::gui
 
 					// if format changed
 					if (exportManager.GetExportImageFormatInt() != exportImageFormat_current) {
-
-						m_readyToDragMaterial = false;
 						exportManager.SetExportImageFormatInt(exportImageFormat_current);
 					}
 
@@ -217,7 +173,6 @@ namespace mnemosy::gui
 
 					// if format changed
 					if (exportManager.GetNormalMapExportFormatInt() != exportNormalFormat_current) {
-						m_readyToDragMaterial = false;
 						exportManager.SetNormalMapExportFormatInt(exportNormalFormat_current);
 					}
 
@@ -239,10 +194,6 @@ namespace mnemosy::gui
 			}// End Export Settings
 
 
-
-
-
-
 		}
 
 		ImGui::Spacing();
@@ -259,8 +210,8 @@ namespace mnemosy::gui
 
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::ALBEDO, filepath);
-					m_readyToDragMaterial = false;
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ALBEDO, filepath);
+					SaveMaterial();
 				}
 			}
 			m_isAbedoButtonHovered = ImGui::IsItemHovered();
@@ -274,9 +225,9 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Albedo", buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::ALBEDO);
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_ALBEDO);
 					textureAssigned = false;
-					m_readyToDragMaterial = false;
+					SaveMaterial();
 				}
 			}
 
@@ -285,8 +236,8 @@ namespace mnemosy::gui
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetAlbedoTexture().GetWidth()) + "x" + std::to_string(activeMat.GetAlbedoTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
+				// DEBUG
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ALBEDO));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo
@@ -295,9 +246,14 @@ namespace mnemosy::gui
 			// Disabled widgets if texture is assigned 
 			if(textureAssigned)
 				ImGui::BeginDisabled();
-
-			ImGui::ColorEdit3("Albedo Color", (float*)&activeMat.Albedo);
+			{
 			
+			
+				if (ImGui::ColorEdit3("Albedo Color", (float*)&activeMat.Albedo)) {
+					m_valuesChanged = true;
+				}
+
+			}
 			if (textureAssigned)
 				ImGui::EndDisabled();
 
@@ -316,12 +272,11 @@ namespace mnemosy::gui
 
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::ROUGHNESS, filepath);
-					m_readyToDragMaterial = false;
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, filepath);
+					SaveMaterial();
 				}
 			}
 			m_isRoughnessButtonHovered = ImGui::IsItemHovered();
-
 
 
 			if (textureAssigned) {
@@ -329,21 +284,19 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Roughness", buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::ROUGHNESS);
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS);
 					textureAssigned = false;
-					m_readyToDragMaterial = false;
+					SaveMaterial();
 				}
 			}
 
 			if (textureAssigned) {
-
 				
-
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetRoughnessTexture().GetWidth()) + "x" + std::to_string(activeMat.GetRoughnessTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-				// DEBUG
 #ifdef mnemosy_gui_showDebugInfo
+				// DEBUG
 				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ROUGHNESS));
 				ImGui::Text(TextureID.c_str());				
 #endif // mnemosy_gui_showDebugInfo
@@ -355,8 +308,9 @@ namespace mnemosy::gui
 			if (textureAssigned)
 				ImGui::BeginDisabled();
 			{
-				ImGui::SliderFloat("Roughness", &activeMat.Roughness, 0.0f, 1.0f, "%.4f");
-
+				if (ImGui::SliderFloat("Roughness", &activeMat.Roughness, 0.0f, 1.0f, "%.4f")) {
+					m_valuesChanged = true;
+				}
 			}
 			if (textureAssigned)
 				ImGui::EndDisabled();
@@ -376,8 +330,8 @@ namespace mnemosy::gui
 
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::NORMAL, filepath);
-					m_readyToDragMaterial = false;
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_NORMAL, filepath);
+					SaveMaterial();
 				}
 			}
 			m_isNormalButtonHovered = ImGui::IsItemHovered();
@@ -386,9 +340,9 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Normal", buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::NORMAL);
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_NORMAL);
 					textureAssigned = false;
-					m_readyToDragMaterial = false;
+					SaveMaterial();
 				}
 			}
 
@@ -409,45 +363,45 @@ namespace mnemosy::gui
 			if (!textureAssigned)
 				ImGui::BeginDisabled();
 			{
-				ImGui::DragFloat("Normal Strength", &activeMat.NormalStrength,0.01f, 0.0f, 100.0f, "%.4f");
+
+				if (ImGui::DragFloat("Normal Strength", &activeMat.NormalStrength, 0.01f, 0.0f, 100.0f, "%.4f")) {
+					m_valuesChanged = true;
+				}
 				
 				// NORMAL MAP FORMAT
 				
-				if (m_materialRegistry.UserMaterialBound()) { // normal convert feature for now not allowed for the default material because it doesnt have a filepath to save the texture to
-									
-					
-					int format_current = activeMat.GetNormalFormatAsInt();
+				int format_current = activeMat.GetNormalFormatAsInt();
 
-					ImGui::Combo("Normal Map Format", &format_current, normalMapFormats, IM_ARRAYSIZE(normalMapFormats));
-					ImGui::SetItemTooltip("Specify the normal map format of the source texture");
+				ImGui::Combo("Normal Map Format", &format_current, normalMapFormats, IM_ARRAYSIZE(normalMapFormats));
+				ImGui::SetItemTooltip("Specify the normal map format of the source texture");
 
-					// if format changed
-					if (activeMat.GetNormalFormatAsInt() != format_current) {
-						fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-						fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + "_normal.tif"));
+				// if format changed
+				if (activeMat.GetNormalFormatAsInt() != format_current) {
+					fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+					fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + "_normal.tif"));
 										
-						// Generate inverted normal Texture.
-						MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat,true);
+					// Generate inverted normal Texture.
+					MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat,true);
 
 						
 
-						// save normal format to material data file.
-						if (format_current == 0) {
-							activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
-						}
-						else if (format_current == 1) {
-							activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
-						}
-						m_materialRegistry.SaveActiveMaterialToFile();
-
-						// Load newly created texture as new normal map 
-
-						activeMat.GetNormalTexture().generateFromFile(normalMapPath.generic_string().c_str(),true,true);
-						//activeMat.GetNormalTexture().LoadFromKtx(normalMapPath.generic_string().c_str());
-						m_readyToDragMaterial = false;
-
+					// save normal format to material data file.
+					if (format_current == 0) {
+						activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
 					}
+					else if (format_current == 1) {
+						activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
+					}
+					m_materialRegistry.SaveActiveMaterialToFile();
+
+					// Load newly created texture as new normal map 
+
+					activeMat.GetNormalTexture().generateFromFile(normalMapPath.generic_string().c_str(),true,true);
+
+					SaveMaterial();
+
 				}
+				
 
 
 			}
@@ -468,8 +422,8 @@ namespace mnemosy::gui
 			if (ImGui::Button("Load Texture...##Metallic", buttonSizeLoad)) {
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::METALLIC, filepath);
-					m_readyToDragMaterial = false;
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_METALLIC, filepath);
+					SaveMaterial();
 				}
 			}
 			m_isMetallicButtonHovered = ImGui::IsItemHovered();
@@ -478,9 +432,9 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Metallic", buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::METALLIC);
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_METALLIC);
 					textureAssigned = false;
-					m_readyToDragMaterial = false;
+					SaveMaterial();
 				}
 			}
 
@@ -502,7 +456,10 @@ namespace mnemosy::gui
 			if (textureAssigned)
 				ImGui::BeginDisabled();
 			{
-				ImGui::SliderFloat("Metallic", &activeMat.Metallic, 0.0f, 1.0f, "%.4f");
+
+				if (ImGui::SliderFloat("Metallic", &activeMat.Metallic, 0.0f, 1.0f, "%.4f")) {
+					m_valuesChanged = true;
+				}
 			}
 			if (textureAssigned)
 				ImGui::EndDisabled();
@@ -514,15 +471,15 @@ namespace mnemosy::gui
 
 		// Ambient Occlusion Settings
 		{ 
-			ImGui::SeparatorText("Abient Occlusion ");
+			ImGui::SeparatorText("Ambient Occlusion ");
 			bool textureAssigned = activeMat.isAoAssigned();
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##AO", buttonSizeLoad)) {
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::AMBIENTOCCLUSION, filepath);
-					m_readyToDragMaterial = false;
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, filepath);
+					SaveMaterial();
 				}
 			}
 			m_isAmbientOcclusionButtonHovered = ImGui::IsItemHovered();
@@ -531,9 +488,9 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##AO",buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::AMBIENTOCCLUSION);
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION);
 					textureAssigned = false;
-					m_readyToDragMaterial = false;
+					SaveMaterial();
 				}
 			}
 
@@ -564,8 +521,9 @@ namespace mnemosy::gui
 			if (ImGui::Button("Load Texture...##Emissive", buttonSizeLoad)) {
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::EMISSION, filepath);
-					m_readyToDragMaterial = false;
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_EMISSION, filepath);
+					SaveMaterial();
+
 				}
 			}
 			m_isEmissionButtonHovered = ImGui::IsItemHovered();
@@ -575,9 +533,9 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Emissive", buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::EMISSION);
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_EMISSION);
 					textureAssigned = false;
-					m_readyToDragMaterial = false;
+					SaveMaterial();
 				}
 			}
 
@@ -599,12 +557,19 @@ namespace mnemosy::gui
 			if (textureAssigned)
 				ImGui::BeginDisabled();
 			{
-				ImGui::ColorEdit3("Emission", (float*)&activeMat.Emission);
+				
+
+				if (ImGui::ColorEdit3("Emission", (float*)&activeMat.Emission)) {
+					m_valuesChanged = true;
+				}
+
 			}
 			if (textureAssigned)
 				ImGui::EndDisabled();
 
-			ImGui::DragFloat("Emission Strength", &activeMat.EmissionStrength,0.01f, 0.0f, 10000.0f, "%.4f");
+			if (ImGui::DragFloat("Emission Strength", &activeMat.EmissionStrength, 0.01f, 0.0f, 10000.0f, "%.4f")) {
+				m_valuesChanged = true;
+			}
 
 		} // End Emission Settings
 
@@ -619,6 +584,8 @@ namespace mnemosy::gui
 			if (ImGui::DragFloat2("UV Tiling", (float*)uvTiling, 0.1f, 0.0, 1000, "%0.4f")) {
 				activeMat.UVTiling.x = uvTiling[0];
 				activeMat.UVTiling.y = uvTiling[1];
+
+				m_valuesChanged = true;
 			}
 		} // End General Settings
 		
@@ -630,7 +597,7 @@ namespace mnemosy::gui
 
 			if (ImGui::Button("Save Material", buttonSize)) {
 
-				m_materialRegistry.SaveActiveMaterialToFile();
+				SaveMaterial();
 			}
 		}
 
@@ -641,61 +608,96 @@ namespace mnemosy::gui
 
 	// Callback when files are droped into mnemosy
 	void MaterialEditorGuiPanel::OnFileDropInput(int count, std::vector<std::string>& dropedFilePaths) {
+
 		if (m_isPanelHovered) {
 
-			if (count > 0) {
 
-				if (!dropedFilePaths.empty()) { // just making sure
+			if (count == 0)
+				return;
 
-					// we kinda only want to handle the first one.
-					std::string firstPath = dropedFilePaths[0];
-					//MNEMOSY_TRACE("MaterialEditorGuiPanel::OnFileDropInput: fist droped File: {}", firstPath);
-					fs::directory_entry firstFile = fs::directory_entry(firstPath);
-
-					if (firstFile.exists()) {
-
-						if (firstFile.is_regular_file()) {
-
-							std::string extention = firstFile.path().extension().generic_string();
-							if (extention == ".png" || extention == ".tif" || extention == ".tiff" || extention == ".jpg" || extention == ".jpeg") {
-								//MNEMOSY_DEBUG("MaterialEditorGuiPanel::OnFileDropInput: FirstFile is Valid File. Filetype: {}",extention);
-								// Valid texture file
-
-								// albedo 
-								if (m_isAbedoButtonHovered) {
-									m_materialRegistry.LoadTextureForActiveMaterial(graphics::ALBEDO, firstPath);
-								}
-								// roughness
-								if (m_isRoughnessButtonHovered) {
-									m_materialRegistry.LoadTextureForActiveMaterial(graphics::ROUGHNESS, firstPath);
-								}
-								// normal
-								if (m_isNormalButtonHovered) {
-									m_materialRegistry.LoadTextureForActiveMaterial(graphics::NORMAL, firstPath);
-								}
-								// metallic
-								if (m_isMetallicButtonHovered) {
-									m_materialRegistry.LoadTextureForActiveMaterial(graphics::METALLIC, firstPath);
-								}
-								// ao
-								if (m_isAmbientOcclusionButtonHovered) {
-									m_materialRegistry.LoadTextureForActiveMaterial(graphics::AMBIENTOCCLUSION, firstPath);
-								}
-								// emission
-								if (m_isEmissionButtonHovered) {
-									m_materialRegistry.LoadTextureForActiveMaterial(graphics::EMISSION, firstPath);
-								}
-
-								m_readyToDragMaterial = false;
+			if (dropedFilePaths.empty()) // just making sure
+				return;
 
 
-							}
-						}
-					}
+
+			// we kinda only want to handle the first one.
+			std::string firstPath = dropedFilePaths[0];
+			fs::directory_entry firstFile = fs::directory_entry(firstPath);
+
+
+			if (!firstFile.exists()) 
+				return;
+
+			if (!firstFile.is_regular_file())
+				return;
+
+
+
+			
+
+			std::string extention = firstFile.path().extension().generic_string();
+			if (extention == ".png" || extention == ".tif" || extention == ".tiff" || extention == ".jpg" || extention == ".jpeg") {
+				//MNEMOSY_DEBUG("MaterialEditorGuiPanel::OnFileDropInput: FirstFile is Valid File. Filetype: {}",extention);
+				// Valid texture file
+
+
+				// albedo 
+				if (m_isAbedoButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ALBEDO, firstPath);
 				}
+				// roughness
+				else if (m_isRoughnessButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, firstPath);
+				}
+				// normal
+				else if (m_isNormalButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_NORMAL, firstPath);
+				}
+				// metallic
+				else if (m_isMetallicButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_METALLIC, firstPath);
+				}
+				// ao
+				else if (m_isAmbientOcclusionButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, firstPath);
+				}
+				// emission
+				else if (m_isEmissionButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_EMISSION, firstPath);
+				}
+				// TODO: Add height an opacity
+
+
+				SaveMaterial();
+
 			}
+			
+			
+				
+			
 		}
 
+	}
+
+	void MaterialEditorGuiPanel::CheckToSaveMaterial(float deltaSeconds) {
+
+		// if valuesChanged is set run a timer until we save the material, this will also generate a new thumbnail so we don't want to do it imidiatly to save some computation cost.
+
+		if (m_valuesChanged) {
+
+			m_TimeToSaveMaterialDelta += deltaSeconds;
+
+			if (m_TimeToSaveMaterialDelta >= m_TimeToSaveMaterial) {
+				m_TimeToSaveMaterialDelta = 0.0f;
+				SaveMaterial();
+			}
+		}
+	}
+
+	void MaterialEditorGuiPanel::SaveMaterial()
+	{
+		m_materialRegistry.SaveActiveMaterialToFile();
+		m_valuesChanged = false;
 	}
 
 } // !mnemosy::gui

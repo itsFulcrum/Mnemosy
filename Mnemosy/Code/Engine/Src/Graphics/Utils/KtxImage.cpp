@@ -574,7 +574,7 @@ namespace mnemosy::graphics
 				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(uint8_t);
 
 				float aspectRatio = (float)nextMip_Width / (float)nextMip_Height;
-				MNEMOSY_TRACE("ExportingMip: {}, Width: {}	Height: {}	Channels: {}	Bytes: {}	Aspect Ratio: {}", mip, nextMip_Width, nextMip_Height, channels, (float)mipSizeBytes, aspectRatio);
+				//MNEMOSY_TRACE("ExportingMip: {}, Width: {}	Height: {}	Channels: {}	Bytes: {}	Aspect Ratio: {}", mip, nextMip_Width, nextMip_Height, channels, (float)mipSizeBytes, aspectRatio);
 
 				/*if (aspectRatio != InitialAspectRatio) {
 					break;

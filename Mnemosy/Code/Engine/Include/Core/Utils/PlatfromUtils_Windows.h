@@ -13,7 +13,7 @@ namespace mnemosy::core
 		static std::string OpenFile(const char* filter);
 		static std::string SaveFile(const char* filter);
 		static std::string SelectFolder(const char* filter);
-
+		static void OpenFolderAt(const char* filepath);
 	};
 
 }

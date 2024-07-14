@@ -3,6 +3,14 @@
 
 #include "Include/Gui/GuiPanel.h"
 
+#include "External/ImGui/imgui.h"
+
+
+namespace mnemosy {
+
+	class MnemosyEngine;
+}
+
 namespace mnemosy::gui
 {
 	class ViewportGuiPanel : public GuiPanel
@@ -11,6 +19,19 @@ namespace mnemosy::gui
 		ViewportGuiPanel();
 
 		virtual void Draw() override;
+
+
+	private:
+		MnemosyEngine& m_engineInstance;
+
+		int m_viewportPosX = 1;
+		int m_viewportPosY = 1;
+
+		ImVec2 m_windowSize = ImVec2(2.0f, 2.0f);
+		ImVec2 m_windowPos  = ImVec2(2.0f, 2.0f);
+
+		ImVec2 m_avail_size = ImVec2(2.0f, 2.0f);
+		ImVec2 m_imageSize  = ImVec2(2.0f, 2.0f);
 	};
 }
 #endif // !VIEWPORT_GUI_PANEL_H

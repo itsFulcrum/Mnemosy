@@ -12,7 +12,6 @@ namespace mnemosy::systems {
 		, m_runtimeMaterialIDCounter{1}
 		, m_rootNodeName{rootName}
 	{
-		m_jsonLibKeys = new JsonLibKeys();
 		m_rootNode = CreateNewFolder_Internal(nullptr, m_rootNodeName);
 	}
 
@@ -20,8 +19,6 @@ namespace mnemosy::systems {
 	FolderTree::~FolderTree()
 	{
 		RecursivDeleteHierarchy(m_rootNode);
-		delete m_jsonLibKeys;
-		m_jsonLibKeys = nullptr;
 	}
 
 	FolderNode* FolderTree::CreateNewFolder(FolderNode* parentNode, const std::string& name) {
@@ -141,12 +138,23 @@ namespace mnemosy::systems {
 	std::string FolderTree::MakeNameUnique(const std::string& name) {
 
 		// ensure that the name is completely unique across all folders and materials
-		unsigned int suffixNbr = RecursivCheckNames(m_rootNode,name,0);
+
+
+		unsigned int suffixNbr = 0;
 
 		std::string newName = name;
-		if (suffixNbr > 0) {
+
+		while (RecursivDoesNameExist(m_rootNode, newName)) {
+			suffixNbr++;
 			newName = name + "_" + std::to_string(suffixNbr);
 		}
+
+		//RecursivCheckNames(m_rootNode, name, suffixNbr);
+
+		//std::string newName = name;
+		//if (suffixNbr > 0) {
+		//	newName = name + "_" + std::to_string(suffixNbr);
+		//}
 
 		return newName;
 	}
@@ -163,20 +171,20 @@ namespace mnemosy::systems {
 	json* FolderTree::WriteToJson() {
 
 		json LibraryDirectoriesJson; // top level json object
-		LibraryDirectoriesJson["1_Mnemosy_Data_File"] = "UserLibraryDirectoriesData";
+		LibraryDirectoriesJson[jsonLibKey_MnemosyDataFile] = "UserLibraryDirectoriesData";
 
 		json HeaderInfo;
 		std::string descriptionString = "This file stores the treelike folder structure defined by users to organise their materials";
-		HeaderInfo["Description"] = descriptionString;
+		HeaderInfo[jsonLibKey_Description] = descriptionString;
 
-		LibraryDirectoriesJson["2_Header_Info"] = HeaderInfo;
+		LibraryDirectoriesJson[jsonLibKey_HeaderInfo] = HeaderInfo;
 
 
 		json rootFolderJson = RecursivWriteToJson(m_rootNode);
 
 		json userDirectoriesJson;
 		userDirectoriesJson[m_rootNodeName] = rootFolderJson;
-		LibraryDirectoriesJson["3_UserDirectories"] = userDirectoriesJson;
+		LibraryDirectoriesJson[jsonLibKey_FolderTree] = userDirectoriesJson;
 
 		return new json(LibraryDirectoriesJson);
 	}
@@ -251,42 +259,50 @@ namespace mnemosy::systems {
 		}
 	}
 
-	unsigned int FolderTree::RecursivCheckNames(FolderNode* node, const std::string& name,const unsigned int suffixNbr) {
+	bool FolderTree::RecursivDoesNameExist(FolderNode* node, const std::string& name) {
 
 		// recursivly walk through the entire tree and check if the name already exists somewhere either as a folder or as a material
+		// returns true if the name exists
+		
+		if (node->name == name) {
 
-		unsigned int suffix = suffixNbr;
-
-		std::string nameModified = name;
-		if (suffix > 0) {
-			nameModified = name + "_" + std::to_string(suffix);
-		}
-
-
-		if (node->name == nameModified) {
-			suffix++;
-			nameModified = name + "_" + std::to_string(suffix);
+			return true;
 		}
 
 
 		if (node->HasMaterials()) {
 
 
-			while (node->SubMaterialExistsAlready(nameModified)) {
-				suffix++;
-				nameModified = name + "_" + std::to_string(suffix);
+			for (size_t i = 0; i < node->subMaterials.size(); i++) {
+
+				if (node->subMaterials[i].name == name) {
+					return true;
+				}
 			}
 		}
 
 		if (!node->IsLeafNode()) {
+
+			std::string n = name;
+			if (node->SubnodeExistsAlready(n)) {
+
+				return true;
+			}
+
 			for (size_t i = 0; i < node->subNodes.size(); i++) {
 
 
-				suffix = RecursivCheckNames(node->subNodes[i], name, suffix);
+				bool foundMatch = RecursivDoesNameExist(node->subNodes[i], name);
+
+				if (foundMatch) {
+
+					return true;
+				}
+
 			}
 		}
 
-		return suffix;
+		return false;
 	}
 
 	json FolderTree::RecursivWriteToJson(FolderNode* node) {
@@ -294,10 +310,10 @@ namespace mnemosy::systems {
 		json nodeJson;
 
 		
-		nodeJson["1_name"] = node->name;
+		nodeJson[jsonLibKey_name] = node->name;
 
 		bool isLeafNode = node->IsLeafNode();
-		nodeJson["2_isLeaf"] = isLeafNode;
+		nodeJson[jsonLibKey_isLeaf] = isLeafNode;
 
 		std::string pathFromRoot = "";
 		if (node->parent != nullptr) { // if not root node
@@ -312,11 +328,11 @@ namespace mnemosy::systems {
 			}
 		}
 
-		nodeJson["3_pathFromRoot"] = pathFromRoot;
+		nodeJson[jsonLibKey_pathFromRoot] = pathFromRoot;
 
 		bool hasMaterials = !node->subMaterials.empty();
 
-		nodeJson["6_hasMaterials"] = hasMaterials;
+		nodeJson[jsonLibKey_hasMaterials] = hasMaterials;
 		if (hasMaterials) {
 
 			std::vector<std::string> matNames;
@@ -324,7 +340,7 @@ namespace mnemosy::systems {
 				matNames.push_back(node->subMaterials[i].name);
 			}
 
-			nodeJson["6_materialEntries"] = matNames;
+			nodeJson[jsonLibKey_materialEntries] = matNames;
 			matNames.clear();
 		}
 
@@ -335,7 +351,7 @@ namespace mnemosy::systems {
 
 				subNodeNames.push_back(node->subNodes[i]->name);
 			}
-			nodeJson["4_subFolderNames"] = subNodeNames;
+			nodeJson[jsonLibKey_subFolderNames] = subNodeNames;
 
 			json subNodes;
 			for (size_t i = 0; i < node->subNodes.size(); i++) {
@@ -343,7 +359,7 @@ namespace mnemosy::systems {
 				subNodes[node->subNodes[i]->name] = RecursivWriteToJson(node->subNodes[i]);
 			}
 
-			nodeJson["5_subFolders"] = subNodes;
+			nodeJson[jsonLibKey_subFolders] = subNodes;
 		}
 
 		return nodeJson;
@@ -351,11 +367,11 @@ namespace mnemosy::systems {
 
 	void FolderTree::RecursivLoadFromJson(FolderNode* node, const json& jsonNode) {
 
-		bool isLeafNode = jsonNode["2_isLeaf"].get<bool>();
+		bool isLeafNode = jsonNode[jsonLibKey_isLeaf].get<bool>();
 
-		bool hasMaterials = jsonNode["6_hasMaterials"].get<bool>();
+		bool hasMaterials = jsonNode[jsonLibKey_hasMaterials].get<bool>();
 		if (hasMaterials) {
-			std::vector<std::string> subMatNames = jsonNode["6_materialEntries"].get<std::vector<std::string>>();
+			std::vector<std::string> subMatNames = jsonNode[jsonLibKey_materialEntries].get<std::vector<std::string>>();
 			for (size_t i = 0; i < subMatNames.size(); i++) {
 
 				CreateMaterial_Internal(node, subMatNames[i]);
@@ -364,12 +380,12 @@ namespace mnemosy::systems {
 
 		if (!isLeafNode) {
 
-			std::vector<std::string> subFolderNames = jsonNode["4_subFolderNames"].get<std::vector<std::string>>();
+			std::vector<std::string> subFolderNames = jsonNode[jsonLibKey_subFolderNames].get<std::vector<std::string>>();
 
 			for (size_t i = 0; i < subFolderNames.size(); i++) {
 
 				FolderNode* subNode = CreateNewFolder_Internal(node, subFolderNames[i]);
-				json subJson = jsonNode["5_subFolders"][subFolderNames[i]];
+				json subJson = jsonNode[jsonLibKey_subFolders][subFolderNames[i]];
 				RecursivLoadFromJson(subNode, subJson);
 			}
 		}

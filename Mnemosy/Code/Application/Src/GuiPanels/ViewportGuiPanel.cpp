@@ -3,11 +3,11 @@
 #include "Include/Application.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Core/Window.h"
-#include "External/ImGui/imgui.h"
 
 namespace mnemosy::gui
 {
 	ViewportGuiPanel::ViewportGuiPanel()
+		: m_engineInstance{ MnemosyEngine::GetInstance() }
 	{
 		panelName = "Viewport";
 	}
@@ -17,38 +17,38 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		ImGui::Begin(panelName.c_str(), &showPanel);
+		ImGui::Begin(panelName, &showPanel);
 
 		// width and height of the entrire imGui window including top bar and left padding
-		ImVec2 windowSize = ImGui::GetWindowSize();
+		m_windowSize = ImGui::GetWindowSize();
 		// start position relative to the main glfw window
-		ImVec2 windowPos = ImGui::GetWindowPos();
+		m_windowPos = ImGui::GetWindowPos();
 		// available size inside the window  use this to define the width and height of the texture image
 		// if i subtract this from GetWindowSize() i should get the start coordinates from the image relative to the panel window
-		ImVec2 avail_size = ImGui::GetContentRegionAvail();
-		ImVec2 imageSize = avail_size;
+		m_avail_size = ImGui::GetContentRegionAvail();
+		m_imageSize = m_avail_size;
 
 		// start position of viewport relative to the main glfw window
-		int viewportPosX =int( windowPos.x + (windowSize.x - avail_size.x));
-		int viewportPosY =int( windowPos.y + (windowSize.y - avail_size.y));
+		m_viewportPosX =int(m_windowPos.x + (m_windowSize.x - m_avail_size.x));
+		m_viewportPosY =int(m_windowPos.y + (m_windowSize.y - m_avail_size.y));
 
 
-		unsigned int vSizeX = (unsigned int)imageSize.x;
-		if(imageSize.x <= 0)
+		unsigned int vSizeX = (unsigned int)m_imageSize.x;
+		if (m_imageSize.x <= 0) {
 			vSizeX = 1;
-		unsigned int vSizeY = (unsigned int)imageSize.y;
-		if(imageSize.y <= 0)
+		}
+
+		unsigned int vSizeY = (unsigned int)m_imageSize.y;
+		if (m_imageSize.y <= 0) {
 			vSizeY = 1;
+		}
+
+		m_engineInstance.GetWindow().SetViewportData(vSizeX, vSizeY, m_viewportPosX, m_viewportPosY);
+
+		// Display Rendered Frame
+		ImGui::Image((void*)m_engineInstance.GetRenderer().GetRenderTextureId(), m_imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
 
-		ENGINE_INSTANCE().GetWindow().SetViewportData(vSizeX, vSizeY, viewportPosX, viewportPosY);
-
-		//ImGui::Text("Width %i, Height %i", viewportWidth, viewportHeight);
-		//ImGui::Text("availX %f, availY %f", avail_size.x, avail_size.y);
-		//ImGui::Text("availX %f, availY %f", avail_size.x, avail_size.y);
-		//ImGui::Text("viewportRenderTextureID = %d", viewportRenderTextureID);
-
-		ImGui::Image((void*)ENGINE_INSTANCE().GetRenderer().GetRenderTextureId(), imageSize , ImVec2(0, 1), ImVec2(1, 0));		
 		if (ImGui::IsWindowHovered())
 		{
 			ImGui::CaptureMouseFromApp(false);

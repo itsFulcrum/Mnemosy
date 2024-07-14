@@ -1,28 +1,21 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "Include/Graphics/Shader.h"
-#include "Include/Graphics/Texture.h"
 
 #include <string>
 #include <glm/glm.hpp>
 
+
+namespace mnemosy::graphics {
+
+	enum NormalMapFormat;
+	enum PBRTextureType;
+	class Texture;
+	class Shader;
+}
+
 namespace mnemosy::graphics
 {
-	enum PBRTextureType
-	{
-		ALBEDO,
-		ROUGHNESS,
-		METALLIC,
-		NORMAL,
-		AMBIENTOCCLUSION,
-		EMISSION
-	};
-	enum NormalMapFormat
-	{
-		MNSY_NORMAL_FORMAT_OPENGl = 0,
-		MNSY_NORMAL_FORMAT_DIRECTX = 1
-	};
 
 	class Material
 	{
@@ -39,7 +32,7 @@ namespace mnemosy::graphics
 		float NormalStrength = 1.0f; // not supported by shader at the moment
 		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
 
-		NormalMapFormat NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
+		NormalMapFormat NormalTextureFormat;
 
 		void setDefaults();
 

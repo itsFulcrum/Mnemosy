@@ -2,6 +2,12 @@
 
 #include "Include/Core/Log.h"
 
+#include "Include/Graphics/TextureDefinitions.h"
+#include "Include/Graphics/Shader.h"
+#include "Include/Graphics/Texture.h"
+
+
+
 namespace mnemosy::graphics
 {
 	Material::Material()
@@ -63,29 +69,29 @@ namespace mnemosy::graphics
 
 	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* texture) {
 
-		if (pbrTextureType == ALBEDO)
+		if (pbrTextureType == MNSY_TEXTURE_ALBEDO)
 			m_pAlbedoTexture = texture;
 
-		else if (pbrTextureType == ROUGHNESS)
+		else if (pbrTextureType == MNSY_TEXTURE_ROUGHNESS)
 			m_pRoughnessTexture = texture;
 		
-		else if (pbrTextureType == METALLIC)
+		else if (pbrTextureType == MNSY_TEXTURE_METALLIC)
 			m_pMetallicTexture = texture;
 		
-		else if (pbrTextureType == NORMAL)
+		else if (pbrTextureType == MNSY_TEXTURE_NORMAL)
 			m_pNormalTexture = texture;
 		
-		else if (pbrTextureType == AMBIENTOCCLUSION)
+		else if (pbrTextureType == MNSY_TEXTURE_AMBIENTOCCLUSION)
 			m_pAmbientOcclusionTexture = texture;
 		
-		else if (pbrTextureType == EMISSION)
+		else if (pbrTextureType == MNSY_TEXTURE_EMISSION)
 			m_pEmissiveTexture = texture;
 	}
 
 	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath)
 	{
 
-		if (pbrType == ALBEDO)
+		if (pbrType == MNSY_TEXTURE_ALBEDO)
 		{
 			
 			if(!m_pAlbedoTexture)
@@ -104,7 +110,7 @@ namespace mnemosy::graphics
 			return;
 		}
 
-		if (pbrType == ROUGHNESS)
+		if (pbrType == MNSY_TEXTURE_ROUGHNESS)
 		{
 			if (!m_pRoughnessTexture)
 				m_pRoughnessTexture = new Texture();
@@ -122,7 +128,7 @@ namespace mnemosy::graphics
 			return;
 		}
 	
-		if (pbrType == METALLIC)
+		if (pbrType == MNSY_TEXTURE_METALLIC)
 		{
 			if (!m_pMetallicTexture)
 				m_pMetallicTexture = new Texture();
@@ -139,7 +145,7 @@ namespace mnemosy::graphics
 
 			return;
 		}
-		if (pbrType == NORMAL)
+		if (pbrType == MNSY_TEXTURE_NORMAL)
 		{
 			if (!m_pNormalTexture)
 				m_pNormalTexture = new Texture();
@@ -154,7 +160,7 @@ namespace mnemosy::graphics
 			
 			return;
 		}
-		if (pbrType == AMBIENTOCCLUSION)
+		if (pbrType == MNSY_TEXTURE_AMBIENTOCCLUSION)
 		{
 			if (!m_pAmbientOcclusionTexture)
 				m_pAmbientOcclusionTexture = new Texture();
@@ -168,7 +174,7 @@ namespace mnemosy::graphics
 			}
 			return;
 		}
-		if (pbrType == EMISSION)
+		if (pbrType == MNSY_TEXTURE_EMISSION)
 		{
 			if (!m_pEmissiveTexture)
 				m_pEmissiveTexture = new Texture();
@@ -187,34 +193,34 @@ namespace mnemosy::graphics
 
 	void Material::removeTexture(const PBRTextureType& pbrTextureType)
 	{
-		if (pbrTextureType == ALBEDO)
+		if (pbrTextureType == MNSY_TEXTURE_ALBEDO)
 		{
 			delete m_pAlbedoTexture;
 			m_pAlbedoTexture = nullptr;
 		}
-		else if (pbrTextureType == ROUGHNESS)
+		else if (pbrTextureType == MNSY_TEXTURE_ROUGHNESS)
 		{
 			delete m_pRoughnessTexture;
 			m_pRoughnessTexture = nullptr;
 
 		}
-		else if (pbrTextureType == METALLIC)
+		else if (pbrTextureType == MNSY_TEXTURE_METALLIC)
 		{
 			delete m_pMetallicTexture;
 			m_pMetallicTexture = nullptr;
 		}
-		else if (pbrTextureType == NORMAL)
+		else if (pbrTextureType == MNSY_TEXTURE_NORMAL)
 		{
 			delete m_pNormalTexture;
 			m_pNormalTexture = nullptr;
 			SetNormalMapFormat(MNSY_NORMAL_FORMAT_OPENGl);
 		}
-		else if (pbrTextureType == AMBIENTOCCLUSION)
+		else if (pbrTextureType == MNSY_TEXTURE_AMBIENTOCCLUSION)
 		{
 			delete m_pAmbientOcclusionTexture;
 			m_pAmbientOcclusionTexture = nullptr;
 		}
-		else if (pbrTextureType == EMISSION)
+		else if (pbrTextureType == MNSY_TEXTURE_EMISSION)
 		{
 			delete m_pEmissiveTexture;
 			m_pEmissiveTexture = nullptr;
@@ -318,32 +324,32 @@ namespace mnemosy::graphics
 
 	unsigned int Material::DebugGetTextureID(const PBRTextureType& pbrTextureType)
 	{
-		if (pbrTextureType == ALBEDO)
+		if (pbrTextureType == MNSY_TEXTURE_ALBEDO)
 		{
 			if(m_pAlbedoTexture)
 				return m_pAlbedoTexture->GetID();
 		}
-		else if (pbrTextureType == ROUGHNESS)
+		else if (pbrTextureType == MNSY_TEXTURE_ROUGHNESS)
 		{
 			if(m_pRoughnessTexture)
 				return m_pRoughnessTexture->GetID();
 		}
-		else if (pbrTextureType == METALLIC)
+		else if (pbrTextureType == MNSY_TEXTURE_METALLIC)
 		{
 			if(m_pMetallicTexture)
 				return m_pMetallicTexture->GetID();
 		}
-		else if (pbrTextureType == NORMAL)
+		else if (pbrTextureType == MNSY_TEXTURE_NORMAL)
 		{
 			if(m_pNormalTexture)
 				return m_pNormalTexture->GetID();
 		}
-		else if (pbrTextureType == AMBIENTOCCLUSION)
+		else if (pbrTextureType == MNSY_TEXTURE_AMBIENTOCCLUSION)
 		{
 			if(m_pAmbientOcclusionTexture)
 				return m_pAmbientOcclusionTexture->GetID();
 		}
-		else if (pbrTextureType == EMISSION)
+		else if (pbrTextureType == MNSY_TEXTURE_EMISSION)
 		{
 			if(m_pEmissiveTexture)
 				return m_pEmissiveTexture->GetID();

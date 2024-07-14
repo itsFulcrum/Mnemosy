@@ -33,7 +33,7 @@ namespace mnemosy::gui
 
 		MnemosyEngine& engine = ENGINE_INSTANCE();
 
-		ImGui::Begin(panelName.c_str(), &showPanel);
+		ImGui::Begin(panelName, &showPanel);
 
 
 		// Library Directory
