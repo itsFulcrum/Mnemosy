@@ -54,7 +54,7 @@ namespace mnemosy::core
 		m_frameCount++;
 	}
 
-	const double Clock::GetGLFWTimeDirectly()
+	const double Clock::GetTimeSinceLaunch()
 	{
 		return glfwGetTime();
 	}

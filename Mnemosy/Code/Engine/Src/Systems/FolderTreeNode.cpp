@@ -17,13 +17,15 @@ namespace mnemosy::systems
 	}
 
 
-	bool FolderNode::SubMaterialExistsAlready(std::string name) {
+	bool FolderNode::SubMaterialExistsAlready(std::string& name) {
 
 		if (subMaterials.empty())
 			return false;
 
-		for (MaterialInfo subMat : subMaterials) {
-			if (subMat.name == name) {
+
+		for (size_t i = 0; i < subMaterials.size(); i++) {
+
+			if (subMaterials[i].name == name) {
 				return true;
 			}
 		}
@@ -32,14 +34,10 @@ namespace mnemosy::systems
 	}
 
 	bool FolderNode::HasMaterials() {
-
-		if (subMaterials.empty())
-			return false;
-
-		return true;
+		return !subMaterials.empty();
 	}
 
-	FolderNode* FolderNode::GetSubNodeByName(std::string name) {
+	FolderNode* FolderNode::GetSubNodeByName(std::string& name) {
 		
 		if (!subNodes.empty()) {
 
@@ -54,16 +52,16 @@ namespace mnemosy::systems
 		return nullptr;
 	}
 
-	bool FolderNode::SubnodeExistsAlready(FolderNode* node, std::string name) {
+	bool FolderNode::SubnodeExistsAlready(std::string& name) {
 
 		// only searches curent and subnodes not reqursivly the entire subtree
 
-		if (node->name == name)
+		if (this->name == name)
 			return true;
 
 		if (!subNodes.empty()) {
 
-			for (FolderNode* subnode : node->subNodes) {
+			for (FolderNode* subnode : subNodes) {
 
 				if (subnode->name == name) {
 					return true;

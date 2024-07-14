@@ -45,7 +45,7 @@ namespace mnemosy
 
 		m_pGuiPanelManager = new gui::GuiPanelManager();
 
-		double applicationLoadTime = GetEngine().GetClock().GetGLFWTimeDirectly();
+		double applicationLoadTime = GetEngine().GetClock().GetTimeSinceLaunch();
 		MNEMOSY_INFO("Mnemosy Application Initialized: {} Seconds", applicationLoadTime);
 	}
 

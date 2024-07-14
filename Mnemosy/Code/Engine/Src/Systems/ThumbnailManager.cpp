@@ -76,23 +76,7 @@ namespace mnemosy::systems {
 				}
 			}
 		}
-
-
-
 	}
-	//void ThumbnailManager::RefreshThumbnail(MaterialInfo& materialInfo,fs::path& pathToThumbnail) {
-	//	/// NOT IN USE AT THE MOMENT...
-	//	glDeleteTextures(1, &materialInfo.thumbnailTexure_ID);
-	//	MNEMOSY_DEBUG("Delete GL TEX ID {}", materialInfo.thumbnailTexure_ID);
-	//	materialInfo.thumbnailTexure_ID = 0;
-	//	materialInfo.thumbnailLoaded = false;
-
-
-	//	m_activeFolderFullyLoaded = false;
-	//	//glGenTextures(1, &materialInfo.thumbnailTexure_ID);
-	//	//graphics::KtxImage thumbnailImg;
-	//	//thumbnailImg.LoadKtx(pathToThumbnail.generic_string().c_str(), materialInfo.thumbnailTexure_ID);
-	//}
 	
 	void ThumbnailManager::DeleteThumbnailFromCache(MaterialInfo& materialInfo) {
 		glDeleteTextures(1, &materialInfo.thumbnailTexure_ID);
@@ -123,7 +107,6 @@ namespace mnemosy::systems {
 		}
 
 		m_activeFolderFullyLoaded = false;
-
 	}
 
 	void ThumbnailManager::LoadThumbnailsOfActiveFolder(FolderNode* activeFolder, fs::path folderDirectory) {

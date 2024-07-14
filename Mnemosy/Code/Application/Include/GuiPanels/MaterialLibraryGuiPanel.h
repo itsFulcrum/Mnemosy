@@ -36,16 +36,20 @@ namespace mnemosy::gui
 		void RecursivDrawSubfolders(systems::FolderNode* node);
 		void DrawMaterialEntries(systems::FolderNode* node);
 	private:
-		void AddSubfolder(systems::FolderNode* node,std::string name);
-		void ChangeNodeName(systems::FolderNode* node, std::string newName);
 		
+		void AddSubfolder(systems::FolderNode* node,std::string name);
+		void RenameFolder(systems::FolderNode* node, std::string newName);
+		void DeleteButKeepChildren(systems::FolderNode* node);
+		void DeleteHierarchy(systems::FolderNode* node);
+		
+
+
 		void AddMaterial(systems::FolderNode* node,std::string name);
-		void ChangeMaterialName(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector);
+		void RenameMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector);
 		void DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector);
 
 
 		void HandleDeleteHierarchyModal();
-		void DeleteHierarchy(systems::FolderNode* node);
 		systems::FolderNode* m_nodeDeleteHierarchy = nullptr;
 
 		ImGuiTreeNodeFlags m_directoryTreeFlags;

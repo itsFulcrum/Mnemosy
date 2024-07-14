@@ -18,10 +18,6 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/FileDirectories.h
 ${ENGINE_SOURCE_PATH}/Src/Core/FileDirectories.cpp
 
-
-
-
-
 #Systems
 ${ENGINE_SOURCE_PATH}/Include/Systems/Input/InputSystem.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/Input/InputSystem.cpp
@@ -31,13 +27,16 @@ ${ENGINE_SOURCE_PATH}/Include/Systems/MaterialLibraryRegistry.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/MaterialLibraryRegistry.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/FolderTreeNode.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/FolderTreeNode.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/FolderTree.h
+${ENGINE_SOURCE_PATH}/Src/Systems/FolderTree.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/ThumbnailManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/ThumbnailManager.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/TextureGenerationManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/TextureGenerationManager.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/ExportManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/ExportManager.cpp
-
+${ENGINE_SOURCE_PATH}/Include/Systems/JsonKeys.h
+${ENGINE_SOURCE_PATH}/Src/Systems/JsonKeys.cpp
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/PlatfromUtils_Windows.cpp

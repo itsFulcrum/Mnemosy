@@ -56,6 +56,9 @@ namespace mnemosy::gui
 			ImGui::BeginChild("CurrentDirectory", ImVec2(0, 0), ImGuiChildFlags_Border );
 			{
 
+				if (m_materialRegistry.GetSelectedNode() == nullptr) {
+					MNEMOSY_TRACE("Selected node is not nullptr");
+				}
 			
 				std::string directoryText = "Directory: " + m_materialRegistry.GetSelectedNode()->name;
 				ImGui::SeparatorText(directoryText.c_str());
@@ -164,7 +167,7 @@ namespace mnemosy::gui
 			ImGui::SameLine();
 			
 			// === Right Click Options
-			const char* options[] = { "Rename", "Add Subfolder", "Add Material", "Delete Hierarchy"};
+			const char* options[] = { "Rename", "Add Subfolder", "Add Material","Delete", "Delete Hierarchy"};
 			// right click on open folder to rename
 			if (ImGui::BeginPopupContextItem()) {
 				
@@ -180,7 +183,7 @@ namespace mnemosy::gui
 
 						if (i == 0)  { // rename
 							// need to open another popup probably
-							ChangeNodeName(node, newName);
+							RenameFolder(node, newName);
 						}
 						else if (i == 1) { // Add Subfolder
 
@@ -189,7 +192,10 @@ namespace mnemosy::gui
 						else if (i == 2) { // Add material 
 							AddMaterial(node,newName);
 						}
-						else if (i == 3) { // delete hierarchy
+						else if (i == 3) { // delete but keep children
+							DeleteButKeepChildren(node);
+						}
+						else if (i == 4) { // delete hierarchy
 						
 							m_nodeDeleteHierarchy = node;
 							showDeleteHierarchyModel = true;
@@ -224,12 +230,12 @@ namespace mnemosy::gui
 					IM_ASSERT(payload->DataSize == sizeof(unsigned int));
 					unsigned int sourceNodeID = *(const unsigned int*)payload->Data;
 					
-					systems::FolderNode* sourceNode = m_materialRegistry.RecursivGetNodeByRuntimeID(m_materialRegistry.GetRootFolder(),sourceNodeID);
+					systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(),sourceNodeID);
 
 					if (sourceNode != nullptr) { // just in case. This should never happen.
 
 						if (sourceNode->parent->name != node->name) { // dont copy if it is already in that directory
-							m_materialRegistry.MoveDirectory(sourceNode, node);
+							m_materialRegistry.MoveFolder(sourceNode, node);
 						}
 						else {
 							MNEMOSY_WARN("Dirctory is already inside this directory");
@@ -248,7 +254,7 @@ namespace mnemosy::gui
 					IM_ASSERT(payload->DataSize == sizeof(MaterialDragDropPayload));
 					MaterialDragDropPayload materialPayload = *(const MaterialDragDropPayload*)payload->Data;
 
-					systems::FolderNode* sourceNode = m_materialRegistry.RecursivGetNodeByRuntimeID(m_materialRegistry.GetRootFolder(), materialPayload.nodeRuntimeID);
+					systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(), materialPayload.nodeRuntimeID);
 					
 					std::string matName = sourceNode->subMaterials[materialPayload.nodeMaterialIndex].name;
 
@@ -336,7 +342,7 @@ namespace mnemosy::gui
 							if (b == 0) { // rename
 								MNEMOSY_TRACE("Selection rename: material: {}, new Name: {}", node->subMaterials[i].name, newMaterialName);
 								//materialName = newMaterialName;
-								ChangeMaterialName(node, node->subMaterials[i], newMaterialName,i);
+								RenameMaterial(node, node->subMaterials[i], newMaterialName,i);
 							}
 							else if (b == 1) { // delete
 								MNEMOSY_TRACE("Selection delete");
@@ -369,17 +375,12 @@ namespace mnemosy::gui
 		} // end loop through sub materials
 	}
 
+
+
+
 	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node, std::string name) {
 
-		int suffix = 1;
-		std::string folderName = name;
-		std::string newFolderName = folderName;// +"_" + std::to_string(suffix);
-		while (node->SubnodeExistsAlready(node, newFolderName)) {
-			newFolderName = folderName + "_" + std::to_string(suffix);
-			suffix++;
-		}
-
-		node->subNodes.push_back(m_materialRegistry.CreateFolderNode(node, newFolderName));
+		m_materialRegistry.AddNewFolder(node, name);
 	}
 
 	void MaterialLibraryGuiPanel::HandleDeleteHierarchyModal() {
@@ -421,64 +422,32 @@ namespace mnemosy::gui
 
 	}
 
-	void MaterialLibraryGuiPanel::DeleteHierarchy(systems::FolderNode* node) {
+	void MaterialLibraryGuiPanel::DeleteButKeepChildren(systems::FolderNode* node) {
 
-		// make popup modal 
-		;
+		m_materialRegistry.DeleteAndKeepChildren(node);
+	}
+
+	void MaterialLibraryGuiPanel::DeleteHierarchy(systems::FolderNode* node) {
 		m_materialRegistry.DeleteFolderHierarchy(node);
 	}
 
-	void MaterialLibraryGuiPanel::ChangeNodeName(systems::FolderNode* node, std::string newName) {
-
-		if (node->IsRoot()) {
-			MNEMOSY_WARN("You cannot change the name of the root directory");
-			return;
-		}
-
-		std::string oldPathFromRoot = node->pathFromRoot;
-		// makes sure that no node of its parent is called the same
-		// this allows to rename a folder to have the same name as one of its childnodes
-		int suffix = 1;
-		std::string folderName = newName;
-		std::string finalName = folderName;
-		while (node->parent->SubnodeExistsAlready(node->parent, finalName)) {
-
-			finalName = folderName + "_" + std::to_string(suffix);
-			suffix++;
-		}
-
-		// maybe call registry to update or somehting
-		node->name = finalName;
-
-		// updating path from root so we can rename the file.  !! we are not yet updateing all subsequent pathsFromRoot for sub directories .. it'll only happen when saving atm
-		if (node->parent->IsRoot()) {
-			node->pathFromRoot = finalName;
-		}
-		else {
-			node->pathFromRoot = node->parent->pathFromRoot + "/" + finalName;
-		}
-
-		m_materialRegistry.RenameDirectory(node, oldPathFromRoot);
-
+	void MaterialLibraryGuiPanel::RenameFolder(systems::FolderNode* node, std::string newName) {
+		m_materialRegistry.RenameFolder(node, newName);
 	}
 	
 	
 	void MaterialLibraryGuiPanel::AddMaterial(systems::FolderNode* node,std::string name) {
 
-		m_materialRegistry.CreateNewMaterial(node, "New Material");
+		std::string matName = "New Material";
+		m_materialRegistry.AddNewMaterial(node, matName);
+	}
+	void MaterialLibraryGuiPanel::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
 
-		// maybe set it as the active one
-
+		m_materialRegistry.RenameMaterial(node, materialInfo, newName,positionInVector);
 
 	}
-	void MaterialLibraryGuiPanel::ChangeMaterialName(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
 
-		m_materialRegistry.ChangeMaterialName(node, materialInfo, newName,positionInVector);
-
-	}
 	void MaterialLibraryGuiPanel::DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector) {
-		
-
 		m_materialRegistry.DeleteMaterial(node, materialInfo, positionInVector);
 	}
 } // !mnemosy::gui

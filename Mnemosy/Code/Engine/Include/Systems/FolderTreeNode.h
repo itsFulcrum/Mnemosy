@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
 
 namespace mnemosy::systems
@@ -16,30 +17,25 @@ namespace mnemosy::systems
 		unsigned int thumbnailTexure_ID = 0;
 	};
 
+
 	struct FolderNode {
-	
 	public:
-		std::string name;
 		unsigned int runtime_ID; // only used for runtime identification.
-		std::string pathFromRoot;
+		std::string name;
+		std::filesystem::path pathFromRoot;
 		
 		FolderNode* parent;
 		std::vector<FolderNode*> subNodes;
-
 		std::vector<MaterialInfo> subMaterials;
-		//std::vector<std::string> subMaterialNames;
-		bool SubMaterialExistsAlready(std::string name);
+
+		bool SubMaterialExistsAlready(std::string& name);
 		bool HasMaterials();
 
-
-		FolderNode* GetSubNodeByName(std::string name);
+		FolderNode* GetSubNodeByName(std::string& name);
 		bool IsLeafNode();
 		bool IsRoot();
-		bool SubnodeExistsAlready(FolderNode* node, std::string name);
-	
+		bool SubnodeExistsAlready(std::string& name);
 	};
-
-
 
 } // !mnemosy::systems
 

@@ -1,6 +1,7 @@
 #include "Include/Systems/MaterialLibraryRegistry.h"
 
 #include "Include/Core/Log.h"
+#include "Include/Core/Clock.h"
 #include "Include/MnemosyEngine.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/Texture.h"
@@ -11,6 +12,7 @@
 
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/FolderTreeNode.h"
+#include "Include/Systems/FolderTree.h"
 #include "Include/Systems/ThumbnailManager.h"
 
 #include <glad/glad.h>
@@ -22,47 +24,69 @@ namespace mnemosy::systems
 	// == public methods
  
 	MaterialLibraryRegistry::MaterialLibraryRegistry() 
-		: m_fileDirectories{ MnemosyEngine::GetInstance().GetFileDirectories()}
+		: m_fileDirectories{MnemosyEngine::GetInstance().GetFileDirectories()}
 	{
-		m_runtimeIDCounter = 1;
-		m_runtimeMaterialIDCounter = 1;
+		m_folderTree = new FolderTree("Root");
+		
 
 		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetDataPath() / fs::path("UserLibraryDirectories.mnsydata");
 		m_userDirectoriesDataFile = fs::directory_entry(pathToUserDirectoriesDataFile); 
-		
-		m_rootNodeName = "Root";
 		m_folderNodeOfActiveMaterial = nullptr;
+	
+		double timeStart = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 		LoadUserDirectoriesFromFile();
-		m_selectedFolderNode = m_rootFolderNode;
+		double timeEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+		MNEMOSY_INFO("Loaded Material Library in {} Seconds",timeEnd-timeStart);
 
+		m_selectedFolderNode = m_folderTree->GetRootPtr();
 	}
 
 	MaterialLibraryRegistry::~MaterialLibraryRegistry() {
 		
 		SaveUserDirectoriesData();
-		// recursivly cleanup folderTree heap memory
-		RecursivCleanFolderTreeMemory(m_rootFolderNode);
+
+		delete m_folderTree;
+		m_folderTree = nullptr;
 	}
 
 	
-	void MaterialLibraryRegistry::RenameDirectory(FolderNode* node, std::string oldPathFromRoot) {
+	FolderNode* MaterialLibraryRegistry::AddNewFolder(FolderNode* parentNode, std::string& name) {
+
+		FolderNode* node = m_folderTree->CreateNewFolder(parentNode, name);
+		// create system folder 
+		CreateDirectoryForNode(node);
 		
-		//mnemosy::core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
+		// we can NOT Call SaveUserDirectoriesData() here because 
+		// we call this function when initialising and reading from the file..
+		return node;
+	}
+	
+	void MaterialLibraryRegistry::RenameFolder(FolderNode* node, std::string& newName) {
+		
+		if (node->IsRoot()) {
+			MNEMOSY_WARN("You can't change the name of the root directory");
+			return;
+		}
+
+		// store old path because pathFromRoot is upadeted inside RenameFolder() method
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path oldPath = libraryDir / fs::path(node->pathFromRoot);
+		std::string oldName = node->name;
+		
+		// rename internally 
+		m_folderTree->RenameFolder(node, newName);
 
-		fs::path oldPath = libraryDir / fs::path(oldPathFromRoot);
-		fs::path newPath = libraryDir / fs::path(node->pathFromRoot);
-
+		// rename files on disk 
+		fs::path newPath = libraryDir / fs::path(node->parent->pathFromRoot) / fs::path(node->name);
 		try {
 			fs::rename(oldPath, newPath);
 		}
 		catch (fs::filesystem_error error) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::RenameDirectory: System error renaming directory: {} \nError message: {}", oldPath.generic_string(), newPath.generic_string(), error.what());
+
+			// revert name if system can't rename the file on disk
+			m_folderTree->RenameFolder(node, oldName);
 		}
-		
-		RecursivUpadtePathFromRoot(node);
-
-
 
 		// check if the folder  we renamed  included the active material in its hierarchy
 		if (!m_activeMaterialDataFilePath.empty()) {
@@ -76,7 +100,7 @@ namespace mnemosy::systems
 		}
 	}
 
-	void MaterialLibraryRegistry::MoveDirectory(FolderNode* dragSource, FolderNode* dragTarget) {
+	void MaterialLibraryRegistry::MoveFolder(FolderNode* dragSource, FolderNode* dragTarget) {
 
 		fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 		fs::path fromPath = libraryDir / fs::path(dragSource->pathFromRoot);
@@ -89,36 +113,34 @@ namespace mnemosy::systems
 			fs::copy(fromPath, toPath / fromPath.filename(), fs::copy_options::recursive);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveDirectory: System Error Copying directory: \nMessage: {}", error.what());
+			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveFolder: System Error Copying directory: \nMessage: {}", error.what());
 			return;
 		}
+
 		try { // remove old directory
 			fs::remove_all(fromPath);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveDirectory: System Error Removing old directory: \nMessage: {}", error.what());
+			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveFolder: System Error Removing old directory: \nMessage: {}", error.what());
+
+			// if this happens we should clean up the copy we just did
+			try {
+				fs::remove_all(toPath / fromPath.filename());
+			}
+			catch (fs::filesystem_error error2) {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::MoveFolder: System Error Removing directory that was just copied, if this happend something went really wrong! \nMessage: {}", error.what());
+			}
 			return;
 		}
-		
+
 		// Updating Internal Data
-		// removing from old parent
-		for (int i = 0; i < dragSource->parent->subNodes.size(); i++) {
-			if (dragSource->parent->subNodes[i]->name == dragSource->name) {
-				dragSource->parent->subNodes.erase(dragSource->parent->subNodes.begin() + i);
-			}
-		}
-		dragSource->parent = dragTarget; // set new parent
-		dragTarget->subNodes.push_back(dragSource); // enlist into target subNodes
-
-		// Recursivly update path from root
-		RecursivUpadtePathFromRoot(dragSource);
+		m_folderTree->MoveFolder(dragSource, dragTarget);
 
 
-		// should prob save to data
+		// should prob save to data file here
 		SaveUserDirectoriesData();
 
 		// check if the folder  we moved included the active material in its hierarchy by checking if the activeMaterialDataFile still exists at its last location
-
 		if (UserMaterialBound()) {
 
 			fs::directory_entry activeMaterialDataFile;
@@ -149,16 +171,48 @@ namespace mnemosy::systems
 		}
 	}
 
+	void MaterialLibraryRegistry::DeleteAndKeepChildren(FolderNode* node) {
+		// never delete root node
+		if (node->IsRoot()) {
+			MNEMOSY_WARN("MaterialLibraryRegistry::DeleteAndKeepChildren: You can't delete the root directory");
+			return;
+		}
+
+
+		//1. move all sub nodes and materials into parent
+		if (node->HasMaterials()) {
+			std::vector<MaterialInfo> matsCopy = node->subMaterials;
+
+			for (size_t i = 0; i < matsCopy.size(); i++) {
+
+				MoveMaterial(node, node->parent, matsCopy[i]);
+			}
+			matsCopy.clear();
+		}
+
+		if (!node->IsLeafNode()) {
+
+			std::vector<FolderNode*> subFolderCopy = node->subNodes;
+			for (size_t i = 0; i < subFolderCopy.size(); i++) {
+
+				MoveFolder(subFolderCopy[i], node->parent);
+			}
+			subFolderCopy.clear();
+		}
+
+		//2. delete folder
+		DeleteFolderHierarchy(node);
+	}
+
 	void MaterialLibraryRegistry::DeleteFolderHierarchy(FolderNode* node) {
+		// Deletes the entire hierarchy of nodes in memory and the files on disk, including the supplied beginning node
 
 		// never delete root node
-		if (node->parent == nullptr || node->name == m_rootNodeName) {
+		if (node->IsRoot()) {
 			MNEMOSY_WARN("You can't delete the root directory");
 			return;
 		}
 
-		
-		
 		{ // delete directories from disk			
 			fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 			fs::path directoryPathToDelete = libraryDir / fs::path(node->pathFromRoot);
@@ -172,97 +226,54 @@ namespace mnemosy::systems
 			}
 		}
 
-		// remove node from parent subnodes list
-		for (int i = 0; i < node->parent->subNodes.size(); i++) {
-			if (node->parent->subNodes[i]->name == node->name) {
-				node->parent->subNodes.erase(node->parent->subNodes.begin() + i);
-			}
-		}
 
-		// Free memory for all subsequent nodes recursivly
-		RecursivCleanFolderTreeMemory(node);
+		OpenFolderNode(node->parent);
+		m_folderTree->DeleteFolderHierarchy(node);
 
 		// check if the folder hierarchy we deleted included the active material
 		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
 		if (!activeMaterialDataFile.exists()) {
 			SetDefaultMaterial();
-		}
-
-		
+		}	
 	}
 
-
-	FolderNode* MaterialLibraryRegistry::CreateFolderNode(FolderNode* parentNode, std::string name) {
-		FolderNode* node = new FolderNode();
-		node->name = name;
-		node->parent = parentNode;
-
-		std::string pathFromRoot = "";
-		if (parentNode != nullptr) { // if this not root node
-			if (parentNode->name == m_rootNodeName) { // if parent is root
-				pathFromRoot = node->name;
-			}
-			else {
-				pathFromRoot = parentNode->pathFromRoot + "/" + node->name;
-			}
-		}
-		node->pathFromRoot = pathFromRoot;
-
-		node->runtime_ID = m_runtimeIDCounter;
-		m_runtimeIDCounter++;
-		// create system folder 
-		CreateDirectoryForNode(node);
-		
-		// we can NOT Call SaveUserDirectoriesData() here because we call this function when initialising and reading from the file..
-		return node;
-	}
 
 	FolderNode* MaterialLibraryRegistry::GetRootFolder() {
-
-		return m_rootFolderNode;
+		return m_folderTree->GetRootPtr();
 	}
 
-	FolderNode* MaterialLibraryRegistry::RecursivGetNodeByRuntimeID(FolderNode* node, unsigned int id) {
+	FolderNode* MaterialLibraryRegistry::GetFolderByID(FolderNode* node, const unsigned int id) {
 
-		if (node == nullptr) {
-			return nullptr;
-		}
-
-		if (node->runtime_ID == id) {
-			return node;
-		}
-
-		FolderNode* foundNode = nullptr;
-		for (FolderNode* child : node->subNodes) {
-
-			foundNode = RecursivGetNodeByRuntimeID(child, id);
-			if (foundNode != nullptr) {
-				break; // Found the node, no need to search further
-			}
-		}
-
-		return foundNode;
+		return m_folderTree->RecursivGetNodeByID(node,id);
 	}
 
-	void MaterialLibraryRegistry::CreateNewMaterial(FolderNode* node, std::string name) {
+	void MaterialLibraryRegistry::AddNewMaterial(FolderNode* node, std::string& name) {
 
-		// check if name exists already and add suffix number if needed
-		int suffix = 1;
-		std::string finalName = name;
-		while (node->SubMaterialExistsAlready(finalName)) {
-			finalName = name + "_" + std::to_string(suffix);
-			suffix++;
-		}
+		MaterialInfo& matInfo = m_folderTree->CreateNewMaterial(node, name);
 
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 		// create directory for material
-		fs::path materialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(finalName);
+		fs::path materialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(matInfo.name);
 		//MNEMOSY_TRACE("Add Material: new material directory: {}", materialDirectory.generic_string());
 
 		try {
 			fs::create_directory(materialDirectory);
-		} catch (fs::filesystem_error error) {
+		} 
+		catch (fs::filesystem_error error) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error creating directory. \nError message: {}", error.what());
+
+			int posInVector = -1;
+			for (size_t i = 0; i < node->subMaterials.size(); i++) {
+
+				if (node->subMaterials[i].runtime_ID == matInfo.runtime_ID) {
+					posInVector = i;
+				}
+			}
+			MNEMOSY_ASSERT(posInVector != -1, "This should not happen because we just added the material");
+
+
+			m_folderTree->DeleteMaterial(node, posInVector);
+
 			return;
 		}
 		
@@ -270,18 +281,10 @@ namespace mnemosy::systems
 
 		// Copy Default thumbnail image
 		fs::path pathToDefaultThumbnail = m_fileDirectories.GetTexturesPath() / fs::path("default_thumbnail.ktx2");
-		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(finalName + "_thumbnail.ktx2");
+		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(matInfo.name + "_thumbnail.ktx2");
 		fs::copy_file(pathToDefaultThumbnail,pathToMaterialThumbnail);
 						
-		CreateNewMaterialDataFile(materialDirectory,finalName);
-
-		// adding entry to list of directory node;
-		MaterialInfo matInfo;
-		matInfo.name = finalName; 
-		matInfo.runtime_ID = m_runtimeMaterialIDCounter;
-		m_runtimeMaterialIDCounter++;
-		matInfo.thumbnailTexure_ID = 0;
-		matInfo.thumbnailLoaded = false;
+		CreateNewMaterialDataFile(materialDirectory, matInfo.name);
 
 		// check if it was created in the currently opend folder
 		if (node == m_selectedFolderNode) {
@@ -289,37 +292,28 @@ namespace mnemosy::systems
 			MnemosyEngine::GetInstance().GetThumbnailManager().NewThumbnailInActiveFolder();
 		}
 
-		node->subMaterials.push_back(matInfo);
 
 		SaveUserDirectoriesData();
 	}
 
-	void MaterialLibraryRegistry::ChangeMaterialName(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
+	void MaterialLibraryRegistry::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector) {
 
 		std::string oldName = materialInfo.name;
 		unsigned int matID = materialInfo.runtime_ID;
 
 		if (materialInfo.name == newName)
 			return;
-		
-		std::string finalName = newName;
-		// check if name exists already add suffix number if needed
-		{
-			int suffix = 1;
-			while (node->SubMaterialExistsAlready(finalName)) {
-				finalName = newName + "_" + std::to_string(suffix);
-				suffix++;
-			}
-		}
+
+
+		// rename material internally
+		m_folderTree->RenameMaterial(materialInfo, newName);
+
+		std::string finalName = materialInfo.name;
 
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
-
-		// change name of thumbnail img
-
-
 		fs::path materialDir = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName);
 
-		// change name of data file. TODO: and adjust all data inside
+		// change name of data file.
 		{
 			fs::path newDataFilePath = materialDir / fs::path(finalName + ".mnsydata");
 			fs::path oldDataFilePath = materialDir / fs::path(oldName + ".mnsydata");
@@ -339,7 +333,7 @@ namespace mnemosy::systems
 
 			readFile["name"] = finalName;
 			
-			
+			// TODO: simplify this into a funciton
 			// Renaming all accosiated textures
 			if (readFile["albedoAssigned"].get<bool>()) {
 				std::string oldFileName = readFile["albedoPath"].get<std::string>();
@@ -427,9 +421,6 @@ namespace mnemosy::systems
 			catch (fs::filesystem_error error) {MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming directory. \nError message: {}", error.what());}
 		}
 
-		// change name in vector of names..
-		node->subMaterials[positionInVector].name = finalName;
-
 		// check if we are changing the active material
 		if (m_activeMaterialID == matID) {
 			// set updated path for data file
@@ -451,12 +442,10 @@ namespace mnemosy::systems
 			MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(materialInfo);
 		}
 
-
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
-		// delete files
 
+		// delete files
 		fs::path pathToMaterialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(materialInfo.name);
-		
 		try {
 			fs::remove_all(pathToMaterialDirectory);
 		}
@@ -465,20 +454,15 @@ namespace mnemosy::systems
 			return;
 		}
 
-		//TODO:
-		// once i have a selected material that is displayed in the viewport and in material editor,
-		// I should switch it to a different one here and free memory;
-		
 		// deleting from vector
-		node->subMaterials.erase(node->subMaterials.begin() + positionInVector);
+		m_folderTree->DeleteMaterial(node, positionInVector);
 		
-
-		// check if we are delete the active material
+		// check if we have deleted the active material
 		if (m_activeMaterialID == matID) {
 			SetDefaultMaterial();
 		}
 
-		// maybe save library data file
+		// save
 		SaveUserDirectoriesData();
 	}
 
@@ -508,30 +492,11 @@ namespace mnemosy::systems
 			return;
 		}
 
-		
-
-		// enlist into target node list
-
-		// remove from source node list
-		// this could maybe be done faster if we pass the vector position directly into the function
-		for (int i = 0; i < sourceNode->subMaterials.size(); i++) {
-			if (sourceNode->subMaterials[i].name == materialName) {
-
-				// make sure thumbnail get popperly unloaded
-				if (sourceNode == m_selectedFolderNode) {
-					MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(sourceNode->subMaterials[i]);
-				}
-
-
-				// enlist into target node list
-				targetNode->subMaterials.push_back(sourceNode->subMaterials[i]);
-				// remove from source nodel list
-				sourceNode->subMaterials.erase(sourceNode->subMaterials.begin() + i);
-
-				break;
-			}
+		if (sourceNode == m_selectedFolderNode) {
+			MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(materialInfo);
 		}
 
+		m_folderTree->MoveMaterial(materialInfo, sourceNode, targetNode);
 
 		// check if the moved material was the active material
 		if (materialInfo.runtime_ID == m_activeMaterialID) {
@@ -809,64 +774,26 @@ namespace mnemosy::systems
 			filename = activeMat.Name + "_normal.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, true);
-
-			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_NORMAL, true);
-			//if (!success) {
-			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-			//	activeMat.removeTexture(graphics::NORMAL);
-			//	delete tex;
-			//	return;
-			//}
-
 		}
 		else if (textureType == graphics::ROUGHNESS) {
 			filename = activeMat.Name + "_roughness.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
-
-			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
-			//if (!success) {
-			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-			//	activeMat.removeTexture(graphics::ROUGHNESS);
-			//	delete tex;
-			//	return;
-			//}
 		}
 		else if (textureType == graphics::METALLIC) {
 			filename = activeMat.Name + "_metallic.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
-			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
-			//if (!success) {
-			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-			//	activeMat.removeTexture(graphics::METALLIC);
-			//	delete tex;
-			//	return;
-			//}
 		}
 		else if (textureType == graphics::AMBIENTOCCLUSION) {
 			filename = activeMat.Name + "_ambientOcclusion.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
-			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_LINEAR_CHANNEL, true);
-			//if (!success) {
-			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-			//	activeMat.removeTexture(graphics::AMBIENTOCCLUSION);
-			//	delete tex;
-			//	return;
-			//}
 		}
 		else if (textureType == graphics::EMISSION) {
 			filename = activeMat.Name + "_emissive.tif";
 			fs::path exportPath = materialDir / fs::path(filename);
 			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
-			//bool success = ktxImg.ExportGlTexture(exportPath.generic_string().c_str(), tex->GetID(), tex->GetChannelsAmount(), tex->GetWidth(), tex->GetHeight(), graphics::MNSY_COLOR, true);
-			//if (!success) {
-			//	MNEMOSY_WARN("Unexpected error when trying to export image to ktx2 format: \nFilepath {}", filepath);
-			//	activeMat.removeTexture(graphics::EMISSION);
-			//	delete tex;
-			//	return;
-			//}
 		}
 
 		// save material data file
@@ -1019,62 +946,23 @@ namespace mnemosy::systems
 	void MaterialLibraryRegistry::OpenFolderNode(FolderNode* node){
 
 		if (node == nullptr) {
-			MNEMOSY_WARN("Node is nullptr");
+			MNEMOSY_WARN("MaterialLibraryRegistry::OpenFolderNode: Node is nullptr");
 			return;
 		}
-
-		// already selectd node
-		if (m_selectedFolderNode == node) {
-			return;
-		}
-		
-		if (m_selectedFolderNode == nullptr) {
-			
-			m_selectedFolderNode = node;
-		}
-
-		MnemosyEngine::GetInstance().GetThumbnailManager().DeleteLoadedThumbnailsOfActiveFolder(m_selectedFolderNode);
-
 
 		m_selectedFolderNode = node;
 
-		if (!node->HasMaterials()) {
-			return;
-		}
-
-		// load thumbnails of the opend folder
-
-		FolderNode* selectedNode = m_selectedFolderNode;
-
-
-		return;
-		//fs::path folderDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(selectedNode->pathFromRoot);
-		//MnemosyEngine::GetInstance().GetThumbnailManager().LoadThumbnailsOfActiveFolder(m_selectedFolderNode, folderDir);
-
-
-
-
-
+		MnemosyEngine::GetInstance().GetThumbnailManager().DeleteLoadedThumbnailsOfActiveFolder(m_selectedFolderNode);
 	}
 
 	void MaterialLibraryRegistry::ClearUserMaterialsAndFolders() {
 
 		// Clearing all User materials and folders from memory but not deleting any files.
-		// root node stays in takt
+
 		SetDefaultMaterial();
-		m_selectedFolderNode = m_rootFolderNode;
+		m_selectedFolderNode = m_folderTree->GetRootPtr();
 
-		if (!m_rootFolderNode->IsLeafNode()) {
-
-			for (int i = 0; i < m_rootFolderNode->subNodes.size(); i++) {
-			
-				RecursivCleanFolderTreeMemory(m_rootFolderNode->subNodes[i]);
-			}
-			m_rootFolderNode->subNodes.clear();
-		}
-		if (m_rootFolderNode->HasMaterials()) {
-			m_rootFolderNode->subMaterials.clear();
-		}
+		m_folderTree->Clear();
 		
 		SaveUserDirectoriesData();
 	}
@@ -1089,10 +977,7 @@ namespace mnemosy::systems
 			return paths;
 		}
 
-
-
 		fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-
 		fs::path materialFolder = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
 		if (activeMat.isAlbedoAssigned()) {
@@ -1130,19 +1015,9 @@ namespace mnemosy::systems
 
 	}
 
-	
-	
 	void MaterialLibraryRegistry::LoadUserDirectoriesFromFile() {
 
-		bool fileExists = CheckDataFile(m_userDirectoriesDataFile);
-		if (!fileExists) {
-			// if file does not exist we explicitly create root node here otherwise it should be created from within the file
-			m_rootFolderNode = new FolderNode();
-			m_rootFolderNode->name = m_rootNodeName;
-			m_rootFolderNode->parent = nullptr;
-			m_rootFolderNode->runtime_ID = m_runtimeIDCounter;
-			m_runtimeIDCounter++;
-		}
+		CheckDataFile(m_userDirectoriesDataFile);
 
 		std::string pathToDataFileString = m_userDirectoriesDataFile.path().generic_string();
 
@@ -1157,17 +1032,7 @@ namespace mnemosy::systems
 			return;
 		}
 		
-		m_rootNodeName = readFile["3_UserDirectories"][m_rootNodeName]["1_name"].get<std::string>();
-		bool rootIsLeaf = readFile["3_UserDirectories"][m_rootNodeName]["2_isLeaf"].get<bool>();
-
-		FolderNode* rootFolder = CreateFolderNode(nullptr, m_rootNodeName);
-
-		json rootJson = readFile["3_UserDirectories"][m_rootNodeName];
-
-		m_rootFolderNode = rootFolder; 
-
-
-		RecursivLoadDirectories(rootFolder, rootJson);
+		m_folderTree->LoadFromJson(readFile);
 
 		dataFileStream.close();
 
@@ -1177,7 +1042,7 @@ namespace mnemosy::systems
 
 		std::string pathToDataFileString = m_userDirectoriesDataFile.path().generic_string();
 		if (CheckDataFile(m_userDirectoriesDataFile)) {
-			// if file exists we clear it first; -> really shoudl think if this is a good idea though
+			// if file exists we clear it first; -> really should think if this is a good idea though
 			std::ofstream file;
 			file.open(pathToDataFileString);
 			file << "";
@@ -1185,34 +1050,19 @@ namespace mnemosy::systems
 		}
 
 		std::ofstream dataFileStream;
-		// start Saving
 		dataFileStream.open(pathToDataFileString);
-		json LibraryDirectoriesJson; // top level json object
-		LibraryDirectoriesJson["1_Mnemosy_Data_File"] = "UserLibraryDirectoriesData";
 
-		json HeaderInfo;
-		std::string descriptionString = "This file stores the treelike folder structure defined by users to organise their materials";
-		HeaderInfo["Description"] = descriptionString;
+		json* LibraryDirectoriesJson = m_folderTree->WriteToJson();
 
-		LibraryDirectoriesJson["2_Header_Info"] = HeaderInfo;
-
-		json userDirectoriesJson;
-
-		json rootFolderJson = RecursivSaveDirectories(m_rootFolderNode);
-
-		userDirectoriesJson[m_rootNodeName] = rootFolderJson;
-
-		
-		LibraryDirectoriesJson["3_UserDirectories"] = userDirectoriesJson;
-
-
-		
 		if (prettyPrintDataFile)
-			dataFileStream << LibraryDirectoriesJson.dump(4);
+			dataFileStream << LibraryDirectoriesJson->dump(4);
 		else
-			dataFileStream << LibraryDirectoriesJson.dump(-1);
+			dataFileStream << LibraryDirectoriesJson->dump(-1);
 
 		dataFileStream.close();
+
+		delete LibraryDirectoriesJson;
+		LibraryDirectoriesJson = nullptr;
 	}
 
 	// == private methods
@@ -1296,149 +1146,6 @@ namespace mnemosy::systems
 		
 	}
 
-	void MaterialLibraryRegistry::RecursivUpadtePathFromRoot(FolderNode* node) {
-
-		if (node->parent->IsRoot()) {
-			node->pathFromRoot = node->name;
-		}
-		else {
-			node->pathFromRoot = node->parent->pathFromRoot + "/" + node->name;
-		}
-
-		if (!node->IsLeafNode()) {
-			for (FolderNode* child : node->subNodes) {
-				RecursivUpadtePathFromRoot(child);
-			}
-		}
-	}
-
-	void MaterialLibraryRegistry::RecursivCleanFolderTreeMemory(FolderNode* node) {
-
-
-		if (!node->subNodes.empty()) {
-			for (FolderNode* subNode : node->subNodes) {
-				RecursivCleanFolderTreeMemory(subNode);
-			}
-			node->subNodes.clear();
-		} 
-
-		if (!node->subMaterials.empty()) {
-			node->subMaterials.clear();
-		}
-
-		// if node we are deleting is the currently selected one, select root node.
-		if(node == m_selectedFolderNode){
-			OpenFolderNode(m_rootFolderNode);
-		}
-
-		delete node;
-		node = nullptr;
-	}
-
-	void MaterialLibraryRegistry::RecursivLoadDirectories(FolderNode* node, json& jsonNode) {
-
-		bool isLeafNode = jsonNode["2_isLeaf"].get<bool>();
-
-		bool hasMaterials = jsonNode["6_hasMaterials"].get<bool>();
-		if (hasMaterials) {
-			std::vector<std::string> subMatNames = jsonNode["6_materialEntries"].get<std::vector<std::string>>();
-			for (int i = 0; i < subMatNames.size(); i++) {
-				
-				MaterialInfo matInfo; 
-				matInfo.name = subMatNames[i];
-				matInfo.runtime_ID = m_runtimeMaterialIDCounter;
-				m_runtimeMaterialIDCounter++;
-
-				node->subMaterials.push_back(matInfo);
-			}
-
-		}
-
-		if (!isLeafNode) {
-
-			std::vector<std::string> subFolderNames = jsonNode["4_subFolderNames"].get<std::vector<std::string>>(); // 3 nature,wood,stone
-						
-			for (int i = 0; i < subFolderNames.size(); i++) {
-
-				FolderNode* subNode = new FolderNode();
-				subNode->parent = node;
-				subNode->name = subFolderNames[i];
-				subNode->pathFromRoot = jsonNode["5_subFolders"][subFolderNames[i]]["3_pathFromRoot"].get<std::string>();
-				subNode->runtime_ID = m_runtimeIDCounter;
-				m_runtimeIDCounter++;
-				node->subNodes.push_back(subNode);
-				
-				json subJson = jsonNode["5_subFolders"][subFolderNames[i]];
-				RecursivLoadDirectories(subNode, subJson);
-				
-			}
-		}
-	}
-
-	json MaterialLibraryRegistry::RecursivSaveDirectories(FolderNode* node)
-	{
-
-		json nodeJson;
-
-		nodeJson["1_name"] = node->name;
-		bool isLeafNode = node->IsLeafNode();
-		nodeJson["2_isLeaf"] = isLeafNode;
-
-
-		std::string pathFromRoot = "";
-
-		if (node->parent != nullptr) { // if not root node
-
-			if (node->parent->name == m_rootNodeName) {
-
-				pathFromRoot = node->name;
-			}
-			else {
-				pathFromRoot = node->parent->pathFromRoot + "/" + node->name;
-			}
-		}
-		//MNEMOSY_DEBUG("PathFromRoot: {}", pathFromRoot);
-		nodeJson["3_pathFromRoot"] = pathFromRoot;
-
-
-		bool hasMaterials = !node->subMaterials.empty();
-
-		nodeJson["6_hasMaterials"] = hasMaterials;
-		if (hasMaterials) {
-
-			std::vector<std::string> matNames;
-			for (int i = 0; i < node->subMaterials.size(); i++) {
-				matNames.push_back(node->subMaterials[i].name);
-			}
-
-			nodeJson["6_materialEntries"] = matNames;
-			matNames.clear();
-		}
-
-		if (!isLeafNode) {
-			std::vector<std::string> subNodeNames;
-
-			for (int i = 0; i < node->subNodes.size(); i++) {
-
-				subNodeNames.push_back(node->subNodes[i]->name);
-			}
-			nodeJson["4_subFolderNames"] = subNodeNames;
-
-			json subNodes;
-			for (int i = 0; i < node->subNodes.size(); i++) {
-
-				subNodes[node->subNodes[i]->name] = RecursivSaveDirectories(node->subNodes[i]);
-			}
-
-			nodeJson["5_subFolders"] = subNodes;
-
-		}
-
-
-
-		return nodeJson;
-	}
-
 	bool MaterialLibraryRegistry::CheckDataFile(fs::directory_entry dataFile) {
 
 		std::string pathToDataFileString = dataFile.path().generic_string();
@@ -1465,7 +1172,5 @@ namespace mnemosy::systems
 
 		return true;
 	}
-
-
 
 } // !mnemosy::systems

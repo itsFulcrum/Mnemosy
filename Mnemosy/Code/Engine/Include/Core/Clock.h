@@ -13,7 +13,7 @@ namespace mnemosy::core
 		void Update();
 
 		const double GetTimeSeconds() { return m_currentTime; }
-		const double GetGLFWTimeDirectly();
+		const double GetTimeSinceLaunch();
 		const double GetDeltaSeconds() { return m_deltaSeconds; }
 		//double GetDeltaMiliseconds() { return m_deltaMili; }
 
