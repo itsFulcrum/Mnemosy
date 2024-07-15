@@ -32,6 +32,8 @@ namespace mnemosy::graphics
 		void SetPosition(const glm::vec3& position);
 		void SetRotationEulerAngles(const glm::vec3& rotation);
 		void SetScale(const glm::vec3& scale);
+		void SetRotationQuaternion(const glm::quat& orientation);
+
 
 		void RotateAroundAxis(const float angle, const glm::vec3& axis);
 

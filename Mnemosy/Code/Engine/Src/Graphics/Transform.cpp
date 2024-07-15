@@ -37,6 +37,13 @@ namespace mnemosy::graphics
 
 	void Transform::SetScale(const glm::vec3& scale) {m_scale = scale;}
 
+	void Transform::SetRotationQuaternion(const glm::quat& orientation)
+	{
+		m_quatOrientation = orientation;
+
+		RecalculateLocalVectors_Internal();
+	}
+
 	void Transform::RotateAroundAxis(const float angle, const glm::vec3& axis)
 	{
 		glm::quat rotate = glm::angleAxis(glm::radians(angle),axis);
