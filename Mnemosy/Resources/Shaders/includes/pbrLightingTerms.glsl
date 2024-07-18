@@ -25,6 +25,7 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 
     vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
     return normalize(sampleVec);
+    
 }
 
 // normal distribution function TrowbridgeReitzGGX

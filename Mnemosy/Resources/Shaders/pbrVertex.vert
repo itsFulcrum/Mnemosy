@@ -24,7 +24,7 @@ out mat3 tangentToWorldMatrix;
 void main()
 {
 	gl_Position = _projectionMatrix * _viewMatrix * _modelMatrix * vec4(aPos.xyz, 1.0);
-
+	
 	// outputs to fragment shader
 	uv = aTexCoord;
 	uv.x = uv.x * _uvTiling.x;

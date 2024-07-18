@@ -159,7 +159,7 @@ namespace mnemosy
 		while (!glfwWindowShouldClose(&m_pWindow->GetWindow()))  {
 
 			m_pClock->Update();
-						
+
 			glfwPollEvents();
 						
 			if (m_pUserInterface->WantCaptureInput()) {
@@ -175,6 +175,7 @@ namespace mnemosy
 			m_pScene->Update();
 
 			// Rendering
+			m_pRenderer->HotReloadPbrShader(m_pClock->GetDeltaSeconds());
 			m_pRenderer->RenderScene(*m_pScene);
 			m_pUserInterface->Render();
 

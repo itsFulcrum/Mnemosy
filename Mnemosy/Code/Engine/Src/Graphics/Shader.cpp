@@ -24,10 +24,10 @@ namespace mnemosy::graphics
 		DeleteShaderProgram();
 	}
 
-	void Shader::CreateShaderProgram(const char* vertexPath, const char* fragmentPath)
+	bool Shader::CreateShaderProgram(const char* vertexPath, const char* fragmentPath)
 	{
 		if (ID) {
-			MNEMOSY_WARN("A Shader program already exists under this ID: {} \nFilepath Vertex Shader: {}\nFilepath Fragment Shader: {} \n -> Proceding to override shader program", ID, m_pathVertex, m_pathFragment);
+			//MNEMOSY_WARN("Shader::CreateShaderProgram: A Shader program already exists under this ID: {} -> Proceding to override shader program");
 			DeleteShaderProgram();
 		}
 		m_pathVertex = vertexPath;
@@ -63,20 +63,23 @@ namespace mnemosy::graphics
 		glAttachShader(ID, vertexShader);
 		glAttachShader(ID, fragmentShader);
 		glLinkProgram(ID);
-		CheckCompileErrors(ID, "PROGRAM");
 
-		MNEMOSY_DEBUG("Compiled Shader Program:\nVertexShader: {}\nFragmentShader: {}", vertexPath, fragmentPath);
+		bool compilationSuccessfull = CheckCompileErrors(ID, "PROGRAM");
+
+		if (compilationSuccessfull) {
+			MNEMOSY_DEBUG("Compiled Shader Program:\nVertexShader: {}\nFragmentShader: {}", vertexPath, fragmentPath);
+		}
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 
+		return compilationSuccessfull;
 	}
 
-	void Shader::CreateMeshShaderProgramm(const char* meshPath, const char* fragmentPath)
-	{
+	bool Shader::CreateMeshShaderProgramm(const char* meshPath, const char* fragmentPath) {
 		if (ID)
 		{
-			MNEMOSY_WARN("A Shader program already exists under this ID: {} \nFilepath Vertex Shader: {}\nFilepath Fragment Shader: {} \n -> Proceding to override shader program", ID, m_pathVertex, m_pathFragment);
+			//MNEMOSY_WARN("A Shader program already exists under this ID: {} \nFilepath Vertex Shader: {}\nFilepath Fragment Shader: {} \n -> Proceding to override shader program", ID, m_pathVertex, m_pathFragment);
 			DeleteShaderProgram();
 		}
 		m_pathVertex = meshPath;
@@ -90,8 +93,7 @@ namespace mnemosy::graphics
 
 
 		// compile shaders
-		//int success;
-		//char infoLog[512];
+		
 
 		unsigned int vertexShader;
 		unsigned int fragmentShader;
@@ -112,14 +114,17 @@ namespace mnemosy::graphics
 		glAttachShader(ID, vertexShader);
 		glAttachShader(ID, fragmentShader);
 		glLinkProgram(ID);
-		CheckCompileErrors(ID, "PROGRAM");
+
+
+		bool compilationSuccess = true;
+		compilationSuccess = CheckCompileErrors(ID, "PROGRAM");
 
 		MNEMOSY_DEBUG("Compiled Shader Program:\nMeshShader: {}\nFragmentShader: {}", meshPath, fragmentPath);
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 
-
+		return compilationSuccess;
 	}
 
 	void Shader::Use()
@@ -176,8 +181,9 @@ namespace mnemosy::graphics
 	}
 	// private
 
-	void Shader::CheckCompileErrors(unsigned int shader,const std::string& type)
-	{
+	bool Shader::CheckCompileErrors(unsigned int shader,const std::string& type) {
+
+
 		int success;
 		char infoLog[1024];
 		if (type != "PROGRAM")
@@ -187,6 +193,7 @@ namespace mnemosy::graphics
 			{
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
 				MNEMOSY_ERROR("SHADER_COMPILATION_ERROR of type: {} \nInfo Log: {}\n Filepath Vertex Shader: {}\n Filepath Fragment Shader: {}", type, infoLog, m_pathVertex, m_pathFragment);
+				return false;
 			}
 		}
 		else
@@ -196,8 +203,11 @@ namespace mnemosy::graphics
 			{
 				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
 				MNEMOSY_ERROR("SHADER_PROGRAM_LINKING_ERROR of type: {} \nInfo Log: {}\n Filepath Vertex Shader: {}\n Filepath Fragment Shader: {}", type, infoLog, m_pathVertex, m_pathFragment);
+				return false;
 			}
 		}
+
+		return true;
 	}
 
 } // !mnemosy::graphics

@@ -16,8 +16,8 @@ namespace mnemosy::graphics
 		Shader(const char* MeshPath, const char* fragmentPath, bool isMeshShader);
 		~Shader();
 
-		void CreateShaderProgram(const char* vertexPath, const char* fragmentPath);
-		void CreateMeshShaderProgramm(const char* meshPath, const char* fragmentPath);
+		bool CreateShaderProgram(const char* vertexPath, const char* fragmentPath);
+		bool CreateMeshShaderProgramm(const char* meshPath, const char* fragmentPath);
 
 		void Use();
 
@@ -39,7 +39,7 @@ namespace mnemosy::graphics
 		std::string m_pathFragment;
 
 
-		void CheckCompileErrors(unsigned int shader,const std::string& type);
+		bool CheckCompileErrors(unsigned int shader,const std::string& type);
 
 	};
 

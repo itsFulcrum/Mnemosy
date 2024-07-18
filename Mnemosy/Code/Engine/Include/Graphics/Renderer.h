@@ -1,7 +1,12 @@
 #ifndef GRAPHICS_RENDERER_H
 #define GRAPHICS_RENDERER_H
 
+#include "Include/Core/Utils/FileWatcher.h"
 #include <glm/glm.hpp>
+
+#include <filesystem>
+
+
 
 namespace mnemosy::graphics
 {
@@ -65,11 +70,15 @@ namespace mnemosy::graphics
 		int GetMSAA() { return (int)m_msaaSamplesSettings; }
 		void SetMSAASamples(const MSAAsamples& samples);
 		unsigned int GetThumbnailResolution() { return m_thumbnailResolution; };
+		
+		
+		void HotReloadPbrShader(float deltaSeconds);
 	private:
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
 
 		void CreateThumbnailFramebuffers();
+
 
 		// for rendering with msaa enabled
 		unsigned int m_MSAA_FBO = 0;
@@ -111,8 +120,11 @@ namespace mnemosy::graphics
 		unsigned int m_thumb_blitTexture_ID = 0;
 		
 
-		//unsigned int m_thumbnailRenderTexture_Id = 0;
-		//unsigned int m_thumbnailFbo = 0;
+	private:
+
+		core::FileWatcher m_shaderFileWatcher;
+		float m_fileWatchTimeDelta = 0.0f;
+
 	};
 
 } // mnemosy::graphics

@@ -25,8 +25,6 @@ uniform vec3 _cameraPositionWS;
 uniform float _skyboxRotation;
 uniform float _skyboxExposure;
 
-
-
 uniform samplerCube _irradianceMap;
 uniform samplerCube _prefilterMap;
 uniform sampler2D _brdfLUT;
@@ -99,15 +97,12 @@ void main()
 
 	////// POST PROCCESSING ========================================================================================= ////
 	//// ============================================================================================================ ////
-			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
-
+			//fragmentOutputColor	= vec4(1.0,1.0,1.0,1.0);
 			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
-
 			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 			//float r = texture(_roughnessMap,uv).r;
 			//float r = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);
-			//fragmentOutputColor.rgb = vec3(r,r,r);
-
+			//fragmentOutputColor.rgb = vec3(1,1,1);
 			//fragmentOutputColor.rgb = texture(_brdfLUT, uv).rgb;
 
 }

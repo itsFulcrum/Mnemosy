@@ -44,7 +44,6 @@ namespace mnemosy::graphics
 
 
 		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
-
 		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
 		m_pGizmoShader	= new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
@@ -54,6 +53,26 @@ namespace mnemosy::graphics
 		CreateRenderingFramebuffer(w,h);
 		CreateBlitFramebuffer(w,h);
 		CreateThumbnailFramebuffers();
+
+		// init FileWatcher
+		{
+			fs::path _includes = shaders / fs::path("includes");
+
+			m_shaderFileWatcher.RegisterFile(shaders /fs::path("pbrVertex.vert"));
+			m_shaderFileWatcher.RegisterFile(fs::path(pbrFrag));
+
+
+			m_shaderFileWatcher.RegisterFile(_includes / fs::path("colorFunctions.glsl"));
+			m_shaderFileWatcher.RegisterFile(_includes / fs::path("lighting.glsl"));
+			m_shaderFileWatcher.RegisterFile(_includes / fs::path("mathFunctions.glsl"));
+			m_shaderFileWatcher.RegisterFile(_includes / fs::path("pbrLightingTerms.glsl"));
+			m_shaderFileWatcher.RegisterFile(_includes / fs::path("samplePbrMaps.glsl"));
+
+		}
+
+
+
+
 
 		//SetPbrShaderBrdfLutUniforms();
 	}
@@ -374,8 +393,9 @@ namespace mnemosy::graphics
 		glCullFace(GL_FRONT);
 	}
 
-	void Renderer::RenderScene(Scene& scene)
-	{
+	void Renderer::RenderScene(Scene& scene) {
+
+
 		unsigned int width = MnemosyEngine::GetInstance().GetWindow().GetViewportWidth();
 		unsigned int height = MnemosyEngine::GetInstance().GetWindow().GetViewportHeight();
 
@@ -578,6 +598,55 @@ namespace mnemosy::graphics
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Renderer::HotReloadPbrShader(float deltaSeconds) {
+
+
+		// only check every couple of seconds
+
+
+		m_fileWatchTimeDelta += deltaSeconds;
+		if (m_fileWatchTimeDelta >= 2.0f) {
+
+			m_fileWatchTimeDelta = 0.0f;
+		}
+		else {
+			return;
+		}
+
+
+
+		if (!m_shaderFileWatcher.DidAnyFileChange()) {
+			return;
+		}
+
+
+		MNEMOSY_INFO("Renderer::HotRealoadPbrShader: Recompiling pbr shader.");
+
+
+		std::filesystem::path shaders = MnemosyEngine::GetInstance().GetFileDirectories().GetShadersPath();
+		fs::path vertPath = shaders / fs::path("pbrVertex.vert");
+		fs::path fragPath = shaders / fs::path("pbrFragment.frag");
+
+		bool success = m_pPbrShader->CreateShaderProgram(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
+
+		if (success) {
+
+			// reassign uniforms
+			SetPbrShaderBrdfLutUniforms();
+			SetPbrShaderLightUniforms(MnemosyEngine::GetInstance().GetScene().GetLight());
+			SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().GetSkybox());
+		}
+		else {
+			// compilation failed assign fallback shader;
+			MNEMOSY_WARN("Renderer::HotRealoadPbrShader: Compilationfailed. Switching to fallback shader.");
+
+			fs::path fallbackVertPath = shaders / fs::path("fallback.vert");
+			fs::path fallbackFragPath = shaders / fs::path("fallback.frag");
+
+			m_pPbrShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
+		}
 	}
 
 } // !mnemosy::graphics

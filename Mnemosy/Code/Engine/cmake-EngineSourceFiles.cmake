@@ -43,6 +43,8 @@ ${ENGINE_SOURCE_PATH}/Include/Core/Utils/DropManager_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/DropManager_Windows.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/DropHandler_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/DropHandler_Windows.cpp
+${ENGINE_SOURCE_PATH}/Include/Core/Utils/FileWatcher.h
+${ENGINE_SOURCE_PATH}/Src/Core/Utils/FileWatcher.cpp
 
 # Graphics
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/ShaderIncludeParser.h
