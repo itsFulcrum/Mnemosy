@@ -12,6 +12,8 @@
 
 #include "Include/MnemosyEngine.h"
 #include "Include/Gui/UserInterface.h"
+#include "Include/Systems/UserSettingsManager.h"
+
 
 namespace mnemosy::gui
 {
@@ -34,6 +36,10 @@ namespace mnemosy::gui
 		m_pDocumentationPanel = new DocumentationGuiPanel();
 		userInterface.RegisterGuiPanel(m_pDocumentationPanel);
 
+		
+		// load user settings after all panels have been initialized
+		MnemosyEngine::GetInstance().GetUserSettingsManager().LoadUserSettings();
+
 #ifdef mnemosy_gui_showImGuiDemoWindow
 
 	userInterface.show_demo_window = true;
@@ -46,7 +52,10 @@ namespace mnemosy::gui
 
 	GuiPanelManager::~GuiPanelManager()
 	{
-		UserInterface& userInterface = ENGINE_INSTANCE().GetUserInterface();
+		// safe user settings before destroying the gui panels
+		MnemosyEngine::GetInstance().GetUserSettingsManager().SaveToFile();
+
+		UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
 
 		userInterface.UnregisterMainMenuBarGuiPanel();
 		delete m_pMainMenuBarPanel;

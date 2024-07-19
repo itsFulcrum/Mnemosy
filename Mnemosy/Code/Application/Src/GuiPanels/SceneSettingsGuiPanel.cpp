@@ -24,6 +24,7 @@ namespace mnemosy::gui
 	SceneSettingsGuiPanel::SceneSettingsGuiPanel()
 	{
 		panelName = "Scene Settings";
+		panelType = MNSY_GUI_PANEL_SCENE_SETTINGS;
 	}
 
 	void SceneSettingsGuiPanel::Draw()

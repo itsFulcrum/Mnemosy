@@ -19,6 +19,7 @@ namespace mnemosy::gui
 
 	DocumentationGuiPanel::DocumentationGuiPanel() {
 		panelName = "Documentation";
+		panelType = MNSY_GUI_PANEL_DOCUMENTATION;
 
 		LoadTextFromFileToString();
 	}

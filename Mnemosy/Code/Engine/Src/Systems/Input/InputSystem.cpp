@@ -413,16 +413,22 @@ namespace mnemosy::systems
 		glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
 
-	bool InputSystem::IsButtonPressed(int glfwKeyboardKey)
-	{
+	bool InputSystem::IsButtonPressed(int glfwKeyboardKey) {
 		if (!m_processUserInputs)
 			return false;
 
 		return glfwGetKey(m_pWindow, glfwKeyboardKey) == GLFW_PRESS;
 	}
 
-	void InputSystem::HandleMouseOverViewport()
-	{
+	bool InputSystem::IsMouseButtonPressed(int glfwMouseBtnKey) {
+		if (!m_processUserInputs)
+			return false;
+		
+		return glfwGetMouseButton(m_pWindow, glfwMouseBtnKey) == GLFW_PRESS;
+
+	}
+
+	void InputSystem::HandleMouseOverViewport() {
 		// mouse cursor position relative to the main glfw window
 		double cursorWindowPosX_double = 0;
 		double cursorWindowPosY_double = 0;

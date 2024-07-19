@@ -34,6 +34,7 @@ namespace mnemosy::gui
 		: m_materialRegistry{ ENGINE_INSTANCE().GetMaterialLibraryRegistry() }
 	{
 		panelName = "Material Editor";
+		panelType = MNSY_GUI_PANEL_MATERIAL_EDITOR;
 
 		m_onFileDropInput_callback_id = MnemosyEngine::GetInstance().GetInputSystem().REGISTER_DROP_INPUT(&MaterialEditorGuiPanel::OnFileDropInput);
 	}

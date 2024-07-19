@@ -152,7 +152,16 @@ namespace mnemosy::input
 
 		if (!m_controllable) return;
 
-		MnemosyEngine::GetInstance().GetInputSystem().HandleMouseOverViewport();
+
+		systems::InputSystem& inputSystem = MnemosyEngine::GetInstance().GetInputSystem();
+
+
+		if(!inputSystem.IsMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)){
+			m_controllable = false;
+			return;
+		}
+
+		inputSystem.HandleMouseOverViewport();
 
 
 		if (m_cameraMode == CAMERA_MODE_EDIT) {

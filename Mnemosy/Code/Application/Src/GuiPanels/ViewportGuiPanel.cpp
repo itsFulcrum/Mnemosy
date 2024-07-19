@@ -10,6 +10,8 @@ namespace mnemosy::gui
 		: m_engineInstance{ MnemosyEngine::GetInstance() }
 	{
 		panelName = "Viewport";
+		panelType = MNSY_GUI_PANEL_VIEWPORT;
+
 	}
 
 	void ViewportGuiPanel::Draw()
@@ -48,12 +50,16 @@ namespace mnemosy::gui
 		// Display Rendered Frame
 		ImGui::Image((void*)m_engineInstance.GetRenderer().GetRenderTextureId(), m_imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
+		
+			if (ImGui::IsWindowHovered() && ImGui::IsWindowDocked())
+			{
+			
+					ImGui::CaptureMouseFromApp(false);
 
-		if (ImGui::IsWindowHovered())
-		{
-			ImGui::CaptureMouseFromApp(false);
-			ImGui::CaptureKeyboardFromApp(false);
-		}
+					ImGui::CaptureKeyboardFromApp(false);
+			
+			}
+		
 
 
 		ImGui::End();

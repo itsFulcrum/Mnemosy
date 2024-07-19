@@ -89,6 +89,13 @@ namespace mnemosy::gui
 				return;
 			}
 
+			if (panel->GetType() == newPanel->GetType()) {
+
+				// dont add it 
+				MNEMOSY_ERROR("UserInterface::RegisterGuiPanel:  A gui panel with the same type already exists");
+				return;
+			}
+
 		}
 
 		m_guiPanels.push_back(newPanel);
@@ -129,6 +136,49 @@ namespace mnemosy::gui
 
 		//delete m_mainMenuBarGuiPanel;
 		m_mainMenuBarGuiPanel = nullptr;
+	}
+
+	bool UserInterface::IsGuiPanelVisible(GuiPanelType panelType) {
+
+		MNEMOSY_ASSERT(panelType != MNSY_GUI_PANEL_NONE, " Cannot call this with type none");
+		MNEMOSY_ASSERT(!m_guiPanels.empty(), "Gui Panels should not be empty!");
+
+
+		for (size_t i = 0; i < m_guiPanels.size();i++) {
+
+			if (m_guiPanels[i]->GetType() == panelType) {
+
+				return m_guiPanels[i]->isActive();
+			}
+
+
+		}
+
+
+		return false;
+	}
+
+	GuiPanel& UserInterface::GetGuiPanel(GuiPanelType panelType) {
+
+		MNEMOSY_ASSERT(panelType != MNSY_GUI_PANEL_NONE, " Cannot call this with type none");
+		MNEMOSY_ASSERT(!m_guiPanels.empty(), "Gui Panels should not be empty!");
+
+
+		for (size_t i = 0; i < m_guiPanels.size(); i++) {
+
+			if (m_guiPanels[i]->GetType() == panelType) {
+
+				return *m_guiPanels[i];
+			}
+
+
+		}
+
+		// in case we reach here there must be an error
+		MNEMOSY_ASSERT(false, "This should not happen there should be a gui panel for each type");
+
+		GuiPanel* p = nullptr;
+		return *p;
 	}
 
 

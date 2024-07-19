@@ -16,6 +16,7 @@
 #include "Include/Systems/ThumbnailManager.h"
 #include "Include/Systems/TextureGenerationManager.h"
 #include "Include/Systems/ExportManager.h"
+#include "Include/Systems/UserSettingsManager.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -37,12 +38,9 @@ namespace mnemosy
 
 	// public
 	MnemosyEngine::~MnemosyEngine()
-	{ 
-		
-	}
+	{ }
 
-	MnemosyEngine& MnemosyEngine::GetInstance()
-	{
+	MnemosyEngine& MnemosyEngine::GetInstance() {
 		if (!m_sInstance)
 		{
 			m_sInstance = new MnemosyEngine();
@@ -140,10 +138,14 @@ namespace mnemosy
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
 		//MNEMOSY_TRACE("UserInterface Initialized");
 
-		
+		m_pUserSettingsManager = std::make_unique<systems::UserSettingsManager>();
+
+
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
 		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
 		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->GetSkybox());
+
+
 
 
 		m_isInitialized = true;
@@ -187,6 +189,7 @@ namespace mnemosy
 
 	void MnemosyEngine::Shutdown() {	
 
+		
 		m_pWindow->Shutdown();
 		delete m_pWindow;
 		m_pWindow = nullptr;

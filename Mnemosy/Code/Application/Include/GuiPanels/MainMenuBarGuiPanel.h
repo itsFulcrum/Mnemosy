@@ -18,6 +18,13 @@ namespace mnemosy::gui
 		virtual void Draw() override;
 		
 	private:
+
+		void DataDropdown();
+		const char* m_dataDropdown_ImGuiLabel = "Data";
+
+		void ViewsDropdown();
+
+
 		//GuiPanelManager* m_panelManager;
 
 

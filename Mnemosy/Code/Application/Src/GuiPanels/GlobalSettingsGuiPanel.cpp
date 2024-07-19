@@ -23,6 +23,7 @@ namespace mnemosy::gui
 	GlobalSettingsGuiPanel::GlobalSettingsGuiPanel()
 	{
 		panelName = "Global Settings";
+		panelType = MNSY_GUI_PANEL_GLOBAL_SETTINGS;
 	}
 
 	void GlobalSettingsGuiPanel::Draw()

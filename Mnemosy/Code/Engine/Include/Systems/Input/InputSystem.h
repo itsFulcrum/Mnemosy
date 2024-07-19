@@ -98,6 +98,8 @@ namespace mnemosy::systems
 
 
 		bool IsButtonPressed(int glfwKeyboardKey);
+		bool IsMouseButtonPressed(int glfwMouseBtnKey);
+
 		void LockCursor();
 		void UnlockCursor();
 		void HideCursor();

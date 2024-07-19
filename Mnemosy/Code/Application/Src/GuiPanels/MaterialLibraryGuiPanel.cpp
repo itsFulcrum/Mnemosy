@@ -22,9 +22,11 @@
 namespace mnemosy::gui
 {
 	MaterialLibraryGuiPanel::MaterialLibraryGuiPanel()
-		: m_materialRegistry { ENGINE_INSTANCE().GetMaterialLibraryRegistry() }
+		: m_materialRegistry { MnemosyEngine::GetInstance().GetMaterialLibraryRegistry()}
 	{
 		panelName = "Material Library";
+		panelType = MNSY_GUI_PANEL_MATERIAL_LIBRARY;
+
 		rootNode = m_materialRegistry.GetRootFolder();
 		//m_selectedNode = rootNode;
 		m_materialRegistry.OpenFolderNode(rootNode);
@@ -46,10 +48,6 @@ namespace mnemosy::gui
 			{
 
 				ImGui::SeparatorText("Material Library");
-
-				if (ImGui::Button("Save All")) {
-					m_materialRegistry.SaveUserDirectoriesData();
-				}
 
 				RecursivDrawSubfolders(rootNode);
 				HandleDeleteHierarchyModal();

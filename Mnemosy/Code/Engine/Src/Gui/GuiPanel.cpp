@@ -7,7 +7,6 @@
 namespace mnemosy::gui
 {
 	GuiPanel::GuiPanel() {
-
 	}
 
 	GuiPanel::~GuiPanel() {
@@ -21,6 +20,11 @@ namespace mnemosy::gui
 	std::string GuiPanel::GetName()
 	{
 		return std::string(panelName);
+	}
+
+	GuiPanelType GuiPanel::GetType()
+	{
+		return panelType;
 	}
 
 } // !mnemosy::gui

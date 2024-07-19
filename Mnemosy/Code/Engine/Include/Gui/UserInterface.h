@@ -29,6 +29,8 @@ namespace mnemosy::gui
 		void RegisterMainMenuBarGuiPanel(GuiPanel& newMenuBarPanel);
 		void UnregisterMainMenuBarGuiPanel();
 
+		bool IsGuiPanelVisible(GuiPanelType panelType);
+		GuiPanel& GetGuiPanel(GuiPanelType panelType);
 
 		bool show_demo_window = false;
 	private:
