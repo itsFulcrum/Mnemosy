@@ -38,6 +38,8 @@ ${ENGINE_SOURCE_PATH}/Src/Systems/ExportManager.cpp
 ${ENGINE_SOURCE_PATH}/Include/Systems/JsonKeys.h
 ${ENGINE_SOURCE_PATH}/Include/Systems/UserSettingsManager.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/UserSettingsManager.cpp
+${ENGINE_SOURCE_PATH}/Include/Systems/MeshRegistry.h
+${ENGINE_SOURCE_PATH}/Src/Systems/MeshRegistry.cpp
 
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h

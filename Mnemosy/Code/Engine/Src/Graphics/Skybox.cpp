@@ -10,6 +10,7 @@
 
 #include "Include/Core/Log.h"
 #include "Include/Graphics/ModelLoader.h"
+#include "Include/Systems/MeshRegistry.h"
 
 #include <filesystem>
 
@@ -20,8 +21,14 @@ namespace mnemosy::graphics
 		std::filesystem::path meshesPath = MnemosyEngine::GetInstance().GetFileDirectories().GetMeshesPath();
 		std::filesystem::path skyboxMesh = meshesPath / std::filesystem::path("mnemosy_skybox_render_mesh.fbx");// sphere makes for better rendering but for generating skybox from equrectanuglar wee need cubeMesh
 
-		ModelLoader modelLoader;
-		m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str()); 
+
+		systems::MeshRegistry& meshRegistry = MnemosyEngine::GetInstance().GetMeshRegistry();
+		m_modelData_id = meshRegistry.LoadMesh(skyboxMesh.generic_string());
+
+
+
+		//ModelLoader modelLoader;
+		//m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str()); 
 		
 		m_pCubemap = new Cubemap();
 	}
@@ -31,8 +38,13 @@ namespace mnemosy::graphics
 		std::filesystem::path meshesPath = MnemosyEngine::GetInstance().GetFileDirectories().GetMeshesPath();
 		std::filesystem::path skyboxMesh = meshesPath / std::filesystem::path("mnemosy_skybox_render_mesh.fbx");// sphere makes for better rendering but for generating skybox from equrectanuglar wee need cubeMesh
 
-		ModelLoader modelLoader;
-		m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str());
+
+		systems::MeshRegistry& meshRegistry = MnemosyEngine::GetInstance().GetMeshRegistry();
+		m_modelData_id = meshRegistry.LoadMesh(skyboxMesh.generic_string());
+
+
+		//ModelLoader modelLoader;
+		//m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str());
 
 
 		m_pCubemap = new Cubemap();
@@ -52,8 +64,8 @@ namespace mnemosy::graphics
 	Skybox::~Skybox()
 	{
 
-		delete m_pModelData;
-		m_pModelData = nullptr;
+		//delete m_pModelData;
+		//m_pModelData = nullptr;
 
 		delete m_pCubemap;
 		m_pCubemap = nullptr;
@@ -110,9 +122,10 @@ namespace mnemosy::graphics
 		return *m_pCubemap;
 	}
 
-	ModelData& Skybox::GetModelData()
-	{
-		return *m_pModelData;
+	ModelData& Skybox::GetModelData() {
+
+		return MnemosyEngine::GetInstance().GetMeshRegistry().GetMeshByID(m_modelData_id);
+		//return *m_pModelData;
 	}
 
 }

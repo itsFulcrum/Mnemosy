@@ -34,7 +34,7 @@ namespace mnemosy::core {
 			return;
 		}
 
-		MNEMOSY_DEBUG("FileWatcher::RegisterFile: {}", filePath.generic_string());
+		//MNEMOSY_DEBUG("FileWatcher::RegisterFile: {}", filePath.generic_string());
 
 
 

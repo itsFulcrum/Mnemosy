@@ -22,6 +22,7 @@ namespace mnemosy::systems
 	class TextureGenerationManager;
 	class ExportManager;
 	class UserSettingsManager;
+	class MeshRegistry;
 }
 
 namespace mnemosy::graphics
@@ -69,7 +70,7 @@ namespace mnemosy
 		systems::TextureGenerationManager& GetTextureGenerationManager()	{ return *m_pTextureGenerationManager; }
 		systems::ExportManager& GetExportManager()							{ return *m_pExportManager; }
 		systems::UserSettingsManager& GetUserSettingsManager()				{ return *m_pUserSettingsManager; }
-
+		systems::MeshRegistry& GetMeshRegistry()							{ return *m_pMeshRegistry; }
 
 		graphics::ImageBasedLightingRenderer& GetIblRenderer() { return *m_pIbl_renderer; }
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
@@ -98,7 +99,8 @@ namespace mnemosy
 		std::unique_ptr<systems::TextureGenerationManager> m_pTextureGenerationManager;
 		std::unique_ptr<systems::ExportManager> m_pExportManager;
 		std::unique_ptr<systems::UserSettingsManager> m_pUserSettingsManager;
-
+		std::unique_ptr<systems::MeshRegistry> m_pMeshRegistry;
+		
 
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
 		std::unique_ptr<graphics::Renderer> m_pRenderer;

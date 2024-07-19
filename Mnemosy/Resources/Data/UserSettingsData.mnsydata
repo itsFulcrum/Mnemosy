@@ -9,7 +9,7 @@
             "gp_globalSettings_Open": true,
             "gp_materialEditor_Open": true,
             "gp_materialLibrary_Open": true,
-            "gp_sceneSettings_Open": true,
+            "gp_sceneSettings_Open": false,
             "gp_viewport_Open": true
         }
     }

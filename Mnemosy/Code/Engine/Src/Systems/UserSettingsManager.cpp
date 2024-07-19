@@ -37,7 +37,6 @@ namespace mnemosy::systems {
 		fs::path dataFilePath = m_userSettingsDataFilePath;
 
 		if (useDefaultFile) {
-			MNEMOSY_TRACE("Resotring Defaults");
 			dataFilePath = fs::path(MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / fs::path("UserSettingsData_default.mnsydata"));
 		}
 
@@ -90,16 +89,13 @@ namespace mnemosy::systems {
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR).SetActive(gp_materialEditor_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_VIEWPORT).SetActive(gp_viewport_Open);
 
-
-
-
-
 		}
 
 
 		if (useDefaultFile) {
 
 			SaveToFile();
+			MNEMOSY_INFO("Restored Default Settings");
 		}
 	}
 

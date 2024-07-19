@@ -30,9 +30,13 @@ namespace mnemosy::graphics
 
 
 		m_camera = std::make_unique<Camera>(window.GetWindowWidth(), window.GetWindowHeight());
+		m_light = std::make_unique<Light>();
+
+
+
+
 		m_mesh = std::make_unique<RenderMesh>(previewMesh.generic_string().c_str());
 		m_gizmoMesh = std::make_unique<RenderMesh>(gizmoMesh.generic_string().c_str());
-		m_light = std::make_unique<Light>();
 		
 		//MNEMOSY_TRACE("Scene - light Init");
 		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("brown_photostudio.hdr");

@@ -37,7 +37,10 @@ namespace mnemosy::graphics
 		float blurRadius = 0.0f;
 
 	private:
-		ModelData* m_pModelData = nullptr;
+		//ModelData* m_pModelData = nullptr;
+		unsigned int m_modelData_id;
+
+
 		Cubemap* m_pCubemap = nullptr;
 
 	};

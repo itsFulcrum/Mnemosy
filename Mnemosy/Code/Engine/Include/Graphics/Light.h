@@ -39,8 +39,13 @@ namespace mnemosy::graphics
 	private:
 		LightType m_type = LightType::DIRECTIONAL;
 
-		ModelData* m_pDirectionalLightMesh;
-		ModelData* m_pPointLightMesh;
+
+		unsigned int m_directionalLightMesh_id;
+		unsigned int m_pointLightMesh_id;
+
+
+		//ModelData* m_pDirectionalLightMesh;
+		//ModelData* m_pPointLightMesh;
 
 
 	};

@@ -51,8 +51,12 @@ namespace mnemosy::graphics
 		PreviewMesh m_currentPreviewMesh = PreviewMesh::Default;
 
 		std::unique_ptr<Camera> m_camera;
+		
+		
 		std::unique_ptr<RenderMesh> m_mesh;
 		std::unique_ptr<RenderMesh> m_gizmoMesh;
+
+
 		std::unique_ptr<Light> m_light;
 		std::unique_ptr<Skybox> m_skybox;
 

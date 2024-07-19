@@ -17,6 +17,7 @@
 #include "Include/Systems/TextureGenerationManager.h"
 #include "Include/Systems/ExportManager.h"
 #include "Include/Systems/UserSettingsManager.h"
+#include "Include/Systems/MeshRegistry.h"
 
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Renderer.h"
@@ -108,7 +109,7 @@ namespace mnemosy
 		//MNEMOSY_TRACE("TextureGenManager Initialized");
 		m_pExportManager = std::make_unique<systems::ExportManager>();
 		//MNEMOSY_TRACE("ExportManager Initialized");
-
+		m_pMeshRegistry = std::make_unique<systems::MeshRegistry>();
 
 
 		// menmosy::graphcs
