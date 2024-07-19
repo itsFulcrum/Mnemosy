@@ -172,13 +172,15 @@ namespace mnemosy::gui
 				renderer.SetMSAASamples((graphics::MSAAsamples)previewMSAA_Current);
 			}
 
-			ImGui::Checkbox("Cap Delta Time",&clock.capDeltaTime);
-			bool vSyncEnabled = window.IsVsyncEnabled();
+			//ImGui::Checkbox("Cap Delta Time",&clock.capDeltaTime);
+			
+			
+			/*bool vSyncEnabled = window.IsVsyncEnabled();
 			ImGui::Checkbox("Enable VSync",&vSyncEnabled);
 			if (vSyncEnabled != window.IsVsyncEnabled())
 			{
 				window.EnableVsync(vSyncEnabled);
-			}
+			}*/
 
 
 

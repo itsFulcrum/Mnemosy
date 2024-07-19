@@ -13,8 +13,9 @@ namespace mnemosy::systems {
 		UserSettingsManager();
 		~UserSettingsManager();
 
-		void LoadUserSettings();
+		void LoadUserSettings(bool useDefaultFile);
 		void SaveToFile();
+
 	private:
 		bool CheckDataFile(std::filesystem::directory_entry& fileDirectoryEntry);
 

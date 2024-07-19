@@ -30,10 +30,8 @@ namespace mnemosy::gui
 		virtual void Initialize() {};
 		virtual void Draw() {};
 
-		bool isActive() { return showPanel; }
-		void setActive() { showPanel = true; }
-		void Deactivate() { showPanel = false; }
-
+		bool IsActive() { return showPanel; }
+		void SetActive(bool active) { showPanel = active; }
 
 		std::string GetName();
 		GuiPanelType GetType();

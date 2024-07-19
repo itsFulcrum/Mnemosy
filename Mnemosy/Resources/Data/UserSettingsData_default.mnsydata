@@ -1,0 +1,16 @@
+{
+    "1_Mnemosy_Data_File": "UserSettingsData",
+    "2_Header_Info": {
+        "Description": "This files stores user settings"
+    },
+    "3_UserSettings": {
+        "guiPanelStates": {
+            "gp_documentation_Open": true,
+            "gp_globalSettings_Open": true,
+            "gp_materialEditor_Open": true,
+            "gp_materialLibrary_Open": true,
+            "gp_sceneSettings_Open": true,
+            "gp_viewport_Open": true
+        }
+    }
+}

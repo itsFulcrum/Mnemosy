@@ -59,8 +59,6 @@ namespace mnemosy::gui
 					ImGui::CaptureKeyboardFromApp(false);
 			
 			}
-		
-
 
 		ImGui::End();
 	}

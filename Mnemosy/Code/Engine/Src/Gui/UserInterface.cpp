@@ -26,8 +26,6 @@ namespace mnemosy::gui
 		
 		SetupImGuiStyle();
 
-	
-
 
 		//MnemosyEngine::GetInstance().GetWindow().GetWindow();
 		// Setup Platform/Renderer backends
@@ -36,17 +34,14 @@ namespace mnemosy::gui
 		ImGui_ImplGlfw_InitForOpenGL(current, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
 	}
-	UserInterface::~UserInterface()
-	{
+	UserInterface::~UserInterface() {
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-
-
 	}
-	void UserInterface::Render()
-	{
+
+	void UserInterface::Render() {
 		StartFrame();
 
 		ImGui::DockSpaceOverViewport();
@@ -148,7 +143,7 @@ namespace mnemosy::gui
 
 			if (m_guiPanels[i]->GetType() == panelType) {
 
-				return m_guiPanels[i]->isActive();
+				return m_guiPanels[i]->IsActive();
 			}
 
 

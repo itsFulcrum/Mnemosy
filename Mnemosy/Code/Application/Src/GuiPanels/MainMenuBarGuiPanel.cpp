@@ -63,6 +63,13 @@ namespace mnemosy::gui
 			}
 
 
+			if (ImGui::MenuItem("Restore Default Settings")) {
+
+				MnemosyEngine::GetInstance().GetUserSettingsManager().LoadUserSettings(true);
+
+			}
+
+
 			ImGui::EndMenu();
 		}
 
@@ -75,34 +82,34 @@ namespace mnemosy::gui
 			GuiPanelManager& m_panelManager = Application::GetInstance().GetGuiPanelManager();
 
 
-			viewportPanel = m_panelManager.GetViewportPanel().isActive();
+			viewportPanel = m_panelManager.GetViewportPanel().IsActive();
 			if (ImGui::MenuItem("Viewport", "", viewportPanel, !viewportPanel)) {
-				m_panelManager.GetViewportPanel().setActive();
+				m_panelManager.GetViewportPanel().SetActive(true);
 			}
 
-			globalSettingsPanel = m_panelManager.GetGlobalSettingsPanel().isActive();
+			globalSettingsPanel = m_panelManager.GetGlobalSettingsPanel().IsActive();
 			if (ImGui::MenuItem("Global Settings", "", globalSettingsPanel, !globalSettingsPanel)) {
-				m_panelManager.GetGlobalSettingsPanel().setActive();
+				m_panelManager.GetGlobalSettingsPanel().SetActive(true);
 			}
 
-			sceneSettings = m_panelManager.GetSceneSettingsPanel().isActive();
+			sceneSettings = m_panelManager.GetSceneSettingsPanel().IsActive();
 			if (ImGui::MenuItem("Scene Settings", "", sceneSettings, !sceneSettings)) {
-				m_panelManager.GetSceneSettingsPanel().setActive();
+				m_panelManager.GetSceneSettingsPanel().SetActive(true);
 			}
 
-			materialEditorPanel = m_panelManager.GetMaterialEditorPanel().isActive();
+			materialEditorPanel = m_panelManager.GetMaterialEditorPanel().IsActive();
 			if (ImGui::MenuItem("Material Editor", "", materialEditorPanel, !materialEditorPanel)) {
-				m_panelManager.GetMaterialEditorPanel().setActive();
+				m_panelManager.GetMaterialEditorPanel().SetActive(true);
 			}
 
-			materialLibraryPanel = m_panelManager.GetMaterialLibraryPanel().isActive();
+			materialLibraryPanel = m_panelManager.GetMaterialLibraryPanel().IsActive();
 			if (ImGui::MenuItem("Material Library", "", materialLibraryPanel, !materialLibraryPanel)) {
-				m_panelManager.GetMaterialLibraryPanel().setActive();
+				m_panelManager.GetMaterialLibraryPanel().SetActive(true);
 			}
 
-			documentationPanel = m_panelManager.GetDocumentationPanel().isActive();
+			documentationPanel = m_panelManager.GetDocumentationPanel().IsActive();
 			if (ImGui::MenuItem("Documentation", "", documentationPanel, !documentationPanel)) {
-				m_panelManager.GetDocumentationPanel().setActive();
+				m_panelManager.GetDocumentationPanel().SetActive(true);
 			}
 
 			ImGui::EndMenu();

@@ -28,12 +28,21 @@ namespace mnemosy::systems {
 
 
 
-	void UserSettingsManager::LoadUserSettings() {
+	void UserSettingsManager::LoadUserSettings(bool useDefaultFile) {
 
 		namespace fs = std::filesystem;
 		using namespace nlohmann;
 
-		fs::directory_entry dataFile = fs::directory_entry(m_userSettingsDataFilePath);
+
+		fs::path dataFilePath = m_userSettingsDataFilePath;
+
+		if (useDefaultFile) {
+			MNEMOSY_TRACE("Resotring Defaults");
+			dataFilePath = fs::path(MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / fs::path("UserSettingsData_default.mnsydata"));
+		}
+
+		fs::directory_entry dataFile = fs::directory_entry(dataFilePath);
+
 		if (!CheckDataFile(dataFile)) {
 			return;
 		}
@@ -43,7 +52,7 @@ namespace mnemosy::systems {
 		{
 
 			std::ifstream dataFileStream;
-			dataFileStream.open(m_userSettingsDataFilePath);
+			dataFileStream.open(dataFilePath);
 			json json_readFile;
 			try {
 				json_readFile = json::parse(dataFileStream);
@@ -67,13 +76,30 @@ namespace mnemosy::systems {
 			json json_guiPanels = json_userSettings["guiPanelStates"].get<json>();
 
 
-			if (!json_guiPanels["gp_documentation_Open"].get<bool>())	{ userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_DOCUMENTATION).Deactivate(); }
-			if (!json_guiPanels["gp_globalSettings_Open"].get<bool>())	{ userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_GLOBAL_SETTINGS).Deactivate();}
-			if (!json_guiPanels["gp_sceneSettings_Open"].get<bool>())	{ userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_SCENE_SETTINGS).Deactivate(); }
-			if (!json_guiPanels["gp_materialLibrary_Open"].get<bool>()) { userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_LIBRARY).Deactivate(); }
-			if (!json_guiPanels["gp_materialEditor_Open"].get<bool>())	{ userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR).Deactivate(); }
-			if (!json_guiPanels["gp_viewport_Open"].get<bool>())		{ userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_VIEWPORT).Deactivate(); }
+			bool gp_documentation_Open		= json_guiPanels["gp_documentation_Open"].get<bool>();
+			bool gp_globalSettings_Open		= json_guiPanels["gp_globalSettings_Open"].get<bool>();
+			bool gp_sceneSettings_Open		= json_guiPanels["gp_sceneSettings_Open"].get<bool>();
+			bool gp_materialLibrary_Open	= json_guiPanels["gp_materialLibrary_Open"].get<bool>();
+			bool gp_materialEditor_Open		= json_guiPanels["gp_materialEditor_Open"].get<bool>();
+			bool gp_viewport_Open			= json_guiPanels["gp_viewport_Open"].get<bool>();
 
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_DOCUMENTATION).SetActive(gp_documentation_Open);
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_GLOBAL_SETTINGS).SetActive(gp_globalSettings_Open);
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_SCENE_SETTINGS).SetActive(gp_sceneSettings_Open);
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_LIBRARY).SetActive(gp_materialLibrary_Open);
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR).SetActive(gp_materialEditor_Open);
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_VIEWPORT).SetActive(gp_viewport_Open);
+
+
+
+
+
+		}
+
+
+		if (useDefaultFile) {
+
+			SaveToFile();
 		}
 	}
 
@@ -142,6 +168,7 @@ namespace mnemosy::systems {
 
 		dataFileStream.close();
 	}
+
 
 	bool UserSettingsManager::CheckDataFile(std::filesystem::directory_entry& fileDirectoryEntry) {
 

@@ -102,6 +102,16 @@ namespace mnemosy::gui
 			renderMesh.transform.SetRotationEulerAngles(newMeshRot);
 
 
+			float meshScale[3] = { 1.0f,1.0f,1.0f };
+			meshScale[0] = renderMesh.transform.GetScale().x;
+			meshScale[1] = renderMesh.transform.GetScale().y;
+			meshScale[2] = renderMesh.transform.GetScale().z;
+			ImGui::DragFloat3("Mesh Scale", (float*)meshScale, 0.01f, 0.000001f, 10.0f, "%0.4f");
+			glm::vec3 newMeshScale = glm::vec3(meshScale[0], meshScale[1], meshScale[2]);
+			renderMesh.transform.SetScale(newMeshScale);
+
+
+
 
 			ImGui::TreePop();
 		}
@@ -375,19 +385,19 @@ namespace mnemosy::gui
 			ImGui::TreePop();
 		}
 
-		// --- Camera Settings
-		if (ImGui::TreeNode("Camera Settings"))
-		{
-			graphics::Camera& camera = scene.GetCamera();
+		//// --- Camera Settings
+		//if (ImGui::TreeNode("Camera Settings"))
+		//{
+		//	graphics::Camera& camera = scene.GetCamera();
 
-			ImGui::SliderFloat("Field of View", &camera.settings.fov, 1.0f, 160.0f, "%.1f");
+		//	ImGui::SliderFloat("Field of View", &camera.settings.fov, 1.0f, 160.0f, "%.1f");
 
-			ImGui::DragFloat("Near Clip", &camera.settings.nearClip, 0.1f, 0.00001f, 100.0f, "%0.4f");
-			ImGui::DragFloat("Far Clip", &camera.settings.farClip, 0.1f, 0.02f, 5000.0f, "%0.4f");
+		//	ImGui::DragFloat("Near Clip", &camera.settings.nearClip, 0.1f, 0.00001f, 100.0f, "%0.4f");
+		//	ImGui::DragFloat("Far Clip", &camera.settings.farClip, 0.1f, 0.02f, 5000.0f, "%0.4f");
 
 
-			ImGui::TreePop();
-		}
+		//	ImGui::TreePop();
+		//}
 
 		// --- Post Processing Settings
 		if (ImGui::TreeNode("Post processing"))

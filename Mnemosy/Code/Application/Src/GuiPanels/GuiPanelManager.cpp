@@ -19,7 +19,7 @@ namespace mnemosy::gui
 {
 	GuiPanelManager::GuiPanelManager()
 	{
-		UserInterface& userInterface = ENGINE_INSTANCE().GetUserInterface();
+		UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
 		// gui panels
 		m_pMainMenuBarPanel = new MainMenuBarGuiPanel();
 		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
@@ -38,7 +38,7 @@ namespace mnemosy::gui
 
 		
 		// load user settings after all panels have been initialized
-		MnemosyEngine::GetInstance().GetUserSettingsManager().LoadUserSettings();
+		MnemosyEngine::GetInstance().GetUserSettingsManager().LoadUserSettings(false);
 
 #ifdef mnemosy_gui_showImGuiDemoWindow
 
