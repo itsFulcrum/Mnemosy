@@ -189,8 +189,9 @@ namespace mnemosy
 	}
 
 	void MnemosyEngine::Shutdown() {	
-
 		
+		m_pMaterialLibraryRegistry->SaveActiveMaterialToFile();
+
 		m_pWindow->Shutdown();
 		delete m_pWindow;
 		m_pWindow = nullptr;

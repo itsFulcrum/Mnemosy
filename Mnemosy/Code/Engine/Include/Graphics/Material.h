@@ -33,6 +33,9 @@ namespace mnemosy::graphics
 		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
 
 		NormalMapFormat NormalTextureFormat;
+		bool IsSmoothnessTexture = false;
+
+
 
 		void setDefaults();
 

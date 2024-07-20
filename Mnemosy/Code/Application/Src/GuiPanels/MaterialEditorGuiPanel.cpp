@@ -177,6 +177,16 @@ namespace mnemosy::gui
 						exportManager.SetNormalMapExportFormatInt(exportNormalFormat_current);
 					}
 
+					bool exportRoughAsSmooth = exportManager.GetExportRoughnessAsSmoothness();
+					ImGui::Checkbox("Roughness as Smoothness", &exportRoughAsSmooth);
+
+
+					if (exportRoughAsSmooth != exportManager.GetExportRoughnessAsSmoothness()) {
+						exportManager.SetExportRoughnessAsSmoothness(exportRoughAsSmooth);
+					}
+
+
+
 					if (ImGui::Button("Export To...",buttonSize)) {
 
 						std::string exportFolder = mnemosy::core::FileDialogs::SelectFolder("");
@@ -280,9 +290,9 @@ namespace mnemosy::gui
 			m_isRoughnessButtonHovered = ImGui::IsItemHovered();
 
 
+			// Remove Texture
 			if (textureAssigned) {
 
-				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Roughness", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS);
@@ -291,6 +301,7 @@ namespace mnemosy::gui
 				}
 			}
 
+			// Texture Info text
 			if (textureAssigned) {
 				
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetRoughnessTexture().GetWidth()) + "x" + std::to_string(activeMat.GetRoughnessTexture().GetHeight());
@@ -312,9 +323,68 @@ namespace mnemosy::gui
 				if (ImGui::SliderFloat("Roughness", &activeMat.Roughness, 0.0f, 1.0f, "%.4f")) {
 					m_valuesChanged = true;
 				}
+
 			}
 			if (textureAssigned)
 				ImGui::EndDisabled();
+
+
+
+			// Disabled Widgets if texture is not assiggned
+			if (!textureAssigned)
+				ImGui::BeginDisabled();
+			{
+				bool isSmoothness = activeMat.IsSmoothnessTexture;
+
+				ImGui::Checkbox("Is Smoothness", &isSmoothness);
+
+				if (isSmoothness != activeMat.IsSmoothnessTexture) {
+
+					MNEMOSY_TRACE("Converting Roughness texture");
+					// roughness changed update
+					activeMat.IsSmoothnessTexture = isSmoothness;
+
+
+					//MNEMOSY_TRACE("Changed isSmoothneess to: {}", activeMat.IsSmoothnessTexture);
+
+					fs::path materialFolderPath = libDir / m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot / fs::path(activeMat.Name);
+
+					
+					fs::path roughnessPath = materialFolderPath / fs::path(std::string(activeMat.Name + texture_fileSuffix_roughness));
+
+
+					MnemosyEngine::GetInstance().GetTextureGenerationManager().InvertRoughness(activeMat, roughnessPath.generic_string().c_str(), true);
+
+
+
+					MNEMOSY_TRACE("Converted");
+
+
+
+					// TODO:
+					// Load newly created texture as new roughness texture 
+					activeMat.GetRoughnessTexture().generateFromFile(roughnessPath.generic_string().c_str(), true, true);
+
+					MNEMOSY_TRACE("Loaded New Roughness texture");
+
+
+
+
+					// save is Smoothness to data file
+					activeMat.IsSmoothnessTexture = isSmoothness;
+					
+					SaveMaterial();
+					MNEMOSY_TRACE("SavedMaterialFile");
+
+				}
+
+			}
+			if (!textureAssigned)
+				ImGui::EndDisabled();
+
+
+
+
 
 		} // End Roughness Settings
 
@@ -337,8 +407,8 @@ namespace mnemosy::gui
 			}
 			m_isNormalButtonHovered = ImGui::IsItemHovered();
 
+			// Remove Texture
 			if (textureAssigned) {
-				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Normal", buttonSizeDelete)) {
 					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_NORMAL);
@@ -347,6 +417,7 @@ namespace mnemosy::gui
 				}
 			}
 
+			// Texture Info Text
 			if (textureAssigned) {
 
 
@@ -384,7 +455,7 @@ namespace mnemosy::gui
 					// Generate inverted normal Texture.
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat,true);
 
-						
+					
 
 					// save normal format to material data file.
 					if (format_current == 0) {

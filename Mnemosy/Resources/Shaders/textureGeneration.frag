@@ -22,13 +22,25 @@ vec4 Mode0_FlipNormalYChannel(sampler2D normalMapSampler)
   return vec4(normalMap.xyz,1.0f);
 }
 
+// for converting between roughness and smoothness textures
+vec4 Mode1_InvertRoughness(sampler2D roughnessMapSampler){
+
+  float roughness =  1 - texture(roughnessMapSampler,uv).r;
+  return vec4(roughness,0.0f,0.0f,0.0f);
+}
+
+
 // Fragment Shader
 void main()
 {
-  fragmentOutputColor = vec4(0.0f,0.0f,0.0f,1.0f);
+  fragmentOutputColor = vec4(1.0f,0.0f,1.0f,1.0f);
 
   if(_mode == 0){
     fragmentOutputColor = Mode0_FlipNormalYChannel(_texture0);
   }
+  else if(_mode == 1){
+    fragmentOutputColor = Mode1_InvertRoughness(_texture0);
+  }
+
 
 }

@@ -4,7 +4,6 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/TextureGenerationManager.h"
-#include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Material.h"
 
@@ -20,9 +19,10 @@ namespace mnemosy::systems
 {
 	// public methods
 
-	ExportManager::ExportManager() 
+	ExportManager::ExportManager()
 		: m_exportImageFormat(graphics::MNSY_PNG)
 		, m_exportNormalFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl)
+		, m_exportRoughnessAsSmoothness(false)
 	{
 
 		/*m_exportImageFormat = graphics::MNSY_PNG;
@@ -47,11 +47,6 @@ namespace mnemosy::systems
 		if (!m_lastExportedFilePaths.empty())
 			m_lastExportedFilePaths.clear();
 
-		//if (m_exportImageFormat == MNSY_KTX2) {
-		//	
-		//	ExportAsKtx2(exportPath,materialFolderPath,material);
-		//	return true;
-		//}
 
 		std::string fileExtention = ".png";
 		if (m_exportImageFormat == graphics::MNSY_TIF) {
@@ -62,15 +57,20 @@ namespace mnemosy::systems
 
 			fs::path to = exportPath / fs::path(material.Name + "_albedo_sRGB" + fileExtention);
 			graphics::Texture& tex = material.GetAlbedoTexture();
-			ExportMaterialTexturePngOrTif(to, tex,false,false);
+
+			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB8);
+			ExportGlTexture_PngOrTiff(tex.GetID(),info);
 
 			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
+
 		if (material.isEmissiveAssigned()) {
 
 			fs::path to = exportPath / fs::path(material.Name + "_emissive_sRGB" + fileExtention);
 			graphics::Texture& tex = material.GetEmissiveTexture();
-			ExportMaterialTexturePngOrTif(to, tex,false,false);
+
+			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB8);
+			ExportGlTexture_PngOrTiff(tex.GetID(), info);
 
 			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
@@ -79,7 +79,10 @@ namespace mnemosy::systems
 			if (m_exportNormalFormat == graphics::MNSY_NORMAL_FORMAT_OPENGl) {
 				fs::path to = exportPath / fs::path(material.Name + "_normal_gl_raw" + fileExtention);
 				graphics::Texture& tex = material.GetNormalTexture();
-				ExportMaterialTexturePngOrTif(to, tex,false,true);
+				
+				TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB16);
+				ExportGlTexture_PngOrTiff(tex.GetID(), info);
+
 				m_lastExportedFilePaths.push_back(to.generic_string());
 			}
 			else if (m_exportNormalFormat == graphics::MNSY_NORMAL_FORMAT_DIRECTX) {
@@ -87,51 +90,66 @@ namespace mnemosy::systems
 				TextureGenerationManager& texGenerator = MnemosyEngine::GetInstance().GetTextureGenerationManager();			
 				
 				fs::path to = exportPath / fs::path(material.Name + "_normal_dx_raw" + fileExtention);
-				texGenerator.FlipNormalMap("nothing", material,false);
+				texGenerator.FlipNormalMap(to.generic_string().c_str(), material, true);
 
-				graphics::Texture& normalMap = material.GetNormalTexture();
-				int width = normalMap.GetWidth();
-				int height = normalMap.GetHeight();
-				int channels = 3;
-
-				unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * channels);
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texGenerator.GetRenderTextureID());
-
-				cv::Mat img;
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_SHORT, gl_texture_bytes);
-				img = cv::Mat( height,width, CV_16UC3, gl_texture_bytes);
-
-				cv::flip(img, img, 0);
-				cv::imwrite(to.generic_string().c_str(), img);
-				img.release();
-
-				free(gl_texture_bytes);
-				MNEMOSY_INFO("Exported: {}", exportPath.generic_string());
 				m_lastExportedFilePaths.push_back(to.generic_string());
 			}
 		}
 		if (material.isRoughnessAssigned()) {
-			fs::path to = exportPath / fs::path(material.Name + "_roughness_raw" + fileExtention);
-			graphics::Texture& tex = material.GetRoughnessTexture();
-			ExportMaterialTexturePngOrTif(to, tex,true,true);
-			m_lastExportedFilePaths.push_back(to.generic_string());
+			
+
+			if (m_exportRoughnessAsSmoothness) {
+
+				fs::path to = exportPath / fs::path(material.Name + "_smoothness_raw" + fileExtention);
+
+				TextureGenerationManager& texGenerator = MnemosyEngine::GetInstance().GetTextureGenerationManager();
+
+				texGenerator.InvertRoughness(material, to.generic_string().c_str(), true);
+
+			}
+			else {
+
+				fs::path to = exportPath / fs::path(material.Name + "_roughness_raw" + fileExtention);
+				graphics::Texture& tex = material.GetRoughnessTexture();
+
+				TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+				ExportGlTexture_PngOrTiff(tex.GetID(), info);
+
+
+
+				m_lastExportedFilePaths.push_back(to.generic_string());
+
+			}
+
+
+
+
 		}
 		if (material.isMetallicAssigned()) {
 			fs::path to = exportPath / fs::path(material.Name + "_metallic_raw" + fileExtention);
 			graphics::Texture& tex = material.GetMetallicTexture();
-			ExportMaterialTexturePngOrTif(to, tex,true,true);
+
+			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+			ExportGlTexture_PngOrTiff(tex.GetID(), info);
+
 			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 		if (material.isAoAssigned()) {
 			fs::path to = exportPath / fs::path(material.Name + "_ambientOcclusion_raw" + fileExtention);
 			graphics::Texture& tex = material.GetAOTexture();
-			ExportMaterialTexturePngOrTif(to, tex,true,true);
+			
+			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+			ExportGlTexture_PngOrTiff(tex.GetID(), info);
+			
 			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 
-		return false;
+		// TODO: Add opacity and roughness here
+
+
+
+
+		return true;
 	}
 
 	void ExportManager::SetExportImageFormatInt(int format) {
@@ -170,6 +188,142 @@ namespace mnemosy::systems
 		const char* exportFormats[] = { "tiff", "png"}; // they need to be ordered the same as in ExportManager ExportImageFormats
 
 		return exportFormats[m_exportImageFormat];
+	}
+
+	void ExportManager::ExportGlTexture_PngOrTiff(const int glTextureId, TextureExportInfo& exportInfo) {
+
+		unsigned int width = exportInfo.width;
+		unsigned int height = exportInfo.height;
+
+
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, glTextureId);
+
+		cv::Mat img;
+
+		graphics::TextureFormat format = exportInfo.textureFormat;
+		std::string exportFormatTxt  = "";
+
+		if (format == graphics::MNSY_R8 || format == graphics::MNSY_RG8 || format == graphics::MNSY_RGB8 || format == graphics::MNSY_RGBA8) {
+
+			unsigned int channels = (unsigned int)format;
+
+			char* gl_texture_bytes = (char*)malloc(sizeof(char) * width * height * channels);
+
+			if (channels == 1) { // Not Tested
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_8UC1, gl_texture_bytes);
+				exportFormatTxt = "R8";
+			}
+			else if (channels == 2) { // Not Tested
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_UNSIGNED_BYTE, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_8UC2, gl_texture_bytes);
+				exportFormatTxt = "RG8";
+			}
+			else if (channels == 3) { // Tested And Works
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_8UC3, gl_texture_bytes);
+				exportFormatTxt = "RGB8";
+			}
+			else if (channels == 4) { // Not Tested
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_8UC4, gl_texture_bytes);
+				exportFormatTxt = "RGBA8";
+			}
+
+
+			cv::flip(img, img, 0);
+			cv::imwrite(exportInfo.path, img);
+			img.release();
+
+			free(gl_texture_bytes);
+
+
+		}
+		else if (format == graphics::MNSY_R16 || format == graphics::MNSY_RG16 || format == graphics::MNSY_RGB16 || format == graphics::MNSY_RGBA16) {
+
+			unsigned int channels = (unsigned int)format - 4;
+
+			unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * channels);
+
+
+			if (channels == 1) { // Tested and Works
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_SHORT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_16UC1, gl_texture_bytes);
+				exportFormatTxt = "R16";
+			}
+			else if (channels == 2) { // Not Tested
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_UNSIGNED_SHORT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_16UC2, gl_texture_bytes);
+
+				exportFormatTxt = "RG16";
+			}
+			else if (channels == 3) { // Tested and works
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_SHORT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_16UC3, gl_texture_bytes);
+
+				exportFormatTxt = "RGB16";
+			}
+			else if (channels == 4) { // Not Tested
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_SHORT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_16UC4, gl_texture_bytes);
+				exportFormatTxt = "RGBA16";
+			}
+
+			cv::flip(img, img, 0);
+			cv::imwrite(exportInfo.path, img);
+			img.release();
+
+			free(gl_texture_bytes);
+
+		}
+		// Not Tested
+		else if (format == graphics::MNSY_R32 || format == graphics::MNSY_RG32 || format == graphics::MNSY_RGB32 || format == graphics::MNSY_RGBA32) {
+
+			unsigned int channels = (unsigned int)format - 8;
+
+			float* gl_texture_bytes = (float*)malloc(sizeof(float) * width * height * channels);
+
+
+			if (channels == 1) { // Not Tested
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_32FC1, gl_texture_bytes);
+				exportFormatTxt = "R32";
+			}
+			else if (channels == 2) {// Not Tested
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_FLOAT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_32FC2, gl_texture_bytes);
+				exportFormatTxt = "RG32";
+			}
+			else if (channels == 3) {// Not Tested
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_FLOAT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_32FC3, gl_texture_bytes);
+				exportFormatTxt = "RGB32";
+			}
+			else if (channels == 4) {// Not Tested
+
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_FLOAT, gl_texture_bytes);
+				img = cv::Mat(height, width, CV_32FC4, gl_texture_bytes);
+				exportFormatTxt = "RGBA32";
+			}
+
+			cv::flip(img, img, 0);
+			cv::imwrite(exportInfo.path, img);
+			img.release();
+
+			free(gl_texture_bytes);
+		}
+
+
+		MNEMOSY_INFO("Exported Texture: Format: {} {}x{}  to: {}", exportFormatTxt, width, height, exportInfo.path);
 	}
 
 	std::vector<std::string>& ExportManager::GetLastExportedFilePaths() {
@@ -279,12 +433,12 @@ namespace mnemosy::systems
 
 	}
 
-	void ExportManager::ExportMaterialTexturePngOrTif(fs::path& exportPath, graphics::Texture& texture, bool singleChannelTexture, bool bits16) {
+	void ExportManager::ExportMaterialTexturePngOrTif_Depricated(fs::path& exportPath, graphics::Texture& texture, bool singleChannelTexture, bool bits16) {
 
 		int width = texture.GetWidth();
 		int height = texture.GetHeight();
 
-		int channels = texture.GetChannelsAmount(); // we cant be sure that albedo.GetChannels() is correct because we cant yet read that properly from ktx2 files
+		int channels = texture.GetChannelsAmount(); 
 		if (singleChannelTexture)
 			channels = 1;
 
@@ -344,8 +498,8 @@ namespace mnemosy::systems
 		MNEMOSY_INFO("Exported: {}", exportPath.generic_string());
 	}
 
-	void ExportManager::ExportGlTexturePngOrTiff(fs::path& exportPath, int glTextureId, int width, int height)
-	{
+	void ExportManager::ExportGlTexturePngOrTiff_Depricated(fs::path& exportPath, int glTextureId, int width, int height) {
+
 		// TODO: Make this function work for all types of textures 
 		// Only designed to be used with normal maps atm
 
@@ -365,6 +519,10 @@ namespace mnemosy::systems
 
 		free(gl_texture_bytes);
 	}
+
+
+
+
 
 	std::string ExportManager::GetExportNormalFormatString()
 	{

@@ -47,7 +47,7 @@ namespace mnemosy::systems
 		}
 	}
 	
-	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::Material& material, bool exportKtx2) {
+	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::Material& material, bool exportTexture) {
 		
 		if (!material.isNormalAssigned()) // should never happen but lets be save
 			return;
@@ -95,15 +95,16 @@ namespace mnemosy::systems
 
 
 		
-		// Export to ktx2 file
-		if (exportKtx2) {
+		// Export to png or tiff file
+		if (exportTexture) {
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
-			fs::path p = fs::path(exportPath);
-			//exporter.ExportMaterialTexturePngOrTif(p, false, true);
-			exporter.ExportGlTexturePngOrTiff(p, m_renderTexture_ID, width, height);
+			//fs::path p = fs::path(exportPath);
+			//exporter.ExportGlTexturePngOrTiff_Depricated(p, m_renderTexture_ID, width, height);
 
 
+			TextureExportInfo info = TextureExportInfo(exportPath, width, height, graphics::MNSY_RGB16);
+			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
 
 
 
@@ -114,6 +115,72 @@ namespace mnemosy::systems
 		// === END FRAME
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void TextureGenerationManager::InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture) {
+		
+		
+		MNEMOSY_ASSERT(material.isRoughnessAssigned(), "Check before calling this function if material has a roughness map");
+
+		unsigned int width	= material.GetRoughnessTexture().GetWidth();
+		unsigned int height = material.GetRoughnessTexture().GetHeight();
+
+		if (!IsInitialized()) {
+			InitializeShaderTextureAndFBO(1024, 1024);
+		}
+
+		// === START FRAME
+		glViewport(0, 0, width, height);
+		// Bind framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+		// Resize render texture
+		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr); // TODO check if we can just change the parameters here
+
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// clear frame
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+
+		// Setup Shader
+		m_pTextureGenShader->Use();
+		m_pTextureGenShader->SetUniformInt("_mode", 1); // _mode 0 is for filpping normal y channel
+
+		material.GetRoughnessTexture().BindToLocation(0);
+		m_pTextureGenShader->SetUniformInt("_texture0", 0);
+
+		// DRAW CALL
+		// render screen quad with shader into render texture
+		glBindVertexArray(m_VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertecies
+		glBindVertexArray(0);
+
+		// Generate MipMaps
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+
+		// Export to png or tiff file
+		if (exportTexture) {
+
+			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
+			
+			TextureExportInfo info = TextureExportInfo(exportPath,width,height,graphics::MNSY_R16);
+
+			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
+
+			//exporter.ExportGlTexturePngOrTiff_Depricated(p, m_renderTexture_ID, width, height);
+		}
+
+		// === END FRAME
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
 	}
 
 	bool TextureGenerationManager::IsInitialized() {

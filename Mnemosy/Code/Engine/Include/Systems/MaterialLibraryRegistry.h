@@ -99,6 +99,9 @@ namespace mnemosy::systems
 		int GetActiveMaterialID() { return m_activeMaterialID; }
 		bool UserMaterialBound() { return m_userMaterialBound; }
 		fs::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
+		fs::path GetActiveMaterialFolderPath();
+
+
 		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath);
 		void DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType);
 		

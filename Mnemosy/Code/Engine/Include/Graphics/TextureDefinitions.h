@@ -6,8 +6,7 @@
 
 namespace mnemosy::graphics {
 
-	enum PBRTextureType
-	{
+	enum PBRTextureType {
 		MNSY_TEXTURE_ALBEDO				= 0,
 		MNSY_TEXTURE_ROUGHNESS			= 1,
 		MNSY_TEXTURE_METALLIC			= 2,
@@ -19,17 +18,34 @@ namespace mnemosy::graphics {
 		MNSY_TEXTURE_OPACITY			= 7,
 		MNSY_TEXTURE_CUSTOMPACKED		= 8
 	};
-	enum NormalMapFormat
-	{
+	enum NormalMapFormat {
 		MNSY_NORMAL_FORMAT_OPENGl = 0,
 		MNSY_NORMAL_FORMAT_DIRECTX = 1
 	};
 
-	enum ExportImageFormat
-	{
+	enum ExportImageFormat {
 		//MNSY_KTX2 = 0,
 		MNSY_TIF = 0,
 		MNSY_PNG = 1
+	};
+
+
+	enum TextureFormat {
+		MNSY_NONE		= 0,
+		MNSY_R8			= 1,
+		MNSY_RG8		= 2,
+		MNSY_RGB8		= 3,
+		MNSY_RGBA8		= 4,
+
+		MNSY_R16		= 5,
+		MNSY_RG16		= 6,
+		MNSY_RGB16		= 7,
+		MNSY_RGBA16		= 8,
+
+		MNSY_R32		= 9,
+		MNSY_RG32		= 10,
+		MNSY_RGB32		= 11,
+		MNSY_RGBA32		= 12
 	};
 
 

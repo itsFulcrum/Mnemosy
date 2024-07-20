@@ -45,7 +45,7 @@ namespace mnemosy::systems
 	}
 
 	MaterialLibraryRegistry::~MaterialLibraryRegistry() {
-		
+
 		SaveUserDirectoriesData();
 
 		delete m_folderTree;
@@ -605,6 +605,8 @@ namespace mnemosy::systems
 
 			mat->NormalStrength = readFile[jsonMatKey_normalStrength].get<float>();
 
+			mat->IsSmoothnessTexture = readFile[jsonMatKey_isSmoothness].get<bool>();
+
 			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
 			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
 		
@@ -732,6 +734,9 @@ namespace mnemosy::systems
 
 		MaterialJson[jsonMatKey_normalStrength] = activeMat.NormalStrength;
 		MaterialJson[jsonMatKey_normalMapFormat] = activeMat.GetNormalFormatAsInt(); // 0 = OpenGl, 1 = DirectX
+
+		MaterialJson[jsonMatKey_isSmoothness] = activeMat.IsSmoothnessTexture;
+
 		MaterialJson[jsonMatKey_uvScale_x] = activeMat.UVTiling.x;
 		MaterialJson[jsonMatKey_uvScale_y] = activeMat.UVTiling.y;
 
@@ -788,7 +793,7 @@ namespace mnemosy::systems
 
 		MaterialJson[jsonMatKey_thumbnailPath] = thumbnailPath.generic_string();
 				
-		if (prettyPrintMaterialFiles)
+		if (true)
 			dataFileStream << MaterialJson.dump(4);
 		else
 			dataFileStream << MaterialJson.dump(-1);
@@ -805,6 +810,14 @@ namespace mnemosy::systems
 
 		graphics::Material* defaultMaterial = new graphics::Material();
 		MnemosyEngine::GetInstance().GetScene().SetMaterial(defaultMaterial);
+	}
+
+	fs::path MaterialLibraryRegistry::GetActiveMaterialFolderPath() {
+
+		MNEMOSY_ASSERT(UserMaterialBound(), "You should check if active material is bound before calling this Method");
+
+		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		return m_fileDirectories.GetLibraryDirectoryPath() / m_folderNodeOfActiveMaterial->pathFromRoot / fs::path(activeMat.Name);
 	}
 
 	void MaterialLibraryRegistry::LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath) {
@@ -832,38 +845,50 @@ namespace mnemosy::systems
 		
 
 		std::string filename;
+		fs::path exportPath;
+		graphics::TextureFormat format = graphics::MNSY_RGB8;
 
 		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
 			
 			filename = activeMat.Name + texture_fileSuffix_albedo;
-			fs::path exportPath = materialDir / fs::path(filename);
-			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
+			exportPath = materialDir / fs::path(filename);
+			format = graphics::MNSY_RGB8;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
+			
 			filename = activeMat.Name + texture_fileSuffix_normal;
-			fs::path exportPath = materialDir / fs::path(filename);
-			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, true);
+			exportPath = materialDir / fs::path(filename);
+			format = graphics::MNSY_RGB16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_ROUGHNESS) {
+
 			filename = activeMat.Name + texture_fileSuffix_roughness;
-			fs::path exportPath = materialDir / fs::path(filename);
-			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
+			exportPath = materialDir / fs::path(filename);
+			format = graphics::MNSY_R16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
+			
 			filename = activeMat.Name + texture_fileSuffix_metallic;
-			fs::path exportPath = materialDir / fs::path(filename);
-			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
+			exportPath = materialDir / fs::path(filename);
+			format = graphics::MNSY_R16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
+			
 			filename = activeMat.Name + texture_fileSuffix_ambientOcclusion;
-			fs::path exportPath = materialDir / fs::path(filename);
-			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, true, true);
+			exportPath = materialDir / fs::path(filename);
+			format = graphics::MNSY_R16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
+			
 			filename = activeMat.Name + texture_fileSuffix_emissive;
-			fs::path exportPath = materialDir / fs::path(filename);
-			exportManager.ExportMaterialTexturePngOrTif(exportPath, *tex, false, false);
+			exportPath = materialDir / fs::path(filename);
+			format = graphics::MNSY_RGB8;
 		}
+
+		systems::TextureExportInfo exportInfo = systems::TextureExportInfo(exportPath.generic_string().c_str(),tex->GetWidth(), tex->GetHeight(), format);
+		exportManager.ExportGlTexture_PngOrTiff(tex->GetID(), exportInfo);
+
+
 
 		// save material data file
 		std::ifstream readFileStream;
@@ -912,7 +937,7 @@ namespace mnemosy::systems
 		}
 
 
-		if (prettyPrintDataFile)
+		if (prettyPrintMaterialFiles)
 			outFileStream << outFile.dump(4);
 		else
 			outFileStream << outFile.dump(-1);
@@ -964,6 +989,8 @@ namespace mnemosy::systems
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
+			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+
 			outFile[jsonMatKey_normalAssigned] = false;
 			outFile[jsonMatKey_normalPath] = jsonMatKey_pathNotAssigned;
 			outFile[jsonMatKey_normalMapFormat] = 0;
@@ -973,6 +1000,9 @@ namespace mnemosy::systems
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
+			activeMat.IsSmoothnessTexture = false;
+
+			outFile[jsonMatKey_isSmoothness] = false;
 			outFile[jsonMatKey_roughAssigned] = false;
 			outFile[jsonMatKey_roughPath] = jsonMatKey_pathNotAssigned;
 		}
@@ -989,7 +1019,6 @@ namespace mnemosy::systems
 			try { fs::remove(textureFile); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
 			outFile[jsonMatKey_aoAssigned] = false;
 			outFile[jsonMatKey_aoPath] = jsonMatKey_pathNotAssigned;
 		}
@@ -1006,7 +1035,7 @@ namespace mnemosy::systems
 		std::ofstream outFileStream;
 		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
 
-		if (prettyPrintDataFile)
+		if (prettyPrintMaterialFiles)
 			outFileStream << outFile.dump(4);
 		else
 			outFileStream << outFile.dump(-1);
@@ -1175,7 +1204,10 @@ namespace mnemosy::systems
 		MaterialJson[jsonMatKey_emissionStrength]	= 0.0f;
 
 		MaterialJson[jsonMatKey_normalStrength]		= 1.0f;
-		MaterialJson[jsonMatKey_normalMapFormat]		= 0; // 0 = OpenGl, 1 = DirectX
+		MaterialJson[jsonMatKey_normalMapFormat]	= 0; // 0 = OpenGl, 1 = DirectX
+		
+		MaterialJson[jsonMatKey_isSmoothness]	= false;
+
 
 		MaterialJson[jsonMatKey_uvScale_x]	= 1.0f;
 		MaterialJson[jsonMatKey_uvScale_y]	= 1.0f;

@@ -24,7 +24,11 @@ namespace mnemosy::systems
 		/// <summary> FlipNormalMap() 
 		/// Method to invert the y channel of the normal map texture of the material passed as a parameter. Texture is the exported as ktx to the specified path
 		/// </summary>
-		void FlipNormalMap(const char* exportPath, graphics::Material& material,bool exportKtx2);
+		void FlipNormalMap(const char* exportPath, graphics::Material& material,bool exportTexture);
+
+		void InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture);
+
+
 		unsigned int GetRenderTextureID() { return m_renderTexture_ID; }
 	private:
 		bool IsInitialized();
