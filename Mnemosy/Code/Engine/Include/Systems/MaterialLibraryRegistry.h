@@ -41,26 +41,33 @@ namespace mnemosy::systems
 		float emission_g		= 0.0f;
 		float emission_b		= 0.0f;
 		float emissionStrength	= 0.0f;
-		
+		bool useEmissiveAsMask  = false;
 		float normalStrength	= 1.0f;
 		float uvScale_x			= 1.0f;
 		float uvScale_y			= 1.0f;
 
-		bool albedoAssigned = false;
-		bool roughAssigned = false;
-		bool metalAssigned = false;
-		bool emissionAssigned = false;
-		bool normalAssigned = false;
-		bool aoAssigned = false;
+		float opacityThreshold  = 0.5f;
+		float heightDepth = 1.0f;
 
-		std::string albedoPath	= "notAssigned";
-		std::string roughPath	= "notAssigned";
-		std::string metalPath	= "notAssigned";
-		std::string emissionPath = "notAssigned";
-		std::string normalPath	= "notAssigned";
-		std::string aoPath		= "notAssigned";
+		bool albedoAssigned		= false;
+		bool roughAssigned		= false;
+		bool metalAssigned		= false;
+		bool emissionAssigned	= false;
+		bool normalAssigned		= false;
+		bool aoAssigned			= false;
+		bool opacityAssigned	= false;
+		bool heightAssigned		= false;
 
-		std::string thumbnailPath = "notAssigned";
+		std::string albedoPath		= "notAssigned";
+		std::string roughPath		= "notAssigned";
+		std::string metalPath		= "notAssigned";
+		std::string emissionPath	= "notAssigned";
+		std::string normalPath		= "notAssigned";
+		std::string aoPath			= "notAssigned";
+		std::string opacityPath		= "notAssigned";
+		std::string heightPath		= "notAssigned";
+
+		std::string thumbnailPath	= "notAssigned";
 	};
 
 	class MaterialLibraryRegistry
@@ -77,11 +84,8 @@ namespace mnemosy::systems
 		FolderNode* AddNewFolder(FolderNode* parentNode,std::string& name);
 		void RenameFolder(FolderNode* node, std::string& newName);
 		void MoveFolder(FolderNode* dragSource, FolderNode* dragTarget);
-		void DeleteAndKeepChildren(FolderNode* node); // TODO
+		void DeleteAndKeepChildren(FolderNode* node);
 		void DeleteFolderHierarchy(FolderNode* node);
-
-		FolderNode* GetRootFolder();
-		FolderNode* GetFolderByID(FolderNode* node, const unsigned int id);
 
 
 		void AddNewMaterial(FolderNode* node, std::string& name);
@@ -90,28 +94,35 @@ namespace mnemosy::systems
 		void MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo& materialInfo);
 
 
+		void GenereateOpacityFromAlbedoAlpha(graphics::Material& activeMat);
 
 		void LoadActiveMaterialFromFile(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
 		void SaveActiveMaterialToFile();
 		void SetDefaultMaterial();
 
-		FolderNode* GetSelectedNode() { return m_selectedFolderNode; }
-		int GetActiveMaterialID() { return m_activeMaterialID; }
 		bool UserMaterialBound() { return m_userMaterialBound; }
-		fs::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
-		fs::path GetActiveMaterialFolderPath();
-
 
 		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath);
 		void DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType);
 		
-		fs::path GetLibraryPath();
-		fs::path GetFolderPath(FolderNode* node);
-		fs::path GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo);
-
 
 		void OpenFolderNode(FolderNode* node);
 		void ClearUserMaterialsAndFolders();
+
+
+		// Getters
+		FolderNode* GetRootFolder();
+		FolderNode* GetFolderByID(FolderNode* node, const unsigned int id);
+
+		int GetActiveMaterialID() { return m_activeMaterialID; }
+		FolderNode* GetSelectedNode() { return m_selectedFolderNode; }
+		fs::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
+		fs::path GetActiveMaterialFolderPath();
+
+
+		fs::path GetLibraryPath();
+		fs::path GetFolderPath(FolderNode* node);
+		fs::path GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo);
 
 		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
 

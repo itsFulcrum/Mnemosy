@@ -30,6 +30,9 @@ namespace mnemosy::gui
 		bool m_isNormalButtonHovered = false;
 		bool m_isEmissionButtonHovered = false;
 		bool m_isAmbientOcclusionButtonHovered = false;
+		bool m_isHeightButtonHovered = false;
+		bool m_isOpacityButtonHovered = false;
+
 
 		int m_onFileDropInput_callback_id = -1;
 		void OnFileDropInput(int count,std::vector<std::string>& dropedFilePaths);

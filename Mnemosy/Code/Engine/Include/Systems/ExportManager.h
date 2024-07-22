@@ -30,14 +30,14 @@ namespace mnemosy::systems
 		
 		TextureExportInfo() = default;
 
-		TextureExportInfo(const char* _exportPath, unsigned int _width, unsigned int _height, graphics::TextureFormat _textureFormat)
+		TextureExportInfo(std::string _exportPath, unsigned int _width, unsigned int _height, graphics::TextureFormat _textureFormat)
 			: path{ _exportPath }
 			, width{_width}
 			, height{_height}
 			, textureFormat{_textureFormat}
 		{}
 
-		const char* path;
+		std::string path;
 		unsigned int width;
 		unsigned int height;
 		graphics::TextureFormat textureFormat;

@@ -29,6 +29,11 @@ vec4 Mode1_InvertRoughness(sampler2D roughnessMapSampler){
   return vec4(roughness,0.0f,0.0f,0.0f);
 }
 
+vec4 Mode2_OpacityFromAlbedoAlpha(sampler2D albedoSampler){
+
+  float opacity = texture(albedoSampler,uv).a;
+  return vec4(opacity,0.0f,0.0f,0.0f);
+}
 
 // Fragment Shader
 void main()
@@ -40,6 +45,9 @@ void main()
   }
   else if(_mode == 1){
     fragmentOutputColor = Mode1_InvertRoughness(_texture0);
+  }
+  else if(_mode == 2){
+    fragmentOutputColor = Mode2_OpacityFromAlbedoAlpha(_texture0);
   }
 
 

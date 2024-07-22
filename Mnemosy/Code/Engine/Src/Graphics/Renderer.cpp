@@ -178,9 +178,8 @@ namespace mnemosy::graphics
 	void Renderer::SetPbrShaderBrdfLutUniforms()
 	{
 		m_pPbrShader->Use();
-		MnemosyEngine::GetInstance().GetIblRenderer().BindBrdfLutTexture(9);
-		m_pPbrShader->SetUniformInt("_brdfLUT", 9);
-
+		MnemosyEngine::GetInstance().GetIblRenderer().BindBrdfLutTexture(10);
+		m_pPbrShader->SetUniformInt("_brdfLUT", 10);
 	}
 
 	void Renderer::SetPbrShaderLightUniforms(Light& light)
@@ -212,10 +211,12 @@ namespace mnemosy::graphics
 		
 		m_pPbrShader->Use();
 		
-		skybox.GetCubemap().BindIrradianceCubemap(7);
-		m_pPbrShader->SetUniformInt("_irradianceMap", 7);
-		skybox.GetCubemap().BindPrefilteredCubemap(8);
-		m_pPbrShader->SetUniformInt("_prefilterMap", 8);
+		skybox.GetCubemap().BindIrradianceCubemap(8);
+		m_pPbrShader->SetUniformInt("_irradianceMap", 8);
+
+		skybox.GetCubemap().BindPrefilteredCubemap(9);
+		m_pPbrShader->SetUniformInt("_prefilterMap", 9);
+		
 		m_pPbrShader->SetUniformFloat("_skyboxExposure", skybox.exposure);
 		m_pPbrShader->SetUniformFloat("_skyboxRotation", skybox.rotation);
 
@@ -304,6 +305,7 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
 		m_pPbrShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
 		m_pPbrShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+
 
 		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
 			glBindVertexArray(renderMesh.GetModelData().meshes[i].vertexArrayObject);
@@ -404,6 +406,9 @@ namespace mnemosy::graphics
 		m_pPbrShader->Use();
 		glm::vec3 cameraPosition = scene.GetCamera().transform.GetPosition();
 		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		m_pPbrShader->SetUniformInt("_pixelWidth", width);
+		m_pPbrShader->SetUniformInt("_pixelHeight", height);
+
 
 		scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
 
@@ -604,8 +609,6 @@ namespace mnemosy::graphics
 
 
 		// only check every couple of seconds
-
-
 		m_fileWatchTimeDelta += deltaSeconds;
 		if (m_fileWatchTimeDelta >= 2.0f) {
 

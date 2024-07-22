@@ -58,7 +58,7 @@ namespace mnemosy::systems
 			fs::path to = exportPath / fs::path(material.Name + "_albedo_sRGB" + fileExtention);
 			graphics::Texture& tex = material.GetAlbedoTexture();
 
-			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB8);
+			TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGBA8);
 			ExportGlTexture_PngOrTiff(tex.GetID(),info);
 
 			m_lastExportedFilePaths.push_back(to.generic_string());
@@ -69,7 +69,7 @@ namespace mnemosy::systems
 			fs::path to = exportPath / fs::path(material.Name + "_emissive_sRGB" + fileExtention);
 			graphics::Texture& tex = material.GetEmissiveTexture();
 
-			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB8);
+			TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB8);
 			ExportGlTexture_PngOrTiff(tex.GetID(), info);
 
 			m_lastExportedFilePaths.push_back(to.generic_string());
@@ -80,7 +80,7 @@ namespace mnemosy::systems
 				fs::path to = exportPath / fs::path(material.Name + "_normal_gl_raw" + fileExtention);
 				graphics::Texture& tex = material.GetNormalTexture();
 				
-				TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB16);
+				TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_RGB16);
 				ExportGlTexture_PngOrTiff(tex.GetID(), info);
 
 				m_lastExportedFilePaths.push_back(to.generic_string());
@@ -112,7 +112,7 @@ namespace mnemosy::systems
 				fs::path to = exportPath / fs::path(material.Name + "_roughness_raw" + fileExtention);
 				graphics::Texture& tex = material.GetRoughnessTexture();
 
-				TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+				TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
 				ExportGlTexture_PngOrTiff(tex.GetID(), info);
 
 
@@ -129,7 +129,7 @@ namespace mnemosy::systems
 			fs::path to = exportPath / fs::path(material.Name + "_metallic_raw" + fileExtention);
 			graphics::Texture& tex = material.GetMetallicTexture();
 
-			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+			TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
 			ExportGlTexture_PngOrTiff(tex.GetID(), info);
 
 			m_lastExportedFilePaths.push_back(to.generic_string());
@@ -138,16 +138,32 @@ namespace mnemosy::systems
 			fs::path to = exportPath / fs::path(material.Name + "_ambientOcclusion_raw" + fileExtention);
 			graphics::Texture& tex = material.GetAOTexture();
 			
-			TextureExportInfo info = TextureExportInfo(to.generic_string().c_str(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+			TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
 			ExportGlTexture_PngOrTiff(tex.GetID(), info);
 			
 			m_lastExportedFilePaths.push_back(to.generic_string());
 		}
 
-		// TODO: Add opacity and roughness here
 
+		if (material.isHeightAssigned()) {
+			fs::path to = exportPath / fs::path(material.Name + "_height_raw" + fileExtention);
+			graphics::Texture& tex = material.GetHeightTexture();
 
+			TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+			ExportGlTexture_PngOrTiff(tex.GetID(), info);
 
+			m_lastExportedFilePaths.push_back(to.generic_string());
+		}
+
+		if (material.isOpacityAssigned()) {
+			fs::path to = exportPath / fs::path(material.Name + "_opacity_raw" + fileExtention);
+			graphics::Texture& tex = material.GetOpacityTexture();
+
+			TextureExportInfo info = TextureExportInfo(to.generic_string(), tex.GetWidth(), tex.GetHeight(), graphics::MNSY_R16);
+			ExportGlTexture_PngOrTiff(tex.GetID(), info);
+
+			m_lastExportedFilePaths.push_back(to.generic_string());
+		}
 
 		return true;
 	}
@@ -194,8 +210,6 @@ namespace mnemosy::systems
 
 		unsigned int width = exportInfo.width;
 		unsigned int height = exportInfo.height;
-
-
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, glTextureId);
@@ -252,6 +266,7 @@ namespace mnemosy::systems
 
 			if (channels == 1) { // Tested and Works
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_SHORT, gl_texture_bytes);
+
 				img = cv::Mat(height, width, CV_16UC1, gl_texture_bytes);
 				exportFormatTxt = "R16";
 			}

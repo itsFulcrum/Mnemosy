@@ -12,7 +12,16 @@
 in vec2 uv;
 in vec3 position_WS;
 in vec3 normal_WS;
+//in vec3 cameraPositionWS;
+
 in mat3 tangentToWorldMatrix;
+in vec2 screenUV;
+in vec2 pixelSize; // width and height of the framebufffer
+
+
+in mat3 TBN;
+//in vec3 fragPos_TS;
+//in vec3 viewDir_TS;
 
 // Scene inputs
 uniform vec3 _lightPositionWS;
@@ -25,9 +34,9 @@ uniform vec3 _cameraPositionWS;
 uniform float _skyboxRotation;
 uniform float _skyboxExposure;
 
-uniform samplerCube _irradianceMap;
-uniform samplerCube _prefilterMap;
-uniform sampler2D _brdfLUT;
+uniform samplerCube _irradianceMap; // sampler 8
+uniform samplerCube _prefilterMap;	// sampler 9
+uniform sampler2D _brdfLUT; 				// sampler 10
 
 
 //PBR Value inputs
@@ -40,39 +49,110 @@ uniform vec2 _roughnessValue;
 uniform vec2 _metallicValue;
 uniform vec4 _emissionColorValue;
 uniform float _ambientOcculusionValue;
-uniform float _normalValue;
+uniform vec2 _normalValue; // x = _normalStrength y = indicate if normal is bound our not 0 = is bound, 1 = not bound
+uniform bool _heightAssigned; // if Height map is assigned
+uniform float _heightDepth;
+uniform vec2 _opacityValue; // x = opacityThreshold, y = indicates if thexture is bound 0 = is bound 1 = not Bound
 
-uniform float _normalStrength;
+// adsitional settings
 uniform float _emissionStrength;
+uniform bool _useEmissiveMapAsMask;
 
 //PBR Texture maps inputs
-uniform sampler2D _albedoMap;
-uniform sampler2D _normalMap;
-uniform sampler2D _roughnessMap;
-uniform sampler2D _metallicMap;
-uniform sampler2D _ambientOcculusionMap;
-uniform sampler2D _emissionMap;
+uniform sampler2D _albedoMap; // sampler  0
+uniform sampler2D _normalMap; // sampler 1
+uniform sampler2D _roughnessMap; // sampler 2
+uniform sampler2D _metallicMap; // sampler 3
+uniform sampler2D _ambientOcculusionMap; // sampler 4
+uniform sampler2D _emissionMap; // sampler 5
+uniform sampler2D _heightMap; // sampler 6
+uniform sampler2D _opacityMap; // sampler 7
 
 
 //outputs
 out vec4 fragmentOutputColor;
+
+void ApplyAlphaDiscard(float opacity,vec2 opacityValue,vec2 screenSpaceUV, vec2 framebufferSizeXY){
+
+	if(opacityValue.y > 0.0005)
+		return;
+
+	float threshold = opacityValue.x * 2.0f;
+	vec2 DitherCoordinate = screenSpaceUV  * (framebufferSizeXY);
+	float dither = get_Bayer(int(DitherCoordinate.x),int(DitherCoordinate.y));
+	float discardValue = step(dither*threshold,opacity);
+
+		// discard pixels
+	 if(discardValue <= 0.5f)
+	 	discard;
+}
+
+
+vec2 SteepParralaxUV(vec2 uvs){
+
+	float hightScale = _heightDepth * 0.01f;
+
+	// working in tangent space
+	vec3 viewPos_TS = TBN * _cameraPositionWS;
+	vec3 fragPos_TS = TBN * position_WS;
+	vec3 viewDir_TS = normalize(viewPos_TS - fragPos_TS);
+
+
+	float minLayers = 2.0f  * _heightDepth + 1.0f;
+	float maxLayers = 16.0f * _heightDepth;
+	float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir_TS), 0.0));
+
+	// the depth to sample for each layer
+	float layerDepth = 1.0 / numLayers;
+
+	float currentLayerDepth = 0.0f;
+
+	vec2 offset = viewDir_TS.xy * hightScale / numLayers;
+
+	// get initial values
+	vec2  currentUV = uvs;
+	float currentDepthMapValue = 1 - texture(_heightMap, currentUV).r;
+
+	while(currentLayerDepth < currentDepthMapValue)
+	{
+	 currentUV -= offset;
+	 currentDepthMapValue = 1- texture(_heightMap, currentUV).r;
+	 currentLayerDepth += layerDepth;
+	}
+
+	return currentUV;
+}
 
 
 void main()
 {
 	////// SURFACE DATA ============================================================================================= ////
 	//// ============================================================================================================ ////
+	//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
+
+		vec2 UVCorrds = uv;
+
+		if(_heightAssigned){
+			UVCorrds = SteepParralaxUV(uv);
+		}
+
+///// ===
+
+
+		float opacity = SampleOpacityMap(_opacityMap,UVCorrds);
+		ApplyAlphaDiscard(opacity,_opacityValue,screenUV,pixelSize);
+
 
 			SurfaceData surfaceData;
-			vec4 albedoAlpha = sampleAlbedoAlphaMap(_albedoMap,uv,_albedoColorValue);
+			vec4 albedoAlpha = sampleAlbedoAlphaMap(_albedoMap,UVCorrds,_albedoColorValue);
 
 			surfaceData.albedo = albedoAlpha.rgb;
-		  surfaceData.normal = sampleNormalMap(_normalMap,uv,_normalStrength,tangentToWorldMatrix,_normalValue);
-		  surfaceData.emissive = sampleEmissionMap(_emissionMap,uv,_emissionColorValue);
+		  surfaceData.normal = sampleNormalMap(_normalMap,UVCorrds,_normalValue.x,tangentToWorldMatrix,_normalValue.y);
+		  surfaceData.emissive = sampleEmissionMap(_emissionMap,UVCorrds,_emissionColorValue,_useEmissiveMapAsMask);
 		  surfaceData.emissionStrength = _emissionStrength;
-		  surfaceData.roughness = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);
-		  surfaceData.metallic = sampleMetallicMap(_metallicMap,uv,_metallicValue);
-		  surfaceData.ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,uv,_ambientOcculusionValue);
+		  surfaceData.roughness = sampleRoughnessMap(_roughnessMap,UVCorrds,_roughnessValue);
+		  surfaceData.metallic = sampleMetallicMap(_metallicMap,UVCorrds,_metallicValue);
+		  surfaceData.ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,UVCorrds,_ambientOcculusionValue);
 		  surfaceData.alpha = albedoAlpha.a;
 
 	////// LIGHTTING DATA =========================================================================================== ////
@@ -97,8 +177,9 @@ void main()
 
 	////// POST PROCCESSING ========================================================================================= ////
 	//// ============================================================================================================ ////
-			//fragmentOutputColor	= vec4(1.0,1.0,1.0,1.0);
+			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
+
 			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 			//float r = texture(_roughnessMap,uv).r;
 			//float r = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);

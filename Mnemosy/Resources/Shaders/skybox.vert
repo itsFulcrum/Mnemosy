@@ -11,9 +11,7 @@ out vec2 screenSpacePos;
 
 uniform mat4 _viewMatrix;
 uniform mat4 _projectionMatrix;
-
 uniform float _rotation;
-
 void main()
 {
 

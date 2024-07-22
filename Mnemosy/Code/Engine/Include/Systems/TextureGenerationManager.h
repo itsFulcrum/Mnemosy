@@ -28,11 +28,16 @@ namespace mnemosy::systems
 
 		void InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture);
 
+		void GenerateOpacityFromAlbedoAlpha(graphics::Material& material, const char* exportPath, bool exportTexture);
 
 		unsigned int GetRenderTextureID() { return m_renderTexture_ID; }
+
+
 	private:
 		bool IsInitialized();
 		void InitializeShaderTextureAndFBO(unsigned int width,unsigned int height);
+
+		void DrawQuad();
 
 		unsigned int m_VBO = 0;
 		unsigned int m_VAO = 0;

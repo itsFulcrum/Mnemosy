@@ -13,7 +13,6 @@ namespace mnemosy::graphics {
 		MNSY_TEXTURE_NORMAL				= 3,
 		MNSY_TEXTURE_AMBIENTOCCLUSION	= 4,
 		MNSY_TEXTURE_EMISSION			= 5,
-		// not implemented yet
 		MNSY_TEXTURE_HEIGHT				= 6,
 		MNSY_TEXTURE_OPACITY			= 7,
 		MNSY_TEXTURE_CUSTOMPACKED		= 8

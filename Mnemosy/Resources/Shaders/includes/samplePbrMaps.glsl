@@ -19,14 +19,26 @@ precision highp float;
     return vec4(albedoOut.rgb,albedoMap.a);
   }
 
-  vec3 sampleEmissionMap(sampler2D emissionSampler, vec2 uv,vec4 emissionColorValue)
+  vec3 sampleEmissionMap(sampler2D emissionSampler, vec2 uv,vec4 emissionColorValue, bool useEmissveAsMask)
   {
     vec4 emissionMap = texture(emissionSampler,uv);
-    //emissionMap = clamp(emissionMap,0.0,1.0);
-    emissionMap = sRGBToLinear (emissionMap);
-    //vec3 emissionSolidColor = vec3(0.0,0.0,0.0);
+
+
+    vec4 emissionLinear = sRGBToLinear (emissionMap);
+
     vec3 emissionSolidColor = sRGBToLinear(emissionColorValue).rgb;
-    vec3 emissionOut = lerp(emissionMap.rgb,emissionSolidColor.rgb,emissionColorValue.w);
+
+    vec3 emissionOut = vec3(0.0f,0.0f,0.0f);
+
+    if(useEmissveAsMask){
+
+      emissionOut = emissionLinear.rgb * emissionSolidColor;
+    }
+    else {
+      emissionOut = lerp(emissionLinear.rgb,emissionSolidColor.rgb,emissionColorValue.w);
+    }
+
+
     return emissionOut;
   }
 
@@ -75,6 +87,14 @@ precision highp float;
     // transform normal into the space we want. as of now lighting is done in worldspace
     normalMap =  normalize(spaceTransformMatrix * normalMap);
     return normalMap;
+  }
+
+  float SampleOpacityMap(sampler2D opacitySampler, vec2 uv)
+  {
+
+    float opacity = texture(opacitySampler,uv).r;
+
+    return opacity;
   }
 
 

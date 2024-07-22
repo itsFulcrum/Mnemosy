@@ -103,7 +103,7 @@ namespace mnemosy::systems
 			//exporter.ExportGlTexturePngOrTiff_Depricated(p, m_renderTexture_ID, width, height);
 
 
-			TextureExportInfo info = TextureExportInfo(exportPath, width, height, graphics::MNSY_RGB16);
+			TextureExportInfo info = TextureExportInfo(std::string(exportPath), width, height, graphics::MNSY_RGB16);
 			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
 
 
@@ -170,11 +170,67 @@ namespace mnemosy::systems
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
 			
-			TextureExportInfo info = TextureExportInfo(exportPath,width,height,graphics::MNSY_R16);
+			TextureExportInfo info = TextureExportInfo(std::string(exportPath),width,height,graphics::MNSY_R16);
 
 			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
 
 			//exporter.ExportGlTexturePngOrTiff_Depricated(p, m_renderTexture_ID, width, height);
+		}
+
+		// === END FRAME
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+	}
+
+	void TextureGenerationManager::GenerateOpacityFromAlbedoAlpha(graphics::Material& material, const char* exportPath, bool exportTexture)
+	{
+		MNEMOSY_ASSERT(material.isAlbedoAssigned(), "Check before calling this function if material has a albedo map");
+
+		unsigned int width  = material.GetAlbedoTexture().GetWidth();
+		unsigned int height = material.GetAlbedoTexture().GetHeight();
+
+		if (!IsInitialized()) {
+			InitializeShaderTextureAndFBO(1024, 1024);
+		}
+
+
+		// === START FRAME
+		glViewport(0, 0, width, height);
+		// Bind framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+		// Resize render texture
+		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// clear frame
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+
+		// Setup Shader
+		m_pTextureGenShader->Use();
+		m_pTextureGenShader->SetUniformInt("_mode", 2); // _mode 0 is for filpping normal y channel
+
+		material.GetAlbedoTexture().BindToLocation(0);
+		m_pTextureGenShader->SetUniformInt("_texture0", 0);
+
+		// DRAW CALL
+		DrawQuad();
+
+		// Export to png or tiff file
+		if (exportTexture) {
+
+			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
+
+
+			TextureExportInfo info = TextureExportInfo(std::string(exportPath), width, height, graphics::MNSY_R16);
+
+			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
 		}
 
 		// === END FRAME
@@ -196,9 +252,6 @@ namespace mnemosy::systems
 
 		if (m_FBO == 0)
 			return false;
-
-		//if (m_RBO == 0)
-		//	return false;
 
 		if (m_renderTexture_ID == 0)
 			return false;
@@ -260,6 +313,21 @@ namespace mnemosy::systems
 				
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+	}
+
+	void TextureGenerationManager::DrawQuad() {
+
+		// DRAW CALL
+		// render screen quad with shader into render texture
+		glBindVertexArray(m_VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertecies
+		glBindVertexArray(0);
+
+		// Generate MipMaps
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 	}
 

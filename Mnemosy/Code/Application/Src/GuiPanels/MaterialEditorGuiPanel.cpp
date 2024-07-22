@@ -99,12 +99,15 @@ namespace mnemosy::gui
 		
 
 		// Set Drop manager to display cursor if files can be dropped or not
-		if (m_isAbedoButtonHovered 
+		if ( m_isAbedoButtonHovered 
 			|| m_isNormalButtonHovered
 			|| m_isRoughnessButtonHovered 
 			|| m_isMetallicButtonHovered
 			|| m_isAmbientOcclusionButtonHovered
-			|| m_isEmissionButtonHovered ) {
+			|| m_isEmissionButtonHovered 
+			|| m_isHeightButtonHovered
+			|| m_isOpacityButtonHovered ) 
+		{
 			engineInstance.GetDropHandler().SetDropTargetActive(true);
 		}
 		else {
@@ -283,6 +286,8 @@ namespace mnemosy::gui
 
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
 				if (!filepath.empty()) {
+
+					activeMat.IsSmoothnessTexture = false;
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, filepath);
 					SaveMaterial();
 				}
@@ -449,8 +454,10 @@ namespace mnemosy::gui
 
 				// if format changed
 				if (activeMat.GetNormalFormatAsInt() != format_current) {
+
+
 					fs::path materialFolderPath = libDir / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
-					fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + "_normal.tif"));
+					fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + texture_fileSuffix_normal));
 										
 					// Generate inverted normal Texture.
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat,true);
@@ -625,8 +632,31 @@ namespace mnemosy::gui
 
 			}
 
+
+
+
+			if (!textureAssigned) 
+				ImGui::BeginDisabled();
+			
+			{
+			
+				bool useEmitAsMask = activeMat.UseEmissiveAsMask;
+				ImGui::Checkbox("Use Emissive As Mask", &useEmitAsMask);
+
+				if (useEmitAsMask != activeMat.UseEmissiveAsMask) {
+					activeMat.UseEmissiveAsMask = useEmitAsMask;
+					m_valuesChanged = true;
+			
+				}
+
+			}
+			if (!textureAssigned)
+				ImGui::EndDisabled();
+
+
+
 			// Disabled widgets if texture is assigned 
-			if (textureAssigned)
+			if (textureAssigned && !activeMat.UseEmissiveAsMask)
 				ImGui::BeginDisabled();
 			{
 				
@@ -636,8 +666,9 @@ namespace mnemosy::gui
 				}
 
 			}
-			if (textureAssigned)
+			if (textureAssigned && !activeMat.UseEmissiveAsMask)
 				ImGui::EndDisabled();
+
 
 			if (ImGui::DragFloat("Emission Strength", &activeMat.EmissionStrength, 0.01f, 0.0f, 10000.0f, "%.4f")) {
 				m_valuesChanged = true;
@@ -647,6 +678,163 @@ namespace mnemosy::gui
 
 		ImGui::Spacing();
 		ImGui::Spacing();
+
+		// Height Settings
+		{
+			ImGui::SeparatorText("Height ");
+			bool textureAssigned = activeMat.isHeightAssigned();
+
+
+			// Load Texture
+			if (ImGui::Button("Load Texture...##Height", buttonSizeLoad)) {
+
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
+
+				if (!filepath.empty()) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_HEIGHT, filepath);
+					SaveMaterial();
+				}
+			}
+
+			m_isHeightButtonHovered = ImGui::IsItemHovered();
+
+			if (textureAssigned) {
+				// Remove Texture
+				ImGui::SameLine();
+				if (ImGui::Button("Remove ##Height", buttonSizeDelete)) {
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_HEIGHT);
+					textureAssigned = false;
+					SaveMaterial();
+				}
+
+			}
+
+			if (textureAssigned) {
+
+				// render info text
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetHeightTexture().GetWidth()) + "x" + std::to_string(activeMat.GetHeightTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
+
+
+#ifdef mnemosy_gui_showDebugInfo
+				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::MNSY_TEXTURE_HEIGHT));
+				ImGui::Text(TextureID.c_str());
+#endif // mnemosy_gui_showDebugInfo
+
+			}
+
+
+
+
+
+			// Disabled widgets if texture is not assigned 
+			if (!textureAssigned)
+				ImGui::BeginDisabled();
+			{
+
+
+				if (ImGui::SliderFloat("Height Depth", &activeMat.HeightDepth, 0.0f, 10.0f, "%.4f")) {
+					m_valuesChanged = true;
+				}
+
+			}
+			if (!textureAssigned)
+				ImGui::EndDisabled();
+
+
+
+
+		}
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		// Opacity Settings
+		{
+
+			ImGui::SeparatorText("Opacity ");
+
+			bool textureAssigned = activeMat.isOpacityAssigned();
+
+
+			// Load Texture
+			if (ImGui::Button("Load Texture...##Opacity", buttonSizeLoad)) {
+
+				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readImageFormats);
+
+				if (!filepath.empty()) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_OPACITY, filepath);
+					SaveMaterial();
+				}
+			}
+
+			if (!textureAssigned && activeMat.isAlbedoAssigned()) {
+
+
+				if (ImGui::Button("Generate from albedo alpha",ImVec2(230, 0))) {
+
+
+					m_materialRegistry.GenereateOpacityFromAlbedoAlpha(activeMat);
+
+
+
+				}
+
+			}
+
+
+			m_isOpacityButtonHovered = ImGui::IsItemHovered();
+
+			if (textureAssigned) {
+				// Remove Texture
+				ImGui::SameLine();
+				if (ImGui::Button("Remove ##Opacity", buttonSizeDelete)) {
+					m_materialRegistry.DeleteTextureOfActiveMaterial(graphics::MNSY_TEXTURE_OPACITY);
+					textureAssigned = false;
+					SaveMaterial();
+				}
+
+			}
+
+			if (textureAssigned) {
+				// render info text
+				std::string resolution = "Resolution: " + std::to_string(activeMat.GetOpacityTexture().GetWidth()) + "x" + std::to_string(activeMat.GetOpacityTexture().GetHeight());
+				ImGui::Text(resolution.c_str());
+
+
+#ifdef mnemosy_gui_showDebugInfo
+				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::MNSY_TEXTURE_OPACITY));
+				ImGui::Text(TextureID.c_str());
+#endif // mnemosy_gui_showDebugInfo
+
+
+
+			}
+
+
+			// settings
+
+			// Disabled widgets if texture is assigned 
+			if (!textureAssigned)
+				ImGui::BeginDisabled();
+			{
+
+
+				if (ImGui::SliderFloat("Opacity Threshold", &activeMat.OpacityTreshhold, 0.0f, 1.0f, "%.4f")) {
+					m_valuesChanged = true;
+				}
+
+			}
+			if (!textureAssigned)
+				ImGui::EndDisabled();
+
+
+
+		}
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+
 
 		// General Settings
 		{
@@ -703,10 +891,6 @@ namespace mnemosy::gui
 			if (!firstFile.is_regular_file())
 				return;
 
-
-
-			
-
 			std::string extention = firstFile.path().extension().generic_string();
 			if (extention == ".png" || extention == ".tif" || extention == ".tiff" || extention == ".jpg" || extention == ".jpeg") {
 				//MNEMOSY_DEBUG("MaterialEditorGuiPanel::OnFileDropInput: FirstFile is Valid File. Filetype: {}",extention);
@@ -719,6 +903,7 @@ namespace mnemosy::gui
 				}
 				// roughness
 				else if (m_isRoughnessButtonHovered) {
+					
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, firstPath);
 				}
 				// normal
@@ -737,7 +922,14 @@ namespace mnemosy::gui
 				else if (m_isEmissionButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_EMISSION, firstPath);
 				}
-				// TODO: Add height an opacity
+				// height
+				else if (m_isHeightButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_HEIGHT, firstPath);
+				}
+				// opacity
+				else if (m_isOpacityButtonHovered) {
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_OPACITY, firstPath);
+				}
 
 
 				SaveMaterial();

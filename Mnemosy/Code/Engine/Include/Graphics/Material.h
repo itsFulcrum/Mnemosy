@@ -27,14 +27,18 @@ namespace mnemosy::graphics
 		glm::vec3 Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
 		glm::vec3 Emission = glm::vec3(0.0f, 0.0f, 0.0f);
 		float Roughness = 0.5f;
+		bool IsSmoothnessTexture = false;
 		float Metallic = 0.0f;
 		float EmissionStrength = 0.0f;
+
+		bool UseEmissiveAsMask = false;
+		float OpacityTreshhold = 0.5f;
+		float HeightDepth = 1.0f;
+
 		float NormalStrength = 1.0f; // not supported by shader at the moment
 		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
 
 		NormalMapFormat NormalTextureFormat;
-		bool IsSmoothnessTexture = false;
-
 
 
 		void setDefaults();
@@ -52,6 +56,8 @@ namespace mnemosy::graphics
 		bool isMetallicAssigned()	{ return m_pMetallicTexture; }
 		bool isEmissiveAssigned()	{ return m_pEmissiveTexture; }
 		bool isAoAssigned()			{ return m_pAmbientOcclusionTexture; }
+		bool isOpacityAssigned()	{ return m_pOpacityTexture; }
+		bool isHeightAssigned()		{ return m_pHeightTexture; }
 
 
 		// These DO NOT check if textures exist yet
@@ -61,7 +67,10 @@ namespace mnemosy::graphics
 		Texture& GetMetallicTexture()	{ return *m_pMetallicTexture; }
 		Texture& GetEmissiveTexture()	{ return *m_pEmissiveTexture; }
 		Texture& GetAOTexture()			{ return *m_pAmbientOcclusionTexture; }
-		
+		Texture& GetOpacityTexture()	{ return *m_pOpacityTexture; }
+		Texture& GetHeightTexture()		{ return *m_pHeightTexture; }
+
+
 
 		int GetNormalFormatAsInt() { return (int)NormalTextureFormat; }
 		unsigned int DebugGetTextureID(const PBRTextureType& pbrType);
@@ -74,6 +83,8 @@ namespace mnemosy::graphics
 		Texture* m_pMetallicTexture = nullptr;
 		Texture* m_pEmissiveTexture = nullptr;
 		Texture* m_pAmbientOcclusionTexture = nullptr;
+		Texture* m_pOpacityTexture = nullptr;
+		Texture* m_pHeightTexture = nullptr;
 		
 	};
 

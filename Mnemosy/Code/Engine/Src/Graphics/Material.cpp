@@ -46,20 +46,35 @@ namespace mnemosy::graphics
 			delete m_pAmbientOcclusionTexture;
 			m_pAmbientOcclusionTexture = nullptr;
 		}
+
+		if (m_pOpacityTexture) {
+			delete m_pOpacityTexture;
+			m_pOpacityTexture = nullptr;
+		}
+
+		if (m_pHeightTexture) {
+			delete m_pHeightTexture;
+			m_pHeightTexture = nullptr;
+		}
+
 		
 	}
 
-	void Material::setDefaults()
-	{
+	void Material::setDefaults() {
+
 		Name = "Mnemosy Default";
 		Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
 		Roughness = 0.5f;
+		IsSmoothnessTexture = false;
 		Metallic = 0.0f;
 		Emission = glm::vec3(0.0f, 0.0f, 0.0f);
 		EmissionStrength = 0.0f;
-		NormalStrength = 1.0f; // currently not supported by shader
+		UseEmissiveAsMask = false;
+		NormalStrength = 1.0f;
+		HeightDepth = 1.0f;
 		UVTiling = glm::vec2(1.0f, 1.0f);
 		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
+		OpacityTreshhold = 0.5f;
 	}
 
 	void Material::SetNormalMapFormat(const NormalMapFormat& format) {
@@ -67,181 +82,179 @@ namespace mnemosy::graphics
 		NormalTextureFormat = format;
 	}
 
-	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* texture) {
+	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* tex) {
 
-		if (pbrTextureType == MNSY_TEXTURE_ALBEDO)
-			m_pAlbedoTexture = texture;
+		MNEMOSY_ASSERT(pbrTextureType != MNSY_TEXTURE_CUSTOMPACKED, "Do not use this function to add custom packed textures");
 
-		else if (pbrTextureType == MNSY_TEXTURE_ROUGHNESS)
-			m_pRoughnessTexture = texture;
-		
-		else if (pbrTextureType == MNSY_TEXTURE_METALLIC)
-			m_pMetallicTexture = texture;
-		
-		else if (pbrTextureType == MNSY_TEXTURE_NORMAL)
-			m_pNormalTexture = texture;
-		
-		else if (pbrTextureType == MNSY_TEXTURE_AMBIENTOCCLUSION)
-			m_pAmbientOcclusionTexture = texture;
-		
-		else if (pbrTextureType == MNSY_TEXTURE_EMISSION)
-			m_pEmissiveTexture = texture;
+
+		switch (pbrTextureType)
+		{
+		case MNSY_TEXTURE_ALBEDO:
+
+			if (m_pAlbedoTexture) {
+				delete m_pAlbedoTexture;
+			}
+			m_pAlbedoTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_ROUGHNESS:
+
+			if (m_pRoughnessTexture) {
+				delete m_pRoughnessTexture;
+			}
+			m_pRoughnessTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_METALLIC:
+
+			if (m_pMetallicTexture) {
+				delete m_pMetallicTexture;
+			}
+			m_pMetallicTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_NORMAL:
+
+			if (m_pNormalTexture) {
+				delete m_pNormalTexture;
+			}
+			m_pNormalTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_AMBIENTOCCLUSION:
+
+			if (m_pAmbientOcclusionTexture) {
+				delete m_pAmbientOcclusionTexture;
+			}
+			m_pAmbientOcclusionTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_EMISSION:
+
+			if (m_pEmissiveTexture) {
+				delete m_pEmissiveTexture;
+			}
+			m_pEmissiveTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_HEIGHT:
+
+			if (m_pHeightTexture) {
+				delete m_pHeightTexture;
+			}
+			m_pHeightTexture = tex;
+
+			break;
+		case MNSY_TEXTURE_OPACITY:
+
+			if (m_pOpacityTexture) {
+				delete m_pOpacityTexture;
+			}
+			m_pOpacityTexture = tex;
+
+			break;
+
+		}
+
 	}
 
-	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath)
-	{
+	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath) {
 
-		if (pbrType == MNSY_TEXTURE_ALBEDO)
+		MNEMOSY_ASSERT(pbrType != MNSY_TEXTURE_CUSTOMPACKED, "Do not use this function to add custom packed textures");
+
+		Texture* tex = new Texture();
+		bool loadedSuccesfull = tex->generateFromFile(filePath.c_str(),true,true);
+
+		if (!loadedSuccesfull) {
+
+			tex->clear();
+			delete tex;
+			tex = nullptr;
+			return;
+		}
+
+		assignTexture(pbrType, tex);
+
+	}
+
+	void Material::removeTexture(const PBRTextureType& pbrTextureType) {
+		
+		switch (pbrTextureType)
 		{
-			
-			if(!m_pAlbedoTexture)
-				m_pAlbedoTexture = new Texture();
-			
-			bool loaded  = m_pAlbedoTexture->generateFromFile(filePath.c_str(), true,true);
-			
-			if (!loaded)
-			{
-				m_pAlbedoTexture->clear();
+		case MNSY_TEXTURE_ALBEDO:
+
+			if (m_pAlbedoTexture) {
 				delete m_pAlbedoTexture;
 				m_pAlbedoTexture = nullptr;
 			}
-			// probably better to handle it through an asset registry
-			// m_pAlbedoTexture = Engine::GetInstance()->GetAssetRegistry().LoadTextureGL(filePath);
-			return;
-		}
+			break;
+		case MNSY_TEXTURE_ROUGHNESS:
 
-		if (pbrType == MNSY_TEXTURE_ROUGHNESS)
-		{
-			if (!m_pRoughnessTexture)
-				m_pRoughnessTexture = new Texture();
-
-			bool loaded =  m_pRoughnessTexture->generateFromFile(filePath.c_str(), true, true);
-			
-			if (!loaded)
-			{
-				m_pRoughnessTexture->clear();
+			if (m_pRoughnessTexture) {
 				delete m_pRoughnessTexture;
 				m_pRoughnessTexture = nullptr;
 			}
+			IsSmoothnessTexture = false;
+			break;
+		case MNSY_TEXTURE_METALLIC:
 
-			
-			return;
-		}
-	
-		if (pbrType == MNSY_TEXTURE_METALLIC)
-		{
-			if (!m_pMetallicTexture)
-				m_pMetallicTexture = new Texture();
-
-			bool loaded = m_pMetallicTexture->generateFromFile(filePath.c_str(), true, true);
-
-			if (!loaded)
-			{
-				m_pMetallicTexture->clear();
+			if (m_pMetallicTexture) {
 				delete m_pMetallicTexture;
 				m_pMetallicTexture = nullptr;
-
 			}
+			break;
+		case MNSY_TEXTURE_NORMAL:
 
-			return;
-		}
-		if (pbrType == MNSY_TEXTURE_NORMAL)
-		{
-			if (!m_pNormalTexture)
-				m_pNormalTexture = new Texture();
-
-			bool loaded = m_pNormalTexture->generateFromFile(filePath.c_str(), true, true);
-			if (!loaded)
-			{
-				m_pNormalTexture->clear();
+			if (m_pNormalTexture) {
 				delete m_pNormalTexture;
 				m_pNormalTexture = nullptr;
 			}
-			
-			return;
-		}
-		if (pbrType == MNSY_TEXTURE_AMBIENTOCCLUSION)
-		{
-			if (!m_pAmbientOcclusionTexture)
-				m_pAmbientOcclusionTexture = new Texture();
+			SetNormalMapFormat(MNSY_NORMAL_FORMAT_OPENGl);
+			break;
+		case MNSY_TEXTURE_AMBIENTOCCLUSION:
 
-			bool loaded = m_pAmbientOcclusionTexture->generateFromFile(filePath.c_str(), true, true);
-			if (!loaded)
-			{
-				m_pAmbientOcclusionTexture->clear();
+			if (m_pAmbientOcclusionTexture) {
 				delete m_pAmbientOcclusionTexture;
 				m_pAmbientOcclusionTexture = nullptr;
 			}
-			return;
-		}
-		if (pbrType == MNSY_TEXTURE_EMISSION)
-		{
-			if (!m_pEmissiveTexture)
-				m_pEmissiveTexture = new Texture();
+			break;
+		case MNSY_TEXTURE_EMISSION:
 
-			bool loaded = m_pEmissiveTexture->generateFromFile(filePath.c_str(), true, true);
-			if (!loaded)
-			{
-				m_pEmissiveTexture->clear();
+			if (m_pEmissiveTexture) {
 				delete m_pEmissiveTexture;
 				m_pEmissiveTexture = nullptr;
-
 			}
-			return;
+			break;
+		case MNSY_TEXTURE_HEIGHT:
+
+			if (m_pHeightTexture) {
+				delete m_pHeightTexture;
+				m_pHeightTexture = nullptr;
+			}
+			break;
+		case MNSY_TEXTURE_OPACITY:
+
+			if (m_pOpacityTexture) {
+				delete m_pOpacityTexture;
+				m_pOpacityTexture = nullptr;
+			}
+			break;
 		}
+
 	}
 
-	void Material::removeTexture(const PBRTextureType& pbrTextureType)
-	{
-		if (pbrTextureType == MNSY_TEXTURE_ALBEDO)
-		{
-			delete m_pAlbedoTexture;
-			m_pAlbedoTexture = nullptr;
-		}
-		else if (pbrTextureType == MNSY_TEXTURE_ROUGHNESS)
-		{
-			delete m_pRoughnessTexture;
-			m_pRoughnessTexture = nullptr;
+	void Material::setMaterialUniforms(Shader& shader) {
 
-		}
-		else if (pbrTextureType == MNSY_TEXTURE_METALLIC)
-		{
-			delete m_pMetallicTexture;
-			m_pMetallicTexture = nullptr;
-		}
-		else if (pbrTextureType == MNSY_TEXTURE_NORMAL)
-		{
-			delete m_pNormalTexture;
-			m_pNormalTexture = nullptr;
-			SetNormalMapFormat(MNSY_NORMAL_FORMAT_OPENGl);
-		}
-		else if (pbrTextureType == MNSY_TEXTURE_AMBIENTOCCLUSION)
-		{
-			delete m_pAmbientOcclusionTexture;
-			m_pAmbientOcclusionTexture = nullptr;
-		}
-		else if (pbrTextureType == MNSY_TEXTURE_EMISSION)
-		{
-			delete m_pEmissiveTexture;
-			m_pEmissiveTexture = nullptr;
-		}
-	}
-
-	void Material::setMaterialUniforms(Shader& shader)
-	{
-		/*MNEMOSY_ASSERT(m_pPbrShader, "Material has no shader assigned");
-		if (!m_pPbrShader)
-			return;*/
 		
-		//shader.Use();
 		shader.Use();
 
 		// set value inputs
 
-		shader.SetUniformFloat("_normalStrength", NormalStrength); // currently not supported by shader
+		//shader.SetUniformFloat("_normalStrength", NormalStrength);
 		shader.SetUniformFloat("_emissionStrength", EmissionStrength);
 		shader.SetUniformFloat2("_uvTiling", UVTiling.x, UVTiling.y);
-
+		shader.SetUniformFloat("_heightDepth", HeightDepth);
+		
 		// for the solid non texture values im passing an extra parameters for each as the last one to specify how much of it will contribute between the texture and the solid non texture values
 		// esentially lerping between texture input and non texture input. the lerp value however is just binary 0 or 1 
 		// the result is that if any texture is not bound it will use the base non texture value but if it is bound the the texture will be used
@@ -263,11 +276,11 @@ namespace mnemosy::graphics
 		if (m_pNormalTexture)
 		{
 			m_pNormalTexture->BindToLocation(1);
-			shader.SetUniformFloat("_normalValue", 0.0f);
+			shader.SetUniformFloat2("_normalValue", NormalStrength,0.0f);
 		}
 		else
 		{
-			shader.SetUniformFloat("_normalValue", 1.0f);
+			shader.SetUniformFloat2("_normalValue", NormalStrength,1.0f);
 		}
 
 		if (m_pRoughnessTexture)
@@ -303,13 +316,32 @@ namespace mnemosy::graphics
 
 		if (m_pEmissiveTexture)
 		{
-			m_pEmissiveTexture->BindToLocation(6);
+			m_pEmissiveTexture->BindToLocation(5);
 			shader.SetUniformFloat4("_emissionColorValue", Emission.r, Emission.g, Emission.b,0.0f);
 		}
 		else
 		{
 			shader.SetUniformFloat4("_emissionColorValue", Emission.r, Emission.g, Emission.b, 1.0f);
 		}
+		shader.SetUniformBool("_useEmissiveMapAsMask", UseEmissiveAsMask);
+
+		if (m_pHeightTexture) {
+
+			m_pHeightTexture->BindToLocation(6);
+			shader.SetUniformBool("_heightAssigned", true);
+		}
+		else {
+			shader.SetUniformBool("_heightAssigned", false);
+		}
+
+		if (m_pOpacityTexture) {
+			m_pOpacityTexture->BindToLocation(7);
+			shader.SetUniformFloat2("_opacityValue",OpacityTreshhold , 0.0f);
+		}
+		else {
+			shader.SetUniformFloat2("_opacityValue", OpacityTreshhold ,1.0f);
+		}
+
 
 
 		shader.SetUniformInt("_albedoMap", 0);
@@ -317,7 +349,10 @@ namespace mnemosy::graphics
 		shader.SetUniformInt("_roughnessMap", 2);
 		shader.SetUniformInt("_metallicMap", 3);
 		shader.SetUniformInt("_ambientOcculusionMap", 4);
-		shader.SetUniformInt("_emissionMap", 6);
+		shader.SetUniformInt("_emissionMap", 5);
+		shader.SetUniformInt("_heightMap", 6);
+		shader.SetUniformInt("_opacityMap", 7);
+
 	}
 
 
@@ -354,6 +389,15 @@ namespace mnemosy::graphics
 			if(m_pEmissiveTexture)
 				return m_pEmissiveTexture->GetID();
 		}
+		else if (pbrTextureType == MNSY_TEXTURE_HEIGHT) {
+			if (m_pHeightTexture)
+				return m_pHeightTexture->GetID();
+		}
+		else if (pbrTextureType == MNSY_TEXTURE_OPACITY) {
+			if (m_pOpacityTexture)
+				return m_pOpacityTexture->GetID();
+		}
+
 		return 0;
 	}
 

@@ -40,14 +40,18 @@ namespace mnemosy::systems {
 #define jsonMatKey_emission_g		"emission_g"			// float - value 0 to 1
 #define jsonMatKey_emission_b		"emission_b"			// float - value 0 to 1
 #define jsonMatKey_emissionStrength	"emissionStrength"		// float - value 0 to 1
+#define jsonMatKey_useEmissiveAsMask "useEmissiveAsMask"	// bool  - whether to use emissive as a mask for the color value or not
+
 
 #define jsonMatKey_normalStrength	"normalStrength"		// float - value
 #define jsonMatKey_normalMapFormat	"normalMapFormat"		// int - format of the original provided normal map, 0 = OpenGl, 1 = DirectX
-
+#define jsonMatKey_heightDepth		"heightDepth"			// float - value 
 #define jsonMatKey_isSmoothness		"isSmoothness"			// bool - if texture was provided as smoothness texture
 
 #define jsonMatKey_uvScale_x		"uvScale_x"				// float - value
 #define jsonMatKey_uvScale_y		"uvScale_y"				// float - value
+#define jsonMatKey_opacityThreshold "opacityThreshold"		// float - value 0 to 1
+
 
 #define jsonMatKey_albedoAssigned	"albedoAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_roughAssigned	"roughAssigned"			// bool - if a texture has been assinged
@@ -55,7 +59,6 @@ namespace mnemosy::systems {
 #define jsonMatKey_emissionAssigned	"emissionAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_normalAssigned	"normalAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_aoAssigned		"aoAssigned"			// bool - if a texture has been assinged
-// not implemented yet
 #define jsonMatKey_heightAssigned	"heightAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_opacityAssigned	"opacityAssigned"		// bool - if a texture has been assinged
 
@@ -69,7 +72,6 @@ namespace mnemosy::systems {
 #define jsonMatKey_emissionPath		"emissionPath"			// std::string - filename of the texture in the same folder
 #define jsonMatKey_normalPath		"normalPath"			// std::string - filename of the texture in the same folder
 #define jsonMatKey_aoPath			"aoPath"				// std::string - filename of the texture in the same folder
-// not implemented yet
 #define jsonMatKey_heightPath		"hightPath"				// std::string - filename of the texture in the same folder
 #define jsonMatKey_opacityPath		"opacityPath"			// std::string - filename of the texture in the same folder
 
