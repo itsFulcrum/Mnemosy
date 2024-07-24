@@ -196,6 +196,7 @@ namespace mnemosy::systems {
 		matInfo.name = name;
 		matInfo.runtime_ID = m_runtimeMaterialIDCounter;
 		m_runtimeMaterialIDCounter++;
+		matInfo.selected = false;
 		matInfo.thumbnailTexure_ID = 0;
 		matInfo.thumbnailLoaded = false;
 

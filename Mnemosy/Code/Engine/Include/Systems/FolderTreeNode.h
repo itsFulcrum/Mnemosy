@@ -14,6 +14,7 @@ namespace mnemosy::systems
 		std::string name;
 		unsigned int runtime_ID; // only used for runtime identification.
 		bool thumbnailLoaded = false;
+		bool selected = false;
 		unsigned int thumbnailTexure_ID = 0;
 	};
 

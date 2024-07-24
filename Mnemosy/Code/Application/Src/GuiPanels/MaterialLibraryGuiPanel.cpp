@@ -276,34 +276,31 @@ namespace mnemosy::gui
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DragDropMaterialPayload")) {
 						//MNEMOSY_TRACE("Material dragdrop target");
 
+						m_matDragDropBegin = false;
+
 						IM_ASSERT(payload->DataSize == sizeof(MaterialDragDropPayload));
 						MaterialDragDropPayload materialPayload = *(const MaterialDragDropPayload*)payload->Data;
 
-						systems::FolderNode* sourceNode = m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(), materialPayload.nodeRuntimeID);
-					
-						std::string matName = sourceNode->subMaterials[materialPayload.nodeMaterialIndex].name;
+						// i think we can just pass a pointer no?
+						systems::FolderNode* sourceNode = materialPayload.sourceNode;// m_materialRegistry.GetFolderByID(m_materialRegistry.GetRootFolder(), materialPayload.nodeRuntimeID);
+
+						MNEMOSY_ASSERT(sourceNode != nullptr, "A nullpointer folder node should never be passed into a drag and drop payload");
+
+						//MNEMOSY_TRACE("Material Payload  matSize: {}, source node sub material: {}", materialPayload.matList.get()->materialListIndexes.size(), sourceNode->subMaterials.size());
 
 
-						MNEMOSY_TRACE("Material payload: SourceNode: {}, Material {}", sourceNode->name,matName);
-						if (sourceNode != nullptr) { // just in case. This should never happen.
+						// need to make a copy of node.submaterials because it changed during the loop
+						std::vector<systems::MaterialInfo> subMatsCopy = sourceNode->subMaterials;
 
+						for (unsigned int b = 0; b < materialPayload.matList->materialListIndexes.size(); b++) {
 
-							if (node->SubMaterialExistsAlready(matName)) {
-							
-								MNEMOSY_WARN("This Material already exists in the target folder");
-							}
-							else {
-
-								systems::MaterialInfo matInfoTemp = sourceNode->subMaterials[materialPayload.nodeMaterialIndex];
-								m_materialRegistry.MoveMaterial(sourceNode,node, matInfoTemp);
-							}
-
+							unsigned int index = materialPayload.matList->materialListIndexes[b];
+							//MNEMOSY_TRACE("Material index: {}", index);
+							systems::MaterialInfo matInfoTemp = subMatsCopy[index];
+							m_materialRegistry.MoveMaterial(sourceNode, node, matInfoTemp);
+						}
 						
-						}
-						else {
-							MNEMOSY_ERROR("Could not move material, because it didn't find the source node by its id. \nThis should not happen and is most likely a bug");
-						}
-
+						subMatsCopy.clear();
 					}
 
 
@@ -337,7 +334,7 @@ namespace mnemosy::gui
 		if (node->subMaterials.empty())
 			return;
 
-		for (int i = 0; i < node->subMaterials.size(); i++) {
+		for (size_t i = 0; i < node->subMaterials.size(); i++) {
 				
 #ifdef mnemosy_gui_showDebugInfo
 			std::string materialText = node->subMaterials[i].name + " -MatID: " + std::to_string(node->subMaterials[i].runtime_ID);
@@ -346,16 +343,79 @@ namespace mnemosy::gui
 #endif // !mnemosy_gui_showDebugInfo
 
 
-			bool matIsOpen = ImGui::TreeNodeEx(materialText.c_str(), m_materialTreeFlags);
+			//bool matIsOpen = ImGui::TreeNodeEx(materialText.c_str(), m_materialTreeFlags);
+			bool matIsOpen = true;
+
+
+			bool selected = ImGui::Selectable(materialText.c_str(), node->subMaterials[i].selected);
+
+
+			if (ImGui::IsItemClicked()) {
+			
+				// we need this here to reset it if user dragged but it didnt arrive
+				m_matDragDropBegin = false;
+			}
+
+			if (selected) {
+
+				if (!ImGui::GetIO().KeyCtrl) {
+					// clear selection 
+					for (size_t a = 0; a < node->subMaterials.size(); a++) {
+
+						node->subMaterials[a].selected = false;
+					}
+				}
+
+				node->subMaterials[i].selected = true;	
+
+			}
+
 
 			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
 
-				MaterialDragDropPayload materialPayload = MaterialDragDropPayload(node->runtime_ID, i);
-				//unsigned int sourceNodeID = node->runtime_ID;
-				ImGui::SetDragDropPayload("DragDropMaterialPayload", &materialPayload, sizeof(MaterialDragDropPayload));
+				if(!m_matDragDropBegin){
+					
+					m_matDragDropBegin = true;
+
+					// current mat will be selected
+					node->subMaterials[i].selected = true;
+
+
+					MaterialDragDropPayload matPayload = MaterialDragDropPayload();
+					matPayload.sourceNode = node;
+					matPayload.matList = std::make_shared<PointerList>();
+
+
+					for (unsigned int a = 0; a < node->subMaterials.size(); a++) {
+
+						if (node->subMaterials[a].selected) {
+					
+							matPayload.matList.get()->materialListIndexes.push_back(a);
+
+							//MNEMOSY_TRACE("PushBack index {}", matPayload.matList.get()->materialListIndexes.back());
+						}
+					}
+					
+					// store it temporarly so that the shared pointer doesn't go out of scope and persists
+					m_tempStoreMatPayload = matPayload;
+
+					ImGui::SetDragDropPayload("DragDropMaterialPayload", &matPayload, sizeof(MaterialDragDropPayload));
+
+				}
+
+				// old way with just one draggable material
+				//MaterialDragDropPayload materialPayload = MaterialDragDropPayload(node->runtime_ID, i);
+				//ImGui::SetDragDropPayload("DragDropMaterialPayload", &materialPayload, sizeof(MaterialDragDropPayload));MaterialDragDropPayload materialPayload = MaterialDragDropPayload(node->runtime_ID, i);
+
+				
 
 				ImGui::EndDragDropSource();
 			}
+
+
+
+
+
 
 			if (matIsOpen) {
 
@@ -386,8 +446,36 @@ namespace mnemosy::gui
 							
 							if (option == 0) { // delete
 								
-								DeleteMaterial(node, node->subMaterials[i], i);
-							}
+
+								std::vector<systems::MaterialInfo> subMatsCopy = node->subMaterials;
+
+								for (size_t a = 0; a < subMatsCopy.size(); a++) {
+
+
+									if (subMatsCopy[a].selected) {
+
+										int posInList = -1;
+										// find posiiton in the original list which is changing as we delete materials
+										int runtimeID = subMatsCopy[a].runtime_ID;
+										for (size_t b = 0; b < node->subMaterials.size(); b++) {
+
+											if (runtimeID == node->subMaterials[b].runtime_ID) {
+
+												posInList = b;
+											}
+
+										}
+
+										MNEMOSY_ASSERT(posInList > -1, "Should always find the correct list entry");
+
+										DeleteMaterial(node, subMatsCopy[a], posInList);
+
+									}
+
+								}
+
+								subMatsCopy.clear();
+							} 
 							
 							else if (option == 1) { // open in FileExplorer
 
@@ -404,7 +492,7 @@ namespace mnemosy::gui
 		
 
 
-				ImGui::TreePop();
+				//ImGui::TreePop();
 			}
 
 
