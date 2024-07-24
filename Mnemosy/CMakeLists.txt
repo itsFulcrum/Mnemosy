@@ -61,6 +61,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/cmake-Mnemosy_OpenCVO
 set(OpenCV_DIR "Code/Dependencies/openCV/opencvBuild/install/")
 find_package(OpenCV REQUIRED PATHS "Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/")
 
+
+
 # Copy debug/release dlls to respective executable directory
 configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
 configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
@@ -91,12 +93,12 @@ set(ALL_SOURCE_FILES ${ENGINE_SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 
 add_library(${ENGINE_PROJECT} ${ALL_SOURCE_FILES})
 target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
-
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
 
 add_executable(${APP_PROJECT} ${APP_SOURCE_FILES})
 target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
 target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Application)
-
+target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
 
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${APP_PROJECT})

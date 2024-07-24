@@ -1,15 +1,16 @@
 #include "Include/Graphics/Texture.h"
 #include "Include/Core/Log.h"
 
-#include "Include/Core/Log.h"
+
 #include "Include/Graphics/Image.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 
 #include <glad/glad.h>
-#include <opencv2/core.hpp>
+#include "opencv2/core.hpp"
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/utils/logger.hpp>
+
 
 #include <math.h>
 
@@ -156,6 +157,8 @@ namespace mnemosy::graphics
 		return true;
 	}
 
+
+
 	bool Texture::LoadFromKtx(const char* imagePath) {
 		clear();
 				
@@ -191,6 +194,141 @@ namespace mnemosy::graphics
 		return true;
 	}
 
+	void Texture::LoadIntoCVMat() {
+
+		if (m_path.empty()) {
+			MNEMOSY_ERROR("Texture::LoadIntoCVMat: no path set");
+			return;
+		}
+
+
+		m_cvMat = cv::imread(m_path.c_str(), cv::IMREAD_UNCHANGED);
+
+		if (m_cvMat.empty()) {
+
+			MNEMOSY_ERROR("Texture::LoadIntoCVMat: OpenCV Image read failed");
+			m_cvMat.release();
+			return;
+		}
+
+		cv::flip(m_cvMat, m_cvMat, 0);
+
+		matrixLoaded = true;
+	}
+
+	bool Texture::generateFromCVMat() {
+
+		if (m_cvMat.empty()) {
+			MNEMOSY_ERROR("Texture::generateFromCVMat:: Mat is empty");
+			m_cvMat.release();
+			m_ID = 0;
+			m_isInitialized = false;
+			return false;
+		}
+
+		m_channelsAmount = m_cvMat.channels();
+		m_width = m_cvMat.cols;
+		m_height = m_cvMat.rows;
+		int bitDepth = m_cvMat.depth();
+
+
+		// ensure byte alingment hopefully
+		int rest = m_cvMat.step1() % 2;
+
+		if (rest == 0) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		}
+		else if (rest == 1) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		}
+
+		MNEMOSY_DEBUG("Texture::gnerateFromCVMat: Widht: {} Height: {} Channels: {} Depth: {}, stepMod2: {}", m_width, m_height, m_channelsAmount, m_cvMat.depth(), rest);
+
+
+
+
+
+		glGenTextures(1, &m_ID);
+		glBindTexture(GL_TEXTURE_2D, m_ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		//depth 0 = 8bit unsigned byte, 2 0 16bit UNSIGNED SHORT // 4 not tested
+
+		//Loading with RGBA channels
+		if (m_channelsAmount == 4) {
+			cv::cvtColor(m_cvMat, m_cvMat, cv::COLOR_BGRA2RGBA);
+			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
+			// cv::pow requres input to be in 32 or 64 bit...
+
+			if (bitDepth == 0) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_cvMat.ptr());
+			}
+			else if (bitDepth == 2) {
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_SHORT, m_cvMat.ptr());
+			}
+			else if (bitDepth == 4) { // not tested
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_FLOAT, m_cvMat.ptr());
+			}
+		}
+		// load with RGB channels
+		else if (m_channelsAmount == 3) {
+
+			cv::cvtColor(m_cvMat,m_cvMat, cv::COLOR_BGR2RGB);
+			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
+			// cv::pow requres input to be in 32 or 64 bit...
+
+
+			if (bitDepth == 0) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_cvMat.ptr());
+			}
+			else if (bitDepth == 2) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_SHORT, m_cvMat.ptr());
+			}
+			else if (bitDepth == 4) { // not tested
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_FLOAT, m_cvMat.ptr());
+			}
+		}
+
+		else if (m_channelsAmount == 1) {
+
+			//cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
+
+			if (bitDepth == 0) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, m_cvMat.ptr());
+
+			}
+			else if (bitDepth == 2) { // not tested
+
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_SHORT, m_cvMat.ptr());
+			}
+			else if (bitDepth == 4) { // not tested
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_FLOAT, m_cvMat.ptr());
+			}
+		}
+
+		else if (m_channelsAmount == 2) {
+			//MNEMOSY_ERROR("Texture::generateFromFile: Loading Texures with only 2 or 1 channels is not supported at the moment \nFilepath: {}", imagePath);
+			//m_ID = 0;
+			m_isInitialized = false;
+			glDeleteTextures(1, &m_ID);
+			m_cvMat.release();
+			return false;
+		}
+		m_cvMat.release();
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		
+		m_isInitialized = true;
+
+		return true;
+	}
+
 
 	bool Texture::containsData() const {
 		return m_isInitialized;
@@ -204,6 +342,10 @@ namespace mnemosy::graphics
 			glDeleteTextures(1, &m_ID);
 			m_ID = 0;
 			m_isInitialized = false;
+			if (!m_cvMat.empty()) {
+				m_cvMat.release();
+			}
+
 		}
 	}
 

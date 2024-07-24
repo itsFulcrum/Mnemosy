@@ -55,7 +55,7 @@ namespace mnemosy::gui
 			ImGui::EndChild();
 
 
-
+			// Draw image buttn of active folder
 			ImGui::BeginChild("CurrentDirectory", ImVec2(0, 0), ImGuiChildFlags_Border );
 			{
 
@@ -109,7 +109,7 @@ namespace mnemosy::gui
 							if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i].runtime_ID); {
 								
 								fs::path matDir = fs::path(selectedNode->pathFromRoot) / fs::path(matName);
-								m_materialRegistry.LoadActiveMaterialFromFile(matDir,selectedNode->subMaterials[i], selectedNode);
+								m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(matDir,selectedNode->subMaterials[i], selectedNode);
 							}
 						}
 

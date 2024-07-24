@@ -22,6 +22,7 @@ namespace mnemosy::graphics {
 	enum PBRTextureType;
 	enum NormapMapFormat;
 	class Material;
+	class Texture;
 }
 
 namespace mnemosy::systems
@@ -97,6 +98,8 @@ namespace mnemosy::systems
 		void GenereateOpacityFromAlbedoAlpha(graphics::Material& activeMat);
 
 		void LoadActiveMaterialFromFile(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
+		void LoadActiveMaterialFromFile_Multithreaded(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
+
 		void SaveActiveMaterialToFile();
 		void SetDefaultMaterial();
 
@@ -131,6 +134,9 @@ namespace mnemosy::systems
 		void CreateNewMaterialDataFile(fs::path& folderPath,std::string& name);
 		void CreateDirectoryForNode(FolderNode* node);
 
+
+		void LoadTexture_internal();
+		
 	public:
 		FolderTree* m_folderTree = nullptr;
 		FolderNode* m_folderNodeOfActiveMaterial = nullptr;
