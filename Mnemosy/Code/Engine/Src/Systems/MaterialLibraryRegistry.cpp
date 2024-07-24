@@ -841,6 +841,33 @@ namespace mnemosy::systems
 
 	void MaterialLibraryRegistry::LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath) {
 		
+
+		// check if the filepath extention is a compatible file
+
+		fs::path checkPath = fs::path(filepath);
+
+		fs::directory_entry checkDir = fs::directory_entry(checkPath);
+
+		if (checkDir.exists() && checkDir.is_regular_file()) {
+
+
+			std::string fileExtention = checkPath.extension().generic_string();
+
+			
+			bool isValid = graphics::TextureDefinitions::IsImageFileExtentionValid(fileExtention);
+			if (!isValid) {
+				MNEMOSY_WARN("The image filetype {} is not supported.", fileExtention)
+					return;
+			}
+
+		}
+		else {
+			MNEMOSY_WARN("filepath is not a file or does not exist. path: {}",filepath);
+			return;
+		}
+
+
+
 		graphics::Texture* tex = new graphics::Texture();
 		bool success =  tex->generateFromFile(filepath.c_str(),true,true);		
 		

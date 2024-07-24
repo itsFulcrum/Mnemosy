@@ -3,6 +3,7 @@
 
 #include "string"
 #include "Include/Systems/JsonKeys.h"
+#include "Include/Core/Log.h"
 
 namespace mnemosy::graphics {
 
@@ -47,6 +48,7 @@ namespace mnemosy::graphics {
 		MNSY_RGBA32		= 12
 	};
 
+#define readable_textureFormats_DialogFilter "All Files\0 * .*\0 TIF (*.tif)\0*.tif\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0"
 
 #define texture_textureFileType ".tif"					// file type of textures stored on disk
 
@@ -155,6 +157,25 @@ namespace mnemosy::graphics {
 			}
 
 			return std::string();
+
+		}
+
+
+		static bool IsImageFileExtentionValid(std::string& extention) {
+
+			std::string validExtentions[5] = {".tif",".tiff",".png",".jpg",".jpeg"};
+
+
+			for (size_t i = 0; i < 5; i++) {
+
+				if (extention == validExtentions[i]) {
+
+					return true;
+				}
+
+			}
+
+			return false;
 
 		}
 

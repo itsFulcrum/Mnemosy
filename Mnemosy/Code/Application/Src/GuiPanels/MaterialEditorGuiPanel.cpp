@@ -212,7 +212,9 @@ namespace mnemosy::gui
 
 		ImGui::Spacing();
 		ImGui::Spacing();
-		const char* readImageFormats = "TIF (*.tif)\0*.tif\0 HDR (*.hdr)\0*.hdr\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0";
+		const char* readImageFormats = readable_textureFormats_DialogFilter;
+
+
 		ImVec2 buttonSizeLoad = ImVec2(120, 0);
 		ImVec2 buttonSizeDelete = ImVec2(80, 0);
 

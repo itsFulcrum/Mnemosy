@@ -214,6 +214,19 @@ namespace mnemosy::systems
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, glTextureId);
 
+
+		// row byte alingment for textures that have width not divisible by 4
+		int rest = width % 2;
+
+		if (rest == 0) {
+			glPixelStorei(GL_PACK_ALIGNMENT, 4);
+		}
+		else if (rest == 1) {
+			glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		}
+
+
+
 		cv::Mat img;
 
 		graphics::TextureFormat format = exportInfo.textureFormat;
@@ -223,7 +236,8 @@ namespace mnemosy::systems
 
 			unsigned int channels = (unsigned int)format;
 
-			char* gl_texture_bytes = (char*)malloc(sizeof(char) * width * height * channels);
+			unsigned char* gl_texture_bytes = (unsigned char*)malloc(sizeof(unsigned char) * width * height * channels);
+
 
 			if (channels == 1) { // Not Tested
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, gl_texture_bytes);
@@ -264,7 +278,11 @@ namespace mnemosy::systems
 			unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * channels);
 
 
+			//MNEMOSY_TRACE("Exporting... step: {}, rest {}", step, rest);
+
+
 			if (channels == 1) { // Tested and Works
+
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_SHORT, gl_texture_bytes);
 
 				img = cv::Mat(height, width, CV_16UC1, gl_texture_bytes);
@@ -272,6 +290,7 @@ namespace mnemosy::systems
 			}
 			else if (channels == 2) { // Not Tested
 
+				
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_UNSIGNED_SHORT, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_16UC2, gl_texture_bytes);
 
@@ -279,6 +298,7 @@ namespace mnemosy::systems
 			}
 			else if (channels == 3) { // Tested and works
 
+				
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_SHORT, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_16UC3, gl_texture_bytes);
 
@@ -286,6 +306,7 @@ namespace mnemosy::systems
 			}
 			else if (channels == 4) { // Not Tested
 
+				
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_SHORT, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_16UC4, gl_texture_bytes);
 				exportFormatTxt = "RGBA16";

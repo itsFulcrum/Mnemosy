@@ -17,7 +17,7 @@ namespace mnemosy::graphics
 {
 	Texture::Texture() {
 
-		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
 		//MNEMOSY_INFO("Texture object created")
 	}
 
@@ -29,6 +29,9 @@ namespace mnemosy::graphics
 	bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
 		clear();
 		
+
+		
+
 		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
 
 		if (pic.empty()) {
@@ -55,8 +58,23 @@ namespace mnemosy::graphics
 
 		}*/
 
-		MNEMOSY_DEBUG("Texture::gnerateFromFile: Loading image: {}\nWidht: {} Height: {} Channels: {} Depth: {}", imagePath, m_width, m_height, m_channelsAmount, pic.depth());
-					
+		// ensure byte alingment hopefully
+		int rest = pic.step1() % 2;
+
+		if (rest == 0) {
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		}
+		else if(rest == 1){
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		}
+
+		MNEMOSY_DEBUG("Texture::gnerateFromFile: Loading image: {}\nWidht: {} Height: {} Channels: {} Depth: {}, stepMod2: {}", imagePath, m_width, m_height, m_channelsAmount, pic.depth(), rest);
+
+
+
+
+
 		glGenTextures(1, &m_ID);
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
