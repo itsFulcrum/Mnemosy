@@ -26,19 +26,18 @@ namespace mnemosy::graphics
 		ModelData& GetModelData();
 
 	public:
+		glm::vec3 colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
+		glm::vec3 backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
+
 		float rotation = 0.0f;
 		float exposure = 0.0f;
-		glm::vec3 colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
-
-		glm::vec3 backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
 		float opacity = 0.0f;
 		float gradientOpacity = 1.0f;
-		int blurSteps = 0;
 		float blurRadius = 0.0f;
+		int blurSteps = 0;
 
 	private:
-		//ModelData* m_pModelData = nullptr;
-		unsigned int m_modelData_id;
+		uint16_t m_modelData_id;
 
 
 		Cubemap* m_pCubemap = nullptr;

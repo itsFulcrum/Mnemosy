@@ -163,7 +163,7 @@ namespace mnemosy::graphics
 		MNEMOSY_ASSERT(pbrType != MNSY_TEXTURE_CUSTOMPACKED, "Do not use this function to add custom packed textures");
 
 		Texture* tex = new Texture();
-		bool loadedSuccesfull = tex->generateFromFile(filePath.c_str(),true,true);
+		bool loadedSuccesfull = tex->GenerateFromFile(filePath.c_str(),true,true);
 
 		if (!loadedSuccesfull) {
 

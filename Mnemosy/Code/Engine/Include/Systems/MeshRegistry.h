@@ -22,8 +22,8 @@ namespace mnemosy::systems {
 		~MeshRegistry();
 
 
-		unsigned int LoadMesh(const std::string& filepath);
-		graphics::ModelData& GetMeshByID(unsigned int id);
+		uint16_t LoadMesh(const std::string& filepath);
+		graphics::ModelData& GetMeshByID(uint16_t id);
 
 	private:
 		std::vector<graphics::ModelData*> m_loadedMeshes;

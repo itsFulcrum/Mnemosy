@@ -99,14 +99,13 @@ namespace mnemosy::gui
 						//MNEMOSY_DEBUG("Texture ID:{}", selectedNode->subMaterials[i].thumbnailTexure_ID);
 						
 
-						ImTextureID;
 						bool pressed = ImGui::ImageButton(reinterpret_cast<void*>(selectedNode->subMaterials[i].thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
 						
 
 						if (pressed) {
 
 							// check if its already the active material
-							if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i].runtime_ID); {
+							if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i].runtime_ID) {
 								
 								fs::path matDir = fs::path(selectedNode->pathFromRoot) / fs::path(matName);
 								m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(matDir,selectedNode->subMaterials[i], selectedNode);

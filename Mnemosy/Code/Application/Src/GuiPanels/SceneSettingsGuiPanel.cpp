@@ -335,8 +335,6 @@ namespace mnemosy::gui
 			ImGui::SliderFloat("Blur Radius", &skybox.blurRadius, 0.0f, 2.0f, "%.5f");
 			ImGui::SliderInt("Blur Steps", &skybox.blurSteps, 0, 50);
 
-
-
 			renderer.SetShaderSkyboxUniforms(skybox);
 
 			ImGui::TreePop();

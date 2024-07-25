@@ -22,18 +22,9 @@ namespace mnemosy::graphics
 		m_directionalLightMesh_id = meshRegistry.LoadMesh(directionalLightMesh.generic_string());
 		m_pointLightMesh_id = meshRegistry.LoadMesh(pointLightMesh.generic_string());
 
-
-		//ModelLoader modelLoader;
-		//m_pDirectionalLightMesh = modelLoader.LoadModelDataFromFile(directionalLightMesh.generic_string().c_str());
-		//m_pPointLightMesh = modelLoader.LoadModelDataFromFile(pointLightMesh.generic_string().c_str());
-
 	}
-	Light::~Light()
-	{
-		//delete m_pDirectionalLightMesh;
-		//m_pDirectionalLightMesh = nullptr;
-		//delete m_pPointLightMesh;
-		//m_pPointLightMesh = nullptr;
+	Light::~Light() {
+
 	}
 
 	const ModelData& Light::GetModelData() {
@@ -44,18 +35,9 @@ namespace mnemosy::graphics
 		if (m_type == LightType::DIRECTIONAL) {
 
 			return meshRegistry.GetMeshByID(m_directionalLightMesh_id);
-
-			//return *m_pDirectionalLightMesh;
-		}
-		else if (m_type == LightType::POINT) {
-			
-			return meshRegistry.GetMeshByID(m_pointLightMesh_id);
-			//return *m_pPointLightMesh;
-
 		}
 
-		return meshRegistry.GetMeshByID(m_directionalLightMesh_id);
-		//return *m_pDirectionalLightMesh;
+		return meshRegistry.GetMeshByID(m_pointLightMesh_id);
 	}
 
 	const LightType& Light::GetLightType()

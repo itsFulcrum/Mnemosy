@@ -25,7 +25,6 @@ namespace mnemosy::graphics
 		m_brdfLutTexture_isGenerated = false;
 
 		LoadBrdfLutTexture();
-		//InitializeMeshAndShader();
 	}
 
 	ImageBasedLightingRenderer::~ImageBasedLightingRenderer() {
@@ -325,7 +324,6 @@ namespace mnemosy::graphics
 			brdfLut.LoadBrdfKTX(pathToFileString.c_str(), m_brdfLutTextureID);
 			
 			m_brdfLutTexture_isGenerated = true;
-			MNEMOSY_DEBUG("Loaded BRDF-Lut texture");
 			return;
 		}
 		else // !fileExists 

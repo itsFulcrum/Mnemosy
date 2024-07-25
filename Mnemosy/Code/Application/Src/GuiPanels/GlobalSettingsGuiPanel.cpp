@@ -165,9 +165,9 @@ namespace mnemosy::gui
 			core::Clock& clock = engine.GetClock();
 
 			const char* MSAA_Settings[5] = { "OFF","2X","4X","8X","16X"}; // they need to be ordered the same as in renderer MSAAsamples Enum
-			int previewMSAA_Current = renderer.GetMSAA();
+			int previewMSAA_Current = renderer.GetMSAAEnumAsInt();
 			ImGui::Combo("MSAA", &previewMSAA_Current, MSAA_Settings, IM_ARRAYSIZE(MSAA_Settings));
-			if (previewMSAA_Current != renderer.GetMSAA())
+			if (previewMSAA_Current != renderer.GetMSAAEnumAsInt())
 			{
 				renderer.SetMSAASamples((graphics::MSAAsamples)previewMSAA_Current);
 			}

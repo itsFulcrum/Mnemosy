@@ -83,7 +83,7 @@ namespace mnemosy
 		
 
 		m_pWindow = new core::Window(WindowTitle);
-		//MNEMOSY_TRACE("Window Initialized");
+		MNEMOSY_DEBUG("Window created");
 		
 		// subsystems
 		// Mnemosy::core
@@ -113,28 +113,17 @@ namespace mnemosy
 
 
 		// menmosy::graphcs
-		//double ibl_timeBegin = glfwGetTime();
-		MNEMOSY_INFO("Initializing ibl-Renderer");
+		MNEMOSY_DEBUG("Initializing Renderer");
 		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
-		//double ibl_timeEnd = glfwGetTime();
-		//MNEMOSY_TRACE("ibl_Renderer Initialdized in {} Seconds", (ibl_timeEnd - ibl_timeBegin));
-		
-
-		//double ren_timeBegin = glfwGetTime();
-		MNEMOSY_INFO("Initializing Renderer");
 		m_pRenderer = std::make_unique<graphics::Renderer>();
-		//double ren_timeEnd = glfwGetTime();
-		//MNEMOSY_TRACE("Renderer Initialdized in {} Seconds", (ren_timeEnd - ren_timeBegin));
-		//MNEMOSY_TRACE("Renderer Initialized");
 
-		//double timeSceneStart = glfwGetTime();
-		MNEMOSY_INFO("Loading main Scene");
+
+
+		MNEMOSY_DEBUG("Loading Scenes");
 		m_pScene = std::make_unique<graphics::Scene>();
-		//double timeSceneEnd = glfwGetTime();
-		MNEMOSY_INFO("Loading thumbnail Scene");
+		//MNEMOSY_DEBUG("Loading thumbnail scene");
 		m_pThumbnailScene = std::make_unique<graphics::ThumbnailScene>();
 
-		//MNEMOSY_TRACE("Scene Initialized {} seconds ",timeSceneEnd-timeSceneStart);
 
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
 		//MNEMOSY_TRACE("UserInterface Initialized");
@@ -195,6 +184,8 @@ namespace mnemosy
 		m_pWindow->Shutdown();
 		delete m_pWindow;
 		m_pWindow = nullptr;
+
+		MNEMOSY_INFO("Mnemosy Application Closed");
 
 		delete m_sInstance;
 	}

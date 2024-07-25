@@ -59,8 +59,8 @@ namespace mnemosy::core
 	{
 		//m_pWindow = nullptr;
 
-		m_currentWindowWidth = SRC_WINDOW_WIDTH;
-		m_currentWindowHeight = SRC_WIDNOW_HEIGHT;
+		m_currentWindowWidth = MNEMOSY_SRC_WINDOW_WIDTH;
+		m_currentWindowHeight = MNEMOSY_SRC_WIDNOW_HEIGHT;
 
 		// setup window
 		glfwInit();
@@ -165,7 +165,6 @@ namespace mnemosy::core
 
 	void Window::Shutdown()
 	{
-		MNEMOSY_INFO("Application Closed");
 		glfwTerminate();
 
 	}

@@ -26,12 +26,8 @@ namespace mnemosy::gui
 	};
 
 	struct MaterialDragDropPayload {
-		//unsigned int nodeRuntimeID;
-		//unsigned int nodeMaterialIndex;
-		
 		systems::FolderNode* sourceNode = nullptr;
 		std::shared_ptr<PointerList> matList;
-
 	};
 
 
@@ -77,8 +73,8 @@ namespace mnemosy::gui
 		std::string m_renameMaterialText = "";
 		std::string m_renameFolderText = "";
 		
-		bool m_setFolderOpenNextFrame = false;
 		unsigned int m_folderIdToOpenNextFrame = 0;
+		bool m_setFolderOpenNextFrame = false;
 
 		bool showDeleteHierarchyModel = false;
 		bool m_matDragDropBegin = false;

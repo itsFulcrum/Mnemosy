@@ -4,7 +4,7 @@
 
 // vertex Data
 layout (location=0) in vec3 aPos;
-layout (location=4) in vec3 aColor;
+//layout (location=4) in vec3 aColor;
 
 // constants
 float gizmoScale = 1.0f;
@@ -31,5 +31,5 @@ void main()
   position.w = 1;
 
 	gl_Position = position;
-	color = aColor;
+	color = vec3(1.0f,1.0f,1.0f);
 }

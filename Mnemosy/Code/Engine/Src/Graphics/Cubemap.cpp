@@ -24,6 +24,8 @@ namespace mnemosy::graphics
 			glDeleteTextures(1,&m_irradianceMapID);
 		if(m_prefilterMap_isGenerated)
 			glDeleteTextures(1,&m_prefilterMapID);
+
+		GLuint;
 	}
 
 	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name,const unsigned int colorCubemapResolution,const bool savePermanently) {
@@ -195,7 +197,7 @@ namespace mnemosy::graphics
 
 // private
 
-	void Cubemap::equirectangularToCubemap(unsigned int resolution) {
+	void Cubemap::equirectangularToCubemap(uint16_t resolution) {
 		
 		if (m_colorCubemap_isGenerated) {
 			glDeleteTextures(1, &m_colorCubemapID);
@@ -227,7 +229,7 @@ namespace mnemosy::graphics
 		m_colorCubemap_isGenerated = true;
 	}
 
-	void Cubemap::equirectangularToIrradianceCubemap(unsigned int resolution) {
+	void Cubemap::equirectangularToIrradianceCubemap(uint16_t resolution) {
 		
 		if (m_irradianceMap_isGenerated) {
 			glDeleteTextures(1, &m_irradianceMapID);
@@ -259,7 +261,7 @@ namespace mnemosy::graphics
 
 	}
 
-	void Cubemap::equirectangularToPrefilteredCubemap(unsigned int resolution) {
+	void Cubemap::equirectangularToPrefilteredCubemap(uint16_t resolution) {
 
 		if (m_prefilterMap_isGenerated) {
 			glDeleteTextures(1, &m_prefilterMapID);

@@ -36,7 +36,10 @@ namespace mnemosy::graphics
 
 
 		m_mesh = std::make_unique<RenderMesh>(previewMesh.generic_string().c_str());
+
+#ifdef MNEMOSY_RENDER_GIZMO
 		m_gizmoMesh = std::make_unique<RenderMesh>(gizmoMesh.generic_string().c_str());
+#endif // MNEMOSY_RENDER_GIZMO
 		
 		//MNEMOSY_TRACE("Scene - light Init");
 		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("brown_photostudio.hdr");
@@ -152,11 +155,13 @@ namespace mnemosy::graphics
 		//m_mesh->GetMaterial().Roughness = 0.15f;
 
 
+#ifdef MNEMOSY_RENDER_GIZMO
 		// gizmo mesh setup
 		// gizmo Mesh could just be a modelData object directly. it doesnt need a material instance but it die
 		//m_gizmoMesh->transform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 		m_gizmoMesh->transform.SetRotationEulerAngles(glm::vec3(0.0f, 0.0f, 0.0f));
 		m_gizmoMesh->transform.SetScale(glm::vec3(0.03f, 0.03f, 0.03f));
+#endif // MNEMOSY_RENDER_GIZMO
 
 
 		// skybox setup

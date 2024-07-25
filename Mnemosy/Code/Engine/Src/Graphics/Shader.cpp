@@ -67,7 +67,7 @@ namespace mnemosy::graphics
 		bool compilationSuccessfull = CheckCompileErrors(ID, "PROGRAM");
 
 		if (compilationSuccessfull) {
-			MNEMOSY_DEBUG("Compiled Shader Program:\nVertexShader: {}\nFragmentShader: {}", vertexPath, fragmentPath);
+			MNEMOSY_DEBUG("Compiled Shader Program: \n - VertexShader: {} - FragmentShader: {}", vertexPath, fragmentPath);
 		}
 
 		glDeleteShader(vertexShader);

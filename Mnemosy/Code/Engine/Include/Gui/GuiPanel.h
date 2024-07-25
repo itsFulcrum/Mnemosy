@@ -38,8 +38,8 @@ namespace mnemosy::gui
 
 	protected:
 		bool showPanel = true;
-		const char* panelName = "";
 		GuiPanelType panelType = MNSY_GUI_PANEL_NONE;
+		const char* panelName = "";
 	};
 } // mnemosy::gui
 

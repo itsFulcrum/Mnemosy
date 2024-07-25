@@ -18,7 +18,7 @@ namespace mnemosy::graphics
 {
 	Texture::Texture() {
 
-		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
+		cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
 		//MNEMOSY_INFO("Texture object created")
 	}
 
@@ -27,7 +27,7 @@ namespace mnemosy::graphics
 		clear();
 	}
 
-	bool Texture::generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
+	bool Texture::GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
 		clear();
 		
 
@@ -36,7 +36,7 @@ namespace mnemosy::graphics
 		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
 
 		if (pic.empty()) {
-			MNEMOSY_ERROR("Texture::generateFromFile: OpenCV Image read failed");
+			MNEMOSY_ERROR("Texture::GenerateFromFile: OpenCV Image read failed");
 			pic.release();
 			m_ID = 0;
 			m_isInitialized = false;
@@ -69,8 +69,6 @@ namespace mnemosy::graphics
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		}
-
-		MNEMOSY_DEBUG("Texture::gnerateFromFile: Loading image: {}\nWidht: {} Height: {} Channels: {} Depth: {}, stepMod2: {}", imagePath, m_width, m_height, m_channelsAmount, pic.depth(), rest);
 
 
 
@@ -140,7 +138,7 @@ namespace mnemosy::graphics
 		}
 			
 		else if (m_channelsAmount == 2) {
-			MNEMOSY_ERROR("Texture::generateFromFile: Loading Texures with only 2 or 1 channels is not supported at the moment \nFilepath: {}", imagePath);
+			MNEMOSY_ERROR("Texture: Loading Texures with only 2 or 1 channels is not supported at the moment \nFilepath: {}", imagePath);
 			//m_ID = 0;
 			m_isInitialized = false;
 			glDeleteTextures(1,&m_ID);
@@ -152,8 +150,10 @@ namespace mnemosy::graphics
 		if (generateMipmaps) {
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
-		m_isInitialized = true;
 
+
+		m_isInitialized = true;
+		MNEMOSY_DEBUG("Loaded Texture from file: {} - {}x{} Channels: {}", imagePath, m_width, m_height, m_channelsAmount);
 		return true;
 	}
 
@@ -194,33 +194,35 @@ namespace mnemosy::graphics
 		return true;
 	}
 
-	void Texture::LoadIntoCVMat() {
+	void Texture::LoadIntoCVMat(std::string path) {
 
-		if (m_path.empty()) {
+		if (path.empty()) {
 			MNEMOSY_ERROR("Texture::LoadIntoCVMat: no path set");
+			m_matrixLoaded = false;
 			return;
 		}
 
 
-		m_cvMat = cv::imread(m_path.c_str(), cv::IMREAD_UNCHANGED);
+		m_cvMat = cv::imread(path.c_str(), cv::IMREAD_UNCHANGED);
 
 		if (m_cvMat.empty()) {
 
 			MNEMOSY_ERROR("Texture::LoadIntoCVMat: OpenCV Image read failed");
 			m_cvMat.release();
+			m_matrixLoaded = false;
 			return;
 		}
 
 		cv::flip(m_cvMat, m_cvMat, 0);
 
-		matrixLoaded = true;
+		m_matrixLoaded = true;
+		return;
 	}
 
-	bool Texture::generateFromCVMat() {
+	bool Texture::GenerateFromCVMat() {
 
 		if (m_cvMat.empty()) {
 			MNEMOSY_ERROR("Texture::generateFromCVMat:: Mat is empty");
-			m_cvMat.release();
 			m_ID = 0;
 			m_isInitialized = false;
 			return false;
@@ -242,11 +244,6 @@ namespace mnemosy::graphics
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		}
-
-		MNEMOSY_DEBUG("Texture::gnerateFromCVMat: Widht: {} Height: {} Channels: {} Depth: {}, stepMod2: {}", m_width, m_height, m_channelsAmount, m_cvMat.depth(), rest);
-
-
-
 
 
 		glGenTextures(1, &m_ID);
@@ -320,12 +317,13 @@ namespace mnemosy::graphics
 			m_cvMat.release();
 			return false;
 		}
+
 		m_cvMat.release();
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 		
 		m_isInitialized = true;
-
+		MNEMOSY_TRACE("Loaded Texture (from Matrix): {}x{}", m_width, m_height);
 		return true;
 	}
 
@@ -342,11 +340,16 @@ namespace mnemosy::graphics
 			glDeleteTextures(1, &m_ID);
 			m_ID = 0;
 			m_isInitialized = false;
+		}
+
+		if (m_matrixLoaded) {
+
 			if (!m_cvMat.empty()) {
 				m_cvMat.release();
 			}
 
 		}
+
 	}
 
 	void Texture::BindToLocation(const unsigned int activeTextureLocation) {

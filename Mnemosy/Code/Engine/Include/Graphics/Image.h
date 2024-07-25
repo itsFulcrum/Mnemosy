@@ -14,11 +14,11 @@ namespace mnemosy::graphics
 
 		void FreeData();
 
-		unsigned char* imageData = nullptr;
 		float* imageDataFLOAT = nullptr;
 		unsigned int width = 0;
 		unsigned int height = 0;
 		unsigned int channels = 0;
+		unsigned char* imageData = nullptr;
 	};
 } // mnemosy::graphics
 

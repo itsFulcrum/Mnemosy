@@ -1,5 +1,6 @@
 #ifndef GRAPHICS_RENDERER_H
 #define GRAPHICS_RENDERER_H
+#include "Include/MnemosyConfig.h"
 
 #include "Include/Core/Utils/FileWatcher.h"
 #include <glm/glm.hpp>
@@ -67,18 +68,18 @@ namespace mnemosy::graphics
 		unsigned int GetThumbnailRenderTextureID() { return m_thumb_blitTexture_ID; }
 
 
-		int GetMSAA() { return (int)m_msaaSamplesSettings; }
+		int GetMSAAEnumAsInt() { return (int)m_msaaSamplesSettings; }
 		void SetMSAASamples(const MSAAsamples& samples);
 		unsigned int GetThumbnailResolution() { return m_thumbnailResolution; };
 		
 		
 		void HotReloadPbrShader(float deltaSeconds);
 	private:
+
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
-
 		void CreateThumbnailFramebuffers();
-
+		int GetMSAAIntValue();
 
 		// for rendering with msaa enabled
 		unsigned int m_MSAA_FBO = 0;
@@ -103,14 +104,17 @@ namespace mnemosy::graphics
 		Shader* m_pPbrShader = nullptr;
 		Shader* m_pLightShader = nullptr;
 		Shader* m_pSkyboxShader = nullptr;
-		Shader* m_pGizmoShader = nullptr;
 
-		int m_msaaSamples = 4;
+#ifdef MNEMOSY_RENDER_GIZMO
+		Shader* m_pGizmoShader = nullptr;
+#endif // MNEMOSY_RENDER_GIZMO
+
+		//int m_msaaSamples = 4;
 		MSAAsamples m_msaaSamplesSettings = MSAA4X;
 		bool m_msaaOff = false;
 
 		// Thumbnails
-		unsigned int m_thumbnailResolution = 200;
+		uint16_t m_thumbnailResolution = 200;
 
 		unsigned int m_thumb_MSAA_FBO = 0;
 		unsigned int m_thumb_MSAA_RBO = 0;

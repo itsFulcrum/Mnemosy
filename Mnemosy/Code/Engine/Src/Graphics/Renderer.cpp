@@ -39,14 +39,19 @@ namespace mnemosy::graphics
 		std::string lightFrag	= shadersPath + "light.frag";
 		std::string skyboxVert	= shadersPath + "skybox.vert";
 		std::string skyboxFrag	= shadersPath + "skybox.frag";
-		std::string gizmoVert	= shadersPath + "gizmo.vert";
-		std::string gizmoFrag	= shadersPath + "gizmo.frag";
 
 
+		MNEMOSY_DEBUG("Compiling Shaders");
 		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
 		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
+
+#ifdef MNEMOSY_RENDER_GIZMO
+		std::string gizmoVert	= shadersPath + "gizmo.vert";
+		std::string gizmoFrag	= shadersPath + "gizmo.frag";
 		m_pGizmoShader	= new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
+#endif // MNEMOSY_RENDER_GIZMO
+
 
 		unsigned int w = engine.GetWindow().GetWindowWidth();
 		unsigned int h = engine.GetWindow().GetWindowHeight();
@@ -70,11 +75,6 @@ namespace mnemosy::graphics
 
 		}
 
-
-
-
-
-		//SetPbrShaderBrdfLutUniforms();
 	}
 	Renderer::~Renderer()
 	{
@@ -83,11 +83,14 @@ namespace mnemosy::graphics
 		delete m_pPbrShader;
 		delete m_pLightShader;
 		delete m_pSkyboxShader;
-		delete m_pGizmoShader;
 		m_pPbrShader = nullptr;
 		m_pLightShader = nullptr;
 		m_pSkyboxShader = nullptr;
+
+#ifdef MNEMOSY_RENDER_GIZMO
+		delete m_pGizmoShader;
 		m_pGizmoShader = nullptr;
+#endif // MNEMOSY_RENDER_GIZMO
 
 
 		// deleting MSAA Framebuffer stuff
@@ -153,10 +156,12 @@ namespace mnemosy::graphics
 		// Resizing multisampled (MSAA) framebuffers and textures
 		glBindFramebuffer(GL_FRAMEBUFFER, m_MSAA_FBO);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_renderTexture_ID);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaaSamples, GL_RGB, width, height, GL_TRUE);
+
+		int MSAA = GetMSAAIntValue();
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA, GL_RGB, width, height, GL_TRUE);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, m_MSAA_RBO);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER,m_msaaSamples, GL_DEPTH24_STENCIL8, width, height);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, MSAA, GL_DEPTH24_STENCIL8, width, height);
 
 		// resize intermediate blit framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER,m_blitFBO);
@@ -331,6 +336,9 @@ namespace mnemosy::graphics
 
 	void Renderer::RenderGizmo(RenderMesh& renderMesh)
 	{
+#ifdef MNEMOSY_RENDER_GIZMO
+
+
 		m_pGizmoShader->Use();
 		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
 		m_pGizmoShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
@@ -344,6 +352,7 @@ namespace mnemosy::graphics
 			glDrawElements(GL_TRIANGLES, (GLsizei)renderMesh.GetModelData().meshes[i].indecies.size(), GL_UNSIGNED_INT, 0);
 		}
 		glBindVertexArray(0);
+#endif // MNEMOSY_RENDER_GIZMO
 	}
 
 	void Renderer::RenderLightMesh(Light& light)
@@ -413,7 +422,10 @@ namespace mnemosy::graphics
 		scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
 
 		RenderMeshes(scene.GetMesh());
+
+#ifdef MNEMOSY_RENDER_GIZMO
 		RenderGizmo(scene.GetGizmoMesh());
+#endif // MNEMOSY_RENDER_GIZMO
 		RenderLightMesh(scene.GetLight());
 		RenderSkybox(scene.GetSkybox());
 
@@ -472,14 +484,6 @@ namespace mnemosy::graphics
 		if (samples == MSAAOFF) {
 			m_msaaOff = true;
 		}
-		else if (samples == MSAA2X) 
-			m_msaaSamples = 2;
-		else if (samples == MSAA4X)
-			m_msaaSamples = 4;
-		else if (samples == MSAA8X)
-			m_msaaSamples = 8;
-		else if (samples == MSAA16X)
-			m_msaaSamples = 16;
 
 		m_msaaSamplesSettings = samples;
 	}
@@ -493,7 +497,9 @@ namespace mnemosy::graphics
 		// Generate MSAA Render Texture
 		glGenTextures(1, &m_MSAA_renderTexture_ID);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_renderTexture_ID);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_msaaSamples , GL_RGB, width, height, GL_TRUE);
+
+		int MSAA = GetMSAAIntValue();
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, MSAA , GL_RGB, width, height, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 		// bind MSAA render texture to MSAA framebuffer
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_MSAA_renderTexture_ID, 0);
@@ -503,7 +509,7 @@ namespace mnemosy::graphics
 		// Generate MSAA Renderbuffer
 		glGenRenderbuffers(1, &m_MSAA_RBO);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_MSAA_RBO);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER,m_msaaSamples, GL_DEPTH24_STENCIL8, width, height);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER,MSAA, GL_DEPTH24_STENCIL8, width, height);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_MSAA_RBO);
 
@@ -603,6 +609,30 @@ namespace mnemosy::graphics
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	int Renderer::GetMSAAIntValue()
+	{
+		switch (m_msaaSamplesSettings) {
+
+		case (MSAAOFF):
+			return 0;
+			break;
+		case (MSAA2X):
+			return 2;
+			break;
+		case (MSAA4X):
+			return 4;
+			break;
+		case (MSAA8X):
+			return 8;
+			break;
+		case (MSAA16X):
+			return 16;
+			break;
+		}
+
+		return 4;
 	}
 
 	void Renderer::HotReloadPbrShader(float deltaSeconds) {

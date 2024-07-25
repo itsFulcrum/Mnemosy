@@ -22,27 +22,25 @@ namespace mnemosy::graphics
 
 
 	private:
-		void equirectangularToCubemap(unsigned int resolution);
-		void equirectangularToIrradianceCubemap(unsigned int resolution);
-		void equirectangularToPrefilteredCubemap(unsigned int resolution);
+		void equirectangularToCubemap(uint16_t resolution);
+		void equirectangularToIrradianceCubemap(uint16_t resolution);
+		void equirectangularToPrefilteredCubemap(uint16_t resolution);
 		void exportGeneratedCubemapsToKtx(const std::string& name,const unsigned int colorCubemapResolution);
 
 
 		unsigned int m_equirectangularTextureID = 0;
-		bool m_equirectangularTexture_isGenerated = false;
-
 		unsigned int m_colorCubemapID = 0;
-		bool m_colorCubemap_isGenerated = false;
-
 		unsigned int m_irradianceMapID = 0;
-		bool m_irradianceMap_isGenerated = false;
-
 		unsigned int m_prefilterMapID = 0;
+
+		const uint16_t m_irradianceMapResolution = 64;
+		const uint16_t m_prefilteredMapResolution = 512;
+
+
+		bool m_equirectangularTexture_isGenerated = false;
+		bool m_colorCubemap_isGenerated = false;
+		bool m_irradianceMap_isGenerated = false;
 		bool m_prefilterMap_isGenerated = false;
-
-		unsigned int m_irradianceMapResolution = 64;
-		unsigned int m_prefilteredMapResolution = 512;
-
 
 		bool m_exportCubemaps = false;
 		bool m_loadCubemapsFromFile = false;

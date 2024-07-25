@@ -25,8 +25,7 @@ namespace mnemosy::graphics
 	private:
 		void ClearModelData();
 		
-		//ModelData* m_modelData = nullptr;
-		unsigned int m_modelData_id;
+		uint16_t m_modelData_id;
 
 	};
 

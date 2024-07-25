@@ -370,7 +370,7 @@ namespace mnemosy::gui
 
 					// TODO:
 					// Load newly created texture as new roughness texture 
-					activeMat.GetRoughnessTexture().generateFromFile(roughnessPath.generic_string().c_str(), true, true);
+					activeMat.GetRoughnessTexture().GenerateFromFile(roughnessPath.generic_string().c_str(), true, true);
 
 					MNEMOSY_TRACE("Loaded New Roughness texture");
 
@@ -477,7 +477,7 @@ namespace mnemosy::gui
 
 					// Load newly created texture as new normal map 
 
-					activeMat.GetNormalTexture().generateFromFile(normalMapPath.generic_string().c_str(),true,true);
+					activeMat.GetNormalTexture().GenerateFromFile(normalMapPath.generic_string().c_str(),true,true);
 
 					SaveMaterial();
 

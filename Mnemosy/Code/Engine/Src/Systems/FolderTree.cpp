@@ -149,13 +149,6 @@ namespace mnemosy::systems {
 			newName = name + "_" + std::to_string(suffixNbr);
 		}
 
-		//RecursivCheckNames(m_rootNode, name, suffixNbr);
-
-		//std::string newName = name;
-		//if (suffixNbr > 0) {
-		//	newName = name + "_" + std::to_string(suffixNbr);
-		//}
-
 		return newName;
 	}
 

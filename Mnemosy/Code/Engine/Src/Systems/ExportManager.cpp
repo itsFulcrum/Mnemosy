@@ -25,9 +25,6 @@ namespace mnemosy::systems
 		, m_exportRoughnessAsSmoothness(false)
 	{
 
-		/*m_exportImageFormat = graphics::MNSY_PNG;
-		m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_OPENGl;*/
-
 		// shut up openCV logging
 		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
 	}
@@ -236,15 +233,16 @@ namespace mnemosy::systems
 
 			unsigned int channels = (unsigned int)format;
 
-			unsigned char* gl_texture_bytes = (unsigned char*)malloc(sizeof(unsigned char) * width * height * channels);
-
+			void* gl_texture_bytes = malloc(sizeof(uint8_t) * width * height * channels);
 
 			if (channels == 1) { // Not Tested
+
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_8UC1, gl_texture_bytes);
 				exportFormatTxt = "R8";
 			}
 			else if (channels == 2) { // Not Tested
+
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_UNSIGNED_BYTE, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_8UC2, gl_texture_bytes);
 				exportFormatTxt = "RG8";
@@ -255,31 +253,25 @@ namespace mnemosy::systems
 				img = cv::Mat(height, width, CV_8UC3, gl_texture_bytes);
 				exportFormatTxt = "RGB8";
 			}
-			else if (channels == 4) { // Not Tested
+			else if (channels == 4) { // Tested And Works
 
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_8UC4, gl_texture_bytes);
 				exportFormatTxt = "RGBA8";
 			}
 
+			free(gl_texture_bytes);
 
 			cv::flip(img, img, 0);
 			cv::imwrite(exportInfo.path, img);
 			img.release();
-
-			free(gl_texture_bytes);
-
 
 		}
 		else if (format == graphics::MNSY_R16 || format == graphics::MNSY_RG16 || format == graphics::MNSY_RGB16 || format == graphics::MNSY_RGBA16) {
 
 			unsigned int channels = (unsigned int)format - 4;
 
-			unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * channels);
-
-
-			//MNEMOSY_TRACE("Exporting... step: {}, rest {}", step, rest);
-
+			void* gl_texture_bytes = malloc(sizeof(uint16_t) * width * height * channels);
 
 			if (channels == 1) { // Tested and Works
 
@@ -290,10 +282,8 @@ namespace mnemosy::systems
 			}
 			else if (channels == 2) { // Not Tested
 
-				
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_RG, GL_UNSIGNED_SHORT, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_16UC2, gl_texture_bytes);
-
 				exportFormatTxt = "RG16";
 			}
 			else if (channels == 3) { // Tested and works
@@ -306,25 +296,23 @@ namespace mnemosy::systems
 			}
 			else if (channels == 4) { // Not Tested
 
-				
 				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_SHORT, gl_texture_bytes);
 				img = cv::Mat(height, width, CV_16UC4, gl_texture_bytes);
 				exportFormatTxt = "RGBA16";
 			}
+			
+			free(gl_texture_bytes);
 
 			cv::flip(img, img, 0);
 			cv::imwrite(exportInfo.path, img);
 			img.release();
-
-			free(gl_texture_bytes);
-
 		}
 		// Not Tested
 		else if (format == graphics::MNSY_R32 || format == graphics::MNSY_RG32 || format == graphics::MNSY_RGB32 || format == graphics::MNSY_RGBA32) {
 
 			unsigned int channels = (unsigned int)format - 8;
 
-			float* gl_texture_bytes = (float*)malloc(sizeof(float) * width * height * channels);
+			void* gl_texture_bytes = malloc(sizeof(uint32_t) * width * height * channels);
 
 
 			if (channels == 1) { // Not Tested
@@ -350,12 +338,12 @@ namespace mnemosy::systems
 				img = cv::Mat(height, width, CV_32FC4, gl_texture_bytes);
 				exportFormatTxt = "RGBA32";
 			}
+			
+			free(gl_texture_bytes);
 
 			cv::flip(img, img, 0);
 			cv::imwrite(exportInfo.path, img);
 			img.release();
-
-			free(gl_texture_bytes);
 		}
 
 

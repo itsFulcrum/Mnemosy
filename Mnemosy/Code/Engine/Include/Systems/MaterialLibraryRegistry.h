@@ -133,9 +133,6 @@ namespace mnemosy::systems
 		bool CheckDataFile(fs::directory_entry dataFile);
 		void CreateNewMaterialDataFile(fs::path& folderPath,std::string& name);
 		void CreateDirectoryForNode(FolderNode* node);
-
-
-		void LoadTexture_internal();
 		
 	public:
 		FolderTree* m_folderTree = nullptr;
@@ -144,15 +141,16 @@ namespace mnemosy::systems
 		core::FileDirectories& m_fileDirectories;
 		FolderNode* m_selectedFolderNode = nullptr;
 
-		// data file 
-		bool prettyPrintDataFile = false;
-		bool prettyPrintMaterialFiles = true;
 		fs::directory_entry m_userDirectoriesDataFile;
 		
 		// active Material;
 		fs::path m_activeMaterialDataFilePath;
 		unsigned int m_activeMaterialID = 0; // 0 means non selected // at startup and if selected gets deleted
 		bool m_userMaterialBound = false;
+		
+		// data file 
+		bool prettyPrintDataFile = false;
+		bool prettyPrintMaterialFiles = false;
 	};
 
 

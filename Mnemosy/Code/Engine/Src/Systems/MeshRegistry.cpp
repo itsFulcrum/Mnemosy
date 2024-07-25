@@ -40,7 +40,7 @@ namespace mnemosy::systems {
 		m_loadedMeshesPaths.clear();
 	}
 
-	unsigned int MeshRegistry::LoadMesh(const std::string& filepath) {
+	uint16_t MeshRegistry::LoadMesh(const std::string& filepath) {
 
 		// check if filepath exists already in the registry and return that mesh id if found
 
@@ -71,10 +71,9 @@ namespace mnemosy::systems {
 		return m_loadedMeshes.size() -1; // yes id is equal to list index
 	}
 
-	graphics::ModelData& MeshRegistry::GetMeshByID(unsigned int id) {
+	graphics::ModelData& MeshRegistry::GetMeshByID(uint16_t id) {
 
 		MNEMOSY_ASSERT(id < m_loadedMeshes.size(), "Mesh Id does not exists ");
-
 
 		return *m_loadedMeshes[id];
 	}

@@ -79,14 +79,14 @@ namespace mnemosy::graphics
 			vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
 			vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
 
-			if (mesh->mColors[0])
-			{
-				vertex.color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
-			}
-			else
-			{
-				vertex.color = glm::vec3(1.0f, 1.0f, 1.0f); // default white
-			}
+			//if (mesh->mColors[0])
+			//{
+			//	vertex.color = glm::vec3(mesh->mColors[0][i].r, mesh->mColors[0][i].g, mesh->mColors[0][i].b);
+			//}
+			//else
+			//{
+			//	vertex.color = glm::vec3(1.0f, 1.0f, 1.0f); // default white
+			//}
 
 			// checking if texCoords Exist
 			if (mesh->mTextureCoords[0])
@@ -156,12 +156,12 @@ namespace mnemosy::graphics
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, bitangent));
 
 		// color 
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, color));
+		/*glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, color));*/
 
 		// texCoord / uvs
-		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, texCoords));
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, texCoords));
 
 		glBindVertexArray(0);
 

@@ -25,14 +25,24 @@ namespace mnemosy::graphics
 		return glm::transpose(glm::inverse(transformMatrix));
 	}
 
+	const glm::vec3 Transform::GetRight()
+	{
+		return glm::normalize(glm::cross(m_forward, glm::vec3(0.0f, 1.0f, 0.0f)));
+	}
+
+	const glm::vec3 Transform::GetUp() {
+
+		return glm::normalize(glm::cross(GetRight(), m_forward));
+	}
+
 	void Transform::SetPosition(const glm::vec3& position) { m_position = position;}
 
 	void Transform::SetRotationEulerAngles(const glm::vec3& rotation)
 	{
-		m_rotation = rotation;
-		m_quatOrientation = glm::quat(glm::radians(m_rotation)); // convert from euler angles in radians to quaternion
+		m_rotationEuler = rotation;
+		m_quatOrientation = glm::quat(glm::radians(m_rotationEuler)); // convert from euler angles in radians to quaternion
 
-		RecalculateLocalVectors_Internal();
+		RecalculateForwardVector_Internal();
 	}
 
 	void Transform::SetScale(const glm::vec3& scale) {m_scale = scale;}
@@ -41,7 +51,7 @@ namespace mnemosy::graphics
 	{
 		m_quatOrientation = orientation;
 
-		RecalculateLocalVectors_Internal();
+		RecalculateForwardVector_Internal();
 	}
 
 	void Transform::RotateAroundAxis(const float angle, const glm::vec3& axis)
@@ -50,21 +60,16 @@ namespace mnemosy::graphics
 
 		m_quatOrientation =  glm::inverse(rotate) * m_quatOrientation;
 
-		RecalculateLocalVectors_Internal();
+		RecalculateForwardVector_Internal();
 	}
 
-	void Transform::RecalculateLocalVectors_Internal()
+	void Transform::RecalculateForwardVector_Internal()
 	{
 		glm::vec3 initialForward = glm::vec3(0.0, 0.0, -1.0);
-		glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-
-		glm::vec3 newForward = glm::vec3(0.0f, 0.0f, 0.0f);
-		newForward = - glm::rotate(m_quatOrientation, initialForward); // calculate forward from quaternion orientation by rotating the inital forward by the quaternion
-
+		// calculate forward from quaternion orientation by rotating the inital forward by the quaternion
+		glm::vec3 newForward = - glm::rotate(m_quatOrientation, initialForward); 
 		m_forward = glm::normalize(newForward);
-		m_right = glm::normalize(glm::cross(m_forward, worldUp));
-		m_up = glm::normalize(glm::cross(m_right,m_forward));
 	}
 
 } // !mnemosy::graphics

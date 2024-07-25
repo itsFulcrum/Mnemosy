@@ -14,9 +14,11 @@
 
 
 #define MNEMOSY_CONFIG_ENABLE_VSYNC
+//#define MNEMOSY_RENDER_GIZMO
 
-static unsigned int SRC_WINDOW_WIDTH = 1600;
-static unsigned int SRC_WIDNOW_HEIGHT = 1000;
+
+#define MNEMOSY_SRC_WINDOW_WIDTH  1600;
+#define MNEMOSY_SRC_WIDNOW_HEIGHT 1000;
 
 
 // all namespaces

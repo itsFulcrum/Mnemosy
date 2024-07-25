@@ -24,21 +24,22 @@ namespace mnemosy::graphics
 		~Material();
 
 		std::string Name = "Mnemosy Default";
+		
 		glm::vec3 Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
 		glm::vec3 Emission = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
+
 		float Roughness = 0.5f;
-		bool IsSmoothnessTexture = false;
 		float Metallic = 0.0f;
 		float EmissionStrength = 0.0f;
 
-		bool UseEmissiveAsMask = false;
 		float OpacityTreshhold = 0.5f;
 		float HeightDepth = 1.0f;
-
 		float NormalStrength = 1.0f; // not supported by shader at the moment
-		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
 
 		NormalMapFormat NormalTextureFormat;
+		bool IsSmoothnessTexture = false;
+		bool UseEmissiveAsMask = false;
 
 
 		void setDefaults();

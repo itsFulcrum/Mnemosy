@@ -1,6 +1,8 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "Include/MnemosyConfig.h"
+
 #include <memory>
 
 namespace mnemosy::graphics
@@ -36,7 +38,11 @@ namespace mnemosy::graphics
 		// getters
 		Camera& GetCamera()	{ return *m_camera; }
 		RenderMesh& GetMesh() { return *m_mesh; }
+
+#ifdef MNEMOSY_RENDER_GIZMO
 		RenderMesh& GetGizmoMesh() { return *m_gizmoMesh; }
+#endif // MNEMOSY_RENDER_GIZMO
+
 		Light& GetLight() {	return *m_light;}
 		Skybox& GetSkybox() { return *m_skybox; }
 		Material& GetActiveMaterial() { return *m_activeMaterial; }
@@ -51,16 +57,15 @@ namespace mnemosy::graphics
 		PreviewMesh m_currentPreviewMesh = PreviewMesh::Default;
 
 		std::unique_ptr<Camera> m_camera;
-		
-		
+				
 		std::unique_ptr<RenderMesh> m_mesh;
-		std::unique_ptr<RenderMesh> m_gizmoMesh;
 
+#ifdef MNEMOSY_RENDER_GIZMO
+		std::unique_ptr<RenderMesh> m_gizmoMesh;
+#endif // MNEMOSY_RENDER_GIZMO
 
 		std::unique_ptr<Light> m_light;
 		std::unique_ptr<Skybox> m_skybox;
-
-
 
 		Material* m_activeMaterial = nullptr;
 	};

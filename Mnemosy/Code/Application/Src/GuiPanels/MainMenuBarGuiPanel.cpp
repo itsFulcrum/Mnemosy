@@ -1,6 +1,7 @@
 #include "Include/GuiPanels/MainMenuBarGuiPanel.h"
 
 #include "Include/MnemosyEngine.h"
+#include "Include/Core/Log.h"
 #include "Include/Systems/UserSettingsManager.h"
 
 
@@ -59,7 +60,7 @@ namespace mnemosy::gui
 				engineInstance.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
 
 				engineInstance.GetUserSettingsManager().SaveToFile();
-			
+				MNEMOSY_INFO("Saved library");
 			}
 
 

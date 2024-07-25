@@ -14,11 +14,11 @@ namespace mnemosy::graphics
 		Texture();
 		~Texture();
 		// todo remove flip parameter
-		bool generateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps);
+		bool GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps);
 		bool LoadFromKtx(const char* imagePath);
 
-		void LoadIntoCVMat();
-		bool generateFromCVMat();
+		void LoadIntoCVMat(std::string path);
+		bool GenerateFromCVMat();
 
 
 
@@ -33,19 +33,21 @@ namespace mnemosy::graphics
 		unsigned int GetWidth() { return m_width; }
 		unsigned int GetHeight() { return m_height; }
 
-		std::string m_path;
-		bool matrixLoaded = false;
 	private:
+		cv::Mat m_cvMat;
+		bool m_matrixLoaded = false;
+
 		bool m_isInitialized = false;
+
 		unsigned int m_ID = 0;
-		int m_lastBoundLocation = 0;
+		unsigned int m_lastBoundLocation = 0;
 		
 		unsigned int m_channelsAmount = 0;
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
 
+
 		
-		cv::Mat m_cvMat;
 	};
 
 } // mnemosy::graphics

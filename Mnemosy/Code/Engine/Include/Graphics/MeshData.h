@@ -12,7 +12,7 @@ namespace mnemosy::graphics
 		glm::vec3 normal;
 		glm::vec3 tangent;
 		glm::vec3 bitangent;
-		glm::vec3 color;
+		//glm::vec3 color;
 		glm::vec2 texCoords;
 	};
 
