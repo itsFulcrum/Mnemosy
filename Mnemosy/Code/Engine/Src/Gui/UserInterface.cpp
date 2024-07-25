@@ -54,8 +54,8 @@ namespace mnemosy::gui
 			m_mainMenuBarGuiPanel->Draw();
 		}
 
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
+		//if (show_demo_window)
+		//	ImGui::ShowDemoWindow(&show_demo_window);
 
 		for (GuiPanel* panels : m_guiPanels)
 		{
