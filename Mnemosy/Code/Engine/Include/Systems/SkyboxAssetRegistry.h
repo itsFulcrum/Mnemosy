@@ -40,7 +40,7 @@ namespace mnemosy::systems
 		SkyboxAssetEntry GetEntry(const std::string& name);
 
 		std::vector<std::string>& GetVectorOfNames();
-
+		int GetPositionByName(const std::string name);
 
 
 	private:
@@ -57,7 +57,6 @@ namespace mnemosy::systems
 		std::vector<std::string> m_orderedEntryNames; // ordered just means that they should always be in the same order as the entries are in the m_skyboxAsstes;
 
 		bool prettyPrintDataFile = false;
-
 	};
 
 

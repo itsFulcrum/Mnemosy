@@ -43,22 +43,18 @@ namespace mnemosy::graphics
 		m_modelData_id = meshRegistry.LoadMesh(skyboxMesh.generic_string());
 
 
-		//ModelLoader modelLoader;
-		//m_pModelData = modelLoader.LoadModelDataFromFile(skyboxMesh.generic_string().c_str());
-
-
 		m_pCubemap = new Cubemap();
 
 		// if there is no skybox in the registry generate one 
 		bool noEntriesExist = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetVectorOfNames().empty();
 		if (noEntriesExist) 
 		{
-			m_pCubemap->LoadEquirectangularFromFile(imagePath, "BrownPhotostudio", resolution, true);
+			m_pCubemap->LoadEquirectangularFromFile(imagePath, "Market", resolution, true);
 			
 			return;
 		}
 
-		LoadPreviewSkybox("BrownPhotostudio");
+		LoadPreviewSkybox("Market");
 	}
 
 	Skybox::~Skybox()

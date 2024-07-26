@@ -130,6 +130,19 @@ namespace mnemosy::systems
 		return m_orderedEntryNames;
 	}
 
+	int SkyboxAssetRegistry::GetPositionByName(const std::string name) {
+
+		for (int i = 0; i < m_orderedEntryNames.size(); i++) {
+
+			if (name == m_orderedEntryNames[i]) {
+				return i;
+			}
+		}
+
+		return 0;
+	}
+
+
 	// Private Methods
 	void SkyboxAssetRegistry::LoadEntriesFromSavedData() {
 

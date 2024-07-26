@@ -25,6 +25,7 @@ namespace mnemosy::gui
 	{
 		panelName = "Scene Settings";
 		panelType = MNSY_GUI_PANEL_SCENE_SETTINGS;
+		m_currentSelectedSkybox = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetPositionByName("Market");
 	}
 
 	void SceneSettingsGuiPanel::Draw()
@@ -126,7 +127,7 @@ namespace mnemosy::gui
 			bool assetsInRegistry = !skyboxRegistry.GetVectorOfNames().empty();
 			if (assetsInRegistry) // if there are no assets in the internal vector this will crash
 			{
-				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[m_currentSelectedSkybox].c_str();// items[item_current_idx];
+				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[m_currentSelectedSkybox].c_str();
 				int previousSelected = m_currentSelectedSkybox;
 				if (ImGui::BeginCombo("Preview Skyboxes", combo_preview_value, 0))
 				{
@@ -290,10 +291,10 @@ namespace mnemosy::gui
 				{
 					// Dont allow to delete the last one
 					bool canRemove = true;
-					if (nameOfSkyboxToDelete == "BrownPhotostudio")
+					if (nameOfSkyboxToDelete == "Market")
 					{
 						canRemove = false;
-						MNEMOSY_ERROR("You are not allowed to remove the default skybox BrownPhotostudio")
+						MNEMOSY_ERROR("You are not allowed to remove the default skybox Market")
 					}
 
 					if (canRemove)

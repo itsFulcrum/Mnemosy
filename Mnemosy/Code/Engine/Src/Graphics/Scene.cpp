@@ -25,8 +25,6 @@ namespace mnemosy::graphics
 		core::FileDirectories& fd =  MnemosyEngine::GetInstance().GetFileDirectories();
 		
 		std::filesystem::path previewMesh = fd.GetPreviewMeshesPath() / std::filesystem::path("mnemosy_previewMesh_mnemosy.fbx");
-		std::filesystem::path gizmoMesh = fd.GetMeshesPath() / std::filesystem::path("mnemosy_gizmo_mesh.fbx");
-
 
 
 		m_camera = std::make_unique<Camera>(window.GetWindowWidth(), window.GetWindowHeight());
@@ -38,11 +36,12 @@ namespace mnemosy::graphics
 		m_mesh = std::make_unique<RenderMesh>(previewMesh.generic_string().c_str());
 
 #ifdef MNEMOSY_RENDER_GIZMO
+		std::filesystem::path gizmoMesh = fd.GetMeshesPath() / std::filesystem::path("mnemosy_gizmo_mesh.fbx");
 		m_gizmoMesh = std::make_unique<RenderMesh>(gizmoMesh.generic_string().c_str());
 #endif // MNEMOSY_RENDER_GIZMO
 		
 		//MNEMOSY_TRACE("Scene - light Init");
-		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("brown_photostudio.hdr");
+		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("market.hdr");
 		m_skybox = std::make_unique<Skybox>(standardSkybox.generic_string().c_str(), 1024);
 		//MNEMOSY_TRACE("Scene - Skybox Init");
 

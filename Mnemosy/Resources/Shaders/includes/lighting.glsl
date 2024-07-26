@@ -8,7 +8,7 @@
 
 //const float LIGHTING_PI = 3.14159265359;
 //const float DIALECTRIC_F0 = 0.04f;
-const float MAX_REFLECTION_LOD = 4.0;
+const float MAX_REFLECTION_LOD = 7.0;
 
 struct SurfaceData
 {
@@ -155,7 +155,7 @@ vec4 lightingPBR(SurfaceData sd, LightingData ld,samplerCube irradianceMap,sampl
 
   ////// OUTPUT =================================================================================================== ////
   //// ============================================================================================================ ////
-  
+
     return vec4(pbrShadedColor,sd.alpha);
 }
 

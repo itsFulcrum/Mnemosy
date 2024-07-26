@@ -128,11 +128,13 @@ vec3 prefilterConvolute(int face, vec2 texCoord)
 
 	float totalWeight = 0.0;
 	vec3 prefilteredColor = vec3(0.0);
+	float roughness = saturate(_roughness);
 
 	for (uint i = 0u; i < prefilter_SAMPLE_COUNT; ++i)
 	{
+
 		vec2 Xi = Hammersley(i, prefilter_SAMPLE_COUNT);
-		vec3 H = ImportanceSampleGGX(Xi,N,_roughness);
+		vec3 H = ImportanceSampleGGX(Xi,N,roughness);
 		vec3 L = normalize(2.0 * dot(V,H) * H -V);
 		float NdotL = max(dot(N,L),0.0);
 
@@ -140,12 +142,13 @@ vec3 prefilterConvolute(int face, vec2 texCoord)
 		float HdotV = max(dot(H,V),0.0);
 
 		// used to determine a mip level to sample the invironment texture with in cases where we get artifacts.
-		float D   = NormalDistributionGGX(NdotH, _roughness);
+		float D   = NormalDistributionGGX(NdotH, roughness);
 		float pdf = (D * NdotH / (4.0 * HdotV)) + 0.0001;
 		float saTexel  = 4.0 * PI / (6.0 * prefilter_RESOLUTION * prefilter_RESOLUTION);
 		float saSample = 1.0 / (float(prefilter_SAMPLE_COUNT) * pdf + 0.0001);
 
-		float mipLevel = _roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
+
+		float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
 
 
 		if(NdotL > 0.0)

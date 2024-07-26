@@ -22,7 +22,7 @@ namespace mnemosy::graphics
 		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 
 		std::filesystem::path cylinderMesh = fd.GetPreviewMeshesPath() / std::filesystem::path("mnemosy_previewMesh_cylinder.fbx");
-		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("brown_photostudio.hdr");
+		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("market.hdr");
 
 
 		//MNEMOSY_TRACE("Start Init Scene");
@@ -58,58 +58,6 @@ namespace mnemosy::graphics
 		//m_pRenderer->SetProjectionMatrix(m_scene->GetCamera().GetProjectionMatrix());
 	}
 
-
-
-	/*
-	void ThumbnailScene::SetPreviewMesh(const PreviewMesh& previewMeshType) {
-		if (previewMeshType == m_currentPreviewMesh)
-			return; // already set
-		
-
-		if (previewMeshType == PreviewMesh::Custom)
-		{
-			// makes button appear to load a custom mesh
-			m_currentPreviewMesh = PreviewMesh::Custom;
-			return;
-		}
-		if (previewMeshType == PreviewMesh::Default)
-		{
-			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_mnemosy.fbx");
-			m_currentPreviewMesh = PreviewMesh::Default;
-			return;
-		}
-		if (previewMeshType == PreviewMesh::Cube)
-		{
-			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cube.fbx");
-			m_currentPreviewMesh = PreviewMesh::Cube;
-			return;
-		}
-		if (previewMeshType == PreviewMesh::Plane)
-		{
-			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_plane.fbx");
-			m_currentPreviewMesh = PreviewMesh::Plane;
-			return;
-		}
-		if (previewMeshType == PreviewMesh::Sphere)
-		{
-			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_sphere.fbx");
-			m_currentPreviewMesh = PreviewMesh::Sphere;
-			return;
-		}
-		if (previewMeshType == PreviewMesh::Cylinder)
-		{
-			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cylinder.fbx");
-			m_currentPreviewMesh = PreviewMesh::Cylinder;
-			return;
-		}
-		if (previewMeshType == PreviewMesh::Suzanne)
-		{
-			m_mesh->LoadMesh("../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_suzanne.fbx");
-			m_currentPreviewMesh = PreviewMesh::Suzanne;
-			return;
-		}
-	}
-	*/
 
 	
 

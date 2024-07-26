@@ -125,13 +125,15 @@ namespace mnemosy::graphics
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
 
-		unsigned int maxMipLevels = 5;
+		unsigned int maxMipLevels = 8;
 		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 		{
 			unsigned int mipRes = int(resolution * std::pow(0.5, mip));
 			glViewport(0, 0, mipRes, mipRes);
 
-			float roughness = float(mip) / float(maxMipLevels - 1);
+			float roughness = float(mip) / float(maxMipLevels - 2); // 6
+
+
 			m_imagedBasedLightingShader->SetUniformFloat("_roughness", roughness);
 
 			for (int cubeFace = 0; cubeFace < 6; cubeFace++)
