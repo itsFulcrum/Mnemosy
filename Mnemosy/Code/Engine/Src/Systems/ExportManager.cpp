@@ -260,11 +260,12 @@ namespace mnemosy::systems
 				exportFormatTxt = "RGBA8";
 			}
 
-			free(gl_texture_bytes);
 
 			cv::flip(img, img, 0);
 			cv::imwrite(exportInfo.path, img);
 			img.release();
+
+			free(gl_texture_bytes);
 
 		}
 		else if (format == graphics::MNSY_R16 || format == graphics::MNSY_RG16 || format == graphics::MNSY_RGB16 || format == graphics::MNSY_RGBA16) {
@@ -301,11 +302,13 @@ namespace mnemosy::systems
 				exportFormatTxt = "RGBA16";
 			}
 			
-			free(gl_texture_bytes);
 
 			cv::flip(img, img, 0);
 			cv::imwrite(exportInfo.path, img);
 			img.release();
+
+
+			free(gl_texture_bytes);
 		}
 		// Not Tested
 		else if (format == graphics::MNSY_R32 || format == graphics::MNSY_RG32 || format == graphics::MNSY_RGB32 || format == graphics::MNSY_RGBA32) {
@@ -339,11 +342,12 @@ namespace mnemosy::systems
 				exportFormatTxt = "RGBA32";
 			}
 			
-			free(gl_texture_bytes);
 
 			cv::flip(img, img, 0);
 			cv::imwrite(exportInfo.path, img);
 			img.release();
+
+			free(gl_texture_bytes);
 		}
 
 

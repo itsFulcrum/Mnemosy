@@ -31,6 +31,19 @@ namespace mnemosy::graphics
 		MSAA16X
 	};
 
+	enum RenderModes
+	{
+		MNSY_RENDERMODE_SHADED				= 0,
+		MNSY_RENDERMODE_ALBEDO				= 1,
+		MNSY_RENDERMODE_ROUGHNESS			= 2,
+		MNSY_RENDERMODE_METALLIC			= 3,
+		MNSY_RENDERMODE_NORMAL				= 4,
+		MNSY_RENDERMODE_AMBIENTOCCLUSION	= 5,
+		MNSY_RENDERMODE_EMISSION			= 6,
+		MNSY_RENDERMODE_HEIGHT				= 7,
+		MNSY_RENDERMODE_OPACITY				= 8
+	};
+
 	class Renderer
 	{
 	public:
@@ -72,7 +85,9 @@ namespace mnemosy::graphics
 		void SetMSAASamples(const MSAAsamples& samples);
 		unsigned int GetThumbnailResolution() { return m_thumbnailResolution; };
 		
-		
+		int GetCurrentRenderModeInt() { return (int)m_renderMode; }
+		void SetRenderMode(RenderModes mode);
+
 		void HotReloadPbrShader(float deltaSeconds);
 	private:
 
@@ -102,6 +117,7 @@ namespace mnemosy::graphics
 
 
 		Shader* m_pPbrShader = nullptr;
+		Shader* m_pUnlitTexturesShader = nullptr;
 		Shader* m_pLightShader = nullptr;
 		Shader* m_pSkyboxShader = nullptr;
 
@@ -123,6 +139,7 @@ namespace mnemosy::graphics
 		unsigned int m_thumb_blitFBO = 0;
 		unsigned int m_thumb_blitTexture_ID = 0;
 		
+		RenderModes m_renderMode = MNSY_RENDERMODE_SHADED;
 
 	private:
 

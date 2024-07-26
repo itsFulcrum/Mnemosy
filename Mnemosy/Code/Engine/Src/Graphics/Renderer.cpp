@@ -33,6 +33,9 @@ namespace mnemosy::graphics
 		std::string shadersPath = shaders.generic_string() + "/";
 		std::string pbrVert		= shadersPath + "pbrVertex.vert";
 		std::string pbrFrag		= shadersPath + "pbrFragment.frag";
+		std::string unlitFrag		= shadersPath + "unlitTexView.frag";
+
+
 		//std::string pbrMesh		= shadersPath + "pbrVert_MESH.glsl";
 		//std::string pbrMeshFrag	= shadersPath + "pbrMeshFragment.frag";
 		std::string lightVert	= shadersPath + "light.vert";
@@ -43,6 +46,8 @@ namespace mnemosy::graphics
 
 		MNEMOSY_DEBUG("Compiling Shaders");
 		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
+		m_pUnlitTexturesShader = new Shader(pbrVert.c_str(), unlitFrag.c_str());
+
 		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
 
@@ -65,7 +70,7 @@ namespace mnemosy::graphics
 
 			m_shaderFileWatcher.RegisterFile(shaders /fs::path("pbrVertex.vert"));
 			m_shaderFileWatcher.RegisterFile(fs::path(pbrFrag));
-
+			m_shaderFileWatcher.RegisterFile(shaders / fs::path("unlitTexView.frag"));
 
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("colorFunctions.glsl"));
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("lighting.glsl"));
@@ -86,9 +91,11 @@ namespace mnemosy::graphics
 		delete m_pPbrShader;
 		delete m_pLightShader;
 		delete m_pSkyboxShader;
+		delete m_pUnlitTexturesShader;
 		m_pPbrShader = nullptr;
 		m_pLightShader = nullptr;
 		m_pSkyboxShader = nullptr;
+		m_pUnlitTexturesShader = nullptr;
 
 #ifdef MNEMOSY_RENDER_GIZMO
 		delete m_pGizmoShader;
@@ -308,11 +315,20 @@ namespace mnemosy::graphics
 
 		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
 
-		m_pPbrShader->Use();
-		m_pPbrShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
-		m_pPbrShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
-		m_pPbrShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
-		m_pPbrShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+		if (m_renderMode != MNSY_RENDERMODE_SHADED) {
+			m_pUnlitTexturesShader->Use();
+			m_pUnlitTexturesShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
+			m_pUnlitTexturesShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
+			m_pUnlitTexturesShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
+			m_pUnlitTexturesShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+		}
+		else {
+			m_pPbrShader->Use();
+			m_pPbrShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
+			m_pPbrShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
+			m_pPbrShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
+			m_pPbrShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+		}
 
 
 		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
@@ -415,14 +431,31 @@ namespace mnemosy::graphics
 
 		StartFrame(width, height);
 
-		m_pPbrShader->Use();
 		glm::vec3 cameraPosition = scene.GetCamera().transform.GetPosition();
-		m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-		m_pPbrShader->SetUniformInt("_pixelWidth", width);
-		m_pPbrShader->SetUniformInt("_pixelHeight", height);
+		
+		if (m_renderMode != MNSY_RENDERMODE_SHADED) {
+
+			m_pUnlitTexturesShader->Use();
+			m_pUnlitTexturesShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+			m_pUnlitTexturesShader->SetUniformInt("_pixelWidth", width);
+			m_pUnlitTexturesShader->SetUniformInt("_pixelHeight", height);
+			
+			m_pUnlitTexturesShader->SetUniformInt("_mode", (int)m_renderMode);
+
+			scene.GetActiveMaterial().setMaterialUniforms(*m_pUnlitTexturesShader);
+		}
+		else {
+			m_pPbrShader->Use();
+			m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+			m_pPbrShader->SetUniformInt("_pixelWidth", width);
+			m_pPbrShader->SetUniformInt("_pixelHeight", height);
+			
+			
+			scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
+		}
 
 
-		scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
+
 
 		RenderMeshes(scene.GetMesh());
 
@@ -440,6 +473,10 @@ namespace mnemosy::graphics
 		unsigned int res = m_thumbnailResolution;
 		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
 		
+		RenderModes userRenderMode = m_renderMode;
+		m_renderMode = MNSY_RENDERMODE_SHADED;
+
+
 		// Setup Shaders with thumbnail Scene settings
 		SetPbrShaderLightUniforms(thumbScene.GetLight());
 		SetShaderSkyboxUniforms(thumbScene.GetSkybox());
@@ -476,6 +513,7 @@ namespace mnemosy::graphics
 
 
 		// Restore user pbr shader settings
+		m_renderMode = userRenderMode;
 		Scene& scene = MnemosyEngine::GetInstance().GetScene();
 		SetPbrShaderLightUniforms(scene.GetLight());
 		SetShaderSkyboxUniforms(scene.GetSkybox());
@@ -638,6 +676,14 @@ namespace mnemosy::graphics
 		return 4;
 	}
 
+	void Renderer::SetRenderMode(RenderModes mode) {
+
+		if (m_renderMode == mode)
+			return;
+
+		m_renderMode = mode;
+	}
+
 	void Renderer::HotReloadPbrShader(float deltaSeconds) {
 
 
@@ -666,9 +712,10 @@ namespace mnemosy::graphics
 			std::filesystem::path shaders = MnemosyEngine::GetInstance().GetFileDirectories().GetShadersPath();
 			fs::path vertPath = shaders / fs::path("pbrVertex.vert");
 			fs::path fragPath = shaders / fs::path("pbrFragment.frag");
+			fs::path unlitFragPath = shaders / fs::path("unlitTexView.frag");
 
 			bool success = m_pPbrShader->CreateShaderProgram(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
-
+			success = m_pUnlitTexturesShader->CreateShaderProgram(vertPath.generic_string().c_str(), unlitFragPath.generic_string().c_str());
 			if (success) {
 
 				// reassign uniforms

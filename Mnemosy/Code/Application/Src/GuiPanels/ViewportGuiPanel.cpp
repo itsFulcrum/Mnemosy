@@ -80,44 +80,69 @@ namespace mnemosy::gui
 			}
 
 			// Quick Select Skybox
-
-			graphics::Skybox& skybox = scene.GetSkybox();
-			mnemosy::systems::SkyboxAssetRegistry& skyboxRegistry = engine.GetSkyboxAssetRegistry();
-
-			// -- Skybox Selection Menu
-			bool assetsInRegistry = !skyboxRegistry.GetVectorOfNames().empty();
-			if (assetsInRegistry) // if there are no assets in the internal vector this will crash
 			{
 
-				int current = skyboxRegistry.GetCurrentSelected();
+				graphics::Skybox& skybox = scene.GetSkybox();
+				mnemosy::systems::SkyboxAssetRegistry& skyboxRegistry = engine.GetSkyboxAssetRegistry();
 
-				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[current].c_str();
-				int previousSelected = current;
-
-				ImGui::Text("Skybox: ");
-				ImGui::SetNextItemWidth(200.0f);
-				if (ImGui::BeginCombo(" ##ViewportSkybox", combo_preview_value, 0))
+				// -- Skybox Selection Menu
+				bool assetsInRegistry = !skyboxRegistry.GetVectorOfNames().empty();
+				if (assetsInRegistry) // if there are no assets in the internal vector this will crash
 				{
-					for (int n = 0; n < skyboxRegistry.GetVectorOfNames().size(); n++)
+
+					int current = skyboxRegistry.GetCurrentSelected();
+
+					const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[current].c_str();
+					int previousSelected = current;
+
+					ImGui::Text("Skybox: ");
+					ImGui::SetNextItemWidth(200.0f);
+					if (ImGui::BeginCombo(" ##ViewportSkybox", combo_preview_value, 0))
 					{
-						const bool is_selected = (current == n);
-						if (ImGui::Selectable(skyboxRegistry.GetVectorOfNames()[n].c_str(), is_selected))
-							current = n;
+						for (int n = 0; n < skyboxRegistry.GetVectorOfNames().size(); n++)
+						{
+							const bool is_selected = (current == n);
+							if (ImGui::Selectable(skyboxRegistry.GetVectorOfNames()[n].c_str(), is_selected))
+								current = n;
 
-						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
+							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+							if (is_selected)
+								ImGui::SetItemDefaultFocus();
+						}
+						ImGui::EndCombo();
 					}
-					ImGui::EndCombo();
+
+					if (current != previousSelected)  // Selection has happend
+					{
+						skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[current]);
+						engine.GetRenderer().SetShaderSkyboxUniforms(skybox);
+					}
 				}
 
-				if (current != previousSelected)  // Selection has happend
-				{
-					skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[current]);
-					engine.GetRenderer().SetShaderSkyboxUniforms(skybox);
-				}
+
 			}
 
+			// Rendering Selection
+			{
+
+				graphics::Renderer& renderer = engine.GetRenderer();
+
+				const char* renderModes_List[9] = { "Shaded","Albedo","Roughness","Metallic","Normal","AmbientOcclusion","Emissive","Height", "Opacity"}; // they need to be ordered the same as in RenderModes Enum in renderer class
+				int rendermode_Current = renderer.GetCurrentRenderModeInt();
+
+
+				ImGui::Text("Render: ");
+				ImGui::SetNextItemWidth(180.0f);
+				ImGui::Combo(" ##ViewportRenderModes", &rendermode_Current, renderModes_List, IM_ARRAYSIZE(renderModes_List));
+
+
+
+				if (rendermode_Current != renderer.GetCurrentRenderModeInt())
+				{
+					renderer.SetRenderMode((graphics::RenderModes)rendermode_Current);
+				}
+
+			}
 
 
 
