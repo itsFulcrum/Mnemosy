@@ -1,5 +1,8 @@
 #include "Include/Gui/UserInterface.h"
 #include "Include/MnemosyEngine.h"
+#include "Include/MnemosyConfig.h"
+
+
 
 #include "Include/Core/Log.h"
 #include "Include/Core/Window.h"
@@ -49,13 +52,17 @@ namespace mnemosy::gui
 
 
 
+
 		if (m_mainMenuBarGuiPanel)
 		{
 			m_mainMenuBarGuiPanel->Draw();
 		}
 
-		//if (show_demo_window)
-		//	ImGui::ShowDemoWindow(&show_demo_window);
+#ifdef MNEMOSY_CONFIG_DEBUG
+		if (show_demo_window) {
+			ImGui::ShowDemoWindow(&show_demo_window);
+		}
+#endif // MNEMOSY_CONFIG_DEBUG
 
 		for (GuiPanel* panels : m_guiPanels)
 		{

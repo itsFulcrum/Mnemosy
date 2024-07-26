@@ -111,6 +111,8 @@ namespace mnemosy::graphics
 		//MNEMOSY_TRACE("LoadSkybox Start");
 		m_pCubemap->LoadCubemapsFromKtxFiles(colorPath.c_str(),irradiancePath.c_str(),prefilterPath.c_str());
 		//MNEMOSY_TRACE("LoadSkybox End");
+
+		registry.SetNewCurrent(name);
 	}
 
 	Cubemap& Skybox::GetCubemap()

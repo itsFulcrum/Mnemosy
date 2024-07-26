@@ -42,6 +42,9 @@ namespace mnemosy::systems
 		std::vector<std::string>& GetVectorOfNames();
 		int GetPositionByName(const std::string name);
 
+		int GetCurrentSelected() { return m_currentSelected; }
+		void SetNewCurrent(const std::string& name);
+
 
 	private:
 		void LoadEntriesFromSavedData();
@@ -55,6 +58,10 @@ namespace mnemosy::systems
 
 		std::vector<SkyboxAssetEntry> m_skyboxAssets;
 		std::vector<std::string> m_orderedEntryNames; // ordered just means that they should always be in the same order as the entries are in the m_skyboxAsstes;
+
+
+		int m_currentSelected = 0;
+
 
 		bool prettyPrintDataFile = false;
 	};

@@ -39,6 +39,7 @@ namespace mnemosy::gui
 		void EndFrame();
 
 
+
 		GuiPanel* m_mainMenuBarGuiPanel = nullptr;
 		std::vector<GuiPanel*> m_guiPanels;
 		ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_NoScrollbar;

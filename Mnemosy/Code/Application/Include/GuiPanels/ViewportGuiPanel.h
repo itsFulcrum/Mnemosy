@@ -22,7 +22,13 @@ namespace mnemosy::gui
 
 
 	private:
+
+		void DrawViewport();
+
+	private:
 		MnemosyEngine& m_engineInstance;
+		//int m_currentSelectedSkybox = 0;
+
 
 		int m_viewportPosX = 1;
 		int m_viewportPosY = 1;

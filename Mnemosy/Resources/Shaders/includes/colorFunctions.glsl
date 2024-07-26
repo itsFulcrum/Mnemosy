@@ -1,6 +1,7 @@
 #ifndef COLOR_FUNCTIONS_GLSL
 #define COLOR_FUNCTIONS_GLSL
 
+precision highp float;
 //////////// Color Correction functions
 // =============================================================================================================
 

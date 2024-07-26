@@ -25,7 +25,7 @@ namespace mnemosy::gui
 	{
 		panelName = "Scene Settings";
 		panelType = MNSY_GUI_PANEL_SCENE_SETTINGS;
-		m_currentSelectedSkybox = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetPositionByName("Market");
+		//m_currentSelectedSkybox = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetPositionByName("Market");  // TODO: make this part of the skybox registry so we can keep it in sync with viewport
 	}
 
 	void SceneSettingsGuiPanel::Draw()
@@ -33,7 +33,7 @@ namespace mnemosy::gui
 		if (!showPanel)
 			return;
 
-		MnemosyEngine& engine = ENGINE_INSTANCE();
+		MnemosyEngine& engine = MnemosyEngine::GetInstance();;
 		graphics::Scene& scene = engine.GetScene();
 		graphics::Renderer& renderer = engine.GetRenderer();
 
@@ -124,18 +124,25 @@ namespace mnemosy::gui
 			mnemosy::systems::SkyboxAssetRegistry& skyboxRegistry = engine.GetSkyboxAssetRegistry();
 			
 			// -- Skybox Selection Menu
+
+
+
 			bool assetsInRegistry = !skyboxRegistry.GetVectorOfNames().empty();
 			if (assetsInRegistry) // if there are no assets in the internal vector this will crash
 			{
-				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[m_currentSelectedSkybox].c_str();
-				int previousSelected = m_currentSelectedSkybox;
+				int current = skyboxRegistry.GetCurrentSelected();
+
+				const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[current].c_str();
+				int previousSelected = current;
+
+
 				if (ImGui::BeginCombo("Preview Skyboxes", combo_preview_value, 0))
 				{
 					for (int n = 0; n < skyboxRegistry.GetVectorOfNames().size(); n++)
 					{
-						const bool is_selected = (m_currentSelectedSkybox == n);
+						const bool is_selected = (current == n);
 						if (ImGui::Selectable(skyboxRegistry.GetVectorOfNames()[n].c_str(), is_selected))
-							m_currentSelectedSkybox = n;
+							current = n;
 
 						// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 						if (is_selected)
@@ -143,9 +150,9 @@ namespace mnemosy::gui
 					}
 					ImGui::EndCombo();
 				}
-				if (m_currentSelectedSkybox != previousSelected)  // Selection has happend
+				if (current != previousSelected)  // Selection has happend
 				{
-					skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[m_currentSelectedSkybox]);
+					skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[current]);
 				}
 			}
 			
@@ -233,8 +240,9 @@ namespace mnemosy::gui
 									{
 										// Function needs to 
 										bool success = skybox.AssignSkyboxTexture(filepath.c_str(), skyboxName, skyboxExportResolution, m_saveSkyboxPermanentlyUponLoad);
-										if(success)
-											m_currentSelectedSkybox = (int)skyboxRegistry.GetVectorOfNames().size() -1;
+										if (success) {
+											skyboxRegistry.SetNewCurrent(skyboxName);
+										}
 									}
 								#endif
 							}
@@ -309,7 +317,7 @@ namespace mnemosy::gui
 						selectedToRemove = 0;
 						std::string firstSkyboxName = skyboxRegistry.GetVectorOfNames()[0];
 						skybox.LoadPreviewSkybox(firstSkyboxName);
-						m_currentSelectedSkybox = 0;
+						//m_currentSelectedSkybox = 0;
 					}
 
 

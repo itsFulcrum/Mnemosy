@@ -7,7 +7,6 @@ precision highp float;
 out vec3 cubeMapSampleVector;
 out vec3 cubeSampleRight;
 out vec3 cubeSampleUp;
-out vec4 fragPos;
 out vec2 screenSpacePos;
 
 uniform mat4 _viewMatrix;
@@ -19,8 +18,9 @@ void main()
     cubeSampleRight = normalize(cross(cubeMapSampleVector,vec3(0.0,1.0,0.0)));
     cubeSampleUp = normalize(cross(cubeSampleRight,cubeMapSampleVector));
 
-    fragPos = _projectionMatrix * _viewMatrix * vec4(aPosition,1.0f);
-    screenSpacePos = fragPos.xy / fragPos.w;
+    vec4 pos = _projectionMatrix * _viewMatrix * vec4(aPosition,1.0f);
 
-    gl_Position = fragPos.xyww;
+    screenSpacePos = pos.xy / pos.w;
+
+    gl_Position = pos.xyww;
 }

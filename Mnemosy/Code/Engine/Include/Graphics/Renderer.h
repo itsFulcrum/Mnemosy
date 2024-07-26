@@ -114,7 +114,7 @@ namespace mnemosy::graphics
 		bool m_msaaOff = false;
 
 		// Thumbnails
-		uint16_t m_thumbnailResolution = 200;
+		const uint16_t m_thumbnailResolution = 200;
 
 		unsigned int m_thumb_MSAA_FBO = 0;
 		unsigned int m_thumb_MSAA_RBO = 0;
@@ -127,6 +127,7 @@ namespace mnemosy::graphics
 	private:
 
 		core::FileWatcher m_shaderFileWatcher;
+		core::FileWatcher m_shaderSkyboxFileWatcher;
 		float m_fileWatchTimeDelta = 0.0f;
 
 	};

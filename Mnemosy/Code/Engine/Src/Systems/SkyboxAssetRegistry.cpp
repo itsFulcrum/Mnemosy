@@ -18,6 +18,8 @@ namespace mnemosy::systems
 		m_pathToDatafile = MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath().generic_string() + "/" + m_dataFileName;
 
 		LoadEntriesFromSavedData();
+
+		m_currentSelected = GetPositionByName("Market");
 	}
 
 	SkyboxAssetRegistry::~SkyboxAssetRegistry()
@@ -140,6 +142,12 @@ namespace mnemosy::systems
 		}
 
 		return 0;
+	}
+
+	void SkyboxAssetRegistry::SetNewCurrent(const std::string& name)
+	{
+
+		m_currentSelected = GetPositionByName(name);
 	}
 
 

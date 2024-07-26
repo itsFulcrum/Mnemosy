@@ -72,10 +72,13 @@ namespace mnemosy::graphics
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("mathFunctions.glsl"));
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("pbrLightingTerms.glsl"));
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("samplePbrMaps.glsl"));
-
+			
+			m_shaderSkyboxFileWatcher.RegisterFile(shaders / fs::path("skybox.vert"));
+			m_shaderSkyboxFileWatcher.RegisterFile(shaders / fs::path("skybox.frag"));
 		}
 
 	}
+
 	Renderer::~Renderer()
 	{
 		
@@ -142,7 +145,7 @@ namespace mnemosy::graphics
 			
 			glBindFramebuffer(GL_FRAMEBUFFER, m_standard_FBO);
 			glBindTexture(GL_TEXTURE_2D, m_standard_renderTexture_ID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr); // ====================
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -638,9 +641,14 @@ namespace mnemosy::graphics
 	void Renderer::HotReloadPbrShader(float deltaSeconds) {
 
 
+		float waitTime = 5.0f;
+#ifdef MNEMOSY_CONFIG_DEBUG
+		waitTime = 1.0f;
+#endif // MNEMOSY_CONFIG_DEBUG
+
 		// only check every couple of seconds
 		m_fileWatchTimeDelta += deltaSeconds;
-		if (m_fileWatchTimeDelta >= 2.0f) {
+		if (m_fileWatchTimeDelta >= waitTime) {
 
 			m_fileWatchTimeDelta = 0.0f;
 		}
@@ -649,37 +657,70 @@ namespace mnemosy::graphics
 		}
 
 
+		// checking pbr shader
+		if (m_shaderFileWatcher.DidAnyFileChange()) {
+			
+			MNEMOSY_INFO("Renderer::HotRealoadPbrShader: Recompiling pbr shader.");
 
-		if (!m_shaderFileWatcher.DidAnyFileChange()) {
-			return;
+
+			std::filesystem::path shaders = MnemosyEngine::GetInstance().GetFileDirectories().GetShadersPath();
+			fs::path vertPath = shaders / fs::path("pbrVertex.vert");
+			fs::path fragPath = shaders / fs::path("pbrFragment.frag");
+
+			bool success = m_pPbrShader->CreateShaderProgram(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
+
+			if (success) {
+
+				// reassign uniforms
+				SetPbrShaderBrdfLutUniforms();
+				SetPbrShaderLightUniforms(MnemosyEngine::GetInstance().GetScene().GetLight());
+				SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().GetSkybox());
+			}
+			else {
+				// compilation failed assign fallback shader;
+				MNEMOSY_WARN("Renderer::HotRealoadPbrShader: Compilationfailed. Switching to fallback shader.");
+
+				fs::path fallbackVertPath = shaders / fs::path("fallback.vert");
+				fs::path fallbackFragPath = shaders / fs::path("fallback.frag");
+
+				m_pPbrShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
+			}
 		}
 
 
-		MNEMOSY_INFO("Renderer::HotRealoadPbrShader: Recompiling pbr shader.");
+		if (m_shaderSkyboxFileWatcher.DidAnyFileChange()) {
 
 
-		std::filesystem::path shaders = MnemosyEngine::GetInstance().GetFileDirectories().GetShadersPath();
-		fs::path vertPath = shaders / fs::path("pbrVertex.vert");
-		fs::path fragPath = shaders / fs::path("pbrFragment.frag");
+			MNEMOSY_INFO("Renderer::HotRealoadPbrShader: Recompiling skybox shader.");
 
-		bool success = m_pPbrShader->CreateShaderProgram(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
+			std::filesystem::path shaders = MnemosyEngine::GetInstance().GetFileDirectories().GetShadersPath();
 
-		if (success) {
+			fs::path vertPath = shaders / fs::path("skybox.vert");
+			fs::path fragPath = shaders / fs::path("skybox.frag");
 
-			// reassign uniforms
-			SetPbrShaderBrdfLutUniforms();
-			SetPbrShaderLightUniforms(MnemosyEngine::GetInstance().GetScene().GetLight());
-			SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().GetSkybox());
+
+			bool success = m_pSkyboxShader->CreateShaderProgram(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
+			if (success) {
+
+				SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().GetSkybox());
+			}
+			else {
+				MNEMOSY_WARN("Renderer::HotRealoadPbrShader: Compilationfailed. Switching to fallback shader.");
+
+
+				fs::path fallbackVertPath = shaders / fs::path("skybox_fallback.vert");
+				fs::path fallbackFragPath = shaders / fs::path("skybox_fallback.frag");
+
+
+				m_pSkyboxShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
+			
+			}
+
+
+
 		}
-		else {
-			// compilation failed assign fallback shader;
-			MNEMOSY_WARN("Renderer::HotRealoadPbrShader: Compilationfailed. Switching to fallback shader.");
 
-			fs::path fallbackVertPath = shaders / fs::path("fallback.vert");
-			fs::path fallbackFragPath = shaders / fs::path("fallback.frag");
 
-			m_pPbrShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
-		}
 	}
 
 } // !mnemosy::graphics
