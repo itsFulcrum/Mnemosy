@@ -294,8 +294,6 @@ namespace mnemosy::graphics
 
 		else if (m_channelsAmount == 1) {
 
-			//cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
-
 			if (bitDepth == 0) {
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, m_cvMat.ptr());
 

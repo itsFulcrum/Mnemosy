@@ -586,9 +586,6 @@ namespace mnemosy::systems
 
 		activeMat.assignTexture(graphics::MNSY_TEXTURE_OPACITY, tex);
 
-
-		
-
 		SaveActiveMaterialToFile();
 	}
 
@@ -730,11 +727,7 @@ namespace mnemosy::systems
 
 		double beginTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 
-		// save active material first
-		if (m_userMaterialBound) {
-			SaveActiveMaterialToFile();
-		}
-
+		
 		// load json file
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
 		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo.name + ".mnsydata");
@@ -748,12 +741,118 @@ namespace mnemosy::systems
 		}
 		catch (json::parse_error err) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error parsing data file: {} \nMessage: {}", dataFile.generic_string(), err.what());
+			dataFileStream.close();
 			return;
 		}
+		dataFileStream.close();
+
+		
 
 		graphics::Material* mat = new graphics::Material();
 		
 		{
+			// First kick off a thread for each assigned texture to load
+			
+			// Start a thread for each assigned texture to load it into a openCV matrix which is a member of texture
+			// the join thread and load that texture form the matrix and opload to openGl
+			// open gl calls must all be from the main thread so we have to do it like this
+
+			
+
+			// Albedo Map
+			bool albedoAssigned = readFile[jsonMatKey_albedoAssigned].get<bool>();
+			graphics::Texture* albedoTex		= new graphics::Texture();
+			std::thread thread_load_albedo;
+			
+			if (albedoAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
+				thread_load_albedo = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*albedoTex), path);
+			}
+
+
+			// Roughness Map
+			bool roughnessAssigned = readFile[jsonMatKey_roughAssigned].get<bool>();
+			graphics::Texture* roughnessTex		= new graphics::Texture();
+			std::thread thread_load_roughness;
+			
+			if (roughnessAssigned) {
+				
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
+				thread_load_roughness = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*roughnessTex),path);
+			}
+			
+			// Metallic Map
+			bool metallicAssigned = readFile[jsonMatKey_metalAssigned].get<bool>();
+			graphics::Texture* metallicTex		= new graphics::Texture();
+			std::thread thread_load_metalllic;
+			
+
+			if (metallicAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_metalPath].get<std::string>();
+				thread_load_metalllic = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*metallicTex), path);
+			}
+
+			// Emissive Map
+			bool emissiveAssigned = readFile[jsonMatKey_emissionAssigned].get<bool>();
+			graphics::Texture* emissionTex		= new graphics::Texture();
+			std::thread thread_load_emissive;
+			
+
+			if (emissiveAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_emissionPath].get<std::string>();
+				thread_load_emissive = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*emissionTex), path);
+			}
+
+			// Normal Map
+			bool normalAssigned = readFile[jsonMatKey_normalAssigned].get<bool>();
+			graphics::Texture* normalTex		= new graphics::Texture();
+			std::thread thread_load_normal;
+			
+			if (normalAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
+				thread_load_normal = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*normalTex), path);
+			}
+
+
+			// AO map
+			bool aoAssigned = readFile[jsonMatKey_aoAssigned].get<bool>();
+			graphics::Texture* aoTex			= new graphics::Texture();
+			std::thread thread_load_ao;
+			
+			if (aoAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
+				thread_load_ao = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*aoTex), path);
+			}
+
+
+			// Height map
+			bool heightAssigned = readFile[jsonMatKey_heightAssigned].get<bool>();
+			graphics::Texture* heightTex = new graphics::Texture();
+			std::thread thread_load_height;
+			
+			if (heightAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
+				thread_load_height = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*heightTex), path);
+			}
+
+			// Opacity Map
+			bool opacityAssigned = readFile[jsonMatKey_opacityAssigned].get<bool>();
+			graphics::Texture* opacityTex		= new graphics::Texture();
+			std::thread thread_load_opacity;
+
+			if (opacityAssigned) {
+
+				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
+				thread_load_opacity = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*opacityTex),path);
+			}
+
+			// Once all threads are going we let the main thread do the rest of the work
 
 			mat->Name = readFile[jsonMatKey_name].get<std::string>();
 			mat->Albedo.r = readFile[jsonMatKey_albedo_r].get<float>();
@@ -785,95 +884,15 @@ namespace mnemosy::systems
 			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
 			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
 
-			bool albedoAssigned = readFile[jsonMatKey_albedoAssigned].get<bool>();
-			bool roughnessAssigned = readFile[jsonMatKey_roughAssigned].get<bool>();
-			bool metallicAssigned = readFile[jsonMatKey_metalAssigned].get<bool>();
-			bool emissiveAssigned = readFile[jsonMatKey_emissionAssigned].get<bool>();
-			bool normalAssigned = readFile[jsonMatKey_normalAssigned].get<bool>();
-			bool aoAssigned = readFile[jsonMatKey_aoAssigned].get<bool>();
-			bool heightAssigned = readFile[jsonMatKey_heightAssigned].get<bool>();
-			bool opacityAssigned = readFile[jsonMatKey_opacityAssigned].get<bool>();
-
-			graphics::Texture* albedoTex		= new graphics::Texture();
-			graphics::Texture* roughnessTex		= new graphics::Texture();
-			graphics::Texture* metallicTex		= new graphics::Texture();
-			graphics::Texture* emissionTex		= new graphics::Texture();
-			graphics::Texture* normalTex		= new graphics::Texture();
-			graphics::Texture* aoTex			= new graphics::Texture();
-			graphics::Texture* heightTex		= new graphics::Texture();
-			graphics::Texture* opacityTex		= new graphics::Texture();
-			
-			std::thread thread_load_albedo;
-			std::thread thread_load_roughness;
-			std::thread thread_load_metalllic;
-			std::thread thread_load_emissive;
-			std::thread thread_load_normal;
-			std::thread thread_load_ao;
-			std::thread thread_load_height;
-			std::thread thread_load_opacity;
-			
-			
-			// Start a thread for each assigned texture to load it into a openCV matrix which is a member of texture
-			// the join thread and load that texture form the matrix and opload to openGl
-			// open gl calls must all be from the main thread so we have to do it like this
-			if (albedoAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
-				thread_load_albedo = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*albedoTex), path);
-			}
-
-			if (roughnessAssigned) {
-				
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
-				thread_load_roughness = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*roughnessTex),path);
-			}
-
-			if (metallicAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_metalPath].get<std::string>();
-				thread_load_metalllic = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*metallicTex), path);
-			}
-
-
-			if (emissiveAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_emissionPath].get<std::string>();
-				thread_load_emissive = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*emissionTex), path);
-			}
-
-
-			if (normalAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
-				thread_load_normal = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*normalTex), path);
-			}
-
-			if (aoAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
-				thread_load_ao = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*aoTex), path);
-			}
-
-			if (heightAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
-				thread_load_height = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*heightTex), path);
-			}
-
-			if (opacityAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
-				thread_load_opacity = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*opacityTex),path);
-			}
+			// we do this here and not at the top of the file to utilize the time we might be waiting for threads better
+			SaveActiveMaterialToFile();
 
 
 
-			dataFileStream.close();
 			m_userMaterialBound = true;
 			m_activeMaterialDataFilePath = dataFile;
 			m_activeMaterialID = materialInfo.runtime_ID;
 			m_folderNodeOfActiveMaterial = parentNode;
-
 
 			// join threads
 			if (albedoAssigned) {
