@@ -7,8 +7,10 @@ set(APP_PROJECT "Mnemosy")
 project(${ENGINE_PROJECT})
 project(${APP_PROJECT})
 
-#set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_BINDIR}/MnemosyBuild/)
-#set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_BINDIR}/MnemosyBuild/)
+
+set(mnemosy_build_dir ${CMAKE_BINARY_DIR}/MnemosyBuild/)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${mnemosy_build_dir})
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${mnemosy_build_dir})
 
 
 include(GNUInstallDirs)
@@ -61,16 +63,18 @@ include(${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/cmake-Mnemosy_OpenCVO
 set(OpenCV_DIR "Code/Dependencies/openCV/opencvBuild/install/")
 find_package(OpenCV REQUIRED PATHS "Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/")
 
-
-
+# copy open cv dlls into the build directory
+file(MAKE_DIRECTORY ${mnemosy_build_dir})
+file(MAKE_DIRECTORY ${mnemosy_build_dir}/Debug)
+file(MAKE_DIRECTORY ${mnemosy_build_dir}/Release)
 # Copy debug/release dlls to respective executable directory
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${CMAKE_BINARY_DIR}/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${mnemosy_build_dir}/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${mnemosy_build_dir}/Debug/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${mnemosy_build_dir}/Debug/ COPYONLY)
 
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_BINARY_DIR}/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${mnemosy_build_dir}/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${mnemosy_build_dir}/Release/ COPYONLY)
+configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${mnemosy_build_dir}/Release/ COPYONLY)
 
 # ==== Load Internal Sources
 # Setting ENGINE source files to: ENGINE_SOURCE_FILES
@@ -88,17 +92,16 @@ include(${CMAKE_CURRENT_LIST_DIR}/Code/Application/cmake-ApplicationSourceFiles.
 
 # === LINKING ===
 # ===============
-#could split up source files by namespaces in their folders or something like that
+# include internal files
 set(ALL_SOURCE_FILES ${ENGINE_SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 
 add_library(${ENGINE_PROJECT} ${ALL_SOURCE_FILES})
 target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
-target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
 
 add_executable(${APP_PROJECT} ${APP_SOURCE_FILES})
 target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
 target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Application)
-target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
+
 
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${APP_PROJECT})
@@ -108,7 +111,8 @@ source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/${ENGINE_SOURCE_PATH} FILES ${ALL_SO
 # include external librariy headers
 target_include_directories(${ENGINE_PROJECT} PRIVATE libs/assimp-src/include)
 target_include_directories(${ENGINE_PROJECT} PRIVATE ${ktx_software_subDir}lib/)
-
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
+target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
 # public for libraries that application also needs
 target_link_libraries(${ENGINE_PROJECT} PUBLIC
 glfw
@@ -126,20 +130,4 @@ ktx
 ${OpenCV_LIBS}
 )
 
-
 target_link_libraries(${APP_PROJECT} PRIVATE ${ENGINE_PROJECT} )
-
-# idk if this does anything ..
-#install(FILES $<TARGET_RUNTIME_DLLS:${OpenCV_LIBS}> TYPE BIN)
-#install(FILES $<TARGET_RUNTIME_DLLS:${APP_PROJECT}> TYPE BIN)
-#install(TARGETS ${APP_PROJECT} DESTINATION ${CMAKE_INSTALL_BINDIR}/MnemosyBuild/)
-
-set(MNEMOSY_INSTALL OFF)
-if(MNEMOSY_INSTALL)
-  # to install i need to copy dlls of opencv into bin  also Resources folder has to be copied  resources should include shaders but i have to change it in code aswell to make that work
-  set(CMAKE_INSTALL_PREFIX "C:/Users/fulcrum/Documents/TestInstall")
-
-  configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${CMAKE_INSTALL_BINDIR} COPYONLY)
-  configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${CMAKE_INSTALL_BINDIR} COPYONLY)
-  configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${CMAKE_INSTALL_BINDIR} COPYONLY)
-ENDIF()

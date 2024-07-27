@@ -731,6 +731,7 @@ namespace mnemosy::graphics
 				fs::path fallbackFragPath = shaders / fs::path("fallback.frag");
 
 				m_pPbrShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
+				m_pUnlitTexturesShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
 			}
 		}
 
