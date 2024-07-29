@@ -158,7 +158,7 @@ namespace mnemosy::systems
 		
 		// data file 
 		bool prettyPrintDataFile = false;
-		bool prettyPrintMaterialFiles = true;
+		bool prettyPrintMaterialFiles = false;
 	};
 
 

@@ -24,12 +24,7 @@ namespace mnemosy::gui
 
 		void ViewsDropdown();
 
-
-		//GuiPanelManager* m_panelManager;
-
-
 		bool viewportPanel = false;
-		bool globalSettingsPanel = false;
 		bool sceneSettings = false;
 		bool materialEditorPanel = false;
 		bool materialLibraryPanel = false;

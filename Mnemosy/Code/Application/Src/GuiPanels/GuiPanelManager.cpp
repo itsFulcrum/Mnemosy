@@ -1,7 +1,6 @@
 #include "Include/GuiPanels/GuiPanelManager.h"
 #include "Include/GuiPanels/MainMenuBarGuiPanel.h"
 #include "Include/GuiPanels/ViewportGuiPanel.h"
-#include "Include/GuiPanels/GlobalSettingsGuiPanel.h"
 #include "Include/GuiPanels/SceneSettingsGuiPanel.h"
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
@@ -23,16 +22,19 @@ namespace mnemosy::gui
 		// gui panels
 		m_pMainMenuBarPanel = new MainMenuBarGuiPanel();
 		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
+		
 		m_pViewportPanel = new ViewportGuiPanel();
-		userInterface.RegisterGuiPanel(m_pViewportPanel);
-		m_pGlobalSettingsPanel = new GlobalSettingsGuiPanel();
-		userInterface.RegisterGuiPanel(m_pGlobalSettingsPanel);
+		userInterface.RegisterGuiPanel(m_pViewportPanel);	
+		
 		m_pSceneSettingsPanel = new SceneSettingsGuiPanel();
 		userInterface.RegisterGuiPanel(m_pSceneSettingsPanel);
+		
 		m_pMaterialEditorPanel = new MaterialEditorGuiPanel();
 		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
+		
 		m_pMaterialLibraryPanel = new MaterialLibraryGuiPanel();
 		userInterface.RegisterGuiPanel(m_pMaterialLibraryPanel);
+
 		m_pDocumentationPanel = new DocumentationGuiPanel();
 		userInterface.RegisterGuiPanel(m_pDocumentationPanel);
 
@@ -64,10 +66,6 @@ namespace mnemosy::gui
 		userInterface.UnregisterGuiPanel(m_pViewportPanel);
 		delete m_pViewportPanel;
 		m_pViewportPanel = nullptr;
-		
-		userInterface.UnregisterGuiPanel(m_pGlobalSettingsPanel);
-		delete m_pGlobalSettingsPanel;
-		m_pGlobalSettingsPanel = nullptr;
 
 		userInterface.UnregisterGuiPanel(m_pSceneSettingsPanel);
 		delete m_pSceneSettingsPanel;

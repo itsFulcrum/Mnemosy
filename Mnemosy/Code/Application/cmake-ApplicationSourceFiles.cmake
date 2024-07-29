@@ -22,8 +22,6 @@ ${APP_SOURCE_PATH}/Src/GuiPanels/GuiPanelManager.cpp
 
 ${APP_SOURCE_PATH}/Include/GuiPanels/MainMenuBarGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/MainMenuBarGuiPanel.cpp
-${APP_SOURCE_PATH}/Include/GuiPanels/GlobalSettingsGuiPanel.h
-${APP_SOURCE_PATH}/Src/GuiPanels/GlobalSettingsGuiPanel.cpp
 
 ${APP_SOURCE_PATH}/Include/GuiPanels/ViewportGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/ViewportGuiPanel.cpp

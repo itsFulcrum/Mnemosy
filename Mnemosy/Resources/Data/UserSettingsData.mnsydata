@@ -6,10 +6,9 @@
     "3_UserSettings": {
         "guiPanelStates": {
             "gp_documentation_Open": true,
-            "gp_globalSettings_Open": true,
             "gp_materialEditor_Open": true,
             "gp_materialLibrary_Open": true,
-            "gp_sceneSettings_Open": true,
+            "gp_settings_Open": true,
             "gp_viewport_Open": true
         }
     }

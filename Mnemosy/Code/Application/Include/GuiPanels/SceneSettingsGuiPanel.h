@@ -14,7 +14,9 @@ namespace mnemosy::gui
 
 	private:
 		bool m_saveSkyboxPermanentlyUponLoad = false;
-		//int m_currentSelectedSkybox = 0;
+		
+		bool m_openChangeDirectoryModal = false;
+		bool m_changeDirectoryModelState = false;
 	};
 }
 #endif // !SCENE_SETTINGS_GUI_PANEL_H

@@ -76,15 +76,13 @@ namespace mnemosy::systems {
 
 
 			bool gp_documentation_Open		= json_guiPanels["gp_documentation_Open"].get<bool>();
-			bool gp_globalSettings_Open		= json_guiPanels["gp_globalSettings_Open"].get<bool>();
-			bool gp_sceneSettings_Open		= json_guiPanels["gp_sceneSettings_Open"].get<bool>();
+			bool gp_sceneSettings_Open		= json_guiPanels["gp_settings_Open"].get<bool>();
 			bool gp_materialLibrary_Open	= json_guiPanels["gp_materialLibrary_Open"].get<bool>();
 			bool gp_materialEditor_Open		= json_guiPanels["gp_materialEditor_Open"].get<bool>();
 			bool gp_viewport_Open			= json_guiPanels["gp_viewport_Open"].get<bool>();
 
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_DOCUMENTATION).SetActive(gp_documentation_Open);
-			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_GLOBAL_SETTINGS).SetActive(gp_globalSettings_Open);
-			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_SCENE_SETTINGS).SetActive(gp_sceneSettings_Open);
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_SETTINGS).SetActive(gp_sceneSettings_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_LIBRARY).SetActive(gp_materialLibrary_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR).SetActive(gp_materialEditor_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_VIEWPORT).SetActive(gp_viewport_Open);
@@ -122,8 +120,7 @@ namespace mnemosy::systems {
 			gui::UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
 		
 			json_guiPanelStates["gp_viewport_Open"]				= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_VIEWPORT);
-			json_guiPanelStates["gp_globalSettings_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_GLOBAL_SETTINGS);
-			json_guiPanelStates["gp_sceneSettings_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_SCENE_SETTINGS);
+			json_guiPanelStates["gp_settings_Open"]				= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_SETTINGS);
 			json_guiPanelStates["gp_materialLibrary_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_MATERIAL_LIBRARY);
 			json_guiPanelStates["gp_materialEditor_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR);
 			json_guiPanelStates["gp_documentation_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_DOCUMENTATION);

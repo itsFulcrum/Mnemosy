@@ -8,7 +8,6 @@
 #include "Include/Application.h"
 #include "Include/GuiPanels/GuiPanelManager.h"
 #include "Include/GuiPanels/ViewportGuiPanel.h"
-#include "Include/GuiPanels/GlobalSettingsGuiPanel.h"
 #include "Include/GuiPanels/SceneSettingsGuiPanel.h"
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
@@ -220,13 +219,8 @@ namespace mnemosy::gui
 				m_panelManager.GetViewportPanel().SetActive(true);
 			}
 
-			globalSettingsPanel = m_panelManager.GetGlobalSettingsPanel().IsActive();
-			if (ImGui::MenuItem("Global Settings", "", globalSettingsPanel, !globalSettingsPanel)) {
-				m_panelManager.GetGlobalSettingsPanel().SetActive(true);
-			}
-
 			sceneSettings = m_panelManager.GetSceneSettingsPanel().IsActive();
-			if (ImGui::MenuItem("Scene Settings", "", sceneSettings, !sceneSettings)) {
+			if (ImGui::MenuItem("Settings", "", sceneSettings, !sceneSettings)) {
 				m_panelManager.GetSceneSettingsPanel().SetActive(true);
 			}
 
