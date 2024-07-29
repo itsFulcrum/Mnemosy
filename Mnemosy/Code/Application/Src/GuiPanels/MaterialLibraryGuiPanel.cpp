@@ -412,10 +412,6 @@ namespace mnemosy::gui
 			}
 
 
-
-
-
-
 			if (matIsOpen) {
 
 #ifdef mnemosy_gui_showDebugInfo

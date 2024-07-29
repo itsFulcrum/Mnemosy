@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 
 
@@ -10,6 +11,7 @@ namespace mnemosy::graphics {
 
 	enum NormalMapFormat;
 	enum PBRTextureType;
+	enum ChannelPackComponent;
 	class Texture;
 	class Shader;
 }
@@ -40,6 +42,10 @@ namespace mnemosy::graphics
 		NormalMapFormat NormalTextureFormat;
 		bool IsSmoothnessTexture = false;
 		bool UseEmissiveAsMask = false;
+
+		bool HasPackedTextures = false;
+		std::vector<std::string> PackedTexturesSuffixes;
+
 
 
 		void setDefaults();
@@ -73,8 +79,16 @@ namespace mnemosy::graphics
 
 
 
+		bool SuffixExistsInPackedTexturesList(std::string& suffix);
+		bool IsTextureTypeAssigned(const PBRTextureType& pbrType);
+
+
+
+		Texture* GetTextureFromPackComponent(ChannelPackComponent packComponent);
+
 		int GetNormalFormatAsInt() { return (int)NormalTextureFormat; }
 		unsigned int DebugGetTextureID(const PBRTextureType& pbrType);
+
 
 
 	private:

@@ -37,12 +37,19 @@ namespace mnemosy::gui
 
 		m_onFileDropInput_callback_id = MnemosyEngine::GetInstance().GetInputSystem().REGISTER_DROP_INPUT(&MaterialEditorGuiPanel::OnFileDropInput);
 	
-		m_textureTreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+		//m_textureTreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+		m_textureTreeNodeFlags = ImGuiTreeNodeFlags_None;
+
+
+		for (int i = 0; i < (int)graphics::MNSY_TEXTURE_CUSTOMPACKED; i++) {
+			m_exportTexturesBools.push_back(true);
+		}
 	}
 
 	MaterialEditorGuiPanel::~MaterialEditorGuiPanel() {
 
 		MnemosyEngine::GetInstance().GetInputSystem().UnregisterDropInput(m_onFileDropInput_callback_id);
+		m_exportTexturesBools.clear();
 	}
 
 	void MaterialEditorGuiPanel::Draw() {
@@ -84,6 +91,12 @@ namespace mnemosy::gui
 		if (m_currentActiveMaterialID != nowActiveMaterialID) {
 			// Active material Changed
 			m_currentActiveMaterialID = nowActiveMaterialID;
+
+			m_exportChannelPackedTexture = true;
+
+			for (int i = 0; i < m_exportTexturesBools.size(); i++) {
+				m_exportTexturesBools[i] = true;
+			}
 		}
 		
 
@@ -176,6 +189,71 @@ namespace mnemosy::gui
 			}
 
 
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_CUSTOMPACKED; i++) {
+			
+
+				graphics::PBRTextureType texType = (graphics::PBRTextureType)i;
+
+				std::string textureTypeName = graphics::TextureDefinitions::GetTextureNameFromEnumType(texType);
+				std::string label = "Export " + textureTypeName;
+
+
+
+				bool isAssigned = activeMat.IsTextureTypeAssigned(texType);
+
+				if (!isAssigned) {
+
+					if (m_exportTexturesBools[i] == true) {
+						m_exportTexturesBools[i] = false;
+					}
+
+
+					ImGui::BeginDisabled();
+				}
+
+				bool exportTexture = m_exportTexturesBools[i];
+
+
+				ImGui::Checkbox(label.c_str(), &exportTexture);
+
+				if (exportTexture != m_exportTexturesBools[i]) {
+				
+					m_exportTexturesBools[i] = exportTexture;
+				}
+
+
+				if (!isAssigned)
+					ImGui::EndDisabled();
+			
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+
+			if (!activeMat.HasPackedTextures) {
+
+				if (m_exportChannelPackedTexture == true) {
+					m_exportChannelPackedTexture = false;
+				}
+
+
+				ImGui::BeginDisabled();
+			}
+			
+			ImGui::Checkbox("Export Channel Packed Textures", &m_exportChannelPackedTexture);
+
+
+
+			if (!activeMat.HasPackedTextures) {
+				
+				ImGui::EndDisabled();
+			}
 
 
 			if (ImGui::Button("Export To...",m_buttonSize)) {
@@ -186,7 +264,7 @@ namespace mnemosy::gui
 					m_materialRegistry.SaveActiveMaterialToFile();
 					fs::path materialFolderPath = libraryDirectory / fs::path(m_materialRegistry.m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 					fs::path exportPath = fs::path(exportFolder);
-					m_exportManager.ExportMaterialTextures(exportPath,materialFolderPath, activeMat);
+					m_exportManager.ExportMaterialTextures(exportPath,materialFolderPath, activeMat, m_exportTexturesBools, m_exportChannelPackedTexture);
 				}
 			}
 
@@ -200,6 +278,7 @@ namespace mnemosy::gui
 
 		DrawTextureSettings(activeMat,libraryDirectory);
 
+		DrawChannelPackUI(activeMat);
 
 		ImGui::End();
 
@@ -867,8 +946,158 @@ namespace mnemosy::gui
 
 	}
 
-	void MaterialEditorGuiPanel::DrawChannelPackUI()
+	void MaterialEditorGuiPanel::DrawChannelPackUI(graphics::Material& activeMat)
 	{
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		ImGui::SeparatorText("Channel Packing");
+
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+
+		// Show a list of all already packed textures
+
+		if (ImGui::TreeNodeEx("Packed Textures", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+			if (activeMat.HasPackedTextures) {
+
+				if (!activeMat.PackedTexturesSuffixes.empty()) { // just to be safe
+
+					for (int i = 0; i < activeMat.PackedTexturesSuffixes.size(); i++) {
+
+						std::string name = " - " + activeMat.Name + activeMat.PackedTexturesSuffixes[i];
+						ImGui::Selectable(name.c_str());
+
+						// delete packed texture right click menu
+						if (ImGui::BeginPopupContextItem()) {
+						
+							if (ImGui::Selectable("Delete packed texture")) {
+
+								m_materialRegistry.DeleteChannelPackedTexture(activeMat, activeMat.PackedTexturesSuffixes[i]);
+							}
+
+							ImGui::EndPopup();
+						}
+					}
+				}
+			}
+			else {
+				ImGui::Text("There are no packed textures for this material yet");
+			}
+		
+			ImGui::TreePop();
+		}
+
+		// Create new channel packed texture
+		if (ImGui::TreeNodeEx("Create Packed Texture")) {
+
+
+			// input field to name the extention
+			static std::string fileSuffix = "_suffix";
+
+			{
+
+				ImGui::Text("File Suffix: ");
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(200);
+				ImGui::InputText("##RenameMaterialInputField", &fileSuffix, m_textInputFlags);
+			
+
+				std::string fileNamePreview = "Filename: " + activeMat.Name + fileSuffix;
+
+				ImGui::Text(fileNamePreview.c_str());
+			}
+
+
+
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			// resolution
+			static int resolutionX = 1024;
+			static int resolutionY = 1024;
+			ImGui::Text("Resolution X: ");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(120);
+			ImGui::DragInt(" ##ResX",&resolutionX,1.0f,4,8192);
+			
+			ImGui::Text("Resolution Y: ");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(120);
+			ImGui::DragInt(" ##ResY",&resolutionY,1.0f,4,8192);
+
+			// pack type 
+			static int current_packtype = 1;
+
+			ImGui::Text("Pack Fromat: ");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(150);
+			ImGui::Combo(" ##PckFmt", &current_packtype, m_packTypes, IM_ARRAYSIZE(m_packTypes));
+
+
+			// select pack components for each channel of pack type
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+
+			static int curr_packComponent_R = 1;
+			static int curr_packComponent_G = 2;
+			static int curr_packComponent_B = 3;
+			static int curr_packComponent_A = 14;
+
+			ImGui::Text("R - Channel");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(200);
+			ImGui::Combo(" ## R_channel", &curr_packComponent_R, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+
+			ImGui::Text("G - Channel");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(200);
+			ImGui::Combo(" ## G_channel", &curr_packComponent_G, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+
+			
+			ImGui::Text("B - Channel");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(200);
+			ImGui::Combo(" ## B_channel", &curr_packComponent_B, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+			
+			
+			if ((graphics::ChannelPackType)current_packtype == graphics::ChannelPackType::MNSY_PACKTYPE_RGBA) {
+				
+				ImGui::Text("A - Channel");
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(200);
+				ImGui::Combo(" ## A_channel", &curr_packComponent_A, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+
+			if (ImGui::Button("Create Packed Texture")) {
+
+				graphics::ChannelPackType packType = (graphics::ChannelPackType)current_packtype;
+				graphics::ChannelPackComponent R = (graphics::ChannelPackComponent)curr_packComponent_R;
+				graphics::ChannelPackComponent G = (graphics::ChannelPackComponent)curr_packComponent_G;
+				graphics::ChannelPackComponent B = (graphics::ChannelPackComponent)curr_packComponent_B;
+				graphics::ChannelPackComponent A = (graphics::ChannelPackComponent)curr_packComponent_A;
+
+				m_materialRegistry.GenerateChannelPackedTexture(activeMat,fileSuffix, packType,R,G,B,A,resolutionX,resolutionY);
+			}
+
+
+			ImGui::TreePop();
+		}
+
+
+
+
+
+
 
 
 

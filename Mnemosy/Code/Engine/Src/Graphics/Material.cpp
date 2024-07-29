@@ -57,7 +57,9 @@ namespace mnemosy::graphics
 			m_pHeightTexture = nullptr;
 		}
 
-		
+		if (!PackedTexturesSuffixes.empty()) {
+			PackedTexturesSuffixes.clear();
+		}
 	}
 
 	void Material::setDefaults() {
@@ -75,6 +77,8 @@ namespace mnemosy::graphics
 		UVTiling = glm::vec2(1.0f, 1.0f);
 		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
 		OpacityTreshhold = 0.5f;
+
+		HasPackedTextures = false;
 	}
 
 	void Material::SetNormalMapFormat(const NormalMapFormat& format) {
@@ -356,6 +360,133 @@ namespace mnemosy::graphics
 	}
 
 
+
+	bool Material::SuffixExistsInPackedTexturesList(std::string& suffix) {
+
+		if (!HasPackedTextures)
+			return false;
+
+		if (PackedTexturesSuffixes.empty())
+			return false;
+
+
+		for (int i = 0; i < PackedTexturesSuffixes.size(); i++) {
+
+			if (suffix == PackedTexturesSuffixes[i]) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool Material::IsTextureTypeAssigned(const PBRTextureType& pbrType) {
+
+		switch (pbrType)
+		{
+		case mnemosy::graphics::MNSY_TEXTURE_ALBEDO:
+
+			return isAlbedoAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_ROUGHNESS:
+			return isRoughnessAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_METALLIC:
+			return isMetallicAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_NORMAL:
+			return isNormalAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_AMBIENTOCCLUSION:
+			return isAoAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_EMISSION:
+			return isEmissiveAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_HEIGHT:
+			return isHeightAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_OPACITY:
+			return isOpacityAssigned();
+			break;
+		case mnemosy::graphics::MNSY_TEXTURE_CUSTOMPACKED:
+			return false;
+			break;
+		default:
+			return false;
+			break;
+		}
+
+		return false;
+	}
+
+
+	// returns nullptr if texture is not assigned
+	Texture* Material::GetTextureFromPackComponent(ChannelPackComponent packComponent) {
+
+		switch (packComponent)
+		{
+		case (MNSY_PACKCOMPONENT_NONE):
+			return nullptr;
+			break;
+		case (MNSY_PACKCOMPONENT_ALBEDO_R):
+			return m_pAlbedoTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_ALBEDO_G):
+			return m_pAlbedoTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_ALBEDO_B):
+			return m_pAlbedoTexture;
+			break;
+
+
+		case (MNSY_PACKCOMPONENT_NORMAL_R):
+			return m_pNormalTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_NORMAL_G):
+			return m_pNormalTexture;
+			break;
+
+		case (MNSY_PACKCOMPONENT_NORMAL_B):
+			return m_pNormalTexture;
+			break;
+
+
+		case (MNSY_PACKCOMPONENT_EMISSIVE_R):
+			return m_pEmissiveTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_EMISSIVE_G):
+			return m_pEmissiveTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_EMISSIVE_B):
+			return m_pEmissiveTexture;
+			break;
+
+
+		case (MNSY_PACKCOMPONENT_ROUGHNESS):
+			return m_pRoughnessTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_METALLIC):
+			return m_pMetallicTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_AO):
+			return m_pAmbientOcclusionTexture;
+			break;
+		case (MNSY_PACKCOMPONENT_HEIGHT):
+			return m_pHeightTexture;
+			break;
+
+		case (MNSY_PACKCOMPONENT_OPACITY):
+			return m_pOpacityTexture;
+			break;
+
+		default:
+			return nullptr;
+			break;
+		}
+
+		return nullptr;
+	}
 
 	unsigned int Material::DebugGetTextureID(const PBRTextureType& pbrTextureType)
 	{

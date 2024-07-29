@@ -51,7 +51,7 @@ namespace mnemosy::systems
 		~ExportManager();
 
 
-		bool ExportMaterialTextures(fs::path& exportPath, fs::path& materialFolderPath,graphics::Material& material);
+		bool ExportMaterialTextures(fs::path& exportPath, fs::path& materialFolderPath,graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
 
 
 

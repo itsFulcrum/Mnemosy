@@ -4,6 +4,7 @@
 #include "Include/Core/FileDirectories.h"
 #include "Include/Core/Log.h"
 #include "Include/Graphics/Material.h"
+#include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/Utils/KtxImage.h"
@@ -237,6 +238,175 @@ namespace mnemosy::systems
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
+	}
+
+	bool TextureGenerationManager::GenerateChannelPackedTexture(graphics::Material& material, const char* exportPath, bool exportTexture, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height)
+	{
+
+		if (!IsInitialized()) {
+			InitializeShaderTextureAndFBO(1024, 1024);
+		}
+
+
+		// === START FRAME
+		glViewport(0, 0, width, height);
+		// Bind framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+		// Resize render texture
+		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// clear frame
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// Setup Shader
+		m_pTextureGenShader->Use();
+		m_pTextureGenShader->SetUniformInt("_mode", 3); // _mode 3 is for generating channel packed textures
+
+
+		// Setup texture samplers
+		{
+			// sampler R channel
+			bool channel_r_assignSampler = true;
+			bool channel_r_isSingleChannel = true;
+
+			if ((int)packComponent_R < 10) {
+				channel_r_isSingleChannel = false;
+			}
+
+			graphics::Texture* channel_r_tex = material.GetTextureFromPackComponent(packComponent_R);
+
+			if (channel_r_tex == nullptr) {
+
+				std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_R);
+				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+				channel_r_assignSampler = false;
+			}
+
+			m_pTextureGenShader->SetUniformBool("_channel_r_isAssigned", channel_r_assignSampler);
+			m_pTextureGenShader->SetUniformBool("_channel_r_isSingleChannel", channel_r_isSingleChannel);
+
+			if (channel_r_assignSampler) {
+				channel_r_tex->BindToLocation(1);
+				m_pTextureGenShader->SetUniformInt("_channel_r", 1);
+			}
+
+			// sampler G channel
+			bool channel_g_assignSampler = true;
+			bool channel_g_isSingleChannel = true;
+
+			if ((int)packComponent_G < 10) {
+				channel_g_isSingleChannel = false;
+			}
+
+			graphics::Texture* channel_g_tex = material.GetTextureFromPackComponent(packComponent_G);
+
+			if (channel_g_tex == nullptr) {
+				std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_G);
+				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+				channel_g_assignSampler = false;
+			}
+
+			m_pTextureGenShader->SetUniformBool("_channel_g_isAssigned", channel_g_assignSampler);
+			m_pTextureGenShader->SetUniformBool("_channel_g_isSingleChannel", channel_g_isSingleChannel);
+
+			if (channel_g_assignSampler) {
+				channel_g_tex->BindToLocation(2);
+				m_pTextureGenShader->SetUniformInt("_channel_g", 2);
+			}
+
+			// sampler B channel
+			bool channel_b_assignSampler = true;
+			bool channel_b_isSingleChannel = true;
+
+			if ((int)packComponent_B < 10) {
+				channel_b_isSingleChannel = false;
+			}
+
+			graphics::Texture* channel_b_tex = material.GetTextureFromPackComponent(packComponent_B);
+
+			if (channel_b_tex == nullptr) {
+				std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_B);
+				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+				channel_b_assignSampler = false;
+			}
+
+			m_pTextureGenShader->SetUniformBool("_channel_b_isAssigned", channel_b_assignSampler);
+			m_pTextureGenShader->SetUniformBool("_channel_b_isSingleChannel", channel_b_isSingleChannel);
+
+			if (channel_b_assignSampler) {
+				channel_b_tex->BindToLocation(3);
+				m_pTextureGenShader->SetUniformInt("_channel_b", 3);
+			}
+
+			// sampler A channel  // only when pack type is MNSY_PACKTYPE_RGBA
+
+			if (packType == graphics::MNSY_PACKTYPE_RGBA) {
+			
+				bool channel_a_assignSampler = true;
+				bool channel_a_isSingleChannel = true;
+
+				if ((int)packComponent_A < 10) {
+					channel_a_isSingleChannel = false;
+				}
+
+				graphics::Texture* channel_a_tex = material.GetTextureFromPackComponent(packComponent_A);
+
+				if (channel_a_tex == nullptr) {
+					std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_A);
+					MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+					channel_a_assignSampler = false;
+				}
+
+				m_pTextureGenShader->SetUniformBool("_channel_a_isAssigned", channel_a_assignSampler);
+				m_pTextureGenShader->SetUniformBool("_channel_a_isSingleChannel", channel_a_isSingleChannel);
+
+				if (channel_a_assignSampler) {
+					channel_a_tex->BindToLocation(4);
+					m_pTextureGenShader->SetUniformInt("_channel_a", 4);
+				}
+			}
+			else {
+
+				m_pTextureGenShader->SetUniformBool("_channel_a_isAssigned", false);
+			}
+
+
+		}
+
+		// DRAW CALL
+		DrawQuad();
+
+		// Export to png or tiff file
+		if (exportTexture) {
+
+			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
+
+			graphics::TextureFormat Format = graphics::MNSY_RGBA16;
+
+			if (packType == graphics::MNSY_PACKTYPE_RGB) {
+				Format = graphics::MNSY_RGB16;
+			}
+
+
+			TextureExportInfo info = TextureExportInfo(std::string(exportPath), width, height, Format);
+
+			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
+		}
+
+
+
+
+		// === END FRAME
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return true; // everything succeeded
 	}
 
 	bool TextureGenerationManager::IsInitialized() {

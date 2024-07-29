@@ -21,8 +21,11 @@ namespace mnemosy::core {
 namespace mnemosy::graphics {
 	enum PBRTextureType;
 	enum NormapMapFormat;
+	enum ChannelPackType;
+	enum ChannelPackComponent;
 	class Material;
 	class Texture;
+
 }
 
 namespace mnemosy::systems
@@ -97,6 +100,11 @@ namespace mnemosy::systems
 
 		void GenereateOpacityFromAlbedoAlpha(graphics::Material& activeMat);
 
+		void GenerateChannelPackedTexture(graphics::Material& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height);
+
+		void DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix);
+
+
 		void LoadActiveMaterialFromFile(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
 		void LoadActiveMaterialFromFile_Multithreaded(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
 
@@ -150,7 +158,7 @@ namespace mnemosy::systems
 		
 		// data file 
 		bool prettyPrintDataFile = false;
-		bool prettyPrintMaterialFiles = false;
+		bool prettyPrintMaterialFiles = true;
 	};
 
 

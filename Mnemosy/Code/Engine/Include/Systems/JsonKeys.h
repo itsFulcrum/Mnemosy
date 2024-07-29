@@ -29,6 +29,9 @@ namespace mnemosy::systems {
 #define jsonMatKey_MnemosyDataFileTxt "Material Meta Data"	// text description of header
 #define jsonMatKey_name				"name"					// std:.string - name of the material
 
+#define jsonMatKey_hasChannelPacked "hasChannelPacked"		// bool - if a texture has channelpacked textures
+#define jsonMatKey_packedSuffixes	"packedSuffixes"		// std::vector<std::string> list of suffixes of channelpacked textures
+
 #define jsonMatKey_albedo_r			"albedo_r"				// float - value 0 to 1
 #define jsonMatKey_albedo_g			"albedo_g"				// float - value 0 to 1
 #define jsonMatKey_albedo_b			"albedo_b"				// float - value 0 to 1
@@ -52,7 +55,6 @@ namespace mnemosy::systems {
 #define jsonMatKey_uvScale_y		"uvScale_y"				// float - value
 #define jsonMatKey_opacityThreshold "opacityThreshold"		// float - value 0 to 1
 
-
 #define jsonMatKey_albedoAssigned	"albedoAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_roughAssigned	"roughAssigned"			// bool - if a texture has been assinged
 #define jsonMatKey_metalAssigned	"metalAssigned"			// bool - if a texture has been assinged
@@ -61,7 +63,6 @@ namespace mnemosy::systems {
 #define jsonMatKey_aoAssigned		"aoAssigned"			// bool - if a texture has been assinged
 #define jsonMatKey_heightAssigned	"heightAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_opacityAssigned	"opacityAssigned"		// bool - if a texture has been assinged
-
 
 
 #define jsonMatKey_pathNotAssigned  "notAssigned"			// string to use when path has not been assigned yet

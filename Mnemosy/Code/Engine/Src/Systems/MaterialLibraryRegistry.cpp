@@ -426,6 +426,38 @@ namespace mnemosy::systems
 				}
 			}
 
+			// now we get all channelpacked textures with this material and rename them too
+
+			bool hasPacked = readFile[jsonMatKey_hasChannelPacked].get<bool>();
+
+			if (hasPacked) {
+
+				std::vector<std::string> suffixes = readFile[jsonMatKey_packedSuffixes].get<std::vector<std::string>>();
+
+
+				if (!suffixes.empty()) {
+
+
+
+					for (int i = 0; i < suffixes.size(); i++) {
+
+						std::string oldFileName = oldName   + suffixes[i] + texture_textureFileType;
+						std::string newFileName = finalName + suffixes[i] + texture_textureFileType;
+
+						fs::path oldFilePath = materialDir / fs::path(oldFileName);
+						fs::path newFilePath = materialDir / fs::path(newFileName);
+
+						try {
+							fs::rename(oldFilePath, newFilePath);
+						}
+						catch (fs::filesystem_error e) {
+							MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming channelpacked texture file. \nError message: {}", e.what());
+						}
+
+					}
+				}
+			}
+
 			// change name of thumbnail file
 			std::string oldFileName = readFile[jsonMatKey_thumbnailPath].get<std::string>();
 			std::string newFileName = finalName + texture_fileSuffix_thumbnail;
@@ -589,6 +621,91 @@ namespace mnemosy::systems
 		SaveActiveMaterialToFile();
 	}
 
+	void MaterialLibraryRegistry::GenerateChannelPackedTexture(graphics::Material& activeMat, std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height) {
+
+		// check if the file extention is valid
+
+		// check against suffixes already taken by mnemosy
+		if (
+			   suffix == fileSuffix_albedo
+			|| suffix == fileSuffix_normal
+			|| suffix == fileSuffix_roughness
+			|| suffix == fileSuffix_metallic
+			|| suffix == fileSuffix_ambientOcclusion
+			|| suffix == fileSuffix_emissive
+			|| suffix == fileSuffix_height
+			|| suffix == fileSuffix_opacity )		
+		{
+			MNEMOSY_WARN("The suffix {} is already taken by another texture. You must choose a different suffix", suffix);
+			return;
+		}
+
+		// check against suffiexes that already exist in other channel packed textures of the material
+		if (activeMat.SuffixExistsInPackedTexturesList(suffix)) {
+			MNEMOSY_WARN("The suffix {} is already taken by another texture. You must choose a different suffix", suffix);
+			return;
+		}
+
+		// generate the texture
+
+
+		std::string filename = activeMat.Name + suffix + texture_textureFileType; // materialName_suffix.tif
+		fs::path channelPackedExportPath = GetActiveMaterialFolderPath() / fs::path(filename);
+
+		MnemosyEngine::GetInstance().GetTextureGenerationManager().GenerateChannelPackedTexture(activeMat, channelPackedExportPath.generic_string().c_str(),true,packType,packComponent_R,packComponent_G,packComponent_B,packComponent_A, width,height);
+
+		// Enlist into suffixes of active mat
+		activeMat.HasPackedTextures = true;
+		activeMat.PackedTexturesSuffixes.push_back(suffix);
+
+		// save to file
+		SaveActiveMaterialToFile();
+
+	}
+
+	void MaterialLibraryRegistry::DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix) {
+
+
+		MNEMOSY_ASSERT(activeMat.HasPackedTextures, "This function should not be called if the material does not contain any channel packed textures");
+		MNEMOSY_ASSERT(!activeMat.PackedTexturesSuffixes.empty(), "This function should not be called if the material does not contain any channel packed textures, this assert should never happen because we already checked if the texture has packed textures, there must be a bug somewhere when loading or saving the material")
+
+		// delete texture file
+
+		std::string filename = activeMat.Name + suffix + texture_textureFileType;
+		fs::path filepath = GetActiveMaterialFolderPath() / fs::path(filename);
+
+
+		try {
+			fs::remove_all(filepath);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteChannelPackedTexture: System error deleting file \nError message: ", error.what());
+			return;
+		}
+
+		// remove from internal list
+
+		// find the index at whicht to remove
+		int index = -1;
+		for (int i = 0; i < activeMat.PackedTexturesSuffixes.size(); i++) {
+
+			if (suffix == activeMat.PackedTexturesSuffixes[i]) {
+
+				index = i;
+				break;
+			}
+		}
+
+		MNEMOSY_ASSERT(index != -1, "This should not happen, we should always find the correct suffix");
+		activeMat.PackedTexturesSuffixes.erase(activeMat.PackedTexturesSuffixes.begin() + index);
+
+		// save the meta data file
+		SaveActiveMaterialToFile();
+	
+		MNEMOSY_INFO("Deleted channel packed texture {}", filepath.generic_string());
+	
+	}
+
 	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(fs::path& materialDirectory,systems::MaterialInfo& materialInfo,FolderNode* parentNode) {
 		
 		MNEMOSY_DEBUG("MaterialLibraryRegistry::LoadActiveMaterialFromFile: Loading Material: {}", materialInfo.name);
@@ -617,6 +734,14 @@ namespace mnemosy::systems
 		{
 
 			mat->Name		= readFile[jsonMatKey_name].get<std::string>();
+
+			mat->HasPackedTextures = readFile[jsonMatKey_hasChannelPacked].get<bool>();
+				
+			if (mat->HasPackedTextures) {
+
+				mat->PackedTexturesSuffixes = readFile[jsonMatKey_packedSuffixes].get<std::vector<std::string>>();
+			}
+
 			mat->Albedo.r	= readFile[jsonMatKey_albedo_r].get<float>();
 			mat->Albedo.g	= readFile[jsonMatKey_albedo_g].get<float>();
 			mat->Albedo.b	= readFile[jsonMatKey_albedo_b].get<float>();
@@ -855,6 +980,15 @@ namespace mnemosy::systems
 			// Once all threads are going we let the main thread do the rest of the work
 
 			mat->Name = readFile[jsonMatKey_name].get<std::string>();
+
+			mat->HasPackedTextures = readFile[jsonMatKey_hasChannelPacked].get<bool>();
+
+			if (mat->HasPackedTextures) {
+
+				mat->PackedTexturesSuffixes = readFile[jsonMatKey_packedSuffixes].get<std::vector<std::string>>();
+			}
+
+
 			mat->Albedo.r = readFile[jsonMatKey_albedo_r].get<float>();
 			mat->Albedo.g = readFile[jsonMatKey_albedo_g].get<float>();
 			mat->Albedo.b = readFile[jsonMatKey_albedo_b].get<float>();
@@ -1041,6 +1175,13 @@ namespace mnemosy::systems
 		
 		json MaterialJson; // top level json object
 		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
+
+		MaterialJson[jsonMatKey_hasChannelPacked] = activeMat.HasPackedTextures;
+
+		if (activeMat.HasPackedTextures) {
+			MaterialJson[jsonMatKey_packedSuffixes] = activeMat.PackedTexturesSuffixes;
+		}
+
 
 		MaterialJson[jsonMatKey_name] = activeMat.Name;
 		
@@ -1514,6 +1655,8 @@ namespace mnemosy::systems
 		fs::path libDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 		fs::path materialFolder = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
+
+		// include each txture that is assigned to this material
 		if (activeMat.isAlbedoAssigned()) {
 			fs::path p = materialFolder / fs::path(activeMat.Name + texture_fileSuffix_albedo);
 			paths.push_back(p.generic_string());
@@ -1547,6 +1690,26 @@ namespace mnemosy::systems
 			paths.push_back(p.generic_string());
 		}
 
+
+		// include channel packed textures as well
+		if (activeMat.HasPackedTextures) {
+
+			if (!activeMat.PackedTexturesSuffixes.empty()) {
+
+				for (int i = 0; i < activeMat.PackedTexturesSuffixes.size(); i++) {
+
+					std::string filename = activeMat.Name + activeMat.PackedTexturesSuffixes[i] + texture_textureFileType;
+					fs::path p = materialFolder / fs::path(filename);
+
+					paths.push_back(p.generic_string());
+				}
+
+			}
+		}
+
+
+
+
 		return paths;
 
 	}
@@ -1564,6 +1727,8 @@ namespace mnemosy::systems
 		json MaterialJson; // top level json object
 		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
 		MaterialJson[jsonMatKey_name]		= name;
+
+		MaterialJson[jsonMatKey_hasChannelPacked] = false;
 
 		MaterialJson[jsonMatKey_albedo_r]	= 0.8f;
 		MaterialJson[jsonMatKey_albedo_g]	= 0.8f;

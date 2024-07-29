@@ -48,9 +48,50 @@ namespace mnemosy::graphics {
 		MNSY_RGBA32		= 12
 	};
 
+	enum ChannelPackType
+	{
+		MNSY_PACKTYPE_RGB = 0,
+		MNSY_PACKTYPE_RGBA = 1
+	};
+
+	enum ChannelPackComponent
+	{
+		MNSY_PACKCOMPONENT_NONE = 0,
+
+		MNSY_PACKCOMPONENT_ALBEDO_R		= 1,
+		MNSY_PACKCOMPONENT_ALBEDO_G		= 2,
+		MNSY_PACKCOMPONENT_ALBEDO_B		= 3,
+
+		MNSY_PACKCOMPONENT_NORMAL_R		= 4,
+		MNSY_PACKCOMPONENT_NORMAL_G		= 5,
+		MNSY_PACKCOMPONENT_NORMAL_B		= 6,
+		
+		MNSY_PACKCOMPONENT_EMISSIVE_R	= 7,
+		MNSY_PACKCOMPONENT_EMISSIVE_G	= 8,
+		MNSY_PACKCOMPONENT_EMISSIVE_B	= 9,
+
+		MNSY_PACKCOMPONENT_ROUGHNESS		= 10,
+		MNSY_PACKCOMPONENT_METALLIC		= 11,
+		MNSY_PACKCOMPONENT_AO			= 12,
+		MNSY_PACKCOMPONENT_HEIGHT		= 13,
+		MNSY_PACKCOMPONENT_OPACITY		= 14,
+
+	};
+
+
 #define readable_textureFormats_DialogFilter "All Files\0 * .*\0 TIF (*.tif)\0*.tif\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0"
 
 #define texture_textureFileType ".tif"					// file type of textures stored on disk
+
+#define fileSuffix_albedo			"_albedo"
+#define fileSuffix_normal			"_normal"
+#define fileSuffix_roughness		"_roughness"
+#define fileSuffix_metallic			"_metallic"
+#define fileSuffix_ambientOcclusion	"_ambientOcclusion"
+#define fileSuffix_emissive			"_emissive"
+#define fileSuffix_height			"_height"
+#define fileSuffix_opacity			"_opacity"
+
 
 #define texture_fileSuffix_albedo			"_albedo"			+ texture_textureFileType
 #define texture_fileSuffix_normal			"_normal"			+ texture_textureFileType
@@ -161,6 +202,46 @@ namespace mnemosy::graphics {
 		}
 
 
+		static std::string GetTextureNameFromEnumType(PBRTextureType type) {
+
+			switch (type)
+			{
+			case mnemosy::graphics::MNSY_TEXTURE_ALBEDO:
+				return "Albedo";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_ROUGHNESS:
+				return "Roughness";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_METALLIC:
+				return "Metallic";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_NORMAL:
+				return "Normal";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_AMBIENTOCCLUSION:
+				return "Ambient Occlusion";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_EMISSION:
+				return "Emissive";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_HEIGHT:
+				return "Height";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_OPACITY:
+				return "Opacity";
+				break;
+			case mnemosy::graphics::MNSY_TEXTURE_CUSTOMPACKED:
+				return "CustomPacked";
+				break;
+			default:
+				return "none";
+				break;
+			}
+
+			return "none";
+		}
+
+
 		static bool IsImageFileExtentionValid(std::string& extention) {
 
 			std::string validExtentions[5] = {".tif",".tiff",".png",".jpg",".jpeg"};
@@ -179,6 +260,72 @@ namespace mnemosy::graphics {
 
 		}
 
+
+		static std::string GetNameOfPackComponent(ChannelPackComponent packComponent) {
+
+			switch (packComponent)
+			{
+			case (MNSY_PACKCOMPONENT_NONE):
+				return std::string("None");
+				break;
+			case (MNSY_PACKCOMPONENT_ALBEDO_R):
+				return std::string("Albedo_R");
+				break;
+			case (MNSY_PACKCOMPONENT_ALBEDO_G):
+				return std::string("Albedo_G");
+				break;
+			case (MNSY_PACKCOMPONENT_ALBEDO_B):
+				return std::string("Albedo_B");
+				break;
+
+
+			case (MNSY_PACKCOMPONENT_NORMAL_R):
+				return std::string("Normal_R");
+				break;
+			case (MNSY_PACKCOMPONENT_NORMAL_G):
+				return std::string("Normal_G");
+				break;
+
+			case (MNSY_PACKCOMPONENT_NORMAL_B):
+				return std::string("Normal_B");
+				break;
+
+
+			case (MNSY_PACKCOMPONENT_EMISSIVE_R):
+				return std::string("Emissive_R");
+				break;
+			case (MNSY_PACKCOMPONENT_EMISSIVE_G):
+				return std::string("Emissive_G");
+				break;
+			case (MNSY_PACKCOMPONENT_EMISSIVE_B):
+				return std::string("Emissive_B");
+				break;
+
+
+			case (MNSY_PACKCOMPONENT_ROUGHNESS):
+				return std::string("Roughness");
+				break;
+			case (MNSY_PACKCOMPONENT_METALLIC):
+				return std::string("Metallic");
+				break;
+			case (MNSY_PACKCOMPONENT_AO):
+				return std::string("Ambient Occlusion");
+				break;
+			case (MNSY_PACKCOMPONENT_HEIGHT):
+				return std::string("Height");
+				break;
+
+			case (MNSY_PACKCOMPONENT_OPACITY):
+				return std::string("Opacity");
+				break;
+
+			default:
+				return std::string("None");;
+				break;
+			}
+
+			return std::string("NONE");
+		}
 
 	};
 

@@ -9,6 +9,8 @@ namespace mnemosy::graphics
 {
 	class Material;
 	class Shader;
+	enum ChannelPackType;
+	enum ChannelPackComponent;
 }
 
 namespace mnemosy::systems
@@ -29,6 +31,9 @@ namespace mnemosy::systems
 		void InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture);
 
 		void GenerateOpacityFromAlbedoAlpha(graphics::Material& material, const char* exportPath, bool exportTexture);
+
+		bool GenerateChannelPackedTexture(graphics::Material& material, const char* exportPath, bool exportTexture, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height);
+
 
 		unsigned int GetRenderTextureID() { return m_renderTexture_ID; }
 
