@@ -1734,7 +1734,7 @@ namespace mnemosy::systems
 		MaterialJson[jsonMatKey_albedo_g]	= 0.8f;
 		MaterialJson[jsonMatKey_albedo_b]	= 0.8f;
 
-		MaterialJson[jsonMatKey_roughness]	= 0.5f;
+		MaterialJson[jsonMatKey_roughness]	= 0.1f;
 		MaterialJson[jsonMatKey_metallic]	= 0.0f;
 
 		MaterialJson[jsonMatKey_emission_r]	= 0.0f;
@@ -1749,7 +1749,7 @@ namespace mnemosy::systems
 		
 		MaterialJson[jsonMatKey_isSmoothness]		= false;
 
-		MaterialJson[jsonMatKey_heightDepth]		= 1.0f;
+		MaterialJson[jsonMatKey_heightDepth]		= 0.0f;
 		MaterialJson[jsonMatKey_opacityThreshold]	= 0.5;
 
 

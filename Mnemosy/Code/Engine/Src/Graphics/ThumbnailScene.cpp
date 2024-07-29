@@ -78,9 +78,9 @@ namespace mnemosy::graphics
 		// skybox setup
 		//MNEMOSY_TRACE("StartGenerateSkyboxes");
 		//m_skybox->AssignSkyboxTexture("../Resources/Textures/spruit_sunrise.hdr", 2048);
-		m_skybox->rotation = 5.533f;
+		m_skybox->rotation = 5.163f;
 		m_skybox->colorTint = glm::vec3(0.3f, 0.3f, 0.3f);
-		m_skybox->exposure = 1.0f;
+		m_skybox->exposure = -0.2f;
 		m_skybox->blurSteps = 0;
 		m_skybox->backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
 		m_skybox->opacity = 0.0f;
@@ -89,12 +89,12 @@ namespace mnemosy::graphics
 
 
 		// light setup
-		m_light->transform.SetPosition(glm::vec3(-0.7f, 1.5f, 1.3f));
+		m_light->transform.SetPosition(glm::vec3(-0.7f, 0.7f, 1.1f));
 		m_light->transform.SetRotationEulerAngles(glm::vec3(0.0f, 0.0f, 0.0));
-		m_light->strength = 7.0f;
+		m_light->strength = 3.0f;
 		//m_light->color = glm::vec3(1.0f, 1.0f, 1.0f);
 		m_light->SetType(graphics::LightType::POINT);
-		m_light->falloff = 0.1f;
+		m_light->falloff = 0.6f;
 
 
 	}

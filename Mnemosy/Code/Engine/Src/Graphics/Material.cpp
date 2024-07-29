@@ -65,15 +65,15 @@ namespace mnemosy::graphics
 	void Material::setDefaults() {
 
 		Name = "Mnemosy Default";
-		Albedo = glm::vec3(1.0f, 1.0f, 1.0f);
-		Roughness = 0.5f;
+		Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
+		Roughness = 0.1f;
 		IsSmoothnessTexture = false;
 		Metallic = 0.0f;
 		Emission = glm::vec3(0.0f, 0.0f, 0.0f);
 		EmissionStrength = 0.0f;
 		UseEmissiveAsMask = false;
 		NormalStrength = 1.0f;
-		HeightDepth = 1.0f;
+		HeightDepth = 0.0f;
 		UVTiling = glm::vec2(1.0f, 1.0f);
 		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
 		OpacityTreshhold = 0.5f;
