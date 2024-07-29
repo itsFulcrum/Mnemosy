@@ -19,7 +19,8 @@ namespace mnemosy::core
 	{
 		ULONG m_cRef = 0;
 
-		bool m_CanDrop = false;
+		bool m_CanDrop = true;
+
 
 	public:
 

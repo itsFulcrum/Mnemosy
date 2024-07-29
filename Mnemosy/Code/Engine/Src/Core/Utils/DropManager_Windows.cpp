@@ -49,12 +49,14 @@ namespace mnemosy::core
 	HRESULT __stdcall DropManager::DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) {
 
 
-		return DROPEFFECT_NONE;
 
 		if (m_CanDrop) {
 			//MNEMOSY_WARN("OnDragEnter canDrop");
 			return DROPEFFECT_COPY || DROPEFFECT_MOVE;
 		}
+
+		return DROPEFFECT_NONE;
+
 
 		//MNEMOSY_WARN("OnDragEnter NoDrop");
 

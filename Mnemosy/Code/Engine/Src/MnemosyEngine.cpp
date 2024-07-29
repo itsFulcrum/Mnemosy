@@ -63,6 +63,7 @@ namespace mnemosy
 
 		MNEMOSY_INFO("Starting Mnemosy v{}.{} - alpha", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR);
 
+
 		#ifdef MNEMOSY_CONFIG_DEBUG
 			MNEMOSY_INFO("Configuration Debug");
 		#else

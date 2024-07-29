@@ -37,9 +37,8 @@ namespace mnemosy::gui
 
 		m_onFileDropInput_callback_id = MnemosyEngine::GetInstance().GetInputSystem().REGISTER_DROP_INPUT(&MaterialEditorGuiPanel::OnFileDropInput);
 	
-		//m_textureTreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
-		m_textureTreeNodeFlags = ImGuiTreeNodeFlags_None;
-
+		m_textureTreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
+		
 
 		for (int i = 0; i < (int)graphics::MNSY_TEXTURE_CUSTOMPACKED; i++) {
 			m_exportTexturesBools.push_back(true);
@@ -100,21 +99,25 @@ namespace mnemosy::gui
 		}
 		
 
+		// not using this atm because it means we cant drop if window is not focused
+		// might be fixable by manually setting glfwWindow focus
+		// 
+		// in the future i would want to have the ablity to just drop files in the material edior or viewport and we try to match the filepaths to a texture automatically
 		// Set Drop manager to display cursor if files can be dropped or not
-		if ( m_isAbedoButtonHovered 
-			|| m_isNormalButtonHovered
-			|| m_isRoughnessButtonHovered 
-			|| m_isMetallicButtonHovered
-			|| m_isAmbientOcclusionButtonHovered
-			|| m_isEmissionButtonHovered 
-			|| m_isHeightButtonHovered
-			|| m_isOpacityButtonHovered ) 
-		{
-			m_engineInstance.GetDropHandler().SetDropTargetActive(true);
-		}
-		else {
-			m_engineInstance.GetDropHandler().SetDropTargetActive(false);
-		}
+		//if ( m_isAbedoButtonHovered 
+		//	|| m_isNormalButtonHovered
+		//	|| m_isRoughnessButtonHovered 
+		//	|| m_isMetallicButtonHovered
+		//	|| m_isAmbientOcclusionButtonHovered
+		//	|| m_isEmissionButtonHovered 
+		//	|| m_isHeightButtonHovered
+		//	|| m_isOpacityButtonHovered ) 
+		//{
+		//	//m_engineInstance.GetDropHandler().SetDropTargetActive(true);
+		//}
+		//else {
+		//	//m_engineInstance.GetDropHandler().SetDropTargetActive(false);
+		//}
 
 		// DEBUG INFO
 #ifdef mnemosy_gui_showDebugInfo

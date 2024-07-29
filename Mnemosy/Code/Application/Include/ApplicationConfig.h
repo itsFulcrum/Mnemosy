@@ -11,7 +11,7 @@
 
 #ifdef MNEMOSY_CONFIG_DEBUG
 
-#define mnemosy_gui_showImGuiDemoWindow
+//#define mnemosy_gui_showImGuiDemoWindow
 //#define mnemosy_gui_showDebugInfo
 
 

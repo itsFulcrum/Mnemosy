@@ -1,14 +1,11 @@
 
 Keyboard controls are only active when your mouse cursor is over the viewport window.
 
-- Hold: SHIFT + RIGHT MOUSE BUTTON
-  -> When Dragging mouse rotate the skybox lighting
+LEFT MOUSE BUTTON + DRAG
+-> move camera around the object
 
-- Hold: ALT + W
-  -> Move camera forward;
-- Hold: ALT + A
-  -> Move camera left;
-- Hold: ALT + S
-  -> Move camera back;
-- Hold: ALT + D
-  -> Move camera right;
+RIGHT MOUSE BUTTON + DRAG
+-> rotate the environment lighting
+
+SCROLL
+-> zoom camera in or out
