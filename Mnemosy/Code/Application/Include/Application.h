@@ -1,8 +1,10 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "Include/MnemosyEngine.h"
-
+namespace mnemosy
+{
+	class MnemosyEngine;
+}
 namespace mnemosy::input
 {
 	class CameraInputController;
@@ -12,15 +14,17 @@ namespace mnemosy::gui
 {
 	class GuiPanelManager;
 }
+
 namespace mnemosy
 {
-#define ENGINE_INSTANCE() Application::GetInstance().GetEngine().GetInstance()
+	// SINGLETON CLASS
+	class Application {
 
-	class Application
-	{
-	private:	// Singleton
+
+	private:
 		Application();
 		static Application* m_sInstance;
+
 	public:
 		static Application& GetInstance();
 		~Application();
@@ -29,16 +33,15 @@ namespace mnemosy
 		void Run();
 		void Shutdown();
 
-		MnemosyEngine& GetEngine();
 		gui::GuiPanelManager& GetGuiPanelManager() { return *m_pGuiPanelManager; }
 	private:
 
-		MnemosyEngine& m_mnemosyEngine = MnemosyEngine::GetInstance();
+		MnemosyEngine& m_mnemosyEngine;
 
-		input::CameraInputController* m_cameraController = nullptr;
-		input::SceneInputController* m_sceneInputController = nullptr;
-
+		input::CameraInputController* m_pCameraController = nullptr;
+		input::SceneInputController* m_pSceneInputController = nullptr;
 		gui::GuiPanelManager* m_pGuiPanelManager = nullptr;
+
 	};
 }
 #endif // !APPLICATION_H

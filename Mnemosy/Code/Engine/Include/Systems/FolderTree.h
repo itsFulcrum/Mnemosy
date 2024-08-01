@@ -2,8 +2,6 @@
 #define FOLDER_TREE_H
 
 #include <nlohmann/json.hpp>
-using namespace nlohmann;
-
 #include "string"
 
 namespace mnemosy::systems {
@@ -38,8 +36,8 @@ namespace mnemosy::systems {
 
 		std::string MakeNameUnique(const std::string& name);
 
-		void LoadFromJson(json& rootJson);
-		json* WriteToJson();
+		void LoadFromJson(nlohmann::json& rootJson);
+		nlohmann::json* WriteToJson();
 		void Clear();
 
 	private:
@@ -52,8 +50,8 @@ namespace mnemosy::systems {
 		bool RecursivDoesNameExist(FolderNode* node, const std::string& name);
 
 
-		json RecursivWriteToJson(FolderNode* node);
-		void RecursivLoadFromJson(FolderNode* node, const json& jsonNode);
+		nlohmann::json RecursivWriteToJson(FolderNode* node);
+		void RecursivLoadFromJson(FolderNode* node, const nlohmann::json& jsonNode);
 
 		unsigned int m_runtimeIDCounter;
 		unsigned int m_runtimeMaterialIDCounter;

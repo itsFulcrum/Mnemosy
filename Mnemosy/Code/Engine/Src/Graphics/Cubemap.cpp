@@ -299,7 +299,7 @@ namespace mnemosy::graphics
 
 		//if (!m_exportCubemaps)
 		//	return;
-		fs::path cubemapsPath = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
+		std::filesystem::path cubemapsPath = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
 
 
 		

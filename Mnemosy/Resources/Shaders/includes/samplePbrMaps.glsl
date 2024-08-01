@@ -32,7 +32,7 @@ precision highp float;
 
     if(useEmissveAsMask){
 
-      emissionOut = emissionLinear.rgb * emissionSolidColor;
+      emissionOut = emissionLinear.r * emissionSolidColor;
     }
     else {
       emissionOut = lerp(emissionLinear.rgb,emissionSolidColor.rgb,emissionColorValue.w);

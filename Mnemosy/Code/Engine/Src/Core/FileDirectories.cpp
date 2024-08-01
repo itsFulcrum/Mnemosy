@@ -8,11 +8,12 @@
 namespace mnemosy::core
 {
 	FileDirectories::FileDirectories() {
+		namespace fs = std::filesystem;
+
 
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
 
 		m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
-		m_tempExportTextureFolderName = "__Temp_Mnemosy_Export__";
 
 		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MnemosyMaterialLibrary)");
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
@@ -23,16 +24,12 @@ namespace mnemosy::core
 		m_mnemosyLibraryDataFile = fs::directory_entry(R"(../Resources/Data/LibraryDirectory.mnsydata)");
 
 		LoadUserLibraryDirectoryFromDataFile();
-		
-		DeleteTempFolder();
 	}
 
-	FileDirectories::~FileDirectories() {
+	FileDirectories::~FileDirectories() 
+	{ }
 
-		DeleteTempFolder();
-	}
-
-	const fs::path FileDirectories::GetResourcesPath() {
+	const std::filesystem::path FileDirectories::GetResourcesPath() {
 
 		if (m_mnemosyInternalResourcesDirectory.exists()) 
 		{
@@ -43,69 +40,56 @@ namespace mnemosy::core
 			MNEMOSY_ERROR("Resources Path does not exist.. Did you delete it?: {} ", m_mnemosyInternalResourcesDirectory.path().generic_string());
 		}
 
-		return std::filesystem::path("");
+		return std::filesystem::path();
 	}
 
-	const fs::path FileDirectories::GetMeshesPath() {
-		fs::path meshesPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Meshes");
+	const std::filesystem::path FileDirectories::GetMeshesPath() {
+
+		std::filesystem::path meshesPath = m_mnemosyInternalResourcesDirectory.path() / std::filesystem::path("Meshes");
 		return meshesPath;
 	}
 
-	const fs::path FileDirectories::GetPreviewMeshesPath()
-	{
-		return m_mnemosyInternalResourcesDirectory.path() / fs::path("Meshes/PreviewMeshes");
+	const std::filesystem::path FileDirectories::GetPreviewMeshesPath() {
+
+		return m_mnemosyInternalResourcesDirectory.path() / std::filesystem::path("Meshes/PreviewMeshes");
 	}
 
-	const fs::path FileDirectories::GetTexturesPath() {
-		fs::path texturesPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Textures");
+	const std::filesystem::path FileDirectories::GetTexturesPath() {
+
+		std::filesystem::path texturesPath = m_mnemosyInternalResourcesDirectory.path() / std::filesystem::path("Textures");
 		return texturesPath;
 	}
 
-	const fs::path FileDirectories::GetDataPath() {
-		fs::path dataPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Data");
+	const std::filesystem::path FileDirectories::GetDataPath() {
+
+		std::filesystem::path dataPath = m_mnemosyInternalResourcesDirectory.path() / std::filesystem::path("Data");
 		return dataPath;
 	}
 
-	const fs::path FileDirectories::GetCubemapsPath() {
-		fs::path cubemapsPath = GetTexturesPath() / fs::path("Cubemaps");
+	const std::filesystem::path FileDirectories::GetCubemapsPath() {
+		std::filesystem::path cubemapsPath = GetTexturesPath() / std::filesystem::path("Cubemaps");
 		return cubemapsPath;
 	}
 
-	const fs::path FileDirectories::GetShadersPath() {
+	const std::filesystem::path FileDirectories::GetShadersPath() {
 
-		fs::path shadersPath = m_mnemosyInternalResourcesDirectory.path() / fs::path("Shaders");
+		std::filesystem::path shadersPath = m_mnemosyInternalResourcesDirectory.path() / std::filesystem::path("Shaders");
 		return shadersPath;
 	}
 
-	const fs::path FileDirectories::GetTempExportFolderPath()
-	{
-		fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);
-		
-		if (!TempFolderExist()) {
-
-			if (CreateTempFolder()) {				
-				return tempFolderPath;
-			}
-			else {
-				MNEMOSY_ERROR("FileDirectories::ErrorCreatingTempFolder:");
-				return fs::path();
-			}			
-		}
-
-		return tempFolderPath;
-	}
-
-	const fs::path FileDirectories::GetDocumentationFilesPath() {
-		return GetDataPath() / fs::path("DocumentationTextFiles");
+	const std::filesystem::path FileDirectories::GetDocumentationFilesPath() {
+		return GetDataPath() / std::filesystem::path("DocumentationTextFiles");
 	}
 	
-	const fs::path FileDirectories::GetLibraryDirectoryPath() {
+	const std::filesystem::path FileDirectories::GetLibraryDirectoryPath() {
 		
 		return m_mnemosyUserLibraryDirectory.path();
 	}
 
-	void FileDirectories::SetNewUserLibraryDirectory(const fs::directory_entry& directoryPath, bool copyOldFiles, bool deleteOldFiles) {
+	void FileDirectories::SetNewUserLibraryDirectory(const std::filesystem::directory_entry& directoryPath, bool copyOldFiles, bool deleteOldFiles) {
 		
+		namespace fs = std::filesystem;
+
 		// check if new path is a valid path
 		if (!directoryPath.exists()) {
 			MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: Directory entry does not exist: {}", directoryPath.path().generic_string());
@@ -128,15 +112,7 @@ namespace mnemosy::core
 			catch (fs::filesystem_error error) {
 				MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: System Error Copying directory: \nMessage: {}", error.what());
 				return;
-			}
-			
-			
-		}
-		else {
-			
-
-
-			
+			}	
 		}
 		
 		if (deleteOldFiles) {
@@ -159,12 +135,13 @@ namespace mnemosy::core
 
 	bool FileDirectories::ContainsUserData() {
 
-		return !fs::is_empty(m_mnemosyUserLibraryDirectory.path());
+		return !std::filesystem::is_empty(m_mnemosyUserLibraryDirectory.path());
 	}
 
 	// private methods
-
 	void FileDirectories::LoadUserLibraryDirectoryFromDataFile() {
+
+		namespace fs = std::filesystem;
 
 		// check if data file exists 
 		if(!CheckLibraryDataFile()) {
@@ -222,13 +199,14 @@ namespace mnemosy::core
 
 	}
 
-	void FileDirectories::SaveUserLibraryDirectoryToDataFile(const fs::directory_entry& libraryDirectoryPath) {
+	void FileDirectories::SaveUserLibraryDirectoryToDataFile(const std::filesystem::directory_entry& libraryDirectoryPath) {
+		
 		// check if path is a valid path on disc.
 		if (!libraryDirectoryPath.exists()) { 
 			
 			// if not create it
 			MNEMOSY_INFO("FileDirectories::SaveUserLibraryDirectoryToDataFile: Directory Does not exists.. creating Directories {} ", libraryDirectoryPath.path().generic_string());
-			fs::create_directories(libraryDirectoryPath.path());
+			std::filesystem::create_directories(libraryDirectoryPath.path());
 		}
 		else { // exists
 
@@ -307,52 +285,12 @@ namespace mnemosy::core
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
 
 			MNEMOSY_WARN("FileDirectories::SetDefaultLibraryPath: Default Mnemosy Directory does not exist yet. Creating directories at {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
-			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
+			std::filesystem::create_directories(m_mnemosyDefaultLibraryDirectory.path());
 		}
 
 		m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
 		MNEMOSY_ERROR("Setting Library path to default Default path: {} ", m_mnemosyDefaultLibraryDirectory.path().generic_string());
 	}
 
-	bool FileDirectories::CreateTempFolder() {
 
-		if (!TempFolderExist()) {
-			fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);
-			try {
-				fs::create_directories(tempFolderPath);
-			}
-			catch (fs::filesystem_error err) {
-				MNEMOSY_ERROR("FileDirectories::CreateTempFolder: System error creating directory {} \nError Message: {}", tempFolderPath.generic_string(), err.what());
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	void FileDirectories::DeleteTempFolder() {
-
-		fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);		
-		
-		if (TempFolderExist()) {
-			fs::remove_all(tempFolderPath);
-		}
-	}
-
-	bool FileDirectories::TempFolderExist(){
-
-		fs::path tempFolderPath = GetLibraryDirectoryPath() / fs::path(m_tempExportTextureFolderName);
-		fs::directory_entry tempFolderDir = fs::directory_entry(tempFolderPath);
-
-		if (tempFolderDir.exists()) {
-			if (tempFolderDir.is_directory()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-
-} // !mnemosy::core
+} // namespace mnemosy::core

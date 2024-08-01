@@ -55,7 +55,7 @@ namespace mnemosy::gui
 			ImGui::EndChild();
 
 
-			// Draw image buttn of active folder
+			// Draw image buttns of active folder
 			ImGui::BeginChild("CurrentDirectory", ImVec2(0, 0), ImGuiChildFlags_Border );
 			{
 
@@ -99,7 +99,7 @@ namespace mnemosy::gui
 						//MNEMOSY_DEBUG("Texture ID:{}", selectedNode->subMaterials[i].thumbnailTexure_ID);
 						
 
-						bool pressed = ImGui::ImageButton(reinterpret_cast<void*>(selectedNode->subMaterials[i].thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
+						bool pressed = ImGui::ImageButton((void*)(selectedNode->subMaterials[i].thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
 						
 
 						if (pressed) {
@@ -113,11 +113,24 @@ namespace mnemosy::gui
 						}
 
 
+						// Calculate size of the name and shorten it if its longer then the button size
+						std::string matNameString = matName;
+
+						while (ImGui::CalcTextSize(matNameString.c_str()).x > (buttonSize - 5.0f )) {
+							matNameString.pop_back();
+						};
+
+						if (matNameString != matName) {
+							matNameString += "..";
+						}
+
+
+
 #ifdef mnemosy_gui_showDebugInfo
 						std::string nameWithDebugInfo = matName + " -GLTexID: " + std::to_string(selectedNode->subMaterials[i].thumbnailTexure_ID);
 						ImGui::Text(nameWithDebugInfo.c_str());
-#else
-						ImGui::Text(matName.c_str());
+#else						
+						ImGui::Text(matNameString.c_str());
 #endif // mnemosy_gui_showDebugInfo
 
 

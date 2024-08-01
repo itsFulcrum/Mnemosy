@@ -8,14 +8,12 @@
 #include "Include/Application.h"
 #include "Include/GuiPanels/GuiPanelManager.h"
 #include "Include/GuiPanels/ViewportGuiPanel.h"
-#include "Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Include/GuiPanels/SettingsGuiPanel.h"
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 #include "Include/GuiPanels/DocumentationGuiPanel.h"
 
 #include "Include/Systems/MaterialLibraryRegistry.h"
-
-
 #include "Include/Systems/SkyboxAssetRegistry.h"
 
 #include "Include/Graphics/Skybox.h"
@@ -27,15 +25,10 @@
 #include "External/ImGui/imgui.h"
 
 
-
-
-
-
 namespace mnemosy::gui
 {
 	MainMenuBarGuiPanel::MainMenuBarGuiPanel() {
 
-		//m_panelManager = &Application::GetInstance().GetGuiPanelManager();
 		panelName = "Main Menu Bar";
 		panelType = MNSY_GUI_PANEL_MAIN_MENU_BAR;
 	}
@@ -44,15 +37,8 @@ namespace mnemosy::gui
 	{
 		if (ImGui::BeginMainMenuBar()) {
 
-
-
-			
 			DataDropdown();
 			ViewsDropdown();
-
-
-
-
 
 			MnemosyEngine& engine = MnemosyEngine::GetInstance();
 
@@ -62,7 +48,7 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 			ImGui::Spacing();
 			ImGui::Spacing();
-			ImGui::Text("														");
+			ImGui::Text("														"); // hack to get some spacing
 
 			// Quick select mesh
 			{
@@ -77,22 +63,9 @@ namespace mnemosy::gui
 				ImGui::SetNextItemWidth(120.0f);
 				ImGui::Combo(" ##ViewportMesh", &previewMesh_Current, previewMesh_List, IM_ARRAYSIZE(previewMesh_List));
 
-				if ((int)scene.GetCurrentPreviewMesh() != previewMesh_Current)
-				{
-					if (previewMesh_Current == 0)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Custom);
-					else if (previewMesh_Current == 1)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Default);
-					else if (previewMesh_Current == 2)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Cube);
-					else if (previewMesh_Current == 3)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Plane);
-					else if (previewMesh_Current == 4)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Sphere);
-					else if (previewMesh_Current == 5)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Cylinder);
-					else if (previewMesh_Current == 6)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Suzanne);
+				if ((int)scene.GetCurrentPreviewMesh() != previewMesh_Current) {
+
+					scene.SetPreviewMesh((graphics::PreviewMesh)previewMesh_Current);
 				}
 
 			}
@@ -168,9 +141,6 @@ namespace mnemosy::gui
 			}
 
 
-
-
-
 			ImGui::EndMainMenuBar();
 		} // End ImGui::BeginMainMenuBar()
 
@@ -219,9 +189,9 @@ namespace mnemosy::gui
 				m_panelManager.GetViewportPanel().SetActive(true);
 			}
 
-			sceneSettings = m_panelManager.GetSceneSettingsPanel().IsActive();
+			sceneSettings = m_panelManager.GetSettingsPanel().IsActive();
 			if (ImGui::MenuItem("Settings", "", sceneSettings, !sceneSettings)) {
-				m_panelManager.GetSceneSettingsPanel().SetActive(true);
+				m_panelManager.GetSettingsPanel().SetActive(true);
 			}
 
 			materialEditorPanel = m_panelManager.GetMaterialEditorPanel().IsActive();

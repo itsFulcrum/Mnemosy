@@ -16,23 +16,18 @@
 
 namespace mnemosy::systems {
 
-	UserSettingsManager::UserSettingsManager()
-	{
+	UserSettingsManager::UserSettingsManager() {
+
 		m_userSettingsDataFilePath = std::filesystem::path(MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / std::filesystem::path("UserSettingsData.mnsydata"));
 	}
 
-	UserSettingsManager::~UserSettingsManager() {
-
-		
-	}
-
-
+	UserSettingsManager::~UserSettingsManager() 
+	{	}
 
 	void UserSettingsManager::LoadUserSettings(bool useDefaultFile) {
 
 		namespace fs = std::filesystem;
-		using namespace nlohmann;
-
+		namespace js = nlohmann;
 
 		fs::path dataFilePath = m_userSettingsDataFilePath;
 
@@ -47,32 +42,31 @@ namespace mnemosy::systems {
 		}
 
 
-		json json_userSettings;
-		{
+		std::ifstream dataFileStream;
+		dataFileStream.open(dataFilePath);
+		js::json json_readFile;
 
-			std::ifstream dataFileStream;
-			dataFileStream.open(dataFilePath);
-			json json_readFile;
-			try {
-				json_readFile = json::parse(dataFileStream);
-			}
-			catch (json::parse_error err) {
-				MNEMOSY_ERROR("UserSettingsManager::LoadUserSettings: Error Parsing File. Message: {}", err.what());
-				return;
-			}
-
-
-
-			json_userSettings = json_readFile["3_UserSettings"].get<json>();
-			dataFileStream.close();
-
+		try {
+			json_readFile = js::json::parse(dataFileStream);
 		}
+		catch (js::json::parse_error error) {
+			MNEMOSY_ERROR("UserSettingsManager::LoadUserSettings: Error Parsing File. Message: {}", error.what());
+			return;
+		}
+
+		dataFileStream.close();
+
+
+		js::json json_userSettings = json_readFile["3_UserSettings"].get<js::json>();
+
+
+		
 
 		// load gui panel states
 		{
 			gui::UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
 
-			json json_guiPanels = json_userSettings["guiPanelStates"].get<json>();
+			js::json json_guiPanels = json_userSettings["guiPanelStates"].get<js::json>();
 
 
 			bool gp_documentation_Open		= json_guiPanels["gp_documentation_Open"].get<bool>();
@@ -99,23 +93,24 @@ namespace mnemosy::systems {
 
 	void UserSettingsManager::SaveToFile() {
 
-		using namespace nlohmann;
+		namespace fs = std::filesystem;
+		namespace js = nlohmann;
 
 
-		json json_userSettingsTopLevel;
+		js::json json_userSettingsTopLevel;
 		json_userSettingsTopLevel["1_Mnemosy_Data_File"] = "UserSettingsData";
 
-		json json_headerInfo;
+		js::json json_headerInfo;
 		json_headerInfo["Description"] = "This files stores user settings";
 
 		json_userSettingsTopLevel["2_Header_Info"] = json_headerInfo;
 
 
-		json json_userSettings; // holds sub jsons for all the settings
+		js::json json_userSettings; // holds sub jsons for all the settings
 
 
 		// store what viewports are visible
-		json json_guiPanelStates;
+		js::json json_guiPanelStates;
 		{
 			gui::UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
 		
@@ -131,17 +126,11 @@ namespace mnemosy::systems {
 
 		// TODO add more settings
 
-
-
-
-
-
 		json_userSettingsTopLevel["3_UserSettings"] = json_userSettings;
 
 
 		//  write to file
 		fs::directory_entry dataFile = fs::directory_entry(m_userSettingsDataFilePath);
-
 
 
 		CheckDataFile(dataFile);

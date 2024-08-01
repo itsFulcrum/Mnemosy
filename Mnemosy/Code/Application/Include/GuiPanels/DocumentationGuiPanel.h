@@ -7,23 +7,23 @@
 
 namespace mnemosy::gui
 {
-	class DocumentationGuiPanel : public GuiPanel
-	{
+
+	class DocumentationGuiPanel : public GuiPanel {
 	public:
 		DocumentationGuiPanel();
 		~DocumentationGuiPanel();
 
-
 		virtual void Draw() override;
 
 	private:
+
 		void LoadTextFromFileToString();
 		void LoadTextFileToString(const char* filepath, std::string& outString);
 
-		std::string m_AboutMnemosy_text;
-		std::string m_GettingStarted_text;
-		std::string m_KeyboardControlls_text;
-		std::string m_AdditionalInformation_text;
+		std::string m_about_text;
+		std::string m_getStarted_text;
+		std::string m_controlls_text;
+		std::string m_additionalInfo_text;
 	};
 
 } // !mnemosy::gui

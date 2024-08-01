@@ -88,7 +88,7 @@ namespace mnemosy::graphics
 
 	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* tex) {
 
-		MNEMOSY_ASSERT(pbrTextureType != MNSY_TEXTURE_CUSTOMPACKED, "Do not use this function to add custom packed textures");
+		MNEMOSY_ASSERT(pbrTextureType != MNSY_TEXTURE_COUNT, "Do not use this function to add custom packed textures");
 
 
 		switch (pbrTextureType)
@@ -164,7 +164,7 @@ namespace mnemosy::graphics
 
 	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath) {
 
-		MNEMOSY_ASSERT(pbrType != MNSY_TEXTURE_CUSTOMPACKED, "Do not use this function to add custom packed textures");
+		MNEMOSY_ASSERT(pbrType != MNSY_TEXTURE_COUNT, "Do not use this function to add custom packed textures");
 
 		Texture* tex = new Texture();
 		bool loadedSuccesfull = tex->GenerateFromFile(filePath.c_str(),true,true);
@@ -409,7 +409,7 @@ namespace mnemosy::graphics
 		case mnemosy::graphics::MNSY_TEXTURE_OPACITY:
 			return isOpacityAssigned();
 			break;
-		case mnemosy::graphics::MNSY_TEXTURE_CUSTOMPACKED:
+		case mnemosy::graphics::MNSY_TEXTURE_COUNT:
 			return false;
 			break;
 		default:

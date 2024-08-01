@@ -36,7 +36,9 @@ namespace mnemosy::systems
 
 	}
 
-	bool ExportManager::ExportMaterialTextures(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {
+	bool ExportManager::ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {
+
+		namespace fs = std::filesystem;
 
 		MNEMOSY_INFO("Exporting Material: {}, as {} using {} normal map format \nExport Path: {}", material.Name, GetExportImageFormatString(), GetExportNormalFormatString(), exportPath.generic_string());
 
@@ -254,35 +256,6 @@ namespace mnemosy::systems
 		return true;
 	}
 
-	void ExportManager::SetExportImageFormatInt(int format) {
-		//MNSY_KTX2 = 0;
-		//MNSY_PNG = 1;
-		//MNSY_TIF = 2;
-		
-
-
-		if (format == 0) {
-			m_exportImageFormat = graphics::MNSY_TIF;
-		}
-		else if (format == 1) {
-			m_exportImageFormat = graphics::MNSY_PNG;
-		}
-		//else if (format == 2) {
-		//	m_exportImageFormat = MNSY_TIF;
-		//}
-	}
-
-	
-
-	void ExportManager::SetNormalMapExportFormatInt(int format) {
-		if (format == 0) {
-			m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_OPENGl;
-		}
-		else if (format == 1) {
-			m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_DIRECTX;
-		}
-	}
-
 	// private methods
 
 	std::string ExportManager::GetExportImageFormatString() {
@@ -442,8 +415,9 @@ namespace mnemosy::systems
 		// TODO: insert return statement here
 	}
 
-	void ExportManager::ExportAsKtx2(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material) {
+	void ExportManager::ExportAsKtx2(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material) {
 
+		namespace fs = std::filesystem;
 		// For ktx2 we can just copy some of the files but we have to check
 		// if we need to convert the normal format 
 		// and we need to export albedo and emission as srgb explicity..
@@ -536,97 +510,6 @@ namespace mnemosy::systems
 		}
 
 	}
-
-	void ExportManager::ExportMaterialTexturePngOrTif_Depricated(fs::path& exportPath, graphics::Texture& texture, bool singleChannelTexture, bool bits16) {
-
-		int width = texture.GetWidth();
-		int height = texture.GetHeight();
-
-		int channels = texture.GetChannelsAmount(); 
-		if (singleChannelTexture)
-			channels = 1;
-
-		texture.BindToLocation(0);
-		cv::Mat img;
-
-		if (bits16) {
-			unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * channels);
-			if (channels == 4) {
-
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_SHORT, gl_texture_bytes);
-				img = cv::Mat(height, width, CV_16UC4, gl_texture_bytes);
-
-			}
-			else if (channels == 3) {
-
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_SHORT, gl_texture_bytes);
-				img = cv::Mat(height, width, CV_16UC3, gl_texture_bytes);
-			}
-			else if (channels == 1) {
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_SHORT, gl_texture_bytes);
-				img = cv::Mat(height, width, CV_16UC1, gl_texture_bytes);
-			}
-
-			cv::flip(img, img, 0);
-			cv::imwrite(exportPath.generic_string().c_str(), img);
-			img.release();
-
-			free(gl_texture_bytes);
-		}
-		else {
-			char* gl_texture_bytes = (char*)malloc(sizeof(char) * width * height * channels);
-			if (channels == 4) {
-
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, gl_texture_bytes);
-				img = cv::Mat(height, width, CV_8UC4, gl_texture_bytes);
-			}
-			else if (channels == 3) {
-
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, gl_texture_bytes);
-				img = cv::Mat(height, width, CV_8UC3, gl_texture_bytes);
-			}
-			else if (channels == 1) {
-				glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, gl_texture_bytes);
-				img = cv::Mat(height, width, CV_8UC1, gl_texture_bytes);
-			}
-
-
-			cv::flip(img, img, 0);
-			cv::imwrite(exportPath.generic_string().c_str(), img);
-			img.release();
-
-			free(gl_texture_bytes);
-		}	
-
-
-		MNEMOSY_INFO("Exported: {}", exportPath.generic_string());
-	}
-
-	void ExportManager::ExportGlTexturePngOrTiff_Depricated(fs::path& exportPath, int glTextureId, int width, int height) {
-
-		// TODO: Make this function work for all types of textures 
-		// Only designed to be used with normal maps atm
-
-		cv::Mat img;
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, glTextureId);
-		
-		unsigned short* gl_texture_bytes = (unsigned short*)malloc(sizeof(unsigned short) * width * height * 3);
-
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_SHORT, gl_texture_bytes);
-		img = cv::Mat(height, width, CV_16UC3, gl_texture_bytes);
-
-
-		cv::flip(img, img, 0);
-		cv::imwrite(exportPath.generic_string().c_str(), img);
-		img.release();
-
-		free(gl_texture_bytes);
-	}
-
-
-
-
 
 	std::string ExportManager::GetExportNormalFormatString()
 	{

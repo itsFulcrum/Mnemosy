@@ -16,7 +16,7 @@ namespace mnemosy::graphics {
 		MNSY_TEXTURE_EMISSION			= 5,
 		MNSY_TEXTURE_HEIGHT				= 6,
 		MNSY_TEXTURE_OPACITY			= 7,
-		MNSY_TEXTURE_CUSTOMPACKED		= 8
+		MNSY_TEXTURE_COUNT				= 8
 	};
 	enum NormalMapFormat {
 		MNSY_NORMAL_FORMAT_OPENGl = 0,
@@ -70,14 +70,13 @@ namespace mnemosy::graphics {
 		MNSY_PACKCOMPONENT_EMISSIVE_G	= 8,
 		MNSY_PACKCOMPONENT_EMISSIVE_B	= 9,
 
-		MNSY_PACKCOMPONENT_ROUGHNESS		= 10,
+		MNSY_PACKCOMPONENT_ROUGHNESS	= 10,
 		MNSY_PACKCOMPONENT_METALLIC		= 11,
 		MNSY_PACKCOMPONENT_AO			= 12,
 		MNSY_PACKCOMPONENT_HEIGHT		= 13,
 		MNSY_PACKCOMPONENT_OPACITY		= 14,
 
 	};
-
 
 #define readable_textureFormats_DialogFilter "All Files\0 * .*\0 TIF (*.tif)\0*.tif\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0"
 
@@ -230,7 +229,7 @@ namespace mnemosy::graphics {
 			case mnemosy::graphics::MNSY_TEXTURE_OPACITY:
 				return "Opacity";
 				break;
-			case mnemosy::graphics::MNSY_TEXTURE_CUSTOMPACKED:
+			case mnemosy::graphics::MNSY_TEXTURE_COUNT:
 				return "CustomPacked";
 				break;
 			default:

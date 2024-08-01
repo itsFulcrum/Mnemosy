@@ -130,7 +130,7 @@ namespace mnemosy::graphics
 		bool m_msaaOff = false;
 
 		// Thumbnails
-		const uint16_t m_thumbnailResolution = 200;
+		const uint16_t m_thumbnailResolution = 256;
 
 		unsigned int m_thumb_MSAA_FBO = 0;
 		unsigned int m_thumb_MSAA_RBO = 0;

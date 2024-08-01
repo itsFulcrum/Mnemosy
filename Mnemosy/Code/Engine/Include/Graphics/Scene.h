@@ -18,13 +18,13 @@ namespace mnemosy::graphics
 {
 	enum PreviewMesh
 	{
-		Custom = 0,
-		Default = 1,
-		Cube = 2,
-		Plane = 3,
-		Sphere = 4,
-		Cylinder = 5,
-		Suzanne = 6
+		Custom		= 0,
+		Default		= 1,
+		Cube		= 2,
+		Plane		= 3,
+		Sphere		= 4,
+		Cylinder	= 5,
+		Suzanne		= 6
 	};
 
 	class Scene

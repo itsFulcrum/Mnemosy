@@ -62,14 +62,29 @@ namespace mnemosy::graphics
 		// ensure byte alingment hopefully
 		int rest = pic.step1() % 2;
 
-		if (rest == 0) {
+		int restWidth = m_width % 2;
+		int restHeight = m_height % 2;
+
+		if (restWidth == 1 || restHeight == 1) {
+
+		}else {
+		
+		}
+
+		// idk this does not seem to be the solution
+		//unsigned int padding = 4 - (pic.step1() / m_width);
+
+
+		//MNEMOSY_TRACE("{}x{}  step: {}, padding {}", restWidth, restHeight, pic.step1(), padding);
+		if (restWidth == 0) {
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		}
 		else if(rest == 1){
+		
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 		}
 
+		//glPixelStorei(GL_UNPACK_ALIGNMENT, padding);
 
 
 
@@ -121,9 +136,7 @@ namespace mnemosy::graphics
 		}
 
 		else if (m_channelsAmount == 1) {
-
-			//cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
-			
+						
 			if (bitDepth == 0) {
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pic.ptr());
 

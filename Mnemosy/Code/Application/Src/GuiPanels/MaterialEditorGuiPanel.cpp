@@ -4,11 +4,12 @@
 #include "Include/ApplicationConfig.h"
 #include "Include/MnemosyEngine.h"
 
-#include "Include/Core/FileDirectories.h"
+#include "Include/Core/Clock.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/FileDirectories.h"
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
 #include "Include/Core/Utils/DropHandler_Windows.h"
-#include "Include/Core/Clock.h"
+
 
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
@@ -40,7 +41,7 @@ namespace mnemosy::gui
 		m_textureTreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
 		
 
-		for (int i = 0; i < (int)graphics::MNSY_TEXTURE_CUSTOMPACKED; i++) {
+		for (int i = 0; i < (int)graphics::MNSY_TEXTURE_COUNT; i++) {
 			m_exportTexturesBools.push_back(true);
 		}
 	}
@@ -163,24 +164,26 @@ namespace mnemosy::gui
 		
 		if (ImGui::TreeNode("Export ##Settings")) {
 
-			int exportImageFormat_current = m_exportManager.GetExportImageFormatInt();
+			int exportImageFormat_current = (int)m_exportManager.GetExportImageFormat();
+
 			ImGui::Combo("Image Format ##Export", &exportImageFormat_current, m_exportFormats, IM_ARRAYSIZE(m_exportFormats));
 			ImGui::SetItemTooltip("Specify the image format used for exporting");
 
 			// if format changed
-			if (m_exportManager.GetExportImageFormatInt() != exportImageFormat_current) {
-				m_exportManager.SetExportImageFormatInt(exportImageFormat_current);
+			if ((int)m_exportManager.GetExportImageFormat() != exportImageFormat_current) {
+
+				m_exportManager.SetExportImageFormat((graphics::ExportImageFormat)exportImageFormat_current);
 			}
 
 
 			// Normal Map Format
-			int exportNormalFormat_current = m_exportManager.GetNormalMapExportFormatInt();
+			int exportNormalFormat_current = (int)m_exportManager.GetNormalMapExportFormat();
 			ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, m_normalMapFormats, IM_ARRAYSIZE(m_normalMapFormats));
 			ImGui::SetItemTooltip("Specify the normal map format to export normal maps with");
 
 			// if format changed
-			if (m_exportManager.GetNormalMapExportFormatInt() != exportNormalFormat_current) {
-				m_exportManager.SetNormalMapExportFormatInt(exportNormalFormat_current);
+			if ((int)m_exportManager.GetNormalMapExportFormat() != exportNormalFormat_current) {
+				m_exportManager.SetNormalMapExportFormat((graphics::NormalMapFormat)exportNormalFormat_current);
 			}
 
 			bool exportRoughAsSmooth = m_exportManager.GetExportRoughnessAsSmoothness();
@@ -196,7 +199,8 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 			ImGui::Spacing();
 
-			for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_CUSTOMPACKED; i++) {
+			// make a export checkbox for each standart texture type
+			for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_COUNT; i++) {
 			
 
 				graphics::PBRTextureType texType = (graphics::PBRTextureType)i;
@@ -213,7 +217,6 @@ namespace mnemosy::gui
 					if (m_exportTexturesBools[i] == true) {
 						m_exportTexturesBools[i] = false;
 					}
-
 
 					ImGui::BeginDisabled();
 				}
@@ -877,6 +880,8 @@ namespace mnemosy::gui
 				}
 			}
 
+			m_isOpacityButtonHovered = ImGui::IsItemHovered();
+
 			if (!textureAssigned && activeMat.isAlbedoAssigned()) {
 
 
@@ -884,9 +889,6 @@ namespace mnemosy::gui
 
 
 					m_materialRegistry.GenereateOpacityFromAlbedoAlpha(activeMat);
-
-
-
 				}
 
 			}

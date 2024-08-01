@@ -1,17 +1,16 @@
 #ifndef MESH_REGISTRY_H
 #define MESH_REGISTRY_H
 
-
 #include <string>
 #include <vector>
 
 namespace mnemosy::graphics {
 	struct ModelData;
-	class ModelLoader;
 }
 
 
-// This mesh registry works as is does because the loaded meshes never get freed until the program ends so we can use the position in the vector as id and be super fast
+// This mesh registry works because the loaded meshes never get freed until the program ends,
+//  -> so we can use the position in the vector as id and be super fast
 
 namespace mnemosy::systems {
 

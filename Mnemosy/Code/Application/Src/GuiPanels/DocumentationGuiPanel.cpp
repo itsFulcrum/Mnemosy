@@ -4,19 +4,14 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
 
-
 #include "External/ImGui/imgui.h"
 
 #include <filesystem>
 #include <fstream>
-#include <string>
 
 
 namespace mnemosy::gui
 {
-
-
-
 	DocumentationGuiPanel::DocumentationGuiPanel() {
 		panelName = "Documentation";
 		panelType = MNSY_GUI_PANEL_DOCUMENTATION;
@@ -24,9 +19,8 @@ namespace mnemosy::gui
 		LoadTextFromFileToString();
 	}
 
-	DocumentationGuiPanel::~DocumentationGuiPanel() {
-
-	}
+	DocumentationGuiPanel::~DocumentationGuiPanel()
+	{	}
 
 	void DocumentationGuiPanel::Draw() {
 
@@ -37,25 +31,25 @@ namespace mnemosy::gui
 
 		if (ImGui::CollapsingHeader("About Mnemosy")) {
 
-			ImGui::TextWrapped(m_AboutMnemosy_text.c_str());
+			ImGui::TextWrapped(m_about_text.c_str());
 		}
-		
+
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Spacing();
 
 		if (ImGui::CollapsingHeader("Geting Started")) {
 
-			ImGui::TextWrapped(m_GettingStarted_text.c_str());
+			ImGui::TextWrapped(m_getStarted_text.c_str());
 		}
-		
+
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Spacing();
 
 		if (ImGui::CollapsingHeader("Keymap & Controlls")) {
 
-			ImGui::TextWrapped(m_KeyboardControlls_text.c_str());
+			ImGui::TextWrapped(m_controlls_text.c_str());
 		}
 
 		ImGui::Spacing();
@@ -64,54 +58,55 @@ namespace mnemosy::gui
 
 		if (ImGui::CollapsingHeader("Additional Information")) {
 
-			ImGui::TextWrapped(m_AdditionalInformation_text.c_str());
+			ImGui::TextWrapped(m_additionalInfo_text.c_str());
 		}
-
 
 		ImGui::End();
 	}
 
+	// private
 	void DocumentationGuiPanel::LoadTextFromFileToString() {
 
-		std::filesystem::path documentationFileDir = MnemosyEngine::GetInstance().GetFileDirectories().GetDocumentationFilesPath();
+		std::filesystem::path documentationTextFilesDirectory = MnemosyEngine::GetInstance().GetFileDirectories().GetDocumentationFilesPath();
 
 		std::filesystem::path filePath;
-		filePath = documentationFileDir / std::filesystem::path("doc_aboutMnemosy.txt");
-		LoadTextFileToString(filePath.generic_string().c_str(), m_AboutMnemosy_text);
+
+		filePath = documentationTextFilesDirectory / std::filesystem::path("doc_aboutMnemosy.txt");
+		LoadTextFileToString(filePath.generic_string().c_str(), m_about_text);
 
 
-		filePath = documentationFileDir / std::filesystem::path("doc_gettingStarted.txt");
-		LoadTextFileToString(filePath.generic_string().c_str(), m_GettingStarted_text);
+		filePath = documentationTextFilesDirectory / std::filesystem::path("doc_gettingStarted.txt");
+		LoadTextFileToString(filePath.generic_string().c_str(), m_getStarted_text);
 
-		filePath = documentationFileDir / std::filesystem::path("doc_keymapControlls.txt");
-		LoadTextFileToString(filePath.generic_string().c_str(), m_KeyboardControlls_text);
+		filePath = documentationTextFilesDirectory / std::filesystem::path("doc_keymapControlls.txt");
+		LoadTextFileToString(filePath.generic_string().c_str(), m_controlls_text);
 
-		filePath = documentationFileDir / std::filesystem::path("doc_additionalInformation.txt");
-		LoadTextFileToString(filePath.generic_string().c_str(), m_AdditionalInformation_text);
+		filePath = documentationTextFilesDirectory / std::filesystem::path("doc_additionalInformation.txt");
+		LoadTextFileToString(filePath.generic_string().c_str(), m_additionalInfo_text);
 
-		
 	}
 
 	void DocumentationGuiPanel::LoadTextFileToString(const char* filepath, std::string& outString) {
-		
-		std::filesystem::directory_entry file = std::filesystem::directory_entry(filepath);
-		if (!file.exists() || file.is_directory() || !file.is_regular_file() || file.path().extension() != ".txt") {
-						
+
+		std::filesystem::directory_entry textFile = std::filesystem::directory_entry(filepath);
+		if (!textFile.exists() || textFile.is_directory() || !textFile.is_regular_file() || textFile.path().extension() != ".txt") {
+
 			MNEMOSY_ERROR("DocumentationGuiPanel::LoadTextFileToString: Filepath does not exist or is not a file \nFilepath: {}", filepath);
-			outString = "The filepath that contains the text for this string does not exist or is not a file: \nFilepath: " + file.path().generic_string();
+			outString = "The filepath that contains the text for this string does not exist or is not a file: \nFilepath: " + textFile.path().generic_string();
 			return;
 		}
 
-		std::ifstream fileContent;
+		std::ifstream fileContents;
 		std::stringstream buffer;
-		
-		fileContent.open(filepath);
 
-		buffer << fileContent.rdbuf();
+		fileContents.open(filepath);
+
+		buffer << fileContents.rdbuf();
 		outString = buffer.str();
 
+
 		buffer.clear();
-		fileContent.close();
+		fileContents.close();
 	}
 
 } // !mnemosy::gui

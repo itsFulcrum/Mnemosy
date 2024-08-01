@@ -1,33 +1,37 @@
 #include "Include/GuiPanels/GuiPanelManager.h"
-#include "Include/GuiPanels/MainMenuBarGuiPanel.h"
-#include "Include/GuiPanels/ViewportGuiPanel.h"
-#include "Include/GuiPanels/SceneSettingsGuiPanel.h"
-#include "Include/GuiPanels/MaterialEditorGuiPanel.h"
-#include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
-#include "Include/GuiPanels/DocumentationGuiPanel.h"
 
 #include "Include/Application.h"
 #include "Include/ApplicationConfig.h"
 
-#include "Include/MnemosyEngine.h"
-#include "Include/Gui/UserInterface.h"
-#include "Include/Systems/UserSettingsManager.h"
+#include "Include/GuiPanels/MainMenuBarGuiPanel.h"
+#include "Include/GuiPanels/ViewportGuiPanel.h"
+#include "Include/GuiPanels/SettingsGuiPanel.h"
+#include "Include/GuiPanels/MaterialEditorGuiPanel.h"
+#include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
+#include "Include/GuiPanels/DocumentationGuiPanel.h"
 
+
+#include "Include/MnemosyEngine.h"
+#include "Include/Systems/UserSettingsManager.h"
+#include "Include/Gui/UserInterface.h"
 
 namespace mnemosy::gui
 {
-	GuiPanelManager::GuiPanelManager()
-	{
+
+	GuiPanelManager::GuiPanelManager() {
+
 		UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
-		// gui panels
+		
+		// Create and register ImGui panels
+
 		m_pMainMenuBarPanel = new MainMenuBarGuiPanel();
 		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
 		
 		m_pViewportPanel = new ViewportGuiPanel();
 		userInterface.RegisterGuiPanel(m_pViewportPanel);	
 		
-		m_pSceneSettingsPanel = new SceneSettingsGuiPanel();
-		userInterface.RegisterGuiPanel(m_pSceneSettingsPanel);
+		m_pSettingsPanel = new SettingsGuiPanel();
+		userInterface.RegisterGuiPanel(m_pSettingsPanel);
 		
 		m_pMaterialEditorPanel = new MaterialEditorGuiPanel();
 		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
@@ -52,36 +56,26 @@ namespace mnemosy::gui
 
 	}
 
-	GuiPanelManager::~GuiPanelManager()
-	{
+	GuiPanelManager::~GuiPanelManager() {
+
 		// safe user settings before destroying the gui panels
 		MnemosyEngine::GetInstance().GetUserSettingsManager().SaveToFile();
 
 		UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
 
 		userInterface.UnregisterMainMenuBarGuiPanel();
-		delete m_pMainMenuBarPanel;
-		m_pMainMenuBarPanel = nullptr;
-
-		userInterface.UnregisterGuiPanel(m_pViewportPanel);
-		delete m_pViewportPanel;
-		m_pViewportPanel = nullptr;
-
-		userInterface.UnregisterGuiPanel(m_pSceneSettingsPanel);
-		delete m_pSceneSettingsPanel;
-		m_pSceneSettingsPanel = nullptr;
-
+		userInterface.UnregisterGuiPanel(m_pViewportPanel); 
+		userInterface.UnregisterGuiPanel(m_pSettingsPanel);
 		userInterface.UnregisterGuiPanel(m_pMaterialEditorPanel);
-		delete m_pMaterialEditorPanel;
-		m_pMaterialEditorPanel = nullptr;
-
 		userInterface.UnregisterGuiPanel(m_pMaterialLibraryPanel);
-		delete m_pMaterialLibraryPanel;
-		m_pMaterialLibraryPanel = nullptr;
-
 		userInterface.UnregisterGuiPanel(m_pDocumentationPanel);
+
+		delete m_pMainMenuBarPanel;
+		delete m_pViewportPanel;
+		delete m_pSettingsPanel;
+		delete m_pMaterialEditorPanel;
+		delete m_pMaterialLibraryPanel;
 		delete m_pDocumentationPanel;
-		m_pDocumentationPanel = nullptr;
 
 	}
 }

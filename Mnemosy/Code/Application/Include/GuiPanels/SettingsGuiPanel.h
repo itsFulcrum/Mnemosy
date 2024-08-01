@@ -5,10 +5,10 @@
 
 namespace mnemosy::gui
 {
-	class SceneSettingsGuiPanel : public GuiPanel
+	class SettingsGuiPanel : public GuiPanel
 	{
 	public:
-		SceneSettingsGuiPanel();
+		SettingsGuiPanel();
 
 		virtual void Draw() override;
 

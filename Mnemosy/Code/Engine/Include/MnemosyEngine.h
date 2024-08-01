@@ -34,6 +34,7 @@ namespace mnemosy::graphics
 	class Scene;
 	class ThumbnailScene;
 }
+
 namespace mnemosy::gui
 {
 	class UserInterface;
@@ -58,11 +59,12 @@ namespace mnemosy
 		void Shutdown();
 
 
-		// Getters
+		// Getters to the subsystems
 		core::Window& GetWindow()											{ return *m_pWindow; }
 		core::FileDirectories& GetFileDirectories()							{ return *m_pFileDirectories; }
 		core::Clock& GetClock()												{ return *m_pClock; }
 		core::DropHandler& GetDropHandler()									{ return *m_pDropHandler; }
+		
 		systems::InputSystem& GetInputSystem()								{ return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry()				{ return *m_pSkyboxAssetRegistry; }
 		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry()		{ return *m_pMaterialLibraryRegistry; }
@@ -76,7 +78,6 @@ namespace mnemosy
 		graphics::Renderer& GetRenderer() { return *m_pRenderer; }
 		graphics::Scene& GetScene() { return *m_pScene; }
 		graphics::ThumbnailScene& GetThumbnailScene() { return *m_pThumbnailScene; }
-
 
 		gui::UserInterface& GetUserInterface() { return *m_pUserInterface; }
 
@@ -95,11 +96,11 @@ namespace mnemosy
 		std::unique_ptr<systems::InputSystem> m_pInputSystem;
 		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;		
 		std::unique_ptr<systems::MaterialLibraryRegistry> m_pMaterialLibraryRegistry;
+		std::unique_ptr<systems::MeshRegistry> m_pMeshRegistry;
 		std::unique_ptr<systems::ThumbnailManager> m_pThumbnailManger;
 		std::unique_ptr<systems::TextureGenerationManager> m_pTextureGenerationManager;
 		std::unique_ptr<systems::ExportManager> m_pExportManager;
 		std::unique_ptr<systems::UserSettingsManager> m_pUserSettingsManager;
-		std::unique_ptr<systems::MeshRegistry> m_pMeshRegistry;
 		
 
 		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;

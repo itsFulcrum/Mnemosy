@@ -7,7 +7,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-namespace fs = std::filesystem;
+//namespace fs = std::filesystem;
 
 
 
@@ -20,10 +20,6 @@ namespace mnemosy::graphics
 
 namespace mnemosy::systems
 {
-
-	
-
-
 
 	struct TextureExportInfo {
 	public:
@@ -51,20 +47,19 @@ namespace mnemosy::systems
 		~ExportManager();
 
 
-		bool ExportMaterialTextures(fs::path& exportPath, fs::path& materialFolderPath,graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
+		bool ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
 
-
-
-		void SetExportImageFormatInt(int format);
-		void SetExportImageFormat(graphics::ExportImageFormat format) { m_exportImageFormat = format; }
-		const int GetExportImageFormatInt() { return (const int)m_exportImageFormat; }
-
-		void SetNormalMapExportFormatInt(int format);
-		void SetNormalMapExportFormat(graphics::NormalMapFormat format) { m_exportNormalFormat = format; }
-		const int GetNormalMapExportFormatInt() { return (const int)m_exportNormalFormat; }
 		
-		void ExportMaterialTexturePngOrTif_Depricated(fs::path& exportPath,graphics::Texture& texture,bool singleChannelTexture,bool bits16);
-		void ExportGlTexturePngOrTiff_Depricated(fs::path& exportPath, int glTextureId, int width, int height);
+		void SetExportImageFormat(graphics::ExportImageFormat format) { m_exportImageFormat = format; }
+		const graphics::ExportImageFormat GetExportImageFormat() { return m_exportImageFormat; }
+
+
+
+
+
+		//void SetNormalMapExportFormatInt(int format);
+		void SetNormalMapExportFormat(graphics::NormalMapFormat format) { m_exportNormalFormat = format; }
+		graphics::NormalMapFormat GetNormalMapExportFormat() { return m_exportNormalFormat; }
 
 
 		void ExportGlTexture_PngOrTiff(const int glTextureId,TextureExportInfo& exportInfo);
@@ -75,7 +70,7 @@ namespace mnemosy::systems
 		void SetExportRoughnessAsSmoothness(bool exportRoughAsSmooth) { m_exportRoughnessAsSmoothness = exportRoughAsSmooth; }
 		bool GetExportRoughnessAsSmoothness() { return m_exportRoughnessAsSmoothness; }
 	private:
-		void ExportAsKtx2(fs::path& exportPath, fs::path& materialFolderPath, graphics::Material& material);
+		void ExportAsKtx2(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material);
 
 
 		std::vector<std::string> m_lastExportedFilePaths;

@@ -112,7 +112,6 @@ namespace mnemosy::systems
 		dataFileStream.close();
 
 		delete LibraryDirectoriesJson;
-		LibraryDirectoriesJson = nullptr;
 	}
 
 

@@ -1,25 +1,25 @@
 #include "Include/Application.h"
 
+#include "Include/MnemosyEngine.h"
+
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
-#include "Include/Gui/UserInterface.h"
 #include "Include/Input/CameraInputController.h"
 #include "Include/Input/SceneInputController.h"
 #include "Include/GuiPanels/GuiPanelManager.h"
 
-
-#include <string>
-
 namespace mnemosy
 {
-	// private singleton stuff
-	Application::Application() {	}
+	// private
+	Application::Application()
+		: m_mnemosyEngine{MnemosyEngine::GetInstance()}
+	
+	{	}
 	Application* Application::m_sInstance = nullptr;
 
 
 	// public
-	Application& Application::GetInstance()
-	{
+	Application& Application::GetInstance() {
 		if (!m_sInstance)
 		{
 			m_sInstance = new Application();
@@ -29,51 +29,35 @@ namespace mnemosy
 	}
 
 	Application::~Application()
-	{
-		
-	}
+	{	}
 
-	void Application::Initialize()
-	{
-		m_mnemosyEngine.Initialize("Mnemosy Texture Library");
+	void Application::Initialize()	{
 
+		m_mnemosyEngine.Initialize("Mnemosy");
 
-
-		m_cameraController = new input::CameraInputController();
-		m_sceneInputController = new input::SceneInputController();
-
-
+		m_pCameraController = new input::CameraInputController();
+		m_pSceneInputController = new input::SceneInputController();
 		m_pGuiPanelManager = new gui::GuiPanelManager();
 
-		double applicationLoadTime = GetEngine().GetClock().GetTimeSinceLaunch();
+		double applicationLoadTime = m_mnemosyEngine.GetClock().GetTimeSinceLaunch();
 		MNEMOSY_INFO("Mnemosy Application Initialized: {} Seconds", applicationLoadTime);
 	}
 
-	void Application::Run()
-	{
+	void Application::Run() {
+
 		m_mnemosyEngine.Run();
 	}
 
-	void Application::Shutdown()
-	{
-		delete m_cameraController;
-		m_cameraController = nullptr;
-		delete m_sceneInputController;
-		m_sceneInputController = nullptr;
+	void Application::Shutdown() {
 
-
+		delete m_pCameraController;
+		delete m_pSceneInputController;
 		delete m_pGuiPanelManager;
-		m_pGuiPanelManager = nullptr;
 
 		// shutdown engine last
 		m_mnemosyEngine.Shutdown();
 
 		delete m_sInstance;
-	}
-
-	MnemosyEngine& Application::GetEngine()
-	{
-		return m_mnemosyEngine;
 	}
 
 } // mnemosy

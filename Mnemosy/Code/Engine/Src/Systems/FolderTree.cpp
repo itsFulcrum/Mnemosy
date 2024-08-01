@@ -152,34 +152,34 @@ namespace mnemosy::systems {
 		return newName;
 	}
 
-	void FolderTree::LoadFromJson(json& rootJson) {
+	void FolderTree::LoadFromJson(nlohmann::json& rootJson) {
 
 		bool rootIsLeaf = rootJson["3_UserDirectories"][m_rootNodeName]["2_isLeaf"].get<bool>();
 
-		json firstTreeEntryJson = rootJson["3_UserDirectories"][m_rootNodeName];
+		nlohmann::json firstTreeEntryJson = rootJson["3_UserDirectories"][m_rootNodeName];
 
 		RecursivLoadFromJson(m_rootNode, firstTreeEntryJson);
 	}
 
-	json* FolderTree::WriteToJson() {
+	nlohmann::json* FolderTree::WriteToJson() {
 
-		json LibraryDirectoriesJson; // top level json object
+		nlohmann::json LibraryDirectoriesJson; // top level json object
 		LibraryDirectoriesJson[jsonLibKey_MnemosyDataFile] = "UserLibraryDirectoriesData";
 
-		json HeaderInfo;
+		nlohmann::json HeaderInfo;
 		std::string descriptionString = "This file stores the treelike folder structure defined by users to organise their materials";
 		HeaderInfo[jsonLibKey_Description] = descriptionString;
 
 		LibraryDirectoriesJson[jsonLibKey_HeaderInfo] = HeaderInfo;
 
 
-		json rootFolderJson = RecursivWriteToJson(m_rootNode);
+		nlohmann::json rootFolderJson = RecursivWriteToJson(m_rootNode);
 
-		json userDirectoriesJson;
+		nlohmann::json userDirectoriesJson;
 		userDirectoriesJson[m_rootNodeName] = rootFolderJson;
 		LibraryDirectoriesJson[jsonLibKey_FolderTree] = userDirectoriesJson;
 
-		return new json(LibraryDirectoriesJson);
+		return new nlohmann::json(LibraryDirectoriesJson);
 	}
 
 	MaterialInfo& FolderTree::CreateMaterial_Internal(FolderNode* node, const std::string name) {
@@ -299,9 +299,9 @@ namespace mnemosy::systems {
 		return false;
 	}
 
-	json FolderTree::RecursivWriteToJson(FolderNode* node) {
+	nlohmann::json FolderTree::RecursivWriteToJson(FolderNode* node) {
 
-		json nodeJson;
+		nlohmann::json nodeJson;
 
 		
 		nodeJson[jsonLibKey_name] = node->name;
@@ -347,7 +347,7 @@ namespace mnemosy::systems {
 			}
 			nodeJson[jsonLibKey_subFolderNames] = subNodeNames;
 
-			json subNodes;
+			nlohmann::json subNodes;
 			for (size_t i = 0; i < node->subNodes.size(); i++) {
 
 				subNodes[node->subNodes[i]->name] = RecursivWriteToJson(node->subNodes[i]);
@@ -359,7 +359,7 @@ namespace mnemosy::systems {
 		return nodeJson;
 	}
 
-	void FolderTree::RecursivLoadFromJson(FolderNode* node, const json& jsonNode) {
+	void FolderTree::RecursivLoadFromJson(FolderNode* node, const nlohmann::json& jsonNode) {
 
 		bool isLeafNode = jsonNode[jsonLibKey_isLeaf].get<bool>();
 
@@ -379,7 +379,7 @@ namespace mnemosy::systems {
 			for (size_t i = 0; i < subFolderNames.size(); i++) {
 
 				FolderNode* subNode = CreateNewFolder_Internal(node, subFolderNames[i]);
-				json subJson = jsonNode[jsonLibKey_subFolders][subFolderNames[i]];
+				nlohmann::json subJson = jsonNode[jsonLibKey_subFolders][subFolderNames[i]];
 				RecursivLoadFromJson(subNode, subJson);
 			}
 		}

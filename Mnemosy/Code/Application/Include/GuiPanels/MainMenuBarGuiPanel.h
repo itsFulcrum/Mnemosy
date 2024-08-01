@@ -10,28 +10,25 @@ namespace mnemosy::gui {
 
 namespace mnemosy::gui
 {
-	class MainMenuBarGuiPanel : public GuiPanel
-	{
+
+	class MainMenuBarGuiPanel : public GuiPanel {
 	public:
 		MainMenuBarGuiPanel();
 
 		virtual void Draw() override;
 		
 	private:
-
 		void DataDropdown();
-		const char* m_dataDropdown_ImGuiLabel = "Data";
-
 		void ViewsDropdown();
+	private:
+
+		const char* m_dataDropdown_ImGuiLabel = "Data";
 
 		bool viewportPanel = false;
 		bool sceneSettings = false;
 		bool materialEditorPanel = false;
 		bool materialLibraryPanel = false;
 		bool documentationPanel = false;
-		
-
-		
 	};
 }
 #endif // !MAIN_MENU_BAR_GUI_PANEL_H

@@ -1,4 +1,5 @@
-#include "Include/GuiPanels/SceneSettingsGuiPanel.h"
+#include "Include/GuiPanels/SettingsGuiPanel.h"
+
 #include "Include/Core/Log.h"
 
 #include "Include/MnemosyConfig.h"
@@ -29,14 +30,14 @@
 
 namespace mnemosy::gui
 {
-	SceneSettingsGuiPanel::SceneSettingsGuiPanel()
+	SettingsGuiPanel::SettingsGuiPanel()
 	{
 		panelName = "Settings";
 		panelType = MNSY_GUI_PANEL_SETTINGS;
 		//m_currentSelectedSkybox = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetPositionByName("Market");  // TODO: make this part of the skybox registry so we can keep it in sync with viewport
 	}
 
-	void SceneSettingsGuiPanel::Draw()
+	void SettingsGuiPanel::Draw()
 	{
 		if (!showPanel)
 			return;
