@@ -37,6 +37,7 @@ namespace mnemosy::graphics
 
 		float OpacityTreshhold = 0.5f;
 		float HeightDepth = 1.0f;
+		float MaxHeight = 0.0f;
 		float NormalStrength = 1.0f; // not supported by shader at the moment
 
 		NormalMapFormat NormalTextureFormat;

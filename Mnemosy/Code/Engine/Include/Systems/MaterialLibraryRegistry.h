@@ -31,49 +31,6 @@ namespace mnemosy::graphics {
 namespace mnemosy::systems
 {
 
-	struct MaterialEntry {
-		std::string name;
-
-		float albedo_r			= 1.0f;
-		float albedo_g			= 1.0f;
-		float albedo_b			= 1.0f;
-		
-		float roughness			= 0.5f;
-		float metallic			= 0.0f;
-		
-		float emission_r		= 0.0f;
-		float emission_g		= 0.0f;
-		float emission_b		= 0.0f;
-		float emissionStrength	= 0.0f;
-		bool useEmissiveAsMask  = false;
-		float normalStrength	= 1.0f;
-		float uvScale_x			= 1.0f;
-		float uvScale_y			= 1.0f;
-
-		float opacityThreshold  = 0.5f;
-		float heightDepth = 1.0f;
-
-		bool albedoAssigned		= false;
-		bool roughAssigned		= false;
-		bool metalAssigned		= false;
-		bool emissionAssigned	= false;
-		bool normalAssigned		= false;
-		bool aoAssigned			= false;
-		bool opacityAssigned	= false;
-		bool heightAssigned		= false;
-
-		std::string albedoPath		= "notAssigned";
-		std::string roughPath		= "notAssigned";
-		std::string metalPath		= "notAssigned";
-		std::string emissionPath	= "notAssigned";
-		std::string normalPath		= "notAssigned";
-		std::string aoPath			= "notAssigned";
-		std::string opacityPath		= "notAssigned";
-		std::string heightPath		= "notAssigned";
-
-		std::string thumbnailPath	= "notAssigned";
-	};
-
 	class MaterialLibraryRegistry
 	{
 	public:
@@ -105,8 +62,8 @@ namespace mnemosy::systems
 		void DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix);
 
 
-		void LoadActiveMaterialFromFile(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
-		void LoadActiveMaterialFromFile_Multithreaded(fs::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
+		void LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
+		void LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
 
 		void SaveActiveMaterialToFile();
 		void SetDefaultMaterial();
@@ -127,19 +84,19 @@ namespace mnemosy::systems
 
 		int GetActiveMaterialID() { return m_activeMaterialID; }
 		FolderNode* GetSelectedNode() { return m_selectedFolderNode; }
-		fs::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
-		fs::path GetActiveMaterialFolderPath();
+		std::filesystem::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
+		std::filesystem::path GetActiveMaterialFolderPath();
 
 
-		fs::path GetLibraryPath();
-		fs::path GetFolderPath(FolderNode* node);
-		fs::path GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo);
+		std::filesystem::path GetLibraryPath();
+		std::filesystem::path GetFolderPath(FolderNode* node);
+		std::filesystem::path GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo);
 
 		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
 
 	private:
-		bool CheckDataFile(fs::directory_entry dataFile);
-		void CreateNewMaterialDataFile(fs::path& folderPath,std::string& name);
+		bool CheckDataFile(std::filesystem::directory_entry dataFile);
+		void CreateNewMaterialDataFile(std::filesystem::path& folderPath,std::string& name);
 		void CreateDirectoryForNode(FolderNode* node);
 		
 	public:
@@ -149,10 +106,10 @@ namespace mnemosy::systems
 		core::FileDirectories& m_fileDirectories;
 		FolderNode* m_selectedFolderNode = nullptr;
 
-		fs::directory_entry m_userDirectoriesDataFile;
+		std::filesystem::directory_entry m_userDirectoriesDataFile;
 		
 		// active Material;
-		fs::path m_activeMaterialDataFilePath;
+		std::filesystem::path m_activeMaterialDataFilePath;
 		unsigned int m_activeMaterialID = 0; // 0 means non selected // at startup and if selected gets deleted
 		bool m_userMaterialBound = false;
 		

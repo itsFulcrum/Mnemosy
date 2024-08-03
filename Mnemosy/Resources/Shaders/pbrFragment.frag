@@ -52,6 +52,7 @@ uniform float _ambientOcculusionValue;
 uniform vec2 _normalValue; // x = _normalStrength y = indicate if normal is bound our not 0 = is bound, 1 = not bound
 uniform bool _heightAssigned; // if Height map is assigned
 uniform float _heightDepth;
+uniform float _maxHeight;
 uniform vec2 _opacityValue; // x = opacityThreshold, y = indicates if thexture is bound 0 = is bound 1 = not Bound
 
 // adsitional settings
@@ -87,10 +88,15 @@ void ApplyAlphaDiscard(float opacity,vec2 opacityValue,vec2 screenSpaceUV, vec2 
 	 	discard;
 }
 
+float SampleHeight(vec2 currUV) {
+	float h = texture(_heightMap, currUV).r;
+ 	h = saturate(h + _maxHeight);
+	return 1.0f - h;
+}
 
 vec2 SteepParralaxUV(vec2 uvs){
 
-	float hightScale = _heightDepth * 0.01f;
+	float hightScale = _heightDepth * 0.01f * (1 + _maxHeight) * (1 + _maxHeight);
 
 	// working in tangent space
 	vec3 viewPos_TS = TBN * _cameraPositionWS;
@@ -111,12 +117,15 @@ vec2 SteepParralaxUV(vec2 uvs){
 
 	// get initial values
 	vec2  currentUV = uvs;
-	float currentDepthMapValue = 1 - texture(_heightMap, currentUV).r;
+	float currentDepthMapValue = SampleHeight(currentUV);
+
+
+	//float d = 1 - ( saturate(texture(_heightMap, currentUV).r + _maxHeight) );
 
 	while(currentLayerDepth < currentDepthMapValue)
 	{
 	 currentUV -= offset;
-	 currentDepthMapValue = 1- texture(_heightMap, currentUV).r;
+	 currentDepthMapValue = SampleHeight(currentUV);
 	 currentLayerDepth += layerDepth;
 	}
 

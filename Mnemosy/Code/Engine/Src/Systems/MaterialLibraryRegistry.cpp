@@ -29,10 +29,6 @@
 #include <fstream>
 #include <thread>
 
-
-
-
-
 namespace mnemosy::systems
 {
 	// == public methods
@@ -765,6 +761,7 @@ namespace mnemosy::systems
 			}
 
 			mat->HeightDepth = readFile[jsonMatKey_heightDepth].get<float>();
+			mat->MaxHeight = readFile[jsonMatKey_maxHeight].get<float>();
 			mat->OpacityTreshhold = readFile[jsonMatKey_opacityThreshold].get<float>();
 
 			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
@@ -1012,6 +1009,7 @@ namespace mnemosy::systems
 			}
 
 			mat->HeightDepth = readFile[jsonMatKey_heightDepth].get<float>();
+			mat->MaxHeight = readFile[jsonMatKey_maxHeight].get<float>();
 			mat->OpacityTreshhold = readFile[jsonMatKey_opacityThreshold].get<float>();
 
 			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
@@ -1204,6 +1202,7 @@ namespace mnemosy::systems
 		MaterialJson[jsonMatKey_normalMapFormat] = activeMat.GetNormalFormatAsInt(); // 0 = OpenGl, 1 = DirectX
 
 		MaterialJson[jsonMatKey_heightDepth] = activeMat.HeightDepth;
+		MaterialJson[jsonMatKey_maxHeight] = activeMat.MaxHeight;
 		MaterialJson[jsonMatKey_opacityThreshold] = activeMat.OpacityTreshhold;
 
 		MaterialJson[jsonMatKey_uvScale_x] = activeMat.UVTiling.x;
@@ -1749,6 +1748,7 @@ namespace mnemosy::systems
 		MaterialJson[jsonMatKey_isSmoothness]		= false;
 
 		MaterialJson[jsonMatKey_heightDepth]		= 0.0f;
+		MaterialJson[jsonMatKey_maxHeight]			= 0.0f;
 		MaterialJson[jsonMatKey_opacityThreshold]	= 0.5;
 
 

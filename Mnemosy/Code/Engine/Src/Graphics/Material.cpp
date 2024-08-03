@@ -74,6 +74,7 @@ namespace mnemosy::graphics
 		UseEmissiveAsMask = false;
 		NormalStrength = 1.0f;
 		HeightDepth = 0.0f;
+		MaxHeight = 0.0f;
 		UVTiling = glm::vec2(1.0f, 1.0f);
 		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
 		OpacityTreshhold = 0.5f;
@@ -258,6 +259,7 @@ namespace mnemosy::graphics
 		shader.SetUniformFloat("_emissionStrength", EmissionStrength);
 		shader.SetUniformFloat2("_uvTiling", UVTiling.x, UVTiling.y);
 		shader.SetUniformFloat("_heightDepth", HeightDepth);
+		shader.SetUniformFloat("_maxHeight", MaxHeight);
 		
 		// for the solid non texture values im passing an extra parameters for each as the last one to specify how much of it will contribute between the texture and the solid non texture values
 		// esentially lerping between texture input and non texture input. the lerp value however is just binary 0 or 1 

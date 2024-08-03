@@ -49,6 +49,7 @@ namespace mnemosy::systems {
 #define jsonMatKey_normalStrength	"normalStrength"		// float - value
 #define jsonMatKey_normalMapFormat	"normalMapFormat"		// int - format of the original provided normal map, 0 = OpenGl, 1 = DirectX
 #define jsonMatKey_heightDepth		"heightDepth"			// float - value 
+#define jsonMatKey_maxHeight		"maxHeight"				// float - value to describe the highest value of the height texture.
 #define jsonMatKey_isSmoothness		"isSmoothness"			// bool - if texture was provided as smoothness texture
 
 #define jsonMatKey_uvScale_x		"uvScale_x"				// float - value

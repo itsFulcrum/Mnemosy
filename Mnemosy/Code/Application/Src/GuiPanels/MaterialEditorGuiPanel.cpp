@@ -847,6 +847,11 @@ namespace mnemosy::gui
 					m_valuesChanged = true;
 				}
 
+				if (ImGui::SliderFloat("Max Height", &activeMat.MaxHeight, 0.0f, 1.0f, "%.4f")) {
+					m_valuesChanged = true;
+				}
+
+
 			}
 			if (!textureAssigned)
 				ImGui::EndDisabled();
