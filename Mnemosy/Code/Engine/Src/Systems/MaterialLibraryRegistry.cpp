@@ -1481,6 +1481,7 @@ namespace mnemosy::systems
 		
 		// load texture to material
 		activeMat.assignTexture(textureType, tex);
+
 	}
 
 	void MaterialLibraryRegistry::DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType) {

@@ -1116,18 +1116,25 @@ namespace mnemosy::gui
 	// Callback when files are droped into mnemosy
 	void MaterialEditorGuiPanel::OnFileDropInput(int count, std::vector<std::string>& dropedFilePaths) {
 
-		if (m_isPanelHovered) {
+
+		namespace fs = std::filesystem;
+
+		if (!m_materialRegistry.UserMaterialBound())
+			return;
+
+		if (!m_isPanelHovered)
+			return;
+	
+		
+		if (count == 0)
+			return;
+
+		if (dropedFilePaths.empty()) // just making sure
+			return;
 
 
-			if (count == 0)
-				return;
-
-			if (dropedFilePaths.empty()) // just making sure
-				return;
-
-
-
-			// we kinda only want to handle the first one.
+		// try handle only first one an check if it is above a specific button
+		{
 			std::string firstPath = dropedFilePaths[0];
 			fs::directory_entry firstFile = fs::directory_entry(firstPath);
 
@@ -1147,46 +1154,102 @@ namespace mnemosy::gui
 				// albedo 
 				if (m_isAbedoButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ALBEDO, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// roughness
 				else if (m_isRoughnessButtonHovered) {
 					
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// normal
 				else if (m_isNormalButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_NORMAL, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// metallic
 				else if (m_isMetallicButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_METALLIC, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// ao
 				else if (m_isAmbientOcclusionButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// emission
 				else if (m_isEmissionButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_EMISSION, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// height
 				else if (m_isHeightButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_HEIGHT, firstPath);
+					SaveMaterial();
+					return;
 				}
 				// opacity
 				else if (m_isOpacityButtonHovered) {
 					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_OPACITY, firstPath);
+					SaveMaterial();
+					return;
 				}
-
-
-				SaveMaterial();
-
 			}
-			
-			
-				
-			
+
 		}
+			
+
+		// now see if we can match all filepath into some texture slot
+		graphics::Material& activeMat = m_engineInstance.GetScene().GetActiveMaterial();
+
+
+		for (int i = 0; i < dropedFilePaths.size(); i++) {
+
+
+			fs::path filepath{ dropedFilePaths[i] };
+			//fs::directory_entry file{ filepath };
+
+
+			if(filepath.has_extension()){
+
+				std::string fileExtention = filepath.extension().generic_string();
+				if (fileExtention == ".png" || fileExtention == ".tif" || fileExtention == ".tiff" || fileExtention == ".jpg" || fileExtention == ".jpeg") {
+
+
+
+					fs::path filename = filepath.filename();
+
+					filename.replace_extension("");
+
+					std::string filenameString = filename.generic_string();
+
+					graphics::PBRTextureType type = graphics::TextureDefinitions::GetTypeFromFileName(filenameString);
+
+
+					if (type != graphics::MNSY_TEXTURE_NONE && type != graphics::MNSY_TEXTURE_COUNT) {
+
+
+						//std::string typeString = graphics::TextureDefinitions::GetTextureNameFromEnumType(type);
+						//MNEMOSY_TRACE("FileDrop: {}, Matches Type: {} Path: {}", filenameString,typeString, filepath.generic_string());
+
+						std::string filepathString = filepath.generic_string();
+						m_materialRegistry.LoadTextureForActiveMaterial(type, filepathString);
+					}
+					else {
+						MNEMOSY_WARN("Could not determine pbr type for texture with name: {}, {}", filename.generic_string(), filepath.generic_string());
+					}
+
+					SaveMaterial();
+				}
+			}
+		}		
+			
 
 	}
 

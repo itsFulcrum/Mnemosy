@@ -5,6 +5,10 @@
 #include "Include/Systems/JsonKeys.h"
 #include "Include/Core/Log.h"
 
+
+#include <cctype>
+#include <clocale>
+
 namespace mnemosy::graphics {
 
 	enum PBRTextureType {
@@ -16,7 +20,8 @@ namespace mnemosy::graphics {
 		MNSY_TEXTURE_EMISSION			= 5,
 		MNSY_TEXTURE_HEIGHT				= 6,
 		MNSY_TEXTURE_OPACITY			= 7,
-		MNSY_TEXTURE_COUNT				= 8
+		MNSY_TEXTURE_COUNT				= 8,
+		MNSY_TEXTURE_NONE				= 9
 	};
 	enum NormalMapFormat {
 		MNSY_NORMAL_FORMAT_OPENGl = 0,
@@ -230,7 +235,7 @@ namespace mnemosy::graphics {
 				return "Opacity";
 				break;
 			case mnemosy::graphics::MNSY_TEXTURE_COUNT:
-				return "CustomPacked";
+				return "Count";
 				break;
 			default:
 				return "none";
@@ -324,6 +329,103 @@ namespace mnemosy::graphics {
 			}
 
 			return std::string("NONE");
+		}
+
+
+		static void str_tolower(std::string& s)
+		{
+			std::transform(s.begin(), s.end(), s.begin(),[](unsigned char c) { return std::tolower(c); } // correct
+			);
+		}
+
+		static PBRTextureType GetTypeFromFileName(const std::string& name) {
+
+
+			std::string testAgainst = name;
+			
+			str_tolower(testAgainst);
+			
+
+			//albdeo
+			const char* albedos[4] = { "albedo","_col","color","diffuse"};
+
+			for (int i = 0; i < 4; i++) {
+
+				if (testAgainst.find(albedos[i]) != std::string::npos) {
+					
+					return MNSY_TEXTURE_ALBEDO;
+				}
+			}
+
+			// Roughness
+			const char* rough[3] = { "roughness","gloss","smoothness" };
+			for (int i = 0; i < 3; i++) {
+
+				if (testAgainst.find(rough[i]) != std::string::npos) {
+					
+					return MNSY_TEXTURE_ROUGHNESS;
+				}
+			}
+
+			// metal
+			if (testAgainst.find("metallic") != std::string::npos) {
+
+				return MNSY_TEXTURE_METALLIC;
+			}
+
+
+			// normal
+			const char* norm[2] = { "_normal" , "_nrm"};
+			for (int i = 0; i < 2; i++) {
+
+				if (testAgainst.find(norm[i]) != std::string::npos) {
+
+					return MNSY_TEXTURE_NORMAL;
+				}
+			}
+
+			// AO
+			const char* ao[4] = { "_ao" , "_occ","_ambient","ambientocclusion" };
+			for (int i = 0; i < 4; i++) {
+
+				if (testAgainst.find(ao[i]) != std::string::npos) {
+
+					return MNSY_TEXTURE_AMBIENTOCCLUSION;
+				}
+			}
+
+			// emission
+			const char* emit[2] = { "emission" , "emissive" };
+			for (int i = 0; i < 2; i++) {
+
+				if (testAgainst.find(emit[i]) != std::string::npos) {
+
+					return MNSY_TEXTURE_EMISSION;
+				}
+			}
+
+			// height
+			const char* height[5] = { "height" , "depth", "bump", "_disp", "displacement"};
+			for (int i = 0; i < 5; i++) {
+
+				if (testAgainst.find(height[i]) != std::string::npos) {
+
+					return MNSY_TEXTURE_HEIGHT;
+				}
+			}
+
+			// opacity
+			const char* opacity[3] = { "opacity" , "transparency", "_alpha" };
+			for (int i = 0; i < 3; i++) {
+
+				if (testAgainst.find(opacity[i]) != std::string::npos) {
+
+					return MNSY_TEXTURE_OPACITY;
+				}
+			}
+
+
+			return PBRTextureType::MNSY_TEXTURE_NONE;
 		}
 
 	};
