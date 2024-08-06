@@ -23,10 +23,15 @@ namespace mnemosy::core
 		const std::filesystem::path GetCubemapsPath();
 		const std::filesystem::path GetShadersPath();
 		const std::filesystem::path GetDocumentationFilesPath();
+		const std::filesystem::path GetUserLibDataFile();
 
 
 		const std::filesystem::path GetLibraryDirectoryPath();
+
 		void SetNewUserLibraryDirectory(const std::filesystem::directory_entry& directoryPath,bool copyOldFiles,bool deleteOldFiles);
+
+		bool LoadExistingMaterialLibrary(const std::filesystem::path& folderPath, bool deleteOldFiles, bool saveAsNewLibraryDirectory);
+
 		bool ContainsUserData();
 
 
@@ -35,7 +40,7 @@ namespace mnemosy::core
 	private:
 		bool prettyPrintDataFile = false;
 		std::string m_rootMaterialLibraryFolderName;// = "MnemosyMaterialLibrary";
-
+		std::string m_userLibraryDataFileName;
 		void LoadUserLibraryDirectoryFromDataFile();
 		void SaveUserLibraryDirectoryToDataFile(const std::filesystem::directory_entry& libraryDirectoryPath);
 		bool CheckLibraryDataFile();

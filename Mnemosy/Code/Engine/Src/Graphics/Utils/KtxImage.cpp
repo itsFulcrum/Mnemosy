@@ -443,6 +443,7 @@ namespace mnemosy::graphics
 		return true;
 	}
 
+	//fixme please
 	const bool KtxImage::ExportGlTexture(const char* filepath, unsigned int glTextureID, const unsigned int numChannels, const unsigned int width, const unsigned int height, ktxImgFormat imgFormat, bool exportMips) {
 
 		ktxTexture2* texture;
@@ -573,40 +574,28 @@ namespace mnemosy::graphics
 
 				ktx_size_t mipSizeBytes = nextMip_Width * nextMip_Height * channels * sizeof(uint8_t);
 
-				float aspectRatio = (float)nextMip_Width / (float)nextMip_Height;
-				//MNEMOSY_TRACE("ExportingMip: {}, Width: {}	Height: {}	Channels: {}	Bytes: {}	Aspect Ratio: {}", mip, nextMip_Width, nextMip_Height, channels, (float)mipSizeBytes, aspectRatio);
 
-				/*if (aspectRatio != InitialAspectRatio) {
-					break;
-				}*/
+				void* pixels = malloc(mipSizeBytes);
 
-				//unsigned char* pixels = new unsigned char[mipSizeBytes];
-
-				//void* pixels = malloc(mipSizeBytes);
-
-				uint8_t* pixels = new uint8_t[mipSizeBytes];
-
+				glPixelStorei(GL_PACK_ALIGNMENT, 4); // should be dependent on width and pixel row byte alingment but works for thumbnails 256x256 for now
 				// RGB or RGBA texture
 				// get pixel data from a glUploadedTexture
 				if (channels == 4) {
-					glGetnTexImage(GL_TEXTURE_2D, mip, GL_RGBA, GL_UNSIGNED_BYTE, mipSizeBytes, pixels);
-					//glGetTextureImage(glTextureID, mip, GL_RGBA, GL_UNSIGNED_BYTE, mipSizeBytes, pixels);
+					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 				}
 				else if (channels == 3) {
-					//glGetTextureImage(glTextureID, mip, GL_RGBA, GL_UNSIGNED_BYTE, mipSizeBytes, pixels);
-					glGetnTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_UNSIGNED_BYTE,mipSizeBytes, pixels);
+					glGetTexImage(GL_TEXTURE_2D, mip, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 				}
 
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, mipSizeBytes); //
+				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, layer, 0, (unsigned char*)pixels, mipSizeBytes);
 				if (errorCode != 0) {
 					MNEMOSY_ERROR("KtxImage::ExportGlTexture: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
 					ktxTexture_Destroy(ktxTexture(texture));
-					delete[] pixels;
-					//free(pixels);
+
+					free(pixels);
 					return false;
 				}
-				delete[] pixels;
-				//free(pixels);
+				free(pixels);
 							
 
 				nextMip_Width  = (int)((double)nextMip_Width * 0.5f);

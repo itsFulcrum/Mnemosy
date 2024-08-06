@@ -14,8 +14,11 @@ namespace mnemosy::core
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
 
 		m_rootMaterialLibraryFolderName = "MnemosyMaterialLibrary";
+		m_userLibraryDataFileName = "MnemosyMaterialLibraryData.mnsydata";
+
 
 		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MnemosyMaterialLibrary)");
+
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
 			MNEMOSY_WARN("Default Mnemosy Directory does not yet exist. Creating directories {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
 			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
@@ -28,6 +31,7 @@ namespace mnemosy::core
 
 	FileDirectories::~FileDirectories() 
 	{ }
+
 
 	const std::filesystem::path FileDirectories::GetResourcesPath() {
 
@@ -80,6 +84,30 @@ namespace mnemosy::core
 	const std::filesystem::path FileDirectories::GetDocumentationFilesPath() {
 		return GetDataPath() / std::filesystem::path("DocumentationTextFiles");
 	}
+
+	const std::filesystem::path FileDirectories::GetUserLibDataFile() {
+
+		namespace fs = std::filesystem;
+
+		fs::path userLibDataFile = m_mnemosyUserLibraryDirectory.path().parent_path() / fs::path(m_userLibraryDataFileName);
+
+		fs::directory_entry dirEntry;
+		try {
+
+			dirEntry = fs::directory_entry(userLibDataFile);
+		}
+		catch (fs::filesystem_error error) {
+			MNEMOSY_ERROR("System error creating direcotry instance: \nError Message: {}", error.what());
+		}
+
+
+		if (!dirEntry.exists() || !dirEntry.is_regular_file() || dirEntry.is_directory()) {
+			MNEMOSY_ERROR("FileDirectories::GetUserLibDataFile: The filepath does not point to a valid file. {}", userLibDataFile.generic_string());
+		}
+
+
+		return userLibDataFile;
+	}
 	
 	const std::filesystem::path FileDirectories::GetLibraryDirectoryPath() {
 		
@@ -100,6 +128,12 @@ namespace mnemosy::core
 			return;
 		}
 
+		if (!fs::is_empty(directoryPath.path())) {
+
+			MNEMOSY_ERROR("The folder you selected is not empty, please select a folder that is empty for the material library: path {}", directoryPath.path().generic_string());
+			return;
+		}
+
 		fs::path newDirPath = directoryPath.path() / fs::path(m_rootMaterialLibraryFolderName);
 		fs::directory_entry newLibraryDirectory = fs::directory_entry(newDirPath);
 
@@ -107,6 +141,13 @@ namespace mnemosy::core
 		if (copyOldFiles) {
 			// copy all existing files to the new directory..
 			try {
+
+
+				fs::path dataFileFrom = GetUserLibDataFile();
+				fs::path dataFileTo = directoryPath.path() / fs::path(m_userLibraryDataFileName);
+
+				fs::copy(dataFileFrom, dataFileTo);
+
 				fs::copy(m_mnemosyUserLibraryDirectory.path(), newDirPath, fs::copy_options::recursive);
 			}
 			catch (fs::filesystem_error error) {
@@ -118,6 +159,9 @@ namespace mnemosy::core
 		if (deleteOldFiles) {
 			// delete contents of the old directory 
 			try {
+
+				fs::remove(GetUserLibDataFile());
+
 				fs::remove_all(m_mnemosyUserLibraryDirectory.path());
 			}
 			catch (fs::filesystem_error error) {
@@ -130,6 +174,39 @@ namespace mnemosy::core
 
 
 		SaveUserLibraryDirectoryToDataFile(newLibraryDirectory);
+
+	}
+
+
+	bool FileDirectories::LoadExistingMaterialLibrary(const std::filesystem::path& materialLibraryFolder, bool deleteOldFiles, bool saveAsNewLibraryDirectory) {
+		// !! == before alling this function we should check if the filepath is valid
+
+
+		namespace fs = std::filesystem;
+				
+		if (deleteOldFiles) {
+			// delete contents of the old directory 
+			try {
+				// delete the data file
+				fs::remove(GetUserLibDataFile());
+				// delete the entire library folder
+				fs::remove_all(m_mnemosyUserLibraryDirectory.path());
+			}
+			catch (fs::filesystem_error error) {
+				MNEMOSY_ERROR("FileDirectories::SetNewUserLibraryDirectory: System Error Removing old directory: \nMessage: {}", error.what());
+				return false;
+			}
+		}
+
+		fs::directory_entry libraryFolderDir = fs::directory_entry(materialLibraryFolder);
+		
+		m_mnemosyUserLibraryDirectory = libraryFolderDir;
+
+		if (saveAsNewLibraryDirectory) {
+			SaveUserLibraryDirectoryToDataFile(libraryFolderDir);
+		}
+
+		return true;
 
 	}
 
@@ -154,12 +231,10 @@ namespace mnemosy::core
 		
 		//data file exists
 		
-		// read data file and extract path;
-		std::string pathToDataFile = m_mnemosyLibraryDataFile.path().generic_string();
-
+		// read data file and extract path
 
 		std::fstream dataFileStream;
-		dataFileStream.open(pathToDataFile);
+		dataFileStream.open(m_mnemosyLibraryDataFile.path());
 
 		nlohmann::json readFile;
 		try {
@@ -210,7 +285,6 @@ namespace mnemosy::core
 		}
 		else { // exists
 
-			//MNEMOSY_INFO("exists..");
 			if (!libraryDirectoryPath.is_directory())
 			{
 				MNEMOSY_ERROR("FileDirectories::SaveUserLibraryDirectoryToDataFile: Path {} is not a directory.", libraryDirectoryPath.path().generic_string());
@@ -268,7 +342,7 @@ namespace mnemosy::core
 		if (!m_mnemosyLibraryDataFile.is_regular_file()) {
 
 			std::string dataFilePath = m_mnemosyLibraryDataFile.path().generic_string();
-			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File is not a regular file: {} \nCreating new file at that location", dataFilePath);
+			MNEMOSY_ERROR("FileDirectories::CheckLibraryDataFile: File is not a regular file: {} \nCreating new file at that location", dataFilePath);
 			// maybe need to delete unregular file first idk should never happen anyhow
 			std::ofstream file;
 			file.open(dataFilePath);

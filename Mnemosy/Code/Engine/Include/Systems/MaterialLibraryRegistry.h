@@ -76,6 +76,9 @@ namespace mnemosy::systems
 
 		void OpenFolderNode(FolderNode* node);
 		void ClearUserMaterialsAndFolders();
+		void ClearInternalTree_OnlyMemory();
+
+		bool LoadExistingMnemosyLibrary(std::filesystem::path& pathToDataFile, bool savePermanently, bool deleteCurrentLibrary);
 
 
 		// Getters
@@ -95,7 +98,7 @@ namespace mnemosy::systems
 		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
 
 	private:
-		bool CheckDataFile(std::filesystem::directory_entry dataFile);
+		bool CheckDataFile(const std::filesystem::path& dataFilePath);
 		void CreateNewMaterialDataFile(std::filesystem::path& folderPath,std::string& name);
 		void CreateDirectoryForNode(FolderNode* node);
 		
@@ -106,7 +109,7 @@ namespace mnemosy::systems
 		core::FileDirectories& m_fileDirectories;
 		FolderNode* m_selectedFolderNode = nullptr;
 
-		std::filesystem::directory_entry m_userDirectoriesDataFile;
+		//std::filesystem::directory_entry m_userDirectoriesDataFile;
 		
 		// active Material;
 		std::filesystem::path m_activeMaterialDataFilePath;

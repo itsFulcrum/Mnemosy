@@ -36,13 +36,20 @@ namespace mnemosy::systems
 	MaterialLibraryRegistry::MaterialLibraryRegistry() 
 		: m_fileDirectories{MnemosyEngine::GetInstance().GetFileDirectories()}
 	{
+		namespace fs = std::filesystem;
+
 		m_folderTree = new FolderTree(jsonLibKey_RootNodeName);
 		
-
-		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetDataPath() / fs::path("UserLibraryDirectories.mnsydata");
-		m_userDirectoriesDataFile = fs::directory_entry(pathToUserDirectoriesDataFile); 
 		m_folderNodeOfActiveMaterial = nullptr;
-	
+
+		
+		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetUserLibDataFile();
+
+		if (!CheckDataFile(pathToUserDirectoriesDataFile)) {
+			MNEMOSY_WARN("Failed to read materialLibraryData file: Creating new empty file at {}", pathToUserDirectoriesDataFile.generic_string());
+			SaveUserDirectoriesData();
+		}
+
 		float timeStart = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 		LoadUserDirectoriesFromFile();
 		float timeEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
@@ -63,12 +70,15 @@ namespace mnemosy::systems
 
 	void MaterialLibraryRegistry::LoadUserDirectoriesFromFile() {
 
-		CheckDataFile(m_userDirectoriesDataFile);
+		fs::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
 
-		std::string pathToDataFileString = m_userDirectoriesDataFile.path().generic_string();
+		if (!CheckDataFile(materialLibraryDataFilePath)) {
+
+			return;
+		}
 
 		std::ifstream dataFileStream;
-		dataFileStream.open(pathToDataFileString);
+		dataFileStream.open(materialLibraryDataFilePath);
 
 		json readFile;
 		try {
@@ -86,19 +96,31 @@ namespace mnemosy::systems
 
 	void MaterialLibraryRegistry::SaveUserDirectoriesData() {
 
-		std::string pathToDataFileString = m_userDirectoriesDataFile.path().generic_string();
-		if (CheckDataFile(m_userDirectoriesDataFile)) {
-			// if file exists we clear it first; -> really should think if this is a good idea though
+		fs::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
+
+		if (CheckDataFile(materialLibraryDataFilePath)) {
+			
+			// if data file exists we first make a backup copy
+			fs::path copyTo = m_fileDirectories.GetDataPath() / fs::path("MnemosyMaterialLibraryData_LAST_BACKUP.mnsydata");
+			try
+			{
+				fs::copy(materialLibraryDataFilePath, copyTo, fs::copy_options::overwrite_existing);
+			}
+			catch(fs::filesystem_error error){
+				MNEMOSY_ERROR("MaterialLibraryRegistry::SaverUserDirectoriesData: System error Copying backup file: \nError Message: {}", error.what());
+			}
+
+			// then we clear the existing file
 			std::ofstream file;
-			file.open(pathToDataFileString);
+			file.open(materialLibraryDataFilePath);
 			file << "";
 			file.close();
 		}
 
-		std::ofstream dataFileStream;
-		dataFileStream.open(pathToDataFileString);
-
 		json* LibraryDirectoriesJson = m_folderTree->WriteToJson();
+
+		std::ofstream dataFileStream;
+		dataFileStream.open(materialLibraryDataFilePath);
 
 		if (prettyPrintDataFile)
 			dataFileStream << LibraryDirectoriesJson->dump(4);
@@ -1604,6 +1626,78 @@ namespace mnemosy::systems
 		SaveUserDirectoriesData();
 	}
 
+	void MaterialLibraryRegistry::ClearInternalTree_OnlyMemory() {
+
+		SetDefaultMaterial();
+		m_selectedFolderNode = m_folderTree->GetRootPtr();
+
+		m_folderTree->Clear();
+	}
+
+	bool MaterialLibraryRegistry::LoadExistingMnemosyLibrary(std::filesystem::path& pathToDataFile, bool savePermanently, bool deleteCurrentLibrary) {
+
+		namespace fs = std::filesystem;
+
+		// first save current
+		SaveUserDirectoriesData();
+
+		// make sure everything is valid
+		fs::directory_entry dataFile = fs::directory_entry(pathToDataFile);
+
+		if (pathToDataFile.filename() != fs::path("MnemosyMaterialLibraryData.mnsydata") )
+		{
+			if ( pathToDataFile.filename() == fs::path("MnemosyMaterialLibraryData_BACKUP_COPY.mnsydata"))
+			{
+				MNEMOSY_WARN("To use the backup file, delete the other corrupted file and rename this backup to MnemosyMaterialLibraryData.mnsydata - loading this renamed file will create a new backup again.");
+			}
+			
+			return false;
+		}
+
+
+
+		if (!dataFile.exists() || !dataFile.is_regular_file()) {
+			MNEMOSY_ERROR("The Selected path is not a valid mnemosy data file. Path: {}", pathToDataFile.generic_string());
+			return false;
+		}
+
+		// data file is most likely valid unless a user has messed with it or its corrupted or it doesnt match the folder library it is stored along
+
+
+		fs::path libraryFolderPath =  pathToDataFile.parent_path() / fs::path("MnemosyMaterialLibrary");
+		fs::directory_entry libraryDirectory = fs::directory_entry(libraryFolderPath);
+
+		if (!libraryDirectory.exists() || !libraryDirectory.is_directory()) {
+			MNEMOSY_ERROR("There is no MnemosyMaterialLibrary folder next to the MnemosyMaterialLibraryData.mnsydata data file. Path: {}", pathToDataFile.parent_path().generic_string());
+			return false;
+		}
+
+		if (fs::is_empty(libraryFolderPath)) {
+			MNEMOSY_ERROR("The MnemosyMaterialLibrary folder is empty. Path: {}", libraryFolderPath.generic_string());
+			return false;
+		}
+
+		// make a backup copy of the data file of the new library
+
+
+		fs::path copyPath = pathToDataFile.parent_path() / fs::path("MnemosyMaterialLibraryData_BACKUP_COPY.mnsydata");
+		fs::copy_file(pathToDataFile, copyPath, fs::copy_options::overwrite_existing);
+
+		// now we first clear the current tree in memory
+		ClearInternalTree_OnlyMemory();
+
+
+		MnemosyEngine::GetInstance().GetFileDirectories().LoadExistingMaterialLibrary(libraryFolderPath,deleteCurrentLibrary,savePermanently);
+
+
+
+		// last load the new file data
+
+		LoadUserDirectoriesFromFile();
+
+		return true;
+	}
+
 
 	// ======== Getters ========
 
@@ -1810,25 +1904,17 @@ namespace mnemosy::systems
 		
 	}
 
-	bool MaterialLibraryRegistry::CheckDataFile(fs::directory_entry dataFile) {
+	bool MaterialLibraryRegistry::CheckDataFile(const std::filesystem::path& dataFilePath) {
 
-		std::string pathToDataFileString = dataFile.path().generic_string();
+		namespace fs = std::filesystem;
 
-		if (!dataFile.exists())
-		{
-			MNEMOSY_ERROR("MaterialLibraryRegistry::CheckDataFile: File did Not Exist: {} \nCreating new file at that location", pathToDataFileString);
+		fs::directory_entry dataFile = fs::directory_entry(dataFilePath);
+
+		if (!dataFile.exists() || !dataFile.is_regular_file()) {
+
+			MNEMOSY_ERROR("MaterialLibraryRegistry::CheckDataFile: File did Not Exist or is not a regular file: {} \nCreating new empty file at that location", dataFilePath.generic_string());
 			std::ofstream file;
-			file.open(pathToDataFileString);
-			file << "";
-			file.close();
-			return false;
-		}
-		if (!dataFile.is_regular_file())
-		{
-			MNEMOSY_ERROR("MaterialLibraryRegistry::CheckDataFile: File is not a regular file: {} \nCreating new file at that location", pathToDataFileString);
-			// maybe need to delete unregular file first idk should never happen anyhow
-			std::ofstream file;
-			file.open(pathToDataFileString);
+			file.open(dataFilePath);
 			file << "";
 			file.close();
 			return false;

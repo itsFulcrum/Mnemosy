@@ -1,8 +1,14 @@
 #include "Include/GuiPanels/MainMenuBarGuiPanel.h"
 
 #include "Include/MnemosyEngine.h"
+#include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/FileDirectories.h"
 #include "Include/Systems/UserSettingsManager.h"
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+#include "Include/Core/Utils/PlatfromUtils_Windows.h"
+#endif // MNEMOSY_PLATFORM_WINDOWS
 
 
 #include "Include/Application.h"
@@ -24,6 +30,9 @@
 
 #include "External/ImGui/imgui.h"
 
+
+#include <string>
+#include <filesystem>
 
 namespace mnemosy::gui
 {
@@ -150,6 +159,8 @@ namespace mnemosy::gui
 
 	void MainMenuBarGuiPanel::DataDropdown() {
 
+		namespace fs = std::filesystem;
+
 		if (ImGui::BeginMenu(m_dataDropdown_ImGuiLabel)) {
 
 			if (ImGui::MenuItem("Save All")) {
@@ -171,9 +182,111 @@ namespace mnemosy::gui
 
 			}
 
+			if (ImGui::MenuItem("Load Existing Library")) {
+
+				m_open_loadMnemosyLibraryModel = true;
+			}
+
+
 
 			ImGui::EndMenu();
 		}
+
+
+
+		if (m_open_loadMnemosyLibraryModel) {
+			m_open_loadMnemosyLibraryModel = false;
+
+			m_loadMnemosyLibraryModal = true;
+			ImGui::OpenPopup("Load Mnemosy Library");
+		}
+
+
+
+		if (ImGui::BeginPopupModal("Load Mnemosy Library", &m_loadMnemosyLibraryModal, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+
+			ImGui::TextWrapped("Do you want to permanently change the library directory or only for this session?");
+			ImGui::Spacing();
+			ImGui::TextWrapped("Pick and option below and select the MnemosyMaterialLibrary.mnsydata  file that is next to your material library folder.");
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+
+			if (ImGui::Button("Change Permanently and DELETE old files")) {
+
+				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
+				if (!filePath.empty()) {
+
+					fs::path dataFilePath = fs::path(filePath);
+					bool success = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadExistingMnemosyLibrary(dataFilePath,true,true);
+
+
+					if (success) {
+						m_loadMnemosyLibraryModal = false;
+						ImGui::CloseCurrentPopup();
+					}
+				}
+				else {
+					MNEMOSY_ERROR("You didnt select a valid mnemosy data file");
+				}
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			if (ImGui::Button("Change Permanently, but KEEP old files")) {
+				
+
+				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
+				
+				if (!filePath.empty()) {
+
+
+					fs::path dataFilePath = fs::path(filePath);
+					bool success = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadExistingMnemosyLibrary(dataFilePath, true, false);
+
+					if (success) {
+						m_loadMnemosyLibraryModal = false;
+						ImGui::CloseCurrentPopup();
+					}
+
+				}
+				else {
+					MNEMOSY_ERROR("You didnt select a valid mnemosy data file");
+				}
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+
+			if (ImGui::Button("Only This Session")) {
+
+				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
+				
+				if (!filePath.empty()) {
+
+					fs::path dataFilePath = fs::path(filePath);
+					bool success = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadExistingMnemosyLibrary(dataFilePath, false, false);
+
+					if (success) {
+						m_loadMnemosyLibraryModal = false;
+						ImGui::CloseCurrentPopup();
+					}
+
+				}
+				else {
+					MNEMOSY_ERROR("You didnt select a valid mnemosy data file");
+				}
+			}
+
+			ImGui::EndPopup();
+		}
+
+
+
 
 	}
 

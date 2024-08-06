@@ -167,7 +167,7 @@ namespace mnemosy::systems {
 		LibraryDirectoriesJson[jsonLibKey_MnemosyDataFile] = "UserLibraryDirectoriesData";
 
 		nlohmann::json HeaderInfo;
-		std::string descriptionString = "This file stores the treelike folder structure defined by users to organise their materials";
+		std::string descriptionString = "!!! == DO NOT DELETE, MOVE, OR MODIFY THIS FILE ==!!! This file stores the treelike folder structure defined by users to organise their materials";
 		HeaderInfo[jsonLibKey_Description] = descriptionString;
 
 		LibraryDirectoriesJson[jsonLibKey_HeaderInfo] = HeaderInfo;

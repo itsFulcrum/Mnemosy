@@ -24,6 +24,9 @@ namespace mnemosy::gui
 
 		const char* m_dataDropdown_ImGuiLabel = "Data";
 
+		bool m_loadMnemosyLibraryModal = false;
+		bool m_open_loadMnemosyLibraryModel = false;
+
 		bool viewportPanel = false;
 		bool sceneSettings = false;
 		bool materialEditorPanel = false;
