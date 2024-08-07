@@ -334,28 +334,26 @@ namespace mnemosy::graphics {
 
 		static void str_tolower(std::string& s)
 		{
-			std::transform(s.begin(), s.end(), s.begin(),[](unsigned char c) { return std::tolower(c); } // correct
-			);
+			std::transform(s.begin(), s.end(), s.begin(),[](unsigned char c) { return std::tolower(c); } );
 		}
 
 		static PBRTextureType GetTypeFromFileName(const std::string& name) {
 
-
-			std::string testAgainst = name;
-			
-			str_tolower(testAgainst);
-			
+			std::string testAgainst = name;			
+			str_tolower(testAgainst);			
 
 			//albdeo
 			const char* albedos[4] = { "albedo","_col","color","diffuse"};
 
+
 			for (int i = 0; i < 4; i++) {
 
 				if (testAgainst.find(albedos[i]) != std::string::npos) {
-					
+
 					return MNSY_TEXTURE_ALBEDO;
 				}
 			}
+
 
 			// Roughness
 			const char* rough[3] = { "roughness","gloss","smoothness" };
@@ -372,7 +370,6 @@ namespace mnemosy::graphics {
 
 				return MNSY_TEXTURE_METALLIC;
 			}
-
 
 			// normal
 			const char* norm[2] = { "_normal" , "_nrm"};

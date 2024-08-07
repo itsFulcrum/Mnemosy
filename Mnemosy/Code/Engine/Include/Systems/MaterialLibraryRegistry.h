@@ -97,6 +97,10 @@ namespace mnemosy::systems
 
 		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
 
+
+		bool SearchMaterialsForKeyword(const std::string& keyword);
+		std::vector<systems::MaterialInfo*>& GetSearchResultsList();
+
 	private:
 		bool CheckDataFile(const std::filesystem::path& dataFilePath);
 		void CreateNewMaterialDataFile(std::filesystem::path& folderPath,std::string& name);

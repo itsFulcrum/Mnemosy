@@ -10,10 +10,14 @@
 namespace mnemosy::systems
 {
 	// Runtime id  is assigned at runtime when material gets created and never changes until the app closes
+
+	struct FolderNode;
+
 	struct MaterialInfo {
 	public:
 		unsigned int runtime_ID;
 		unsigned int thumbnailTexure_ID = 0;
+		FolderNode* parent = nullptr;
 		std::string name;
 		bool selected = false;
 		bool thumbnailLoaded = false;

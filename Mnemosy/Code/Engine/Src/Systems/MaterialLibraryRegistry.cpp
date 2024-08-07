@@ -328,7 +328,6 @@ namespace mnemosy::systems
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 		// create directory for material
 		fs::path materialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(matInfo.name);
-		//MNEMOSY_TRACE("Add Material: new material directory: {}", materialDirectory.generic_string());
 
 		try {
 			fs::create_directory(materialDirectory);
@@ -371,7 +370,8 @@ namespace mnemosy::systems
 		// check if it was created in the currently opend folder
 		if (node == m_selectedFolderNode) {
 			// make sure it gets loaded
-			MnemosyEngine::GetInstance().GetThumbnailManager().NewThumbnailInActiveFolder();
+
+			MnemosyEngine::GetInstance().GetThumbnailManager().AddMaterialForThumbnailing(&matInfo);
 		}
 
 		SaveUserDirectoriesData();
@@ -528,7 +528,8 @@ namespace mnemosy::systems
 		// check if material is part of the opend folder
 		if (node == m_selectedFolderNode) {
 			// unload thumbnail
-			MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(materialInfo);
+
+			MnemosyEngine::GetInstance().GetThumbnailManager().RemoveMaterialFromThumbnailing(&materialInfo);
 		}
 
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
@@ -582,7 +583,8 @@ namespace mnemosy::systems
 		}
 
 		if (sourceNode == m_selectedFolderNode) {
-			MnemosyEngine::GetInstance().GetThumbnailManager().DeleteThumbnailFromCache(materialInfo);
+
+			MnemosyEngine::GetInstance().GetThumbnailManager().RemoveMaterialFromThumbnailing(&materialInfo);
 		}
 
 		m_folderTree->MoveMaterial(materialInfo, sourceNode, targetNode);
@@ -599,7 +601,7 @@ namespace mnemosy::systems
 
 		// make sure thumbnail gets loaded
 		if (targetNode == m_selectedFolderNode) {
-			MnemosyEngine::GetInstance().GetThumbnailManager().NewThumbnailInActiveFolder();
+			MnemosyEngine::GetInstance().GetThumbnailManager().AddMaterialForThumbnailing(&targetNode->subMaterials.back());
 		}
 
 		// save
@@ -1600,7 +1602,6 @@ namespace mnemosy::systems
 	}
 
 
-
 	void MaterialLibraryRegistry::OpenFolderNode(FolderNode* node){
 		
 		SaveActiveMaterialToFile();
@@ -1612,7 +1613,17 @@ namespace mnemosy::systems
 
 		m_selectedFolderNode = node;
 
-		MnemosyEngine::GetInstance().GetThumbnailManager().DeleteLoadedThumbnailsOfActiveFolder(m_selectedFolderNode);
+		systems::ThumbnailManager& thumbnailManager = MnemosyEngine::GetInstance().GetThumbnailManager();
+		// unload all currently loaded thumbnails
+		thumbnailManager.UnloadAllThumbnails();
+
+
+		if (node->HasMaterials()) {
+
+			for (int i = 0; i < node->subMaterials.size(); i++) {
+				thumbnailManager.AddMaterialForThumbnailing(&node->subMaterials[i]);
+			}
+		}
 	}
 
 	void MaterialLibraryRegistry::ClearUserMaterialsAndFolders() {
@@ -1805,6 +1816,16 @@ namespace mnemosy::systems
 
 		return paths;
 
+	}
+
+	bool MaterialLibraryRegistry::SearchMaterialsForKeyword(const std::string& keyword) {
+
+		return m_folderTree->CollectMaterialsFromSearchKeyword(keyword);
+	}
+
+	std::vector<systems::MaterialInfo*>& MaterialLibraryRegistry::GetSearchResultsList() {
+
+		return m_folderTree->GetSearchResultsList();
 	}
 
 	// == private methods

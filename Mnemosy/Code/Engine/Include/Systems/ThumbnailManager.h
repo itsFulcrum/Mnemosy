@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <vector>
 
-namespace fs = std::filesystem;
 
 namespace mnemosy::systems {
 	struct MaterialInfo;
@@ -23,23 +22,23 @@ namespace mnemosy::systems {
 		~ThumbnailManager();
 		
 		void Update();
+				
+		void RenderThumbnailOfActiveMaterial(std::filesystem::path& pathToThumbnail,FolderNode* selectedFolder,unsigned int activeMaterialID);
 
-		
-		void RenderThumbnailOfActiveMaterial(fs::path& pathToThumbnail,FolderNode* selectedFolder,unsigned int activeMaterialID);
+		void AddMaterialForThumbnailing(MaterialInfo* material);
+		void RemoveMaterialFromThumbnailing(MaterialInfo* material);
 
-		//void RefreshThumbnail(MaterialInfo& materialInfo, fs::path& pathToThumbnail);
-
-		void DeleteThumbnailFromCache(MaterialInfo& materialInfo);
-
-		void DeleteLoadedThumbnailsOfActiveFolder(FolderNode* activeFolder);
-		void LoadThumbnailsOfActiveFolder(FolderNode* activeFolder, fs::path folderDirectory);
-
-		void NewThumbnailInActiveFolder() { m_activeFolderFullyLoaded = false; }
+		void UnloadAllThumbnails();
 
 	private:
-		bool m_activeFolderFullyLoaded = false;
+		void DeleteThumbnailGLTexture_Internal(MaterialInfo* material);
+		void LoadThumbnailForMaterial_Internal(MaterialInfo* material);
+
+		bool m_activeMaterialsFullyLoaded = false;
 
 		std::vector<systems::MaterialInfo*> m_thumbnailsQuedForRefresh;
+		std::vector<systems::MaterialInfo*> m_activeMaterials;
+	
 	};
 } // ! mnemosy::systems
 #endif // !THUMBNAIL_MANAGER_H

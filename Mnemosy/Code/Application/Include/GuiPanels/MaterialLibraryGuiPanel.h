@@ -43,6 +43,10 @@ namespace mnemosy::gui
 		void DrawMaterialEntries(systems::FolderNode* node);
 	private:
 		
+		void DrawMaterialButtons();
+		void DrawMaterialButtonsOfSearch();
+
+	private:
 		void AddSubfolder(systems::FolderNode* node);
 		void RenameFolder(systems::FolderNode* node, std::string newName);
 		void DeleteButKeepChildren(systems::FolderNode* node);
@@ -72,7 +76,10 @@ namespace mnemosy::gui
 		ImGuiInputTextFlags m_textInputFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;
 		std::string m_renameMaterialText = "";
 		std::string m_renameFolderText = "";
-		
+		std::string m_searchInput = "";
+		bool m_inSearchMode = false;
+
+		float m_imgButtonSize = 128.0f;
 		unsigned int m_folderIdToOpenNextFrame = 0;
 		bool m_setFolderOpenNextFrame = false;
 

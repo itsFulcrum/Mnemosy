@@ -2,7 +2,8 @@
 #define FOLDER_TREE_H
 
 #include <nlohmann/json.hpp>
-#include "string"
+#include <string>
+#include <vector>
 
 namespace mnemosy::systems {
 	struct MaterialInfo;
@@ -31,6 +32,9 @@ namespace mnemosy::systems {
 		void MoveMaterial(MaterialInfo materialInfo, FolderNode* sourceNode, FolderNode* targetParentNode);
 		void DeleteMaterial(FolderNode* parentNode, unsigned int posInVector);
 
+
+		bool CollectMaterialsFromSearchKeyword(const std::string& searchKeyword);
+
 		FolderNode* RecursivGetNodeByID(FolderNode* startNode, const unsigned int id);
 
 
@@ -40,6 +44,7 @@ namespace mnemosy::systems {
 		nlohmann::json* WriteToJson();
 		void Clear();
 
+		std::vector<systems::MaterialInfo*>& GetSearchResultsList() { return m_searchResults; }
 	private:
 		MaterialInfo& CreateMaterial_Internal(FolderNode* node,const std::string name);
 		FolderNode* CreateNewFolder_Internal(FolderNode* parentNode, const std::string& name);
@@ -49,15 +54,25 @@ namespace mnemosy::systems {
 
 		bool RecursivDoesNameExist(FolderNode* node, const std::string& name);
 
+		void RecursivCollectMaterialSearch(FolderNode* node, const std::string& searchKeyword);
 
 		nlohmann::json RecursivWriteToJson(FolderNode* node);
 		void RecursivLoadFromJson(FolderNode* node, const nlohmann::json& jsonNode);
 
+
+		void MakeStringLowerCase(std::string& str);
+
+
+
+	private:
 		unsigned int m_runtimeIDCounter;
 		unsigned int m_runtimeMaterialIDCounter;
 
 		std::string m_rootNodeName;
 		FolderNode* m_rootNode = nullptr;
+
+		std::vector<MaterialInfo*> m_searchResults;
+
 	}; 
 
 

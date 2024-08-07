@@ -19,6 +19,10 @@ namespace mnemosy::systems {
 	FolderTree::~FolderTree()
 	{
 		RecursivDeleteHierarchy(m_rootNode);
+
+		if (!m_searchResults.empty()) {
+			m_searchResults.clear();
+		}
 	}
 
 	FolderNode* FolderTree::CreateNewFolder(FolderNode* parentNode, const std::string& name) {
@@ -30,6 +34,27 @@ namespace mnemosy::systems {
 
 		node->name = MakeNameUnique(newName);
 		RecursivUpdatePathFromRoot(node);
+	}
+
+	bool FolderTree::CollectMaterialsFromSearchKeyword(const std::string& searchKeyword) {
+
+		if (!m_searchResults.empty()) {
+			m_searchResults.clear();
+		}
+
+		std::string keyword = searchKeyword;
+
+		MakeStringLowerCase(keyword);
+
+		RecursivCollectMaterialSearch(m_rootNode, keyword);
+
+
+		if (!m_searchResults.empty()) {
+			return true;
+		}
+
+
+		return false;
 	}
 
 	FolderNode* FolderTree::RecursivGetNodeByID(FolderNode* startNode, const unsigned int id)
@@ -82,6 +107,7 @@ namespace mnemosy::systems {
 	void FolderTree::MoveMaterial(MaterialInfo materialInfo, FolderNode* sourceNode, FolderNode* targetParentNode) {
 
 		targetParentNode->subMaterials.push_back(materialInfo);
+		materialInfo.parent = targetParentNode;
 
 		for (size_t i = 0; i < sourceNode->subMaterials.size(); i++) {
 
@@ -187,6 +213,7 @@ namespace mnemosy::systems {
 		//// adding entry to list of directory node;
 		MaterialInfo matInfo;
 		matInfo.name = name;
+		matInfo.parent = node;
 		matInfo.runtime_ID = m_runtimeMaterialIDCounter;
 		m_runtimeMaterialIDCounter++;
 		matInfo.selected = false;
@@ -299,6 +326,41 @@ namespace mnemosy::systems {
 		return false;
 	}
 
+	void FolderTree::RecursivCollectMaterialSearch(FolderNode* node, const std::string& searchKeyword) {
+
+
+		if (node->HasMaterials()) {
+
+			// collect suitable materials
+
+			for (int i = 0; i < node->subMaterials.size(); i++) {
+
+				std::string matName = node->subMaterials[i].name;
+				MakeStringLowerCase(matName);
+
+				if (matName.find(searchKeyword) != std::string::npos) {
+
+					// Found a material that contains the keyword in its name
+
+					m_searchResults.push_back(&node->subMaterials[i]);
+
+				}
+			}
+		}
+
+
+		if (!node->IsLeafNode()) {
+
+
+			for (int i = 0; i < node->subNodes.size(); i++) {
+
+				RecursivCollectMaterialSearch(node->subNodes[i], searchKeyword);
+			}
+
+		}
+
+	}
+
 	nlohmann::json FolderTree::RecursivWriteToJson(FolderNode* node) {
 
 		nlohmann::json nodeJson;
@@ -384,6 +446,11 @@ namespace mnemosy::systems {
 			}
 		}
 
+	}
+
+	void FolderTree::MakeStringLowerCase(std::string& str) {
+
+		std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
 	}
 
 } // namespace mnemosy::systems
