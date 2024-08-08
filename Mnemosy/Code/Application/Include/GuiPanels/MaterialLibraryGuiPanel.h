@@ -55,8 +55,8 @@ namespace mnemosy::gui
 
 
 		void AddMaterial(systems::FolderNode* node);
-		void RenameMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector);
-		void DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector);
+		void RenameMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector);
+		void DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, int positionInVector);
 
 
 		void HandleDeleteHierarchyModal();

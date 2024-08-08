@@ -28,7 +28,7 @@ namespace mnemosy::systems
 	public:
 
 		std::vector<FolderNode*> subNodes;
-		std::vector<MaterialInfo> subMaterials;
+		std::vector<MaterialInfo*> subMaterials;
 
 		std::filesystem::path pathFromRoot;
 		std::string name;

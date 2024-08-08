@@ -25,7 +25,7 @@ namespace mnemosy::systems
 
 		for (size_t i = 0; i < subMaterials.size(); i++) {
 
-			if (subMaterials[i].name == name) {
+			if (subMaterials[i]->name == name) {
 				return true;
 			}
 		}

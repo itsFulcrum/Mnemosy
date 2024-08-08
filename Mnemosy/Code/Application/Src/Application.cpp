@@ -33,7 +33,7 @@ namespace mnemosy
 
 	void Application::Initialize()	{
 
-		m_mnemosyEngine.Initialize("Mnemosy");
+		m_mnemosyEngine.Initialize("Mnemosy v0.4-alpha");
 
 		m_pCameraController = new input::CameraInputController();
 		m_pSceneInputController = new input::SceneInputController();

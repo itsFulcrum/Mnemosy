@@ -19,15 +19,12 @@ Mnemosy is a tool to store and organize PBR texture files and materials.
 ## Roadmap
 
 - Export of Dummy textures if no texture is assigned, using the value of the material
-- Material search function
 - Presets for channel packing
 - Store more user settings
 - Support multi selection for folders
 - Possibly add rename to material multi selection (not fixed yet)
 - Support .exr files for both textures and skybox images
 - Store skybox meta data (rendering settings)
-- Allow Dragging multiple files into material editor or viewport and it should try to match the filenames to a texture slot
-- Story Library Data alongside the folder to make copying entire libraries to different systems easier
 - Possiblity to load and entire folder structure into menemosy and try to automatically detect textures that form one material based on their names
 
 ## Building from source

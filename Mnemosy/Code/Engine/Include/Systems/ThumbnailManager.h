@@ -37,6 +37,7 @@ namespace mnemosy::systems {
 		bool m_activeMaterialsFullyLoaded = false;
 
 		std::vector<systems::MaterialInfo*> m_thumbnailsQuedForRefresh;
+		
 		std::vector<systems::MaterialInfo*> m_activeMaterials;
 	
 	};

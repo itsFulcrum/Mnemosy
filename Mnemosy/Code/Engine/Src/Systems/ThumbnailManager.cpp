@@ -36,31 +36,27 @@ namespace mnemosy::systems {
 		// But we cant delete it emediatly because we already gave its texture id to im gui for rendering at the end of the frame. 
 		// so we have to delay the refresh to the next frame and update before we set up the next imGuiFrame
 
+
+
 		if (!m_thumbnailsQuedForRefresh.empty()) {
 
 			for (int i = 0; i < m_thumbnailsQuedForRefresh.size(); i++) {
 
-				glDeleteTextures(1, &m_thumbnailsQuedForRefresh[i]->thumbnailTexure_ID);
-				m_thumbnailsQuedForRefresh[i]->thumbnailLoaded = false;
-				m_thumbnailsQuedForRefresh[i]->thumbnailTexure_ID = 0;
+				DeleteThumbnailGLTexture_Internal(m_thumbnailsQuedForRefresh[i]);
 			}
 
 			m_thumbnailsQuedForRefresh.clear();
 			m_activeMaterialsFullyLoaded = false;
 		}
-
-
+		
 		//  Loading thumbnails
 		if (m_activeMaterials.empty())
 			return;
 
-
 		if (m_activeMaterialsFullyLoaded)
 			return;
 
-
 		
-
 		for (int i = 0; i < m_activeMaterials.size(); i++) {
 
 			if (!m_activeMaterials[i]->thumbnailLoaded) {
@@ -72,7 +68,7 @@ namespace mnemosy::systems {
 		}
 
 		// if we reach this code it means all thumbnails in the list where loaded
-		MNEMOSY_TRACE("ThumbnailsFullyLoaded");
+		
 		m_activeMaterialsFullyLoaded = true;
 
 	}
@@ -99,21 +95,18 @@ namespace mnemosy::systems {
 				
 				if (m_activeMaterials[i]->runtime_ID == activeMaterialID) {
 					
-					m_thumbnailsQuedForRefresh.push_back(&selectedFolder->subMaterials[i]);
+					m_thumbnailsQuedForRefresh.push_back(m_activeMaterials[i]);
 					break;
 				}
-
 			}
 		}
-
-
 
 	}
 
 	void ThumbnailManager::AddMaterialForThumbnailing(MaterialInfo* material) {
 
-		if (material == nullptr)
-			return;
+		MNEMOSY_ASSERT(material != nullptr,"NO!")
+		
 
 		// check if its already in the list
 		if (!m_activeMaterials.empty()) {
@@ -121,12 +114,14 @@ namespace mnemosy::systems {
 			for (int i = 0; i < m_activeMaterials.size(); i++) {
 
 				if (m_activeMaterials[i]->runtime_ID == material->runtime_ID) {
+					MNEMOSY_ERROR("ThumbnailManager::AddMaterialForThumbnailing: Material is already in the thumbnail list");
 					return;
 				}
 			}
 		}
 
 		m_activeMaterials.push_back(material);
+
 		m_activeMaterialsFullyLoaded = false;
 	}
 
@@ -135,14 +130,12 @@ namespace mnemosy::systems {
 		if (m_activeMaterials.empty())
 			return;
 
-		if (material == nullptr)
-			return;
+
+		MNEMOSY_ASSERT(material != nullptr, "Should not happen");
 
 		for (int i = 0; i < m_activeMaterials.size(); i++) {
 
 			if (m_activeMaterials[i]->runtime_ID == material->runtime_ID) {
-
-
 
 				DeleteThumbnailGLTexture_Internal(material);
 				m_activeMaterials.erase(m_activeMaterials.begin() + i);
@@ -159,21 +152,19 @@ namespace mnemosy::systems {
 		if (m_activeMaterials.empty())
 			return;
 
-
 		for (int i = 0; i < m_activeMaterials.size(); i++) {
 
 			DeleteThumbnailGLTexture_Internal(m_activeMaterials[i]);
 		}
 
 		m_activeMaterials.clear();
-		m_activeMaterialsFullyLoaded = false;
+		m_activeMaterialsFullyLoaded = true;
 	}
-
 
 	// Delete the gl texture of the thumbnail
 	void ThumbnailManager::DeleteThumbnailGLTexture_Internal(MaterialInfo* material) {
 
-		MNEMOSY_ASSERT(material != nullptr, "We should make sure to unload all thumbnails");
+		MNEMOSY_ASSERT(material != nullptr, "We should make sure to unload all thumbnails first");
 
 		glDeleteTextures(1, &material->thumbnailTexure_ID);
 		material->thumbnailLoaded = false;
@@ -186,7 +177,6 @@ namespace mnemosy::systems {
 
 		fs::path libPath = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 
-		/// FIXME
 		fs::path materialFolderPath = libPath /  material->parent->pathFromRoot / fs::path(material->name);
 
 		fs::path thumbnailPath = materialFolderPath / fs::path(material->name + "_thumbnail.ktx2");
@@ -200,15 +190,14 @@ namespace mnemosy::systems {
 				material->thumbnailLoaded = true;
 			}
 			else {
-				MNEMOSY_WARN("Loaded thumbnail FAILED: {}", material->name);
+				MNEMOSY_WARN("Failed to load thumbnail for material: {}", material->name);
 				glDeleteTextures(1, &material->thumbnailTexure_ID);
 				return;
 
 			}
-
 		}
 		else {
-			MNEMOSY_WARN("Loaded thumbnail FAILED: {}, thumbnail file does not exist at {}", material->name, thumbnailPath.generic_string());
+			MNEMOSY_WARN("Failed to load thumbnail for material: {}, thumbnail file does not exist at {}", material->name, thumbnailPath.generic_string());
 		}
 
 	}

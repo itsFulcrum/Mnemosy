@@ -46,13 +46,13 @@ namespace mnemosy::core
 
 		switch (severity)
 		{
-		case GL_DEBUG_SEVERITY_HIGH:         MNEMOSY_CRITICAL("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
-		case GL_DEBUG_SEVERITY_MEDIUM:       MNEMOSY_ERROR("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
-		case GL_DEBUG_SEVERITY_LOW:          MNEMOSY_WARN("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION: MNEMOSY_INFO("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
+		case GL_DEBUG_SEVERITY_HIGH:         MNEMOSY_CRITICAL	("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
+		case GL_DEBUG_SEVERITY_MEDIUM:       MNEMOSY_ERROR		("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
+		case GL_DEBUG_SEVERITY_LOW:          MNEMOSY_WARN		("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION: MNEMOSY_INFO		("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
 		}
 
-		//MNEMOSY_BREAK;
+		MNEMOSY_BREAK;
 	}
 
 	Window::Window(const char* WindowTitle)

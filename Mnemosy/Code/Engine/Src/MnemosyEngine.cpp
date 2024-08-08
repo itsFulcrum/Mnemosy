@@ -61,7 +61,7 @@ namespace mnemosy
 		m_pLogger = std::make_unique<core::Logger>();
 
 
-		MNEMOSY_INFO("Starting Mnemosy v{}.{} - alpha", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR);
+		MNEMOSY_INFO("Starting Mnemosy v{}.{}-alpha", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR);
 
 
 		#ifdef MNEMOSY_CONFIG_DEBUG
@@ -102,6 +102,7 @@ namespace mnemosy
 		//MNEMOSY_TRACE("InputSystem Initialized");
 		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
 		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
+
 		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
 		//MNEMOSY_TRACE("MaterialRegistry Initialized");
 		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();

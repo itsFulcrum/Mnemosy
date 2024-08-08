@@ -7,9 +7,6 @@
 
 #include <nlohmann/json.hpp>
 
-using namespace nlohmann;
-namespace fs = std::filesystem;
-
 namespace mnemosy::systems {
 	struct MaterialInfo;
 	struct FolderNode;
@@ -39,8 +36,6 @@ namespace mnemosy::systems
 
 		void LoadUserDirectoriesFromFile();
 		void SaveUserDirectoriesData();
-		
-
 
 		FolderNode* AddNewFolder(FolderNode* parentNode,std::string& name);
 		void RenameFolder(FolderNode* node, std::string& newName);
@@ -50,9 +45,9 @@ namespace mnemosy::systems
 
 
 		void AddNewMaterial(FolderNode* node, std::string& name);
-		void RenameMaterial(FolderNode* node, systems::MaterialInfo& materialInfo, std::string& newName, int positionInVector);
-		void DeleteMaterial(FolderNode* node, systems::MaterialInfo& materialInfo, int positionInVector);
-		void MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo& materialInfo);
+		void RenameMaterial(FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector);
+		void DeleteMaterial(FolderNode* node, systems::MaterialInfo* materialInfo, int positionInVector);
+		void MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo* materialInfo);
 
 
 		void GenereateOpacityFromAlbedoAlpha(graphics::Material& activeMat);
@@ -62,8 +57,8 @@ namespace mnemosy::systems
 		void DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix);
 
 
-		void LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
-		void LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo& materialInfo,FolderNode* parentNode);
+		void LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo,FolderNode* parentNode);
+		void LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo,FolderNode* parentNode);
 
 		void SaveActiveMaterialToFile();
 		void SetDefaultMaterial();
@@ -93,7 +88,7 @@ namespace mnemosy::systems
 
 		std::filesystem::path GetLibraryPath();
 		std::filesystem::path GetFolderPath(FolderNode* node);
-		std::filesystem::path GetMaterialPath(FolderNode* folderNode, MaterialInfo& matInfo);
+		std::filesystem::path GetMaterialPath(FolderNode* folderNode, MaterialInfo* matInfo);
 
 		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
 

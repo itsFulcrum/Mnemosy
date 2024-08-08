@@ -27,9 +27,9 @@ namespace mnemosy::systems {
 		void DeleteFolderHierarchy(FolderNode* node);
 
 
-		MaterialInfo& CreateNewMaterial(FolderNode* node,const std::string& name);
-		void RenameMaterial(MaterialInfo& materialInfo, const std::string& name);
-		void MoveMaterial(MaterialInfo materialInfo, FolderNode* sourceNode, FolderNode* targetParentNode);
+		MaterialInfo* CreateNewMaterial(FolderNode* node,const std::string& name);
+		void RenameMaterial(MaterialInfo* materialInfo, const std::string& name);
+		void MoveMaterial(MaterialInfo* materialInfo, FolderNode* sourceNode, FolderNode* targetParentNode);
 		void DeleteMaterial(FolderNode* parentNode, unsigned int posInVector);
 
 
@@ -45,8 +45,9 @@ namespace mnemosy::systems {
 		void Clear();
 
 		std::vector<systems::MaterialInfo*>& GetSearchResultsList() { return m_searchResults; }
+
 	private:
-		MaterialInfo& CreateMaterial_Internal(FolderNode* node,const std::string name);
+		MaterialInfo* CreateMaterial_Internal(FolderNode* node,const std::string name);
 		FolderNode* CreateNewFolder_Internal(FolderNode* parentNode, const std::string& name);
 
 		void RecursivDeleteHierarchy(FolderNode* node);
