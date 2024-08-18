@@ -9,6 +9,7 @@ namespace mnemosy::gui
 	class MaterialEditorGuiPanel;
 	class MaterialLibraryGuiPanel;
 	class DocumentationGuiPanel;
+	class ContentsGuiPanel;
 }
 
 namespace mnemosy::gui
@@ -25,15 +26,16 @@ namespace mnemosy::gui
 		MaterialEditorGuiPanel&		GetMaterialEditorPanel()	{ return *m_pMaterialEditorPanel; }
 		MaterialLibraryGuiPanel&	GetMaterialLibraryPanel()	{ return *m_pMaterialLibraryPanel; }
 		DocumentationGuiPanel&		GetDocumentationPanel()		{ return *m_pDocumentationPanel; }
+		ContentsGuiPanel&			GetContentsPanel()			{ return *m_pContentsPanel; }
 
 	private:
-		MainMenuBarGuiPanel*		m_pMainMenuBarPanel			= nullptr;
-		ViewportGuiPanel*			m_pViewportPanel			= nullptr;
-		SettingsGuiPanel*			m_pSettingsPanel			= nullptr;
-		MaterialEditorGuiPanel*		m_pMaterialEditorPanel		= nullptr;
-		MaterialLibraryGuiPanel*	m_pMaterialLibraryPanel		= nullptr;
-		DocumentationGuiPanel*		m_pDocumentationPanel		= nullptr;
-
+		MainMenuBarGuiPanel*		m_pMainMenuBarPanel		= nullptr;
+		ViewportGuiPanel*			m_pViewportPanel		= nullptr;
+		SettingsGuiPanel*			m_pSettingsPanel		= nullptr;
+		MaterialEditorGuiPanel*		m_pMaterialEditorPanel	= nullptr;
+		MaterialLibraryGuiPanel*	m_pMaterialLibraryPanel	= nullptr;
+		DocumentationGuiPanel*		m_pDocumentationPanel	= nullptr;
+		ContentsGuiPanel*			m_pContentsPanel		= nullptr;
 	};
 
 }

@@ -24,11 +24,10 @@ namespace mnemosy::gui
 	MaterialLibraryGuiPanel::MaterialLibraryGuiPanel()
 		: m_materialRegistry { MnemosyEngine::GetInstance().GetMaterialLibraryRegistry()}
 	{
-		panelName = "Material Library";
+		panelName = "Library Hierarchy";
 		panelType = MNSY_GUI_PANEL_MATERIAL_LIBRARY;
 
 		rootNode = m_materialRegistry.GetRootFolder();
-		//m_selectedNode = rootNode;
 		m_materialRegistry.OpenFolderNode(rootNode);
 
 
@@ -44,91 +43,74 @@ namespace mnemosy::gui
 
 		ImGui::Begin(panelName, &showPanel);
 		{
-			ImGui::BeginChild("Library", ImVec2(0, 350), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
-			{
-
-				ImGui::SeparatorText("Material Library");
-
-
-				ImGui::Text("Search: ");
-				ImGui::SameLine();
+			
+			ImGui::Text("Search: ");
+			ImGui::SameLine();
 				 
-				bool searched = ImGui::InputText("##SearchInputField", &m_searchInput, m_textInputFlags);
-				if (searched) {
+			bool searchEnter = ImGui::InputText("##SearchInputField", &m_searchInput, m_textInputFlags);
+			if (searchEnter) {
 
-					if (m_searchInput == "") {
-						//MnemosyEngine::GetInstance().GetThumbnailManager().UnloadAllThumbnails();
-						m_inSearchMode = false;
-						m_materialRegistry.OpenFolderNode(m_materialRegistry.GetRootFolder());
-					}
-					else {
-					
+				if (m_searchInput == "") {
 
-						bool foundSome = m_materialRegistry.SearchMaterialsForKeyword(m_searchInput);
-						m_inSearchMode = true;
-
-
-						systems::ThumbnailManager& thumbManager = MnemosyEngine::GetInstance().GetThumbnailManager();
-
-						thumbManager.UnloadAllThumbnails();
-
-						if (foundSome) {
-						
-							std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
-
-
-							for (int i = 0; i < searchResultsList.size(); i++) {
-							
-								thumbManager.AddMaterialForThumbnailing(searchResultsList[i]);							
-							}						
-						}
-
-					}
-
-				}
-
-
-				if (!m_inSearchMode) {
-					RecursivDrawSubfolders(rootNode);
-					HandleDeleteHierarchyModal();
+					m_materialRegistry.inSearchMode = false;
+					m_materialRegistry.OpenFolderNode(m_materialRegistry.GetRootFolder());
 				}
 				else {
+					
 
-					std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
+					bool searchResultsFound = m_materialRegistry.SearchMaterialsForKeyword(m_searchInput);
+					m_materialRegistry.inSearchMode = true;
 
-					if (!searchResultsList.empty()) {
+
+					systems::ThumbnailManager& thumbManager = MnemosyEngine::GetInstance().GetThumbnailManager();
+
+					thumbManager.UnloadAllThumbnails();
+
+					if (searchResultsFound) {
+						
+						std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
+
 
 						for (int i = 0; i < searchResultsList.size(); i++) {
-						
-							if (ImGui::TreeNodeEx(searchResultsList[i]->name.c_str(), m_materialTreeFlags)) {
 							
-								ImGui::TreePop();
-							}
-						}
+							thumbManager.AddMaterialForThumbnailing(searchResultsList[i]);							
+						}						
 					}
-					else {
-						
-						ImGui::Text("Could not find any materials..");
-					
-					}
+
 				}
+
 			}
-			ImGui::EndChild();
 
+			ImGui::Spacing();
+			ImGui::Spacing();
 
-			if (!m_inSearchMode) {
-			
-				DrawMaterialButtons();
-			
+			if (!m_materialRegistry.inSearchMode) {
+
+				RecursivDrawSubfolders(rootNode);
+				HandleDeleteHierarchyModal();
 			}
 			else {
-				
-				DrawMaterialButtonsOfSearch();
-			
+
+				// draw search results as bullet points
+				std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
+
+				if (!searchResultsList.empty()) {
+
+					for (int i = 0; i < searchResultsList.size(); i++) {
+						
+						if (ImGui::TreeNodeEx(searchResultsList[i]->name.c_str(), m_materialTreeFlags)) {
+							
+							ImGui::TreePop();
+						}
+					}
+				}
+				else {
+						
+					ImGui::Text("Could not find any materials..");
+					
+				}
 			}
-
 			
-
 
 		}	
 		ImGui::End();
@@ -402,6 +384,10 @@ namespace mnemosy::gui
 			}
 
 
+
+
+
+
 			if (matIsOpen) {
 
 #ifdef mnemosy_gui_showDebugInfo
@@ -485,186 +471,6 @@ namespace mnemosy::gui
 		} // end loop through sub materials
 	}
 
-	void MaterialLibraryGuiPanel::DrawMaterialButtons()
-	{
-		// Draw image buttns of active folder
-		ImGui::BeginChild("CurrentDirectory", ImVec2(0, 0), ImGuiChildFlags_Border);
-		{
-
-			if (m_materialRegistry.GetSelectedNode() == nullptr) {
-				MNEMOSY_TRACE("Selected node is not nullptr");
-			}
-
-			std::string directoryText = "Directory: " + m_materialRegistry.GetSelectedNode()->name;
-			ImGui::SeparatorText(directoryText.c_str());
-
-			
-			ImGui::SliderFloat("Icon Size", &m_imgButtonSize, 32.0f, 350.0f, "%.0f");
-			ImGui::Spacing();
-
-			if (m_materialRegistry.GetSelectedNode()->HasMaterials()) {
-				// to do kinda messy tbh registry could store it too
-				fs::path lib = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-				fs::path activeFolderPath = lib / fs::path(m_materialRegistry.GetSelectedNode()->pathFromRoot);
-
-				//MnemosyEngine::GetInstance().GetThumbnailManager().LoadThumbnailsOfActiveFolder(m_materialRegistry.GetSelectedNode(), activeFolderPath);
-
-
-
-				systems::FolderNode* selectedNode = m_materialRegistry.GetSelectedNode();
-
-				ImGuiStyle& style = ImGui::GetStyle();
-				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-
-				ImVec2 button_size(m_imgButtonSize, m_imgButtonSize);
-				int materialCount = selectedNode->subMaterials.size();
-				for (int i = 0; i < materialCount; i++) {
-
-					ImGui::BeginGroup();
-					std::string& matName = selectedNode->subMaterials[i]->name;
-
-					bool pressed = ImGui::ImageButton((void*)(selectedNode->subMaterials[i]->thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
-
-
-					if (pressed) {
-
-						// check if its already the active material
-						if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i]->runtime_ID) {
-
-							fs::path matDir = selectedNode->pathFromRoot / fs::path(matName);
-							m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(matDir, selectedNode->subMaterials[i], selectedNode);
-						}
-					}
-					// Calculate size of the name and shorten it if its longer then the button size
-					std::string matNameString = matName;
-
-					while (ImGui::CalcTextSize(matNameString.c_str()).x > (m_imgButtonSize - 5.0f)) {
-						matNameString.pop_back();
-					};
-
-					if (matNameString != matName) {
-						matNameString += "..";
-					}
-
-
-
-#ifdef mnemosy_gui_showDebugInfo
-					std::string nameWithDebugInfo = matName + " -GLTexID: " + std::to_string(selectedNode->subMaterials[i]->thumbnailTexure_ID);
-					ImGui::Text(nameWithDebugInfo.c_str());
-#else						
-					ImGui::Text(matNameString.c_str());
-#endif // mnemosy_gui_showDebugInfo
-
-
-
-
-					ImGui::EndGroup();
-
-					float last_button_x2 = ImGui::GetItemRectMax().x;
-					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_size.x;
-					if (i + 1 < materialCount && next_button_x2 < window_visible_x2)
-						ImGui::SameLine();
-				}
-			}
-
-		}
-		ImGui::EndChild();
-
-	}
-
-	void MaterialLibraryGuiPanel::DrawMaterialButtonsOfSearch() {
-
-
-		// Draw image buttns of active folder
-		ImGui::BeginChild("Search Results", ImVec2(0, 0), ImGuiChildFlags_Border);
-		{
-
-			/*if (m_materialRegistry.GetSelectedNode() == nullptr) {
-				MNEMOSY_TRACE("Selected node is not nullptr");
-			}*/
-
-			std::string headerText = "Search Results: " + m_searchInput;
-			ImGui::SeparatorText(headerText.c_str());
-
-			
-			ImGui::SliderFloat("Icon Size", &m_imgButtonSize, 32.0f, 350.0f, "%.0f");
-			ImGui::Spacing();
-
-
-			std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
-
-
-			
-
-
-
-			if (!searchResultsList.empty()) {
-				// to do kinda messy tbh registry could store it too
-				//fs::path lib = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-				//fs::path activeFolderPath = lib / fs::path(m_materialRegistry.GetSelectedNode()->pathFromRoot);
-
-				//MnemosyEngine::GetInstance().GetThumbnailManager().LoadThumbnailsOfActiveFolder(m_materialRegistry.GetSelectedNode(), activeFolderPath);
-
-
-
-				//systems::FolderNode* selectedNode = m_materialRegistry.GetSelectedNode();
-
-				ImGuiStyle& style = ImGui::GetStyle();
-				float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-				ImVec2 button_size(m_imgButtonSize, m_imgButtonSize);
-
-				int materialCount = searchResultsList.size();
-
-				for (int i = 0; i < materialCount; i++) {
-
-					ImGui::BeginGroup();
-
-					systems::MaterialInfo* matInfo = searchResultsList[i];
-					std::string& matName = matInfo->name;// selectedNode->subMaterials[i].name;
-
-					bool pressed = ImGui::ImageButton((void*)(matInfo->thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
-
-
-					if (pressed) {
-
-						// check if its already the active material
-						if (m_materialRegistry.GetActiveMaterialID() != matInfo->runtime_ID) {
-
-							fs::path matDir = matInfo->parent->pathFromRoot / fs::path(matName);
-							m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(matDir, matInfo, matInfo->parent);
-						}
-					}
-					// Calculate size of the name and shorten it if its longer then the button size
-					std::string matNameString = matName;
-
-					while (ImGui::CalcTextSize(matNameString.c_str()).x > (m_imgButtonSize - 5.0f)) {
-						matNameString.pop_back();
-					};
-
-					if (matNameString != matName) {
-						matNameString += "..";
-					}
-
-					ImGui::Text(matNameString.c_str());
-
-					ImGui::EndGroup();
-
-					float last_button_x2 = ImGui::GetItemRectMax().x;
-					float next_button_x2 = last_button_x2 + style.ItemSpacing.x + button_size.x;
-					if (i + 1 < materialCount && next_button_x2 < window_visible_x2)
-						ImGui::SameLine();
-				}
-			}
-
-		}
-		ImGui::EndChild();
-
-
-
-	}
-
-
-
 
 	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node) {
 
@@ -747,6 +553,7 @@ namespace mnemosy::gui
 		m_folderIdToOpenNextFrame = node->runtime_ID;
 
 	}
+
 	void MaterialLibraryGuiPanel::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector) {
 
 		if (newName != materialInfo->name) {

@@ -46,6 +46,8 @@ namespace mnemosy::systems {
 
 		std::vector<systems::MaterialInfo*>& GetSearchResultsList() { return m_searchResults; }
 
+
+		unsigned int RecursiveCountMaterials(FolderNode* node, const unsigned int startValue);
 	private:
 		MaterialInfo* CreateMaterial_Internal(FolderNode* node,const std::string name);
 		FolderNode* CreateNewFolder_Internal(FolderNode* parentNode, const std::string& name);

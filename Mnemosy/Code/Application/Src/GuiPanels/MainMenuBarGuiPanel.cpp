@@ -18,6 +18,7 @@
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 #include "Include/GuiPanels/DocumentationGuiPanel.h"
+#include "Include/GuiPanels/ContentsGuiPanel.h"
 
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
@@ -297,30 +298,36 @@ namespace mnemosy::gui
 			GuiPanelManager& m_panelManager = Application::GetInstance().GetGuiPanelManager();
 
 
-			viewportPanel = m_panelManager.GetViewportPanel().IsActive();
-			if (ImGui::MenuItem("Viewport", "", viewportPanel, !viewportPanel)) {
+			m_active_viewportPanel = m_panelManager.GetViewportPanel().IsActive();
+			if (ImGui::MenuItem("Viewport", "", m_active_viewportPanel, !m_active_viewportPanel)) {
 				m_panelManager.GetViewportPanel().SetActive(true);
 			}
 
-			sceneSettings = m_panelManager.GetSettingsPanel().IsActive();
-			if (ImGui::MenuItem("Settings", "", sceneSettings, !sceneSettings)) {
+			m_active_sceneSettings = m_panelManager.GetSettingsPanel().IsActive();
+			if (ImGui::MenuItem("Settings", "", m_active_sceneSettings, !m_active_sceneSettings)) {
 				m_panelManager.GetSettingsPanel().SetActive(true);
 			}
 
-			materialEditorPanel = m_panelManager.GetMaterialEditorPanel().IsActive();
-			if (ImGui::MenuItem("Material Editor", "", materialEditorPanel, !materialEditorPanel)) {
+			m_active_materialEditorPanel = m_panelManager.GetMaterialEditorPanel().IsActive();
+			if (ImGui::MenuItem("Material Editor", "", m_active_materialEditorPanel, !m_active_materialEditorPanel)) {
 				m_panelManager.GetMaterialEditorPanel().SetActive(true);
 			}
 
-			materialLibraryPanel = m_panelManager.GetMaterialLibraryPanel().IsActive();
-			if (ImGui::MenuItem("Material Library", "", materialLibraryPanel, !materialLibraryPanel)) {
+			m_active_materialLibraryPanel = m_panelManager.GetMaterialLibraryPanel().IsActive();
+			if (ImGui::MenuItem("Material Library", "", m_active_materialLibraryPanel, !m_active_materialLibraryPanel)) {
 				m_panelManager.GetMaterialLibraryPanel().SetActive(true);
 			}
 
-			documentationPanel = m_panelManager.GetDocumentationPanel().IsActive();
-			if (ImGui::MenuItem("Documentation", "", documentationPanel, !documentationPanel)) {
+			m_active_documentationPanel = m_panelManager.GetDocumentationPanel().IsActive();
+			if (ImGui::MenuItem("Documentation", "", m_active_documentationPanel, !m_active_documentationPanel)) {
 				m_panelManager.GetDocumentationPanel().SetActive(true);
 			}
+
+			m_active_contentsPanel = m_panelManager.GetContentsPanel().IsActive();
+			if (ImGui::MenuItem("Contents", "", m_active_contentsPanel, !m_active_contentsPanel)) {
+				m_panelManager.GetContentsPanel().SetActive(true);
+			}
+
 
 			ImGui::EndMenu();
 		} // End Menu Windows

@@ -27,11 +27,13 @@ namespace mnemosy::gui
 		bool m_loadMnemosyLibraryModal = false;
 		bool m_open_loadMnemosyLibraryModel = false;
 
-		bool viewportPanel = false;
-		bool sceneSettings = false;
-		bool materialEditorPanel = false;
-		bool materialLibraryPanel = false;
-		bool documentationPanel = false;
+		// window panels visibility state
+		bool m_active_viewportPanel = false;
+		bool m_active_sceneSettings = false;
+		bool m_active_materialEditorPanel = false;
+		bool m_active_materialLibraryPanel = false;
+		bool m_active_documentationPanel = false;
+		bool m_active_contentsPanel = false;
 	};
 }
 #endif // !MAIN_MENU_BAR_GUI_PANEL_H

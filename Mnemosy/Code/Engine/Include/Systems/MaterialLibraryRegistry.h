@@ -96,6 +96,8 @@ namespace mnemosy::systems
 		bool SearchMaterialsForKeyword(const std::string& keyword);
 		std::vector<systems::MaterialInfo*>& GetSearchResultsList();
 
+
+
 	private:
 		bool CheckDataFile(const std::filesystem::path& dataFilePath);
 		void CreateNewMaterialDataFile(std::filesystem::path& folderPath,std::string& name);
@@ -104,6 +106,9 @@ namespace mnemosy::systems
 	public:
 		FolderTree* m_folderTree = nullptr;
 		FolderNode* m_folderNodeOfActiveMaterial = nullptr;
+
+		// accessed by library gui panel and contents gui panel
+		bool inSearchMode = false;
 	private:
 		core::FileDirectories& m_fileDirectories;
 		FolderNode* m_selectedFolderNode = nullptr;

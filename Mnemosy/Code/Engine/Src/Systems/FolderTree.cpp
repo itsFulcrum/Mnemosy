@@ -217,6 +217,25 @@ namespace mnemosy::systems {
 		return new nlohmann::json(LibraryDirectoriesJson);
 	}
 
+	unsigned int FolderTree::RecursiveCountMaterials(FolderNode* node, const unsigned int startValue) {
+
+		unsigned int value = startValue;
+
+		if (node->HasMaterials()) {
+			value += node->subMaterials.size();
+		}
+
+		if (!node->IsLeafNode()) {
+
+			for (int i = 0; i < node->subNodes.size(); i++) {
+
+				value = RecursiveCountMaterials(node->subNodes[i], value);	
+			}
+		}
+
+		return value;
+	}
+
 	MaterialInfo* FolderTree::CreateMaterial_Internal(FolderNode* node, const std::string name) {
 
 		//// adding entry to list of directory node;

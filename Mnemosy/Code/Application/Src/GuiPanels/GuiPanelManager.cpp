@@ -9,6 +9,7 @@
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 #include "Include/GuiPanels/DocumentationGuiPanel.h"
+#include "Include/GuiPanels/ContentsGuiPanel.h"
 
 
 #include "Include/MnemosyEngine.h"
@@ -24,24 +25,21 @@ namespace mnemosy::gui
 		
 		// Create and register ImGui panels
 
-		m_pMainMenuBarPanel = new MainMenuBarGuiPanel();
-		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
-		
-		m_pViewportPanel = new ViewportGuiPanel();
-		userInterface.RegisterGuiPanel(m_pViewportPanel);	
-		
-		m_pSettingsPanel = new SettingsGuiPanel();
-		userInterface.RegisterGuiPanel(m_pSettingsPanel);
-		
-		m_pMaterialEditorPanel = new MaterialEditorGuiPanel();
-		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
-		
+		m_pMainMenuBarPanel		= new MainMenuBarGuiPanel();
+		m_pViewportPanel		= new ViewportGuiPanel();
+		m_pSettingsPanel		= new SettingsGuiPanel();
+		m_pMaterialEditorPanel	= new MaterialEditorGuiPanel();
 		m_pMaterialLibraryPanel = new MaterialLibraryGuiPanel();
+		m_pDocumentationPanel	= new DocumentationGuiPanel();
+		m_pContentsPanel		= new ContentsGuiPanel();
+
+		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
+		userInterface.RegisterGuiPanel(m_pViewportPanel);	
+		userInterface.RegisterGuiPanel(m_pSettingsPanel);
+		userInterface.RegisterGuiPanel(m_pMaterialEditorPanel);
 		userInterface.RegisterGuiPanel(m_pMaterialLibraryPanel);
-
-		m_pDocumentationPanel = new DocumentationGuiPanel();
 		userInterface.RegisterGuiPanel(m_pDocumentationPanel);
-
+		userInterface.RegisterGuiPanel(m_pContentsPanel);
 		
 		// load user settings after all panels have been initialized
 		MnemosyEngine::GetInstance().GetUserSettingsManager().LoadUserSettings(false);
@@ -69,6 +67,8 @@ namespace mnemosy::gui
 		userInterface.UnregisterGuiPanel(m_pMaterialEditorPanel);
 		userInterface.UnregisterGuiPanel(m_pMaterialLibraryPanel);
 		userInterface.UnregisterGuiPanel(m_pDocumentationPanel);
+		userInterface.UnregisterGuiPanel(m_pContentsPanel);
+
 
 		delete m_pMainMenuBarPanel;
 		delete m_pViewportPanel;
@@ -76,6 +76,7 @@ namespace mnemosy::gui
 		delete m_pMaterialEditorPanel;
 		delete m_pMaterialLibraryPanel;
 		delete m_pDocumentationPanel;
+		delete m_pContentsPanel;
 
 	}
 }

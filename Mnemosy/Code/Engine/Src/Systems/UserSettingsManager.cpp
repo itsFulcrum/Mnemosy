@@ -74,13 +74,15 @@ namespace mnemosy::systems {
 			bool gp_materialLibrary_Open	= json_guiPanels["gp_materialLibrary_Open"].get<bool>();
 			bool gp_materialEditor_Open		= json_guiPanels["gp_materialEditor_Open"].get<bool>();
 			bool gp_viewport_Open			= json_guiPanels["gp_viewport_Open"].get<bool>();
+			bool gp_contents_Open			= json_guiPanels["gp_contents_Open"].get<bool>();
+
 
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_DOCUMENTATION).SetActive(gp_documentation_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_SETTINGS).SetActive(gp_sceneSettings_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_LIBRARY).SetActive(gp_materialLibrary_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR).SetActive(gp_materialEditor_Open);
 			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_VIEWPORT).SetActive(gp_viewport_Open);
-
+			userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_CONTENTS).SetActive(gp_contents_Open);
 		}
 
 
@@ -119,7 +121,7 @@ namespace mnemosy::systems {
 			json_guiPanelStates["gp_materialLibrary_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_MATERIAL_LIBRARY);
 			json_guiPanelStates["gp_materialEditor_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR);
 			json_guiPanelStates["gp_documentation_Open"]		= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_DOCUMENTATION);
-
+			json_guiPanelStates["gp_contents_Open"]				= userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_CONTENTS);
 		}
 
 		json_userSettings["guiPanelStates"] = json_guiPanelStates;

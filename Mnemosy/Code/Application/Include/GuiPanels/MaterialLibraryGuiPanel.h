@@ -3,8 +3,6 @@
 
 #include "Include/Gui/GuiPanel.h"
 
-
-
 #include "External/ImGui/imgui.h"
 #include "External/ImGui/imgui_stdlib.h"
 
@@ -41,10 +39,8 @@ namespace mnemosy::gui
 
 		void RecursivDrawSubfolders(systems::FolderNode* node);
 		void DrawMaterialEntries(systems::FolderNode* node);
-	private:
-		
-		void DrawMaterialButtons();
-		void DrawMaterialButtonsOfSearch();
+
+
 
 	private:
 		void AddSubfolder(systems::FolderNode* node);
@@ -60,6 +56,9 @@ namespace mnemosy::gui
 
 
 		void HandleDeleteHierarchyModal();
+
+
+	private:
 		systems::FolderNode* m_nodeDeleteHierarchy = nullptr;
 
 		ImGuiTreeNodeFlags m_directoryTreeFlags;
@@ -77,15 +76,14 @@ namespace mnemosy::gui
 		std::string m_renameMaterialText = "";
 		std::string m_renameFolderText = "";
 		std::string m_searchInput = "";
-		bool m_inSearchMode = false;
 
-		float m_imgButtonSize = 128.0f;
 		unsigned int m_folderIdToOpenNextFrame = 0;
 		bool m_setFolderOpenNextFrame = false;
 
 		bool showDeleteHierarchyModel = false;
 		bool m_matDragDropBegin = false;
 		MaterialDragDropPayload m_tempStoreMatPayload;
+
 
 	};
 

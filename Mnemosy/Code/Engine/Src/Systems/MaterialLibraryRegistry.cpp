@@ -53,7 +53,12 @@ namespace mnemosy::systems
 		float timeStart = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 		LoadUserDirectoriesFromFile();
 		float timeEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-		MNEMOSY_DEBUG("Loaded Material Library in {} Seconds",timeEnd-timeStart);
+
+
+		unsigned int materialCount = m_folderTree->RecursiveCountMaterials(m_folderTree->GetRootPtr(), 0);
+
+		MNEMOSY_DEBUG("Loaded Material Library in {} Seconds, Loaded {} Material Entries",timeEnd-timeStart, materialCount);
+
 
 		m_selectedFolderNode = m_folderTree->GetRootPtr();
 	}
