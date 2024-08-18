@@ -23,9 +23,12 @@ namespace mnemosy::systems
 			return false;
 
 
+		std::string nameLower = MakeStringLowerCase(name);
+
+
 		for (size_t i = 0; i < subMaterials.size(); i++) {
 
-			if (subMaterials[i]->name == name) {
+			if (MakeStringLowerCase(subMaterials[i]->name) == nameLower) {
 				return true;
 			}
 		}
@@ -56,14 +59,18 @@ namespace mnemosy::systems
 
 		// only searches curent and subnodes not reqursivly the entire subtree
 
-		if (this->name == name)
+		std::string nameLower = MakeStringLowerCase(name);
+
+
+		if (MakeStringLowerCase(this->name) == nameLower) {
 			return true;
+		}
 
 		if (!subNodes.empty()) {
 
 			for (FolderNode* subnode : subNodes) {
 
-				if (subnode->name == name) {
+				if (MakeStringLowerCase(subnode->name) == nameLower) {
 					return true;
 				}
 			}

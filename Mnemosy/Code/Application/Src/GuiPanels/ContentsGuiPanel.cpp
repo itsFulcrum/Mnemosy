@@ -87,7 +87,10 @@ namespace mnemosy::gui {
 				ImGui::BeginGroup();
 				std::string& matName = selectedNode->subMaterials[i]->name;
 
-				bool pressed = ImGui::ImageButton((void*)(selectedNode->subMaterials[i]->thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
+				// first casting to a uint64 is neccesary to get rid of waring for casting to void* in next line
+				uint64_t textureId = (uint64_t)selectedNode->subMaterials[i]->thumbnailTexure_ID;
+				bool pressed = ImGui::ImageButton((void*)textureId, button_size, ImVec2(0, 1), ImVec2(1, 0));
+				//bool pressed = ImGui::ImageButton((void*)(selectedNode->subMaterials[i]->thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
 
 
 				if (pressed) {
@@ -162,7 +165,10 @@ namespace mnemosy::gui {
 				systems::MaterialInfo* matInfo = searchResultsList[i];
 				std::string& matName = matInfo->name;
 
-				bool pressed = ImGui::ImageButton((void*)(matInfo->thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
+
+				// first casting to a uint64 is neccesary to get rid of waring for casting to void* in next line
+				uint64_t textureId = (uint64_t)matInfo->thumbnailTexure_ID;
+				bool pressed = ImGui::ImageButton((void*)textureId, button_size, ImVec2(0, 1), ImVec2(1, 0));
 
 
 				if (pressed) {

@@ -101,6 +101,9 @@ namespace mnemosy::systems {
 	}
 
 	void FolderTree::RenameMaterial(MaterialInfo* materialInfo, const std::string& name) {
+
+
+
 		materialInfo->name = MakeNameUnique( name);
 	}
 
@@ -177,14 +180,18 @@ namespace mnemosy::systems {
 
 		unsigned int suffixNbr = 0;
 
+
+		std::string capsUnchanged = name;
 		std::string newName = name;
+		MakeStringLowerCase(newName);
 
 		while (RecursivDoesNameExist(m_rootNode, newName)) {
 			suffixNbr++;
 			newName = name + "_" + std::to_string(suffixNbr);
+			capsUnchanged = name + "_" + std::to_string(suffixNbr);
 		}
 
-		return newName;
+		return capsUnchanged;
 	}
 
 	void FolderTree::LoadFromJson(nlohmann::json& rootJson) {
@@ -316,8 +323,12 @@ namespace mnemosy::systems {
 
 		// recursivly walk through the entire tree and check if the name already exists somewhere either as a folder or as a material
 		// returns true if the name exists
-		
-		if (node->name == name) {
+		// input name is assumed to be lower case to avoid doing this computation multiple times
+
+		std::string nodeName = node->name;
+		MakeStringLowerCase(nodeName);
+
+		if (nodeName == name) {
 
 			return true;
 		}
@@ -328,7 +339,10 @@ namespace mnemosy::systems {
 
 			for (size_t i = 0; i < node->subMaterials.size(); i++) {
 
-				if (node->subMaterials[i]->name == name) {
+				std::string matName = node->subMaterials[i]->name;
+				MakeStringLowerCase(matName);
+
+				if (matName == name) {
 					return true;
 				}
 			}

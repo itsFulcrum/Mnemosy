@@ -67,7 +67,10 @@ namespace mnemosy::gui
 		m_engineInstance.GetWindow().SetViewportData(vSizeX, vSizeY, m_viewportPosX, m_viewportPosY);
 
 		// Display Rendered Frame
-		ImGui::Image((void*)m_engineInstance.GetRenderer().GetRenderTextureId(), m_imageSize, ImVec2(0, 1), ImVec2(1, 0));
+
+		// first casting to a uint64 is neccesary to get rid of waring for casting to void* in next line
+		uint64_t textureID = (uint64_t)m_engineInstance.GetRenderer().GetRenderTextureId();
+		ImGui::Image((void*)textureID, m_imageSize, ImVec2(0, 1), ImVec2(1, 0));
 
 
 		// only pass input to Mnemosy if viewport window is hovered and docked

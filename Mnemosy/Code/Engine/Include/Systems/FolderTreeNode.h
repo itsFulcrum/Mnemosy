@@ -43,6 +43,15 @@ namespace mnemosy::systems
 		bool IsLeafNode();
 		bool IsRoot();
 		bool SubnodeExistsAlready(std::string& name);
+
+		std::string MakeStringLowerCase(std::string& str) {
+
+
+			std::string strLower = str;
+			std::transform(strLower.begin(), strLower.end(), strLower.begin(), [](unsigned char c) { return std::tolower(c); });
+		
+			return strLower;
+		}
 	};
 
 } // !mnemosy::systems

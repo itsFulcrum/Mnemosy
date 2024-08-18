@@ -1,12 +1,16 @@
 #include "Include/Application.h"
 
 #include "Include/MnemosyEngine.h"
+#include "Include/MnemosyConfig.h"
 
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
 #include "Include/Input/CameraInputController.h"
 #include "Include/Input/SceneInputController.h"
 #include "Include/GuiPanels/GuiPanelManager.h"
+
+
+#include <string>
 
 namespace mnemosy
 {
@@ -33,7 +37,13 @@ namespace mnemosy
 
 	void Application::Initialize()	{
 
-		m_mnemosyEngine.Initialize("Mnemosy v0.4-alpha");
+		
+
+
+		std::string windowTitle = "Mnemosy v" + std::to_string(MNEMOSY_VERSION_MAJOR) + "." + std::to_string(MNEMOSY_VERSION_MINOR) + "-" + MNEMOSY_VERSION_SUFFIX;
+		m_mnemosyEngine.Initialize(windowTitle.c_str());
+
+
 
 		m_pCameraController = new input::CameraInputController();
 		m_pSceneInputController = new input::SceneInputController();
