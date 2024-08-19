@@ -105,7 +105,7 @@ namespace mnemosy::systems {
 
 	void ThumbnailManager::AddMaterialForThumbnailing(MaterialInfo* material) {
 
-		MNEMOSY_ASSERT(material != nullptr,"NO!")
+		MNEMOSY_ASSERT(material != nullptr, "NO!");
 		
 
 		// check if its already in the list
