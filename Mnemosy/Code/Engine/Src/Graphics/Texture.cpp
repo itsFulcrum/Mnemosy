@@ -1,7 +1,7 @@
 #include "Include/Graphics/Texture.h"
 #include "Include/Core/Log.h"
 
-
+#include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Image.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 
@@ -10,7 +10,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/utils/logger.hpp>
-
 
 #include <math.h>
 
@@ -27,11 +26,9 @@ namespace mnemosy::graphics
 		clear();
 	}
 
-	bool Texture::GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps) {
+	bool Texture::GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps, PBRTextureType pbrType) {
 		clear();
-		
-
-		
+				
 
 		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
 
@@ -43,49 +40,34 @@ namespace mnemosy::graphics
 			return false;					
 		}
 		
+
 		m_channelsAmount =	pic.channels();
+		bool convertSingleChannelToRGB = false;
+		if (m_channelsAmount = 1) {
+			if (pbrType == graphics::MNSY_TEXTURE_ALBEDO || pbrType == graphics::MNSY_TEXTURE_EMISSION) {
+				m_channelsAmount = 3;
+				convertSingleChannelToRGB = true;
+			}
+		}
+
+
 		m_width = pic.cols;
 		m_height = pic.rows;
 		int bitDepth = pic.depth();
 		cv::flip(pic, pic, 0);
 		
-		/*if (m_width != m_height) {
-
-			MNEMOSY_WARN("Texture::gnerateFromFile: Loading Image Failed: \nFilepath: {} \nImages with non square aspect ratios cause crashes upon export so they are not supported at the moment. \nThis is a known issue I want to fix", imagePath);
-			pic.release();
-			m_ID = 0;
-			m_isInitialized = false;
-			return false;
-
-		}*/
-
-		// ensure byte alingment hopefully
-		int rest = pic.step1() % 2;
-
-		int restWidth = m_width % 2;
-		int restHeight = m_height % 2;
-
-		if (restWidth == 1 || restHeight == 1) {
-
-		}else {
+		// ensure byte alignment
+		int restWidth = m_width % 4;
 		
+		unsigned int padding = 4;
+
+		if (restWidth != 0) {
+			padding = 1;
 		}
 
-		// idk this does not seem to be the solution
-		//unsigned int padding = 4 - (pic.step1() / m_width);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, padding);
 
-
-		//MNEMOSY_TRACE("{}x{}  step: {}, padding {}", restWidth, restHeight, pic.step1(), padding);
-		if (restWidth == 0) {
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-		}
-		else if(rest == 1){
-		
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		}
-
-		//glPixelStorei(GL_UNPACK_ALIGNMENT, padding);
-
+		MNEMOSY_TRACE("pixel: {}x{} rest: {}  step: {}, Bit Depth: {}, padding {}",m_width,m_height, restWidth, pic.step1(),bitDepth, padding);
 
 
 
@@ -101,8 +83,7 @@ namespace mnemosy::graphics
 		//Loading with RGBA channels
 		if (m_channelsAmount == 4) {
 			cv::cvtColor(pic, pic, cv::COLOR_BGRA2RGBA);
-			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
-			// cv::pow requres input to be in 32 or 64 bit...
+			
 
 			if (bitDepth == 0) {
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pic.ptr());
@@ -119,9 +100,12 @@ namespace mnemosy::graphics
 		// load with RGB channels
 		else if (m_channelsAmount == 3) {
 
-			cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
-			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
-			// cv::pow requres input to be in 32 or 64 bit...
+			if (convertSingleChannelToRGB) {
+				cv::cvtColor(pic, pic, cv::COLOR_GRAY2RGB);
+			}
+			else {
+				cv::cvtColor(pic, pic, cv::COLOR_BGR2RGB);
+			}	
 			
 			
 			if (bitDepth == 0) {
@@ -136,7 +120,8 @@ namespace mnemosy::graphics
 		}
 
 		else if (m_channelsAmount == 1) {
-						
+
+
 			if (bitDepth == 0) {
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pic.ptr());
 
@@ -169,8 +154,6 @@ namespace mnemosy::graphics
 		MNEMOSY_DEBUG("Loaded Texture from file: {} - {}x{} Channels: {}", imagePath, m_width, m_height, m_channelsAmount);
 		return true;
 	}
-
-
 
 	bool Texture::LoadFromKtx(const char* imagePath) {
 		clear();
@@ -246,17 +229,16 @@ namespace mnemosy::graphics
 		m_height = m_cvMat.rows;
 		int bitDepth = m_cvMat.depth();
 
+		// ensure byte alignment
+		int restWidth = m_width % 4;
 
-		// ensure byte alingment hopefully
-		int rest = m_cvMat.step1() % 2;
+		unsigned int padding = 4;
 
-		if (rest == 0) {
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+		if (restWidth != 0) {
+			padding = 1;
 		}
-		else if (rest == 1) {
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		}
+		glPixelStorei(GL_UNPACK_ALIGNMENT, padding);
 
 
 		glGenTextures(1, &m_ID);
@@ -290,8 +272,6 @@ namespace mnemosy::graphics
 		else if (m_channelsAmount == 3) {
 
 			cv::cvtColor(m_cvMat,m_cvMat, cv::COLOR_BGR2RGB);
-			// cv::pow(pic, 2.2f,pic); if we do gamma corrrect here we need to only apply it to color textures 
-			// cv::pow requres input to be in 32 or 64 bit...
 
 
 			if (bitDepth == 0) {
@@ -321,8 +301,6 @@ namespace mnemosy::graphics
 		}
 
 		else if (m_channelsAmount == 2) {
-			//MNEMOSY_ERROR("Texture::generateFromFile: Loading Texures with only 2 or 1 channels is not supported at the moment \nFilepath: {}", imagePath);
-			//m_ID = 0;
 			m_isInitialized = false;
 			glDeleteTextures(1, &m_ID);
 			m_cvMat.release();

@@ -295,6 +295,19 @@ namespace mnemosy::systems
 				channel_r_tex->BindToLocation(1);
 				m_pTextureGenShader->SetUniformInt("_channel_r", 1);
 			}
+			else {
+				float defaultValue = material.GetDefaultValueFromPackComponent(packComponent_R);
+				m_pTextureGenShader->SetUniformFloat("_channel_r_defaultValue", defaultValue);
+			}
+
+			if (packComponent_R == graphics::MNSY_PACKCOMPONENT_SMOOTHNESS) {
+				m_pTextureGenShader->SetUniformBool("_channel_r_invert", true);
+			}
+			else {
+				m_pTextureGenShader->SetUniformBool("_channel_r_invert", false);
+			}
+
+
 
 			// sampler G channel
 			bool channel_g_assignSampler = true;
@@ -319,6 +332,19 @@ namespace mnemosy::systems
 				channel_g_tex->BindToLocation(2);
 				m_pTextureGenShader->SetUniformInt("_channel_g", 2);
 			}
+			else {
+				float defaultValue = material.GetDefaultValueFromPackComponent(packComponent_G);
+				m_pTextureGenShader->SetUniformFloat("_channel_g_defaultValue", defaultValue);
+			}
+
+
+			if (packComponent_G == graphics::MNSY_PACKCOMPONENT_SMOOTHNESS) {
+				m_pTextureGenShader->SetUniformBool("_channel_g_invert", true);
+			}
+			else {
+				m_pTextureGenShader->SetUniformBool("_channel_g_invert", false);
+			}
+
 
 			// sampler B channel
 			bool channel_b_assignSampler = true;
@@ -342,6 +368,17 @@ namespace mnemosy::systems
 			if (channel_b_assignSampler) {
 				channel_b_tex->BindToLocation(3);
 				m_pTextureGenShader->SetUniformInt("_channel_b", 3);
+			}
+			else {
+				float defaultValue = material.GetDefaultValueFromPackComponent(packComponent_B);
+				m_pTextureGenShader->SetUniformFloat("_channel_b_defaultValue", defaultValue);
+			}
+
+			if (packComponent_B == graphics::MNSY_PACKCOMPONENT_SMOOTHNESS) {
+				m_pTextureGenShader->SetUniformBool("_channel_b_invert", true);
+			}
+			else {
+				m_pTextureGenShader->SetUniformBool("_channel_b_invert", false);
 			}
 
 			// sampler A channel  // only when pack type is MNSY_PACKTYPE_RGBA
@@ -370,11 +407,25 @@ namespace mnemosy::systems
 					channel_a_tex->BindToLocation(4);
 					m_pTextureGenShader->SetUniformInt("_channel_a", 4);
 				}
+				else {
+					float defaultValue = material.GetDefaultValueFromPackComponent(packComponent_A);
+					m_pTextureGenShader->SetUniformFloat("_channel_a_defaultValue", defaultValue);
+				}
+
+				if (packComponent_A == graphics::MNSY_PACKCOMPONENT_SMOOTHNESS) {
+					m_pTextureGenShader->SetUniformBool("_channel_a_invert", true);
+				}
+				else {
+					m_pTextureGenShader->SetUniformBool("_channel_a_invert", false);
+				}
+
 			}
 			else {
 
 				m_pTextureGenShader->SetUniformBool("_channel_a_isAssigned", false);
 			}
+
+
 
 
 		}

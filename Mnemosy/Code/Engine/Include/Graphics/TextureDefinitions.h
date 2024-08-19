@@ -75,11 +75,13 @@ namespace mnemosy::graphics {
 		MNSY_PACKCOMPONENT_EMISSIVE_G	= 8,
 		MNSY_PACKCOMPONENT_EMISSIVE_B	= 9,
 
+		// After 10 should only be single channel types otherwise texture gen manager has to be adjusted
 		MNSY_PACKCOMPONENT_ROUGHNESS	= 10,
-		MNSY_PACKCOMPONENT_METALLIC		= 11,
-		MNSY_PACKCOMPONENT_AO			= 12,
-		MNSY_PACKCOMPONENT_HEIGHT		= 13,
-		MNSY_PACKCOMPONENT_OPACITY		= 14,
+		MNSY_PACKCOMPONENT_SMOOTHNESS	= 11,
+		MNSY_PACKCOMPONENT_METALLIC		= 12,
+		MNSY_PACKCOMPONENT_AO			= 13,
+		MNSY_PACKCOMPONENT_HEIGHT		= 14,
+		MNSY_PACKCOMPONENT_OPACITY		= 15
 
 	};
 
@@ -304,10 +306,11 @@ namespace mnemosy::graphics {
 			case (MNSY_PACKCOMPONENT_EMISSIVE_B):
 				return std::string("Emissive_B");
 				break;
-
-
 			case (MNSY_PACKCOMPONENT_ROUGHNESS):
 				return std::string("Roughness");
+				break;
+			case (MNSY_PACKCOMPONENT_SMOOTHNESS):
+				return std::string("Smoothness");
 				break;
 			case (MNSY_PACKCOMPONENT_METALLIC):
 				return std::string("Metallic");

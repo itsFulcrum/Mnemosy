@@ -645,7 +645,7 @@ namespace mnemosy::systems
 		// load the texture
 		graphics::Texture* tex = new graphics::Texture();
 
-		bool success = tex->GenerateFromFile(opacityMapPath.generic_string().c_str(), true, true);
+		bool success = tex->GenerateFromFile(opacityMapPath.generic_string().c_str(), true, true,graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
 
 		if (!success) {
 
@@ -836,54 +836,54 @@ namespace mnemosy::systems
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
 				graphics::Texture* albedoTex = new graphics::Texture();
 
-				albedoTex->GenerateFromFile(path.c_str(), true, true);
+				albedoTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO, albedoTex);
 			}
 			if (roughnessTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
 				graphics::Texture* roughnessTex = new graphics::Texture();
 				
-				roughnessTex->GenerateFromFile(path.c_str(), true, true);
+				roughnessTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughnessTex);
 			}
 			if (metalTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_metalPath].get<std::string>();
 				graphics::Texture* metallicTex = new graphics::Texture();
 
-				metallicTex->GenerateFromFile(path.c_str(), true, true);
+				metallicTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_METALLIC, metallicTex);
 			}
 			if (emissionTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_emissionPath].get<std::string>();
 				graphics::Texture* emissionTex = new graphics::Texture();
-				emissionTex->GenerateFromFile(path.c_str(), true, true);
+				emissionTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_EMISSION, emissionTex);
 			}
 			if (normalTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
 				graphics::Texture* normalTex = new graphics::Texture();
-				normalTex->GenerateFromFile(path.c_str(), true, true);
+				normalTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_NORMAL, normalTex);
 			}
 			if (aoTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
 				graphics::Texture* aoTex = new graphics::Texture();
 
-				aoTex->GenerateFromFile(path.c_str(), true, true);
+				aoTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION, aoTex);
 			}
 			if (heightTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
 				graphics::Texture* heightTex = new graphics::Texture();
 			
-				heightTex->GenerateFromFile(path.c_str(), true, true);
+				heightTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT, heightTex);
 			}
 			if (opacityTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
 				graphics::Texture* opacityTex = new graphics::Texture();
 			
-				opacityTex->GenerateFromFile(path.c_str(), true, true);
+				opacityTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_OPACITY, opacityTex);
 			}
 
@@ -1371,7 +1371,7 @@ namespace mnemosy::systems
 
 
 		graphics::Texture* tex = new graphics::Texture();
-		bool success =  tex->GenerateFromFile(filepath.c_str(),true,true);		
+		bool success =  tex->GenerateFromFile(filepath.c_str(),true,true,textureType);
 		
 		if (!success) {
 			MNEMOSY_ERROR("Loading Texture Failed: {}", filepath);

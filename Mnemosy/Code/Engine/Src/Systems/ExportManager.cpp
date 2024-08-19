@@ -229,7 +229,7 @@ namespace mnemosy::systems
 
 						graphics::Texture* packedTexture = new graphics::Texture();
 
-						packedTexture->GenerateFromFile(pathOnDisk.generic_string().c_str(), true, false);
+						packedTexture->GenerateFromFile(pathOnDisk.generic_string().c_str(), true, false,graphics::MNSY_TEXTURE_NONE);
 
 
 						graphics::TextureFormat texFormat = graphics::MNSY_RGB16;

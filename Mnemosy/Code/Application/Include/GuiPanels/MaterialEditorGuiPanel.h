@@ -58,7 +58,7 @@ namespace mnemosy::gui
 
 		const char* m_packTypes[2] = { "R+G+B", "R+G+B+A" }; // they need to be orderd the same as ChannelPackType in texture definitions
 		// they need to be orderd the same as ChannelPackComponent in texture definitions
-		const char* m_packComponents[15] =
+		const char* m_packComponents[16] =
 		{
 			"None",
 			"Albedo R",
@@ -74,6 +74,7 @@ namespace mnemosy::gui
 			"Emmissive B",
 
 			"Roughness",
+			"Smoothness",
 			"Metallic",
 			"Ambient Occlusion",
 			"Height",

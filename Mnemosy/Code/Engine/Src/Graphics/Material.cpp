@@ -168,7 +168,7 @@ namespace mnemosy::graphics
 		MNEMOSY_ASSERT(pbrType != MNSY_TEXTURE_COUNT, "Do not use this function to add custom packed textures");
 
 		Texture* tex = new Texture();
-		bool loadedSuccesfull = tex->GenerateFromFile(filePath.c_str(),true,true);
+		bool loadedSuccesfull = tex->GenerateFromFile(filePath.c_str(),true,true,pbrType);
 
 		if (!loadedSuccesfull) {
 
@@ -361,8 +361,6 @@ namespace mnemosy::graphics
 
 	}
 
-
-
 	bool Material::SuffixExistsInPackedTexturesList(std::string& suffix) {
 
 		if (!HasPackedTextures)
@@ -468,6 +466,9 @@ namespace mnemosy::graphics
 		case (MNSY_PACKCOMPONENT_ROUGHNESS):
 			return m_pRoughnessTexture;
 			break;
+		case (MNSY_PACKCOMPONENT_SMOOTHNESS):
+			return m_pRoughnessTexture;
+			break;
 		case (MNSY_PACKCOMPONENT_METALLIC):
 			return m_pMetallicTexture;
 			break;
@@ -488,6 +489,75 @@ namespace mnemosy::graphics
 		}
 
 		return nullptr;
+	}
+
+	float Material::GetDefaultValueFromPackComponent(ChannelPackComponent packComponent)
+	{
+		switch (packComponent)
+		{
+		case (MNSY_PACKCOMPONENT_NONE):
+			return 0.0f;
+			break;
+		case (MNSY_PACKCOMPONENT_ALBEDO_R):
+			return Albedo.r;
+			break;
+		case (MNSY_PACKCOMPONENT_ALBEDO_G):
+			return Albedo.g;
+			break;
+		case (MNSY_PACKCOMPONENT_ALBEDO_B):
+			return Albedo.b;
+			break;
+
+
+		case (MNSY_PACKCOMPONENT_NORMAL_R):
+			return 0.5f;
+			break;
+		case (MNSY_PACKCOMPONENT_NORMAL_G):
+			return 0.5f;
+			break;
+
+		case (MNSY_PACKCOMPONENT_NORMAL_B):
+			return 1.0f;
+			break;
+
+
+		case (MNSY_PACKCOMPONENT_EMISSIVE_R):
+			return Emission.r;
+			break;
+		case (MNSY_PACKCOMPONENT_EMISSIVE_G):
+			return Emission.g;
+			break;
+		case (MNSY_PACKCOMPONENT_EMISSIVE_B):
+			return Emission.b;
+			break;
+
+
+		case (MNSY_PACKCOMPONENT_ROUGHNESS):
+			return Roughness;
+			break;
+		case (MNSY_PACKCOMPONENT_SMOOTHNESS):
+			return Roughness;
+			break;
+		case (MNSY_PACKCOMPONENT_METALLIC):
+			return Metallic;
+			break;
+		case (MNSY_PACKCOMPONENT_AO):
+			return 1.0f;
+			break;
+		case (MNSY_PACKCOMPONENT_HEIGHT):
+			return 0.5f;
+			break;
+
+		case (MNSY_PACKCOMPONENT_OPACITY):
+			return 1.0f;
+			break;
+
+		default:
+			return 0.0f;
+			break;
+		}
+
+		return 0.0f;
 	}
 
 	unsigned int Material::DebugGetTextureID(const PBRTextureType& pbrTextureType)

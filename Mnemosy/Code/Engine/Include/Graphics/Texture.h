@@ -6,6 +6,11 @@
 
 #include "opencv2/core/mat.hpp"
 
+
+namespace mnemosy::graphics {
+	enum PBRTextureType;
+}
+
 namespace mnemosy::graphics 
 {
 	class Texture {
@@ -14,7 +19,7 @@ namespace mnemosy::graphics
 		Texture();
 		~Texture();
 		// todo remove flip parameter
-		bool GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps);
+		bool GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps, PBRTextureType pbrType);
 		bool LoadFromKtx(const char* imagePath);
 
 		void LoadIntoCVMat(std::string path);

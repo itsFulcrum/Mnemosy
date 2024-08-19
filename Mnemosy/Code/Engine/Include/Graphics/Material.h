@@ -86,10 +86,11 @@ namespace mnemosy::graphics
 
 
 		Texture* GetTextureFromPackComponent(ChannelPackComponent packComponent);
+		float GetDefaultValueFromPackComponent(ChannelPackComponent packComponent);
+
 
 		int GetNormalFormatAsInt() { return (int)NormalTextureFormat; }
 		unsigned int DebugGetTextureID(const PBRTextureType& pbrType);
-
 
 
 	private:

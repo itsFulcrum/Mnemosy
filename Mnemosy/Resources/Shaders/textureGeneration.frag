@@ -15,18 +15,27 @@ uniform sampler2D _texture0;
 uniform sampler2D _channel_r;
 uniform bool _channel_r_isAssigned;
 uniform bool _channel_r_isSingleChannel;
+uniform bool _channel_r_invert;
+uniform float _channel_r_defaultValue;
 // loaction 2
 uniform sampler2D _channel_g;
 uniform bool _channel_g_isAssigned;
 uniform bool _channel_g_isSingleChannel;
+uniform bool _channel_g_invert;
+uniform float _channel_g_defaultValue;
 // loaction 3
 uniform sampler2D _channel_b;
 uniform bool _channel_b_isAssigned;
 uniform bool _channel_b_isSingleChannel;
+uniform bool _channel_b_invert;
+uniform float _channel_b_defaultValue;
 // loaction 4
 uniform sampler2D _channel_a;
 uniform bool _channel_a_isAssigned;
 uniform bool _channel_a_isSingleChannel;
+uniform bool _channel_a_invert;
+uniform float _channel_a_defaultValue;
+
 
 
 vec4 Mode0_FlipNormalYChannel(sampler2D normalMapSampler)
@@ -50,13 +59,21 @@ vec4 Mode2_OpacityFromAlbedoAlpha(sampler2D albedoSampler){
 }
 
 vec4 Mode3_CreateChannelPack() {
-  // R - channel
+
+  // ===== R - channel =====
   float R = 0.0f;
   if(_channel_r_isAssigned) {
     R = texture(_channel_r,uv).r;
   }
+  else{
+    R = _channel_r_defaultValue;
+  }
 
-  // G - channel
+  if(_channel_r_invert){
+    R = 1.0f - clamp(R,0.0f,1.0f);
+  }
+
+  // ===== G - channel =====
   float G = 0.0f;
 
   if(_channel_g_isAssigned) {
@@ -68,8 +85,15 @@ vec4 Mode3_CreateChannelPack() {
       G = texture(_channel_g,uv).g;
     }
   }
+  else {
+    G = _channel_g_defaultValue;
+  }
 
-  // B - channel
+  if(_channel_g_invert){
+    G = 1.0f - clamp(G,0.0f,1.0f);
+  }
+
+  // ===== B - channel =====
   float B = 0.0f;
 
   if(_channel_b_isAssigned) {
@@ -81,8 +105,15 @@ vec4 Mode3_CreateChannelPack() {
       B = texture(_channel_b,uv).b;
     }
   }
+  else {
+    B = _channel_b_defaultValue;
+  }
 
-  // A - channel
+  if(_channel_b_invert){
+    B = 1.0f - clamp(B,0.0f,1.0f);
+  }
+
+  // ===== A - channel =====
   float A = 0.0f;
 
   if(_channel_a_isAssigned) {
@@ -94,6 +125,14 @@ vec4 Mode3_CreateChannelPack() {
       A = texture(_channel_a,uv).a;
     }
   }
+  else {
+    A = _channel_a_defaultValue;
+  }
+
+  if(_channel_a_invert){
+    A = 1.0f - clamp(A,0.0f,1.0f);
+  }
+
 
   return vec4(R,G,B,A);
 }
@@ -113,7 +152,6 @@ void main()
     fragmentOutputColor = Mode2_OpacityFromAlbedoAlpha(_texture0);
   }
   else if(_mode == 3){
-    // create channel packed texture
     fragmentOutputColor = Mode3_CreateChannelPack();
   }
 
