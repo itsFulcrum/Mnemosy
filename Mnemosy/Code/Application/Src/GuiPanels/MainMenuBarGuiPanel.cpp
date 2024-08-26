@@ -64,7 +64,7 @@ namespace mnemosy::gui
 			{
 				graphics::RenderMesh& renderMesh = scene.GetMesh();
 
-				const char* previewMesh_List[7] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne" }; // they need to be ordered the same as in lightType Enum in light class
+				const char* previewMesh_List[8] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne","Fabric" }; // they need to be ordered the same as in lightType Enum in light class
 
 				int previewMesh_Current = (int)scene.GetCurrentPreviewMesh();
 
@@ -238,10 +238,10 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 
 			if (ImGui::Button("Change Permanently, but KEEP old files")) {
-				
+
 
 				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
-				
+
 				if (!filePath.empty()) {
 
 
@@ -266,7 +266,7 @@ namespace mnemosy::gui
 			if (ImGui::Button("Only This Session")) {
 
 				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
-				
+
 				if (!filePath.empty()) {
 
 					fs::path dataFilePath = fs::path(filePath);

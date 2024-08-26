@@ -20,10 +20,10 @@ namespace mnemosy::graphics
 	{
 		//MNEMOSY_TRACE("Start Init Scene");
 		mnemosy::core::Window& window = MnemosyEngine::GetInstance().GetWindow();
-		
-		
+
+
 		core::FileDirectories& fd =  MnemosyEngine::GetInstance().GetFileDirectories();
-		
+
 		std::filesystem::path previewMesh = fd.GetPreviewMeshesPath() / std::filesystem::path("mnemosy_previewMesh_mnemosy.fbx");
 
 
@@ -39,7 +39,7 @@ namespace mnemosy::graphics
 		std::filesystem::path gizmoMesh = fd.GetMeshesPath() / std::filesystem::path("mnemosy_gizmo_mesh.fbx");
 		m_gizmoMesh = std::make_unique<RenderMesh>(gizmoMesh.generic_string().c_str());
 #endif // MNEMOSY_RENDER_GIZMO
-		
+
 		//MNEMOSY_TRACE("Scene - light Init");
 		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("market.hdr");
 		m_skybox = std::make_unique<Skybox>(standardSkybox.generic_string().c_str(), 1024);
@@ -74,13 +74,13 @@ namespace mnemosy::graphics
 	}
 
 
+void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
+{
+		namespace fs = std::filesystem;
 
-
-	void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
-	{
 		if (previewMeshType == m_currentPreviewMesh)
 			return; // already set
-		
+
 		std::filesystem::path meshesPath = MnemosyEngine::GetInstance().GetFileDirectories().GetPreviewMeshesPath();
 
 		if (previewMeshType == PreviewMesh::Custom)
@@ -89,45 +89,37 @@ namespace mnemosy::graphics
 			m_currentPreviewMesh = PreviewMesh::Custom;
 			return;
 		}
+
+		std::filesystem::path newMeshPath;
+
 		if (previewMeshType == PreviewMesh::Default)
 		{
-			std::filesystem::path mesh = meshesPath / fs::path("mnemosy_previewMesh_mnemosy.fbx");
-			m_mesh->LoadMesh(mesh.generic_string().c_str());
-			m_currentPreviewMesh = PreviewMesh::Default;
-			return;
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_mnemosy.fbx");
 		}
-		if (previewMeshType == PreviewMesh::Cube)
+		else if (previewMeshType == PreviewMesh::Cube)
 		{
-			std::filesystem::path mesh = meshesPath / fs::path("mnemosy_previewMesh_cube.fbx");
-			m_mesh->LoadMesh(mesh.generic_string().c_str());
-			m_currentPreviewMesh = PreviewMesh::Cube;
-			return;
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_cube.fbx");
 		}
-		if (previewMeshType == PreviewMesh::Plane) {
-			std::filesystem::path mesh = meshesPath / fs::path("mnemosy_previewMesh_plane.fbx");
-			m_mesh->LoadMesh(mesh.generic_string().c_str());
-			m_currentPreviewMesh = PreviewMesh::Plane;
-			return;
+		else if (previewMeshType == PreviewMesh::Plane) {
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_plane.fbx");
 		}
-		if (previewMeshType == PreviewMesh::Sphere) {
-			std::filesystem::path mesh = meshesPath / fs::path("mnemosy_previewMesh_sphere.fbx");
-			m_mesh->LoadMesh(mesh.generic_string().c_str());
-			m_currentPreviewMesh = PreviewMesh::Sphere;
-			return;
+		else if (previewMeshType == PreviewMesh::Sphere) {
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_sphere.fbx");
 		}
-		if (previewMeshType == PreviewMesh::Cylinder) {
-			std::filesystem::path mesh = meshesPath / fs::path("mnemosy_previewMesh_cylinder.fbx");
-			m_mesh->LoadMesh(mesh.generic_string().c_str());
-			m_currentPreviewMesh = PreviewMesh::Cylinder;
-			return;
+		else if (previewMeshType == PreviewMesh::Cylinder) {
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_cylinder.fbx");
 		}
-		if (previewMeshType == PreviewMesh::Suzanne) {
-			std::filesystem::path mesh = meshesPath / fs::path("mnemosy_previewMesh_suzanne.fbx");
-			m_mesh->LoadMesh(mesh.generic_string().c_str());
-			m_currentPreviewMesh = PreviewMesh::Suzanne;
-			return;
+		else if (previewMeshType == PreviewMesh::Suzanne) {
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_suzanne.fbx");
 		}
-	}
+		else if(previewMeshType == PreviewMesh::Fabric){
+			newMeshPath = meshesPath / fs::path("mnemosy_previewMesh_fabric.fbx");
+		}
+
+		m_mesh->LoadMesh(newMeshPath.generic_string().c_str());
+		m_currentPreviewMesh = previewMeshType;
+
+}
 
 	void Scene::SetMaterial(Material* material) {
 		if (m_activeMaterial) {
@@ -168,7 +160,7 @@ namespace mnemosy::graphics
 		//m_skybox->AssignSkyboxTexture("../Resources/Textures/spruit_sunrise.hdr", 2048);
 		//m_skybox->colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
 		//m_skybox->exposure = 0.0f;
-		
+
 		// light setup
 		m_light->transform.SetPosition(glm::vec3(0.0f, 4.0f, 3.0f));
 		m_light->transform.SetRotationEulerAngles(glm::vec3(-45.0f, 0.0f, 0.0));

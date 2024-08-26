@@ -20,11 +20,13 @@ namespace mnemosy::graphics
 	{
 		Custom		= 0,
 		Default		= 1,
-		Cube		= 2,
-		Plane		= 3,
+		Cube			= 2,
+		Plane			= 3,
 		Sphere		= 4,
 		Cylinder	= 5,
-		Suzanne		= 6
+		Suzanne		= 6,
+		Fabric 		= 7,
+		Count			= 8,
 	};
 
 	class Scene
@@ -32,7 +34,7 @@ namespace mnemosy::graphics
 	public:
 		Scene();
 		~Scene();
-		
+
 		void Update();
 
 		// getters
@@ -57,7 +59,7 @@ namespace mnemosy::graphics
 		PreviewMesh m_currentPreviewMesh = PreviewMesh::Default;
 
 		std::unique_ptr<Camera> m_camera;
-				
+
 		std::unique_ptr<RenderMesh> m_mesh;
 
 #ifdef MNEMOSY_RENDER_GIZMO

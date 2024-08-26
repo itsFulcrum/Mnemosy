@@ -47,7 +47,7 @@ namespace mnemosy::gui
 		graphics::Renderer& renderer = engine.GetRenderer();
 
 		ImGui::Begin(panelName, &showPanel);
-		
+
 
 		// Library settings
 		{
@@ -167,32 +167,19 @@ namespace mnemosy::gui
 		if (ImGui::TreeNode("Mesh Settings"))
 		{
 			graphics::RenderMesh& renderMesh = scene.GetMesh();
-			
+
 			//ImGui::Text("Mesh Settings");
 			{
-				const char* previewMesh_List[7] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne"}; // they need to be ordered the same as in lightType Enum in light class
+				const char* previewMesh_List[8] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne","Fabric"}; // they need to be ordered the same as in lightType Enum in light class
 				int previewMesh_Current = (int)scene.GetCurrentPreviewMesh();
 				ImGui::Combo("Preview Mesh", &previewMesh_Current, previewMesh_List, IM_ARRAYSIZE(previewMesh_List));
 
 				if ((int)scene.GetCurrentPreviewMesh() != previewMesh_Current)
 				{
-					if (previewMesh_Current == 0)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Custom);
-					else if(previewMesh_Current == 1)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Default);
-					else if(previewMesh_Current == 2)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Cube);
-					else if(previewMesh_Current == 3)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Plane);
-					else if(previewMesh_Current == 4)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Sphere);
-					else if(previewMesh_Current == 5)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Cylinder);
-					else if(previewMesh_Current == 6)
-						scene.SetPreviewMesh(graphics::PreviewMesh::Suzanne);
+					scene.SetPreviewMesh((graphics::PreviewMesh)previewMesh_Current);
 				}
 
-				if (previewMesh_Current == 0)
+				if ((graphics::PreviewMesh)previewMesh_Current == graphics::PreviewMesh::Custom)
 				{
 					if (ImGui::Button("Load Mesh..."))
 					{
@@ -246,7 +233,7 @@ namespace mnemosy::gui
 		{
 			graphics::Skybox& skybox = scene.GetSkybox();
 			mnemosy::systems::SkyboxAssetRegistry& skyboxRegistry = engine.GetSkyboxAssetRegistry();
-			
+
 			// -- Skybox Selection Menu
 
 
@@ -279,7 +266,7 @@ namespace mnemosy::gui
 					skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[current]);
 				}
 			}
-			
+
 			if (ImGui::Button("Load from file..."))
 			{
 				if (!m_saveSkyboxPermanentlyUponLoad)
@@ -312,7 +299,7 @@ namespace mnemosy::gui
 					ImGui::TextWrapped("Please provide a unique name and select a resolution \nSo Mnemosy can save the skybox to its internal registry.");
 					ImGui::Separator();
 
-					// texfield for name 
+					// texfield for name
 					static char skyboxName[32] = "Unique Name";
 					ImGui::InputText("##edit", skyboxName, IM_ARRAYSIZE(skyboxName));
 
@@ -320,7 +307,7 @@ namespace mnemosy::gui
 
 
 					const char* skyboxResolutions_List[4] = { "4096","2048","1024","512"}; // they need to be ordered the same as in lightType Enum in light class
-					
+
 					ImGui::TextWrapped("Higher Resolutions take longer to process");
 					static int resolution_Selected = 2;
 					ImGui::Combo("Resolution", &resolution_Selected, skyboxResolutions_List, IM_ARRAYSIZE(skyboxResolutions_List));
@@ -333,7 +320,7 @@ namespace mnemosy::gui
 						if (skyboxName[0] == '\0')
 						{
 							hasName = false;
-							MNEMOSY_ERROR("You must provide a name to save a skybox permanently so Mnemosy can save it internaly");	
+							MNEMOSY_ERROR("You must provide a name to save a skybox permanently so Mnemosy can save it internaly");
 						}
 						if (hasName)
 						{
@@ -362,7 +349,7 @@ namespace mnemosy::gui
 
 									if (!filepath.empty())
 									{
-										// Function needs to 
+										// Function needs to
 										bool success = skybox.AssignSkyboxTexture(filepath.c_str(), skyboxName, skyboxExportResolution, m_saveSkyboxPermanentlyUponLoad);
 										if (success) {
 											skyboxRegistry.SetNewCurrent(skyboxName);
@@ -376,13 +363,13 @@ namespace mnemosy::gui
 					ImGui::SetItemDefaultFocus();
 					ImGui::SameLine();
 
-					if (ImGui::Button("Cancel", ImVec2(120, 0))) 
+					if (ImGui::Button("Cancel", ImVec2(120, 0)))
 						ImGui::CloseCurrentPopup();
 
 					ImGui::EndPopup();
 				}
 			} // !m_saveSkyboxPermanentlyUponLoad
-			
+
 			// Removing skybox permanently
 			static bool removePermanentlyModelOpen = false;
 			if (ImGui::Button("Remove Permanently"))
@@ -437,7 +424,7 @@ namespace mnemosy::gui
 
 						// TODO: delete actual files from disk -> shoudl be part of removeEntry probaly
 
-						// set selected skybox to first one 
+						// set selected skybox to first one
 						selectedToRemove = 0;
 						std::string firstSkyboxName = skyboxRegistry.GetVectorOfNames()[0];
 						skybox.LoadPreviewSkybox(firstSkyboxName);
@@ -460,7 +447,7 @@ namespace mnemosy::gui
 
 			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.4f");
 			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%.4f");
-			
+
 			ImGui::ColorEdit3("Background Color", (float*)&skybox.backgroundColor);
 			ImGui::SliderFloat("Opacity", &skybox.opacity, 0.0f, 1.0f, "%.4f");
 			ImGui::SliderFloat("Gradient", &skybox.gradientOpacity, 0.0f, 1.0f, "%.4f");
@@ -489,7 +476,7 @@ namespace mnemosy::gui
 				light.SetType((graphics::LightType)lightType_current);
 			}
 
-		
+
 			float pos[3] = { 1.0f,1.0f,1.0f };
 			pos[0] = light.transform.GetPosition().x;
 			pos[1] = light.transform.GetPosition().y;

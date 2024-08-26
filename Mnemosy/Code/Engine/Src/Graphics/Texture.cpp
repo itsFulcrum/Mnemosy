@@ -43,7 +43,7 @@ namespace mnemosy::graphics
 
 		m_channelsAmount =	pic.channels();
 		bool convertSingleChannelToRGB = false;
-		if (m_channelsAmount = 1) {
+		if (m_channelsAmount == 1) {
 			if (pbrType == graphics::MNSY_TEXTURE_ALBEDO || pbrType == graphics::MNSY_TEXTURE_EMISSION) {
 				m_channelsAmount = 3;
 				convertSingleChannelToRGB = true;

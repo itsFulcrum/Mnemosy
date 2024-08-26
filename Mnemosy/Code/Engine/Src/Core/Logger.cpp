@@ -26,8 +26,8 @@ namespace mnemosy::core
 #endif // DEBUG
 
 #ifdef MNEMOSY_CONFIG_RELEASE
-		logger->set_level(spdlog::level::trace);
-		logger->flush_on(spdlog::level::trace);
+		logger->set_level(spdlog::level::debug);
+		logger->flush_on(spdlog::level::debug);
 
 #endif // MNEMOSY_CONFIG_RELEASE
 

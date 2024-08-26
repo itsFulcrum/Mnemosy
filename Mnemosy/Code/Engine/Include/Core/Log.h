@@ -20,7 +20,7 @@
 
 
 
-#ifndef MNEMOSY_CONFIG_RELEASE // On Debug
+//#ifndef MNEMOSY_CONFIG_RELEASE // On Debug
 
 	#define MNEMOSY_TRACE(...)		if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->trace(__VA_ARGS__);}
 	#define MNEMOSY_DEBUG(...)		if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->debug(__VA_ARGS__);}
@@ -30,16 +30,16 @@
 	#define MNEMOSY_CRITICAL(...)	if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->critical(__VA_ARGS__);}
 	#define MNEMOSY_ASSERT(x, msg)	if((x)) {} else { MNEMOSY_CRITICAL("ASSERT - {}\n\t{}\n\tin file {}\n\ton line {}", #x, msg, __FILE__, __LINE__); MNEMOSY_BREAK}
 
-#else // On Release
+//#else // On Release
 
-	#define MNEMOSY_TRACE(...)		(void)0
+	/*#define MNEMOSY_TRACE(...)		(void)0
 	#define MNEMOSY_DEBUG(...)		(void)0
 	#define MNEMOSY_INFO(...)		if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->info(__VA_ARGS__);}
 	#define MNEMOSY_WARN(...)		if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->warn(__VA_ARGS__);}
 	#define MNEMOSY_ERROR(...)		if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->error(__VA_ARGS__);}
 	#define MNEMOSY_CRITICAL(...)	if(spdlog::get(MNEMOSY_LOGGER_NAME) != nullptr) {spdlog::get(MNEMOSY_LOGGER_NAME)->critical(__VA_ARGS__);}
-	#define MNEMOSY_ASSERT(x, msg)	(void)0
+	#define MNEMOSY_ASSERT(x, msg)	(void)0*/
 
-#endif // !MNEMOSY_CONFIG_RELEASE
+//#endif // !MNEMOSY_CONFIG_RELEASE
 
 #endif // !Log_H
