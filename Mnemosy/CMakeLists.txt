@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.21)
 set(CMAKE_CXX_STANDARD 20)
 
+
+## to build with command line use:
+# cmake --build . --config Release
+
 set(ENGINE_PROJECT "MnemosyEngine")
 set(APP_PROJECT "Mnemosy")
 
@@ -12,6 +16,7 @@ set(mnemosy_build_dir ${CMAKE_BINARY_DIR}/MnemosyBuild/)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${mnemosy_build_dir})
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${mnemosy_build_dir})
 
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${mnemosy_build_dir}/)
 
 include(GNUInstallDirs)
 
