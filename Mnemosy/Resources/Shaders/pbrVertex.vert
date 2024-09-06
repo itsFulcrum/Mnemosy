@@ -5,8 +5,8 @@ layout (location=0) in vec3 aPos;
 layout (location=1) in vec3 aNormal;
 layout (location=2) in vec3 aTangent;
 layout (location=3) in vec3 aBitangent;
-//layout (location=4) in vec3 aColor;
-layout (location=4) in vec2 aTexCoord;
+layout (location=4) in vec3 aColor;
+layout (location=5) in vec2 aTexCoord;
 
 // uniform data
 uniform mat4 _modelMatrix;
@@ -22,7 +22,7 @@ uniform int _pixelHeight;
 // output data to fragment shader
 out vec2 uv;
 out vec2 screenUV;
-
+out float vertexAO;
 out vec3 position_WS;
 out vec3 normal_WS;
 
@@ -39,6 +39,7 @@ void main()
 	gl_Position = fragPos;
 
 	// outputs to fragment shader
+	vertexAO = aColor.r; // ao is supposed to be baked into vertex color
 	uv = aTexCoord;
 	uv.x = uv.x * _uvTiling.x;
 	uv.y = uv.y * _uvTiling.y;

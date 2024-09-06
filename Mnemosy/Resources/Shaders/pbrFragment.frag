@@ -9,6 +9,7 @@
 
 
 // Vertex shader inputs
+in float vertexAO;
 in vec2 uv;
 in vec3 position_WS;
 in vec3 normal_WS;
@@ -161,7 +162,7 @@ void main()
 		  surfaceData.emissionStrength = _emissionStrength;
 		  surfaceData.roughness = sampleRoughnessMap(_roughnessMap,UVCorrds,_roughnessValue);
 		  surfaceData.metallic = sampleMetallicMap(_metallicMap,UVCorrds,_metallicValue);
-		  surfaceData.ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,UVCorrds,_ambientOcculusionValue);
+		  surfaceData.ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,UVCorrds,_ambientOcculusionValue) * vertexAO;
 		  surfaceData.alpha = albedoAlpha.a;
 
 	////// LIGHTTING DATA =========================================================================================== ////
@@ -186,9 +187,9 @@ void main()
 
 	////// POST PROCCESSING ========================================================================================= ////
 	//// ============================================================================================================ ////
-			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
+			fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
-
+			//fragmentOutputColor = vec4(vertexAO);
 			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 			//float r = texture(_roughnessMap,uv).r;
 			//float r = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);
