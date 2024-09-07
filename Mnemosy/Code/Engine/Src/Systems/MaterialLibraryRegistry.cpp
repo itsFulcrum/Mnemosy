@@ -29,20 +29,20 @@
 #include <fstream>
 #include <thread>
 
-namespace mnemosy::systems
-{
+namespace mnemosy::systems {
 	// == public methods
- 
-	MaterialLibraryRegistry::MaterialLibraryRegistry() 
+
+	MaterialLibraryRegistry::MaterialLibraryRegistry()
 		: m_fileDirectories{MnemosyEngine::GetInstance().GetFileDirectories()}
 	{
 		namespace fs = std::filesystem;
 
+
 		m_folderTree = new FolderTree(jsonLibKey_RootNodeName);
-		
+
 		m_folderNodeOfActiveMaterial = nullptr;
 
-		
+
 		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetUserLibDataFile();
 
 		if (!CheckDataFile(pathToUserDirectoriesDataFile)) {
@@ -63,7 +63,8 @@ namespace mnemosy::systems
 		m_selectedFolderNode = m_folderTree->GetRootPtr();
 	}
 
-	MaterialLibraryRegistry::~MaterialLibraryRegistry() {
+	MaterialLibraryRegistry::~MaterialLibraryRegistry()
+	{
 
 		SaveUserDirectoriesData();
 
@@ -72,8 +73,8 @@ namespace mnemosy::systems
 	}
 
 
-
-	void MaterialLibraryRegistry::LoadUserDirectoriesFromFile() {
+	void MaterialLibraryRegistry::LoadUserDirectoriesFromFile()
+  	{
 
 		std::filesystem::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
 
@@ -92,26 +93,23 @@ namespace mnemosy::systems
 			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadUserDirectoriesFromFile: Error Parsing File. Message: {}", err.what());
 			return;
 		}
-		
+
 		m_folderTree->LoadFromJson(readFile);
 
 		dataFileStream.close();
-
 	}
 
-	void MaterialLibraryRegistry::SaveUserDirectoriesData() {
-
-
+  	void MaterialLibraryRegistry::SaveUserDirectoriesData()
+  	{
 		namespace fs = std::filesystem;
 
 		fs::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
 
 		if (CheckDataFile(materialLibraryDataFilePath)) {
-			
+
 			// if data file exists we first make a backup copy
 			fs::path copyTo = m_fileDirectories.GetDataPath() / fs::path("MnemosyMaterialLibraryData_LAST_BACKUP.mnsydata");
-			try
-			{
+			try {
 				fs::copy(materialLibraryDataFilePath, copyTo, fs::copy_options::overwrite_existing);
 			}
 			catch(fs::filesystem_error error){
@@ -138,23 +136,22 @@ namespace mnemosy::systems
 		dataFileStream.close();
 
 		delete LibraryDirectoriesJson;
-	}
-
-
+  	}
 
 	FolderNode* MaterialLibraryRegistry::AddNewFolder(FolderNode* parentNode, std::string& name) {
 
 		FolderNode* node = m_folderTree->CreateNewFolder(parentNode, name);
-		// create system folder 
+		// create system folder
 		CreateDirectoryForNode(node);
-		
-		// we can NOT Call SaveUserDirectoriesData() here because 
+
+		// we can NOT Call SaveUserDirectoriesData() here because
 		// we call this function when initialising and reading from the file..
 		return node;
 	}
-	
-	void MaterialLibraryRegistry::RenameFolder(FolderNode* node, std::string& newName) {
-		
+
+	void MaterialLibraryRegistry::RenameFolder(FolderNode* node, std::string& newName)
+	{
+
 		namespace fs = std::filesystem;
 
 		if (node->IsRoot()) {
@@ -166,11 +163,11 @@ namespace mnemosy::systems
 		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
 		fs::path oldPath = libraryDir / fs::path(node->pathFromRoot);
 		std::string oldName = node->name;
-		
-		// rename internally 
+
+		// rename internally
 		m_folderTree->RenameFolder(node, newName);
 
-		// rename files on disk 
+		// rename files on disk
 		fs::path newPath = libraryDir / fs::path(node->parent->pathFromRoot) / fs::path(node->name);
 		try {
 			fs::rename(oldPath, newPath);
@@ -252,7 +249,7 @@ namespace mnemosy::systems
 				//SetDefaultMaterial();
 				std::string activeMatName = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name;
 
-				fs::path newLocation; 
+				fs::path newLocation;
 				try {
 					newLocation = libraryDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMatName) / fs::path(activeMatName + ".mnsydata");
 				}
@@ -267,7 +264,8 @@ namespace mnemosy::systems
 		}
 	}
 
-	void MaterialLibraryRegistry::DeleteAndKeepChildren(FolderNode* node) {
+	void MaterialLibraryRegistry::DeleteAndKeepChildren(FolderNode* node)
+	{
 		// never delete root node
 		if (node->IsRoot()) {
 			MNEMOSY_WARN("MaterialLibraryRegistry::DeleteAndKeepChildren: You can't delete the root directory");
@@ -300,10 +298,11 @@ namespace mnemosy::systems
 		DeleteFolderHierarchy(node);
 	}
 
-	void MaterialLibraryRegistry::DeleteFolderHierarchy(FolderNode* node) {
-		
+	void MaterialLibraryRegistry::DeleteFolderHierarchy(FolderNode* node)
+	{
+
 		namespace fs = std::filesystem;
-		
+
 		// Deletes the entire hierarchy of nodes in memory and the files on disk, including the supplied beginning node
 
 		// never delete root node
@@ -312,7 +311,7 @@ namespace mnemosy::systems
 			return;
 		}
 
-		{ // delete directories from disk			
+		{ // delete directories from disk
 			fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 			fs::path directoryPathToDelete = libraryDir / fs::path(node->pathFromRoot);
 
@@ -333,7 +332,7 @@ namespace mnemosy::systems
 		fs::directory_entry activeMaterialDataFile = fs::directory_entry(m_activeMaterialDataFilePath);
 		if (!activeMaterialDataFile.exists()) {
 			SetDefaultMaterial();
-		}	
+		}
 	}
 
 	void MaterialLibraryRegistry::AddNewMaterial(FolderNode* node, std::string& name) {
@@ -347,7 +346,7 @@ namespace mnemosy::systems
 
 		try {
 			fs::create_directory(materialDirectory);
-		} 
+		}
 		catch (fs::filesystem_error error) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error creating directory. \nError message: {}", error.what());
 
@@ -365,13 +364,13 @@ namespace mnemosy::systems
 
 			return;
 		}
-		
+
 		// create default material data file
 
 		// Copy Default thumbnail image
 		fs::path pathToDefaultThumbnail = m_fileDirectories.GetTexturesPath() / fs::path("default_thumbnail.ktx2");
 		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(matInfo->name + texture_fileSuffix_thumbnail);
-		
+
 		try {
 			fs::copy_file(pathToDefaultThumbnail, pathToMaterialThumbnail);
 		}
@@ -392,8 +391,8 @@ namespace mnemosy::systems
 		}
 
 		SaveUserDirectoriesData();
-	
-		
+
+
 	}
 
 	void MaterialLibraryRegistry::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector) {
@@ -419,10 +418,10 @@ namespace mnemosy::systems
 		{
 			fs::path newDataFilePath = materialDir / fs::path(finalName + ".mnsydata");
 			fs::path oldDataFilePath = materialDir / fs::path(oldName + ".mnsydata");
-			
+
 			std::fstream dataFileStream;
 			dataFileStream.open(oldDataFilePath.generic_string());
-			
+
 			nlohmann::json readFile;
 			try {
 				readFile = nlohmann::json::parse(dataFileStream);
@@ -434,9 +433,9 @@ namespace mnemosy::systems
 			dataFileStream.close();
 
 			readFile[jsonMatKey_name] = finalName;
-			
+
 			// Renaming all accosiated textures
-			// loops through possilbe texture types as defined in PBRTextureType enum 
+			// loops through possilbe texture types as defined in PBRTextureType enum
 			for (size_t i = 0; i <= 7; i++) {
 
 				std::string assignedKey = graphics::TextureDefinitions::GetJsonMatKey_assigned_FromTextureType((graphics::PBRTextureType)i);
@@ -449,17 +448,17 @@ namespace mnemosy::systems
 
 					std::string oldFileName = readFile[pathJsonKey].get<std::string>();
 					std::string newFileName = graphics::TextureDefinitions::GetTextureFileNameFromTextureType(finalName, (graphics::PBRTextureType)i);
-					
+
 					fs::path oldTextureFile = materialDir / fs::path(oldFileName);
 					fs::path newTextureFile = materialDir / fs::path(newFileName);
 
-					try { 
-						fs::rename(oldTextureFile, newTextureFile); 
+					try {
+						fs::rename(oldTextureFile, newTextureFile);
 					}
-					catch (fs::filesystem_error e) { 
-						MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); 
+					catch (fs::filesystem_error e) {
+						MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());
 					}
-					
+
 					readFile[pathJsonKey] = newFileName;
 				}
 			}
@@ -569,7 +568,7 @@ namespace mnemosy::systems
 
 		// deleting from vector
 		m_folderTree->DeleteMaterial(node, positionInVector);
-		
+
 		// check if we have deleted the active material
 		if (m_activeMaterialID == matID) {
 			SetDefaultMaterial();
@@ -617,7 +616,7 @@ namespace mnemosy::systems
 		// check if the moved material was the active material
 		if (materialInfo->runtime_ID == m_activeMaterialID) {
 			MNEMOSY_TRACE("MaterialLibraryRegistry::MoveMaterial: Moving Material: ID: {}, active ID: {}",materialInfo->runtime_ID,m_activeMaterialID);
-			
+
 			// set updated path for data file
 			fs::path newDataFilePath = toPath / fs::path(materialName + ".mnsydata");
 			m_activeMaterialDataFilePath = newDataFilePath;
@@ -680,7 +679,7 @@ namespace mnemosy::systems
 			|| suffix == fileSuffix_ambientOcclusion
 			|| suffix == fileSuffix_emissive
 			|| suffix == fileSuffix_height
-			|| suffix == fileSuffix_opacity )		
+			|| suffix == fileSuffix_opacity )
 		{
 			MNEMOSY_WARN("The suffix {} is already taken by another texture. You must choose a different suffix", suffix);
 			return;
@@ -748,13 +747,14 @@ namespace mnemosy::systems
 
 		// save the meta data file
 		SaveActiveMaterialToFile();
-	
+
 		MNEMOSY_INFO("Deleted channel packed texture {}", filepath.generic_string());
-	
+
 	}
 
-	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory,systems::MaterialInfo* materialInfo,FolderNode* parentNode) {
-		
+	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory,systems::MaterialInfo* materialInfo,FolderNode* parentNode)
+	{
+
 		namespace fs = std::filesystem;
 
 
@@ -763,15 +763,15 @@ namespace mnemosy::systems
 		if (m_userMaterialBound) {
 			SaveActiveMaterialToFile();
 		}
-		
+
 		// load json file
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
 		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo->name + ".mnsydata");
 
 		std::ifstream dataFileStream;
 		dataFileStream.open(dataFile.generic_string());
-		
-		
+
+
 		nlohmann::json readFile;
 		try {
 			readFile = nlohmann::json::parse(dataFileStream);
@@ -781,13 +781,13 @@ namespace mnemosy::systems
 			return;
 		}
 
-		graphics::Material* mat = new graphics::Material(); 
+		graphics::Material* mat = new graphics::Material();
 		{
 
 			mat->Name		= readFile[jsonMatKey_name].get<std::string>();
 
 			mat->HasPackedTextures = readFile[jsonMatKey_hasChannelPacked].get<bool>();
-				
+
 			if (mat->HasPackedTextures) {
 
 				mat->PackedTexturesSuffixes = readFile[jsonMatKey_packedSuffixes].get<std::vector<std::string>>();
@@ -798,7 +798,7 @@ namespace mnemosy::systems
 			mat->Albedo.b	= readFile[jsonMatKey_albedo_b].get<float>();
 			mat->Roughness	= readFile[jsonMatKey_roughness].get<float>();
 			mat->IsSmoothnessTexture = readFile[jsonMatKey_isSmoothness].get<bool>();
-			
+
 			mat->Metallic	= readFile[jsonMatKey_metallic].get<float>();
 
 			mat->Emission.r = readFile[jsonMatKey_emission_r].get<float>();
@@ -819,10 +819,11 @@ namespace mnemosy::systems
 			mat->HeightDepth = readFile[jsonMatKey_heightDepth].get<float>();
 			mat->MaxHeight = readFile[jsonMatKey_maxHeight].get<float>();
 			mat->OpacityTreshhold = readFile[jsonMatKey_opacityThreshold].get<float>();
+			mat->UseDitheredAlpha = readFile[jsonMatKey_useDitheredAlpha].get<bool>();
 
 			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
 			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
-		
+
 			bool albedoTexture		= readFile[jsonMatKey_albedoAssigned].get<bool>();
 			bool roughnessTexture	= readFile[jsonMatKey_roughAssigned].get<bool>();
 			bool metalTexture		= readFile[jsonMatKey_metalAssigned].get<bool>();
@@ -842,7 +843,7 @@ namespace mnemosy::systems
 			if (roughnessTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
 				graphics::Texture* roughnessTex = new graphics::Texture();
-				
+
 				roughnessTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughnessTex);
 			}
@@ -875,14 +876,14 @@ namespace mnemosy::systems
 			if (heightTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
 				graphics::Texture* heightTex = new graphics::Texture();
-			
+
 				heightTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT, heightTex);
 			}
 			if (opacityTexture) {
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
 				graphics::Texture* opacityTex = new graphics::Texture();
-			
+
 				opacityTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
 				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_OPACITY, opacityTex);
 			}
@@ -905,7 +906,7 @@ namespace mnemosy::systems
 
 		double beginTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 
-		
+
 		// load json file
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
 		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo->name + ".mnsydata");
@@ -924,24 +925,24 @@ namespace mnemosy::systems
 		}
 		dataFileStream.close();
 
-		
+
 
 		graphics::Material* mat = new graphics::Material();
-		
+
 		{
 			// First kick off a thread for each assigned texture to load
-			
+
 			// Start a thread for each assigned texture to load it into a openCV matrix which is a member of texture
 			// the join thread and load that texture form the matrix and opload to openGl
 			// open gl calls must all be from the main thread so we have to do it like this
 
-			
+
 
 			// Albedo Map
 			bool albedoAssigned = readFile[jsonMatKey_albedoAssigned].get<bool>();
 			graphics::Texture* albedoTex		= new graphics::Texture();
 			std::thread thread_load_albedo;
-			
+
 			if (albedoAssigned) {
 
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
@@ -953,18 +954,18 @@ namespace mnemosy::systems
 			bool roughnessAssigned = readFile[jsonMatKey_roughAssigned].get<bool>();
 			graphics::Texture* roughnessTex		= new graphics::Texture();
 			std::thread thread_load_roughness;
-			
+
 			if (roughnessAssigned) {
-				
+
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
 				thread_load_roughness = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*roughnessTex),path);
 			}
-			
+
 			// Metallic Map
 			bool metallicAssigned = readFile[jsonMatKey_metalAssigned].get<bool>();
 			graphics::Texture* metallicTex		= new graphics::Texture();
 			std::thread thread_load_metalllic;
-			
+
 
 			if (metallicAssigned) {
 
@@ -976,7 +977,7 @@ namespace mnemosy::systems
 			bool emissiveAssigned = readFile[jsonMatKey_emissionAssigned].get<bool>();
 			graphics::Texture* emissionTex		= new graphics::Texture();
 			std::thread thread_load_emissive;
-			
+
 
 			if (emissiveAssigned) {
 
@@ -988,7 +989,7 @@ namespace mnemosy::systems
 			bool normalAssigned = readFile[jsonMatKey_normalAssigned].get<bool>();
 			graphics::Texture* normalTex		= new graphics::Texture();
 			std::thread thread_load_normal;
-			
+
 			if (normalAssigned) {
 
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
@@ -1000,7 +1001,7 @@ namespace mnemosy::systems
 			bool aoAssigned = readFile[jsonMatKey_aoAssigned].get<bool>();
 			graphics::Texture* aoTex			= new graphics::Texture();
 			std::thread thread_load_ao;
-			
+
 			if (aoAssigned) {
 
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
@@ -1012,7 +1013,7 @@ namespace mnemosy::systems
 			bool heightAssigned = readFile[jsonMatKey_heightAssigned].get<bool>();
 			graphics::Texture* heightTex = new graphics::Texture();
 			std::thread thread_load_height;
-			
+
 			if (heightAssigned) {
 
 				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
@@ -1068,14 +1069,13 @@ namespace mnemosy::systems
 			mat->HeightDepth = readFile[jsonMatKey_heightDepth].get<float>();
 			mat->MaxHeight = readFile[jsonMatKey_maxHeight].get<float>();
 			mat->OpacityTreshhold = readFile[jsonMatKey_opacityThreshold].get<float>();
+			mat->UseDitheredAlpha = readFile[jsonMatKey_useDitheredAlpha].get<bool>();
 
 			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
 			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
 
 			// we do this here and not at the top of the file to utilize the time we might be waiting for threads better
 			SaveActiveMaterialToFile();
-
-
 
 			m_userMaterialBound = true;
 			m_activeMaterialDataFilePath = dataFile;
@@ -1218,16 +1218,16 @@ namespace mnemosy::systems
 
 
 		fs::path thumbnailPath = fs::path(activeMat.Name + texture_fileSuffix_thumbnail);
-				
+
 		{ // Render thumbnail of active material
 			fs::path libDir = m_fileDirectories.GetLibraryDirectoryPath();
 			fs::path thumbnailAbsolutePath = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) / thumbnailPath;
-			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailOfActiveMaterial(thumbnailAbsolutePath,m_selectedFolderNode, m_activeMaterialID);			
+			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailOfActiveMaterial(thumbnailAbsolutePath,m_selectedFolderNode, m_activeMaterialID);
 		}
-		
+
 		std::ofstream dataFileStream;
-		dataFileStream.open(m_activeMaterialDataFilePath.generic_string());		
-		
+		dataFileStream.open(m_activeMaterialDataFilePath.generic_string());
+
 		nlohmann::json MaterialJson; // top level json object
 		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
 
@@ -1239,7 +1239,7 @@ namespace mnemosy::systems
 
 
 		MaterialJson[jsonMatKey_name] = activeMat.Name;
-		
+
 		MaterialJson[jsonMatKey_albedo_r] = activeMat.Albedo.r; // maybe convert from range 0-255 to 0-1 range by deviding by 255
 		MaterialJson[jsonMatKey_albedo_g] = activeMat.Albedo.g;
 		MaterialJson[jsonMatKey_albedo_b] = activeMat.Albedo.b;
@@ -1262,7 +1262,8 @@ namespace mnemosy::systems
 		MaterialJson[jsonMatKey_heightDepth] = activeMat.HeightDepth;
 		MaterialJson[jsonMatKey_maxHeight] = activeMat.MaxHeight;
 		MaterialJson[jsonMatKey_opacityThreshold] = activeMat.OpacityTreshhold;
-
+		MaterialJson[jsonMatKey_useDitheredAlpha] = activeMat.UseDitheredAlpha;
+		
 		MaterialJson[jsonMatKey_uvScale_x] = activeMat.UVTiling.x;
 		MaterialJson[jsonMatKey_uvScale_y] = activeMat.UVTiling.y;
 
@@ -1318,7 +1319,7 @@ namespace mnemosy::systems
 
 
 		MaterialJson[jsonMatKey_thumbnailPath] = thumbnailPath.generic_string();
-				
+
 		if (prettyPrintMaterialFiles)
 			dataFileStream << MaterialJson.dump(4);
 		else
@@ -1328,7 +1329,7 @@ namespace mnemosy::systems
 	}
 
 	void MaterialLibraryRegistry::SetDefaultMaterial() {
-		
+
 		m_userMaterialBound = false;
 		m_activeMaterialID = 0;
 		m_activeMaterialDataFilePath = std::filesystem::path();
@@ -1341,7 +1342,7 @@ namespace mnemosy::systems
 
 
 	void MaterialLibraryRegistry::LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath) {
-		
+
 		namespace fs = std::filesystem;
 
 		// check if the filepath extention is a compatible file
@@ -1355,7 +1356,7 @@ namespace mnemosy::systems
 
 			std::string fileExtention = checkPath.extension().generic_string();
 
-			
+
 			bool isValid = graphics::TextureDefinitions::IsImageFileExtentionValid(fileExtention);
 			if (!isValid) {
 				MNEMOSY_WARN("The image filetype {} is not supported.", fileExtention)
@@ -1372,13 +1373,13 @@ namespace mnemosy::systems
 
 		graphics::Texture* tex = new graphics::Texture();
 		bool success =  tex->GenerateFromFile(filepath.c_str(),true,true,textureType);
-		
+
 		if (!success) {
 			MNEMOSY_ERROR("Loading Texture Failed: {}", filepath);
 			delete tex;
 			return;
 		}
-		
+
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
 		systems::ExportManager& exportManager = MnemosyEngine::GetInstance().GetExportManager();
 
@@ -1390,7 +1391,7 @@ namespace mnemosy::systems
 		}
 
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) ;
-		
+
 
 		std::string filename;
 		fs::path exportPath;
@@ -1400,13 +1401,13 @@ namespace mnemosy::systems
 
 
 		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
-			
+
 			filename = activeMat.Name + texture_fileSuffix_albedo;
 			exportPath = materialDir / fs::path(filename);
 			format = graphics::MNSY_RGBA8;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
-			
+
 			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
 			filename = activeMat.Name + texture_fileSuffix_normal;
 			exportPath = materialDir / fs::path(filename);
@@ -1420,19 +1421,19 @@ namespace mnemosy::systems
 			format = graphics::MNSY_R16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
-			
+
 			filename = activeMat.Name + texture_fileSuffix_metallic;
 			exportPath = materialDir / fs::path(filename);
 			format = graphics::MNSY_R16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
-			
+
 			filename = activeMat.Name + texture_fileSuffix_ambientOcclusion;
 			exportPath = materialDir / fs::path(filename);
 			format = graphics::MNSY_R16;
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
-			
+
 			filename = activeMat.Name + texture_fileSuffix_emissive;
 			exportPath = materialDir / fs::path(filename);
 			format = graphics::MNSY_RGB8;
@@ -1475,7 +1476,7 @@ namespace mnemosy::systems
 
 		std::ofstream outFileStream;
 		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
-		
+
 		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
 			outFile[jsonMatKey_albedoAssigned] = true;
 			outFile[jsonMatKey_albedoPath] = filename;
@@ -1516,19 +1517,20 @@ namespace mnemosy::systems
 			outFileStream << outFile.dump(-1);
 
 		outFileStream.close();
-		
+
 		// load texture to material
 		activeMat.assignTexture(textureType, tex);
 
 	}
 
-	void MaterialLibraryRegistry::DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType) {
+	void MaterialLibraryRegistry::DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType)
+  {
 
 
 		namespace fs = std::filesystem;
 
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
-		
+
 		if (!UserMaterialBound()) { // if its default aterial
 			activeMat.removeTexture(textureType);
 			return;
@@ -1636,13 +1638,13 @@ namespace mnemosy::systems
 		else
 			outFileStream << outFile.dump(-1);
 		outFileStream.close();
-		
+
 		activeMat.removeTexture(textureType);
 	}
 
 
 	void MaterialLibraryRegistry::OpenFolderNode(FolderNode* node){
-		
+
 
 		SaveActiveMaterialToFile();
 
@@ -1651,7 +1653,7 @@ namespace mnemosy::systems
 		m_selectedFolderNode = node;
 
 		systems::ThumbnailManager& thumbnailManager = MnemosyEngine::GetInstance().GetThumbnailManager();
-		
+
 		// unload all currently loaded thumbnails
 		thumbnailManager.UnloadAllThumbnails();
 
@@ -1671,7 +1673,7 @@ namespace mnemosy::systems
 		m_selectedFolderNode = m_folderTree->GetRootPtr();
 
 		m_folderTree->Clear();
-		
+
 		SaveUserDirectoriesData();
 	}
 
@@ -1699,7 +1701,7 @@ namespace mnemosy::systems
 			{
 				MNEMOSY_WARN("To use the backup file, delete the other corrupted file and rename this backup to MnemosyMaterialLibraryData.mnsydata - loading this renamed file will create a new backup again.");
 			}
-			
+
 			return false;
 		}
 
@@ -1784,7 +1786,7 @@ namespace mnemosy::systems
 	}
 
 	std::vector<std::string> MaterialLibraryRegistry::GetFilepathsOfActiveMat(graphics::Material& activeMat) {
-		
+
 		namespace fs = std::filesystem;
 
 		std::vector<std::string> paths;
@@ -1867,9 +1869,9 @@ namespace mnemosy::systems
 	// == private methods
 
 	void MaterialLibraryRegistry::CreateNewMaterialDataFile(std::filesystem::path& folderPath, std::string& name) {
-		
+
 		std::filesystem::path materialDataFile = folderPath / std::filesystem::path(name + ".mnsydata");
-		
+
 		std::ofstream dataFileStream;
 		dataFileStream.open(materialDataFile.generic_string());
 
@@ -1896,16 +1898,17 @@ namespace mnemosy::systems
 
 		MaterialJson[jsonMatKey_normalStrength]		= 1.0f;
 		MaterialJson[jsonMatKey_normalMapFormat]	= 0; // 0 = OpenGl, 1 = DirectX
-		
+
 		MaterialJson[jsonMatKey_isSmoothness]		= false;
 
 		MaterialJson[jsonMatKey_heightDepth]		= 0.0f;
 		MaterialJson[jsonMatKey_maxHeight]			= 0.0f;
 		MaterialJson[jsonMatKey_opacityThreshold]	= 0.5;
+		MaterialJson[jsonMatKey_useDitheredAlpha]	= false;
 
 		MaterialJson[jsonMatKey_uvScale_x]	= 1.0f;
 		MaterialJson[jsonMatKey_uvScale_y]	= 1.0f;
-		
+
 		MaterialJson[jsonMatKey_albedoAssigned]		= false;
 		MaterialJson[jsonMatKey_roughAssigned]		= false;
 		MaterialJson[jsonMatKey_metalAssigned]		= false;
@@ -1936,7 +1939,7 @@ namespace mnemosy::systems
 	}
 
 	void MaterialLibraryRegistry::CreateDirectoryForNode(FolderNode* node) {
-		
+
 		namespace fs = std::filesystem;
 
 		fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
@@ -1954,7 +1957,7 @@ namespace mnemosy::systems
 		if (!newDir.exists()) {
 			fs::create_directories(newDir.path());
 		}
-		
+
 	}
 
 	bool MaterialLibraryRegistry::CheckDataFile(const std::filesystem::path& dataFilePath) {

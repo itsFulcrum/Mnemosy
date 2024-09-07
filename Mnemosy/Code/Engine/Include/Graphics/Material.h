@@ -26,7 +26,7 @@ namespace mnemosy::graphics
 		~Material();
 
 		std::string Name = "Mnemosy Default";
-		
+
 		glm::vec3 Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
 		glm::vec3 Emission = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec2 UVTiling = glm::vec2(1.0f,1.0f);
@@ -41,12 +41,11 @@ namespace mnemosy::graphics
 		float NormalStrength = 1.0f; // not supported by shader at the moment
 
 		NormalMapFormat NormalTextureFormat;
-		bool IsSmoothnessTexture = false;
-		bool UseEmissiveAsMask = false;
-
-		bool HasPackedTextures = false;
+		bool IsSmoothnessTexture 	= false;
+		bool UseEmissiveAsMask 		= false;
+		bool UseDitheredAlpha 		= false;
+		bool HasPackedTextures 		= false;
 		std::vector<std::string> PackedTexturesSuffixes;
-
 
 
 		void setDefaults();
@@ -102,7 +101,7 @@ namespace mnemosy::graphics
 		Texture* m_pAmbientOcclusionTexture = nullptr;
 		Texture* m_pOpacityTexture = nullptr;
 		Texture* m_pHeightTexture = nullptr;
-		
+
 	};
 
 } // mnemosy::graphics

@@ -7,7 +7,7 @@
 namespace mnemosy::systems {
 
 
-// json identifiers for the UserLibraryDirectory file - containing a hierarchical tree structure 
+// json identifiers for the UserLibraryDirectory file - containing a hierarchical tree structure
 #define jsonLibKey_RootNodeName		"Root"					// std::string - name of the root folder
 
 #define jsonLibKey_MnemosyDataFile	"1_Mnemosy_Data_File"	// Top Level Json Object
@@ -48,13 +48,14 @@ namespace mnemosy::systems {
 
 #define jsonMatKey_normalStrength	"normalStrength"		// float - value
 #define jsonMatKey_normalMapFormat	"normalMapFormat"		// int - format of the original provided normal map, 0 = OpenGl, 1 = DirectX
-#define jsonMatKey_heightDepth		"heightDepth"			// float - value 
+#define jsonMatKey_heightDepth		"heightDepth"			// float - value
 #define jsonMatKey_maxHeight		"maxHeight"				// float - value to describe the highest value of the height texture.
 #define jsonMatKey_isSmoothness		"isSmoothness"			// bool - if texture was provided as smoothness texture
 
 #define jsonMatKey_uvScale_x		"uvScale_x"				// float - value
 #define jsonMatKey_uvScale_y		"uvScale_y"				// float - value
-#define jsonMatKey_opacityThreshold "opacityThreshold"		// float - value 0 to 1
+#define jsonMatKey_opacityThreshold "opacityThreshold"	// float - value 0 to 1
+#define jsonMatKey_useDitheredAlpha "useDitheredAlpha"  // bool - if to use dithering for alpha clipping instead of just clipping
 
 #define jsonMatKey_albedoAssigned	"albedoAssigned"		// bool - if a texture has been assinged
 #define jsonMatKey_roughAssigned	"roughAssigned"			// bool - if a texture has been assinged

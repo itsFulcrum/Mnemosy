@@ -692,6 +692,7 @@ namespace mnemosy::graphics
 		waitTime = 1.0f;
 #endif // MNEMOSY_CONFIG_DEBUG
 
+
 		// only check every couple of seconds
 		m_fileWatchTimeDelta += deltaSeconds;
 		if (m_fileWatchTimeDelta >= waitTime) {

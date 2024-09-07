@@ -55,6 +55,7 @@ uniform bool _heightAssigned; // if Height map is assigned
 uniform float _heightDepth;
 uniform float _maxHeight;
 uniform vec2 _opacityValue; // x = opacityThreshold, y = indicates if thexture is bound 0 = is bound 1 = not Bound
+uniform bool _useDitheredAlpha;
 
 // adsitional settings
 uniform float _emissionStrength;
@@ -74,18 +75,29 @@ uniform sampler2D _opacityMap; // sampler 7
 //outputs
 out vec4 fragmentOutputColor;
 
-void ApplyAlphaDiscard(float opacity,vec2 opacityValue,vec2 screenSpaceUV, vec2 framebufferSizeXY){
+void ApplyAlphaDiscard(float opacity,vec2 opacityValue,vec2 screenSpaceUV, vec2 framebufferSizeXY, bool useDithered){
 
-	if(opacityValue.y > 0.0005)
+	if(opacityValue.y > 0.0005) // return if no texture is bound
 		return;
 
-	float threshold = opacityValue.x * 2.0f;
-	vec2 DitherCoordinate = screenSpaceUV  * (framebufferSizeXY);
-	float dither = get_Bayer(int(DitherCoordinate.x),int(DitherCoordinate.y));
-	float discardValue = step(dither*threshold,opacity);
 
-		// discard pixels
-	 if(discardValue <= 0.5f)
+	float discardValue = 1.0f;
+	float threshold = opacityValue.x;
+
+
+	if(useDithered) {
+
+		threshold *= threshold;
+		vec2 DitherCoordinate = screenSpaceUV  * (framebufferSizeXY);
+		float dither = get_Bayer(int(DitherCoordinate.x),int(DitherCoordinate.y));
+		discardValue = step( dither*threshold, opacity);
+	}
+	else {
+		discardValue = step(threshold,opacity);
+	}
+
+	// discard pixels
+	if(discardValue <= 0.5f)
 	 	discard;
 }
 
@@ -142,7 +154,7 @@ void main()
 
 		vec2 UVCorrds = uv;
 
-		if(_heightAssigned){
+		if(_heightAssigned) {
 			UVCorrds = SteepParralaxUV(uv);
 		}
 
@@ -150,20 +162,19 @@ void main()
 
 
 		float opacity = SampleOpacityMap(_opacityMap,UVCorrds);
-		ApplyAlphaDiscard(opacity,_opacityValue,screenUV,pixelSize);
+		ApplyAlphaDiscard(opacity,_opacityValue,screenUV,pixelSize,_useDitheredAlpha);
 
+		SurfaceData surfaceData;
+		vec4 albedoAlpha = sampleAlbedoAlphaMap(_albedoMap,UVCorrds,_albedoColorValue);
 
-			SurfaceData surfaceData;
-			vec4 albedoAlpha = sampleAlbedoAlphaMap(_albedoMap,UVCorrds,_albedoColorValue);
-
-			surfaceData.albedo = albedoAlpha.rgb;
-		  surfaceData.normal = sampleNormalMap(_normalMap,UVCorrds,_normalValue.x,tangentToWorldMatrix,_normalValue.y);
-		  surfaceData.emissive = sampleEmissionMap(_emissionMap,UVCorrds,_emissionColorValue,_useEmissiveMapAsMask);
-		  surfaceData.emissionStrength = _emissionStrength;
-		  surfaceData.roughness = sampleRoughnessMap(_roughnessMap,UVCorrds,_roughnessValue);
-		  surfaceData.metallic = sampleMetallicMap(_metallicMap,UVCorrds,_metallicValue);
-		  surfaceData.ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,UVCorrds,_ambientOcculusionValue) * vertexAO;
-		  surfaceData.alpha = albedoAlpha.a;
+		surfaceData.albedo = albedoAlpha.rgb;
+		surfaceData.normal = sampleNormalMap(_normalMap,UVCorrds,_normalValue.x,tangentToWorldMatrix,_normalValue.y);
+		surfaceData.emissive = sampleEmissionMap(_emissionMap,UVCorrds,_emissionColorValue,_useEmissiveMapAsMask);
+		surfaceData.emissionStrength = _emissionStrength;
+		surfaceData.roughness = sampleRoughnessMap(_roughnessMap,UVCorrds,_roughnessValue);
+		surfaceData.metallic = sampleMetallicMap(_metallicMap,UVCorrds,_metallicValue);
+		surfaceData.ambientOcclusion = sampleAmbientOcclusionMap(_ambientOcculusionMap,UVCorrds,_ambientOcculusionValue) * vertexAO;
+		surfaceData.alpha = albedoAlpha.a;
 
 	////// LIGHTTING DATA =========================================================================================== ////
 	//// ============================================================================================================ ////

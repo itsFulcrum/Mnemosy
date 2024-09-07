@@ -78,7 +78,7 @@ namespace mnemosy::graphics
 		UVTiling = glm::vec2(1.0f, 1.0f);
 		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
 		OpacityTreshhold = 0.5f;
-
+		UseDitheredAlpha = false;
 		HasPackedTextures = false;
 	}
 
@@ -343,6 +343,7 @@ namespace mnemosy::graphics
 		if (m_pOpacityTexture) {
 			m_pOpacityTexture->BindToLocation(7);
 			shader.SetUniformFloat2("_opacityValue",OpacityTreshhold , 0.0f);
+			shader.SetUniformBool("_useDitheredAlpha", UseDitheredAlpha);
 		}
 		else {
 			shader.SetUniformFloat2("_opacityValue", OpacityTreshhold ,1.0f);

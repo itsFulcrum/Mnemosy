@@ -935,6 +935,14 @@ namespace mnemosy::gui
 				ImGui::BeginDisabled();
 			{
 
+				bool useDithered = activeMat.UseDitheredAlpha;
+				ImGui::Checkbox("Dithered Alpha Clip", &activeMat.UseDitheredAlpha);
+				
+				if(!useDithered != activeMat.UseDitheredAlpha) {
+					activeMat.UseDitheredAlpha = useDithered;
+					m_valuesChanged = true;
+				}
+
 
 				if (ImGui::SliderFloat("Opacity Threshold", &activeMat.OpacityTreshhold, 0.0f, 1.0f, "%.4f")) {
 					m_valuesChanged = true;
