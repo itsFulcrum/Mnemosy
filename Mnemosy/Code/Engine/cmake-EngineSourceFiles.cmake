@@ -18,6 +18,8 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/FileDirectories.h
 ${ENGINE_SOURCE_PATH}/Src/Core/FileDirectories.cpp
 
+
+
 #Systems
 ${ENGINE_SOURCE_PATH}/Include/Systems/Input/InputSystem.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/Input/InputSystem.cpp
@@ -50,6 +52,7 @@ ${ENGINE_SOURCE_PATH}/Include/Core/Utils/DropHandler_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/DropHandler_Windows.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/FileWatcher.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/FileWatcher.cpp
+${ENGINE_SOURCE_PATH}/Include/Core/Utils/StringUtils.h
 
 # Graphics
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/ShaderIncludeParser.h

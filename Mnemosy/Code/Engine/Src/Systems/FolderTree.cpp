@@ -1,6 +1,7 @@
 #include "Include/Systems/FolderTree.h"
 #include "Include/Core/Log.h"
 
+#include "Include/Core/Utils/StringUtils.h"
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/JsonKeys.h"
 
@@ -101,8 +102,6 @@ namespace mnemosy::systems {
 	}
 
 	void FolderTree::RenameMaterial(MaterialInfo* materialInfo, const std::string& name) {
-
-
 
 		materialInfo->name = MakeNameUnique( name);
 	}
@@ -471,6 +470,9 @@ namespace mnemosy::systems {
 		bool hasMaterials = jsonNode[jsonLibKey_hasMaterials].get<bool>();
 		if (hasMaterials) {
 			std::vector<std::string> subMatNames = jsonNode[jsonLibKey_materialEntries].get<std::vector<std::string>>();
+
+			mnemosy::core::StringUtils::SortVectorListAlphabetcially(subMatNames);
+
 			for (size_t i = 0; i < subMatNames.size(); i++) {
 
 				CreateMaterial_Internal(node, subMatNames[i]);
@@ -480,6 +482,8 @@ namespace mnemosy::systems {
 		if (!isLeafNode) {
 
 			std::vector<std::string> subFolderNames = jsonNode[jsonLibKey_subFolderNames].get<std::vector<std::string>>();
+
+			mnemosy::core::StringUtils::SortVectorListAlphabetcially(subFolderNames);
 
 			for (size_t i = 0; i < subFolderNames.size(); i++) {
 

@@ -30,23 +30,12 @@ Mnemosy is a tool to store and organize PBR texture files and materials.
 - CMake
 - Visual Studio 17
 
-- Clone the repository
+#### Build Steps
+- Clone the repository 'https://github.com/itsFulcrum/Mnemosy.git'
 - Create a solution folder in  Mnemosy/Solution
 - Run CMake from the folder with the main CMakeLists.txt ( Mnemosy/CMakeLists.txt ) into your created solution folder and create a visual studio solution.
 - Open the solution Mnemosy.sln
 - Right click the visual studio project called Mnemosy and go into properties->advanced and change "Copy C++ Runtime to OutDir" to yes
 - Build the project for debug and/or release
-- Now you can run Mnemosy through visual studio
 
-- To create a final build, first, create a new folder. Within create another folder called "bin" (anything works) and copy all contents including the Mnemosy.exe and all .dll's that were build to /SolutionFolder/MnemosyBuild/Release/ into this "bin" folder.
-- Now copy the "Resources" folder from the repository (/Mnemosy/Resources) next to the bin Folder.
-- The Folder Structure should look like this
-- BuildFolder
-	- Bin
-		- Mnemosy.exe
-		- ...
-	- Resources
-		- Data
-		- ...
-
-- Mnemosy can now be run from that Mnemosy.exe
+- You can now execute <SolutionFolder>/MnemosyBuild/Release/Mnemosy.exe
