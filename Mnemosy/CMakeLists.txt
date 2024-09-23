@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 
 ## to build with command line use:
-# cmake --build . --config Release
+# cmake --build . --target Mnemosy --config Release
 
 set(ENGINE_PROJECT "MnemosyEngine")
 set(APP_PROJECT "Mnemosy")
