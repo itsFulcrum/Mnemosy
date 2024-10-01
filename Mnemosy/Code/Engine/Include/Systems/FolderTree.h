@@ -1,9 +1,10 @@
 #ifndef FOLDER_TREE_H
 #define FOLDER_TREE_H
 
-#include <nlohmann/json.hpp>
+
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 namespace mnemosy::systems {
 	struct MaterialInfo;

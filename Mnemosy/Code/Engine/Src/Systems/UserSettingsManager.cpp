@@ -8,7 +8,10 @@
 #include "Include/Gui/UserInterface.h"
 #include "Include/Gui/GuiPanel.h"
 
+#include "Include/Core/JsonSettings.h"
 
+
+#include <vector>
 #include <string>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -19,6 +22,7 @@ namespace mnemosy::systems {
 	UserSettingsManager::UserSettingsManager() {
 
 		m_userSettingsDataFilePath = std::filesystem::path(MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / std::filesystem::path("UserSettingsData.mnsydata"));
+
 	}
 
 	UserSettingsManager::~UserSettingsManager() 

@@ -91,6 +91,7 @@ namespace mnemosy::systems {
 			readFile = nlohmann::json::parse(dataFileStream);
 		} catch (nlohmann::json::parse_error err) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadUserDirectoriesFromFile: Error Parsing File. Message: {}", err.what());
+			dataFileStream.close();
 			return;
 		}
 

@@ -19,11 +19,11 @@ namespace mnemosy::systems {
 
 		if (!m_loadedMeshes.empty()) {
 
-			for (size_t i = 0; i < m_loadedMeshes.size(); i++) {
+			for (int i = 0; i < m_loadedMeshes.size(); i++) {
 
 				
 				// free sub vectors
-				for (size_t m = 0; m < m_loadedMeshes[i]->meshes.size(); m++) {
+				for (int m = 0; m < m_loadedMeshes[i]->meshes.size(); m++) {
 
 					m_loadedMeshes[i]->meshes[m].vertecies.clear();
 					m_loadedMeshes[i]->meshes[m].indecies.clear();
@@ -40,13 +40,14 @@ namespace mnemosy::systems {
 		m_loadedMeshesPaths.clear();
 	}
 
+	// returns unique ID of the mesh
 	uint16_t MeshRegistry::LoadMesh(const std::string& filepath) {
 
 		// check if filepath exists already in the registry and return that mesh id if found
 
 		if (!m_loadedMeshesPaths.empty()) {
 
-			for (size_t i = 0; i < m_loadedMeshesPaths.size(); i++) {
+			for (int i = 0; i < m_loadedMeshesPaths.size(); i++) {
 
 				// found mesh in the registry
 				if (m_loadedMeshesPaths[i] == filepath) {

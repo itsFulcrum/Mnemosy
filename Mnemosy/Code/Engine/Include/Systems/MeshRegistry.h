@@ -25,6 +25,8 @@ namespace mnemosy::systems {
 		graphics::ModelData& GetMeshByID(uint16_t id);
 
 	private:
+
+		// these two are always in sync so a mesh m_loadedMeshes[0] was loaded from file system path m_loadedMeshesPaths[0]
 		std::vector<graphics::ModelData*> m_loadedMeshes;
 		std::vector<std::string> m_loadedMeshesPaths;
 	};

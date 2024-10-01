@@ -3,7 +3,6 @@
 
 #include <memory>
 
-
 namespace mnemosy::core
 {
 	class Clock;
