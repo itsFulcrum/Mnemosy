@@ -1,10 +1,13 @@
 #include "Include/GuiPanels/MainMenuBarGuiPanel.h"
 
+#include "Include/Application.h"
+#include "Include/Systems/GuiUserSettingsManager.h"
+
+
 #include "Include/MnemosyEngine.h"
 #include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
-#include "Include/Systems/UserSettingsManager.h"
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
@@ -172,14 +175,15 @@ namespace mnemosy::gui
 				engineInstance.GetMaterialLibraryRegistry().SaveActiveMaterialToFile();
 				engineInstance.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
 
-				engineInstance.GetUserSettingsManager().SaveToFile();
+				Application::GetInstance().GetGuiUserSettingsManager().UserSettingsSave();
+
 				MNEMOSY_INFO("Saved library");
 			}
 
 
 			if (ImGui::MenuItem("Restore Default Settings")) {
 
-				MnemosyEngine::GetInstance().GetUserSettingsManager().LoadUserSettings(true);
+				Application::GetInstance().GetGuiUserSettingsManager().UserSettingsLoad(true);
 
 			}
 

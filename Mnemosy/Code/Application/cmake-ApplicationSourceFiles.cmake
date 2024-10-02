@@ -41,4 +41,8 @@ ${APP_SOURCE_PATH}/Src/GuiPanels/DocumentationGuiPanel.cpp
 ${APP_SOURCE_PATH}/Include/GuiPanels/ContentsGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/ContentsGuiPanel.cpp
 
+#systems
+${APP_SOURCE_PATH}/Include/Systems/GuiUserSettingsManager.h
+${APP_SOURCE_PATH}/Src/Systems/GuiUserSettingsManager.cpp
+
 )

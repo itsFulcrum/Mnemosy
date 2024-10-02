@@ -1,1 +1,5 @@
-{"1_Mnemosy_Data_File":"LibraryDirectories","Directories":{"MaterialLibraryDirectory":"D:/MyMnemosyLib/MnemosyMaterialLibrary"}}
+{
+    "1_Header": "Mnemosy Data File",
+    "2_Description": "This Stores the path to the current library directory",
+    "libraryDirectory": "D:/MyMnemosyLib/MnemosyMaterialLibrary"
+}

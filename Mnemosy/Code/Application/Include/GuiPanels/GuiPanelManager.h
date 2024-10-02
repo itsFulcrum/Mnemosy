@@ -1,6 +1,7 @@
 #ifndef GUI_PANEL_MANAGER_H
 #define GUI_PANEL_MANAGER_H
 
+
 namespace mnemosy::gui
 {
 	class MainMenuBarGuiPanel;
@@ -29,6 +30,9 @@ namespace mnemosy::gui
 		ContentsGuiPanel&			GetContentsPanel()			{ return *m_pContentsPanel; }
 
 	private:
+
+
+
 		MainMenuBarGuiPanel*		m_pMainMenuBarPanel		= nullptr;
 		ViewportGuiPanel*			m_pViewportPanel		= nullptr;
 		SettingsGuiPanel*			m_pSettingsPanel		= nullptr;

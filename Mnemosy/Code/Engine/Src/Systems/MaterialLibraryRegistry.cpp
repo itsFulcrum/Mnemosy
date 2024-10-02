@@ -104,6 +104,8 @@ namespace mnemosy::systems {
   	{
 		namespace fs = std::filesystem;
 
+
+		// this function throws warnings if we change the library directory.
 		fs::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
 
 		if (CheckDataFile(materialLibraryDataFilePath)) {
@@ -1969,7 +1971,7 @@ namespace mnemosy::systems {
 
 		if (!dataFile.exists() || !dataFile.is_regular_file()) {
 
-			MNEMOSY_ERROR("MaterialLibraryRegistry::CheckDataFile: File did Not Exist or is not a regular file: {} \nCreating new empty file at that location", dataFilePath.generic_string());
+			MNEMOSY_WARN("MaterialLibraryRegistry::CheckDataFile: File did Not Exist or is not a regular file: {} \nCreating new empty file at that location", dataFilePath.generic_string());
 			std::ofstream file;
 			file.open(dataFilePath);
 			file << "";

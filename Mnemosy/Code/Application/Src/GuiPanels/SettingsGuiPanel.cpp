@@ -71,7 +71,7 @@ namespace mnemosy::gui
 					if (!directoryPath.empty()) {
 
 
-						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), false, true);
+						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), false, false);
 						engine.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
 
 					}

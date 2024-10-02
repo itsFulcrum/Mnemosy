@@ -1,6 +1,7 @@
 #include "Include/Core/FileDirectories.h"
 
 #include "Include/Core/Log.h"
+#include "Include/Core/JsonSettings.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -20,7 +21,7 @@ namespace mnemosy::core
 		m_mnemosyDefaultLibraryDirectory = fs::directory_entry(R"(C:/Users/Public/Documents/Mnemosy/MnemosyMaterialLibrary)");
 
 		if (!m_mnemosyDefaultLibraryDirectory.exists()) {
-			MNEMOSY_WARN("Default Mnemosy Directory does not yet exist. Creating directories {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
+			MNEMOSY_INFO("Default Mnemosy Directory does not yet exist. Creating directories {}", m_mnemosyDefaultLibraryDirectory.path().generic_string());
 			fs::create_directories(m_mnemosyDefaultLibraryDirectory.path());
 		}
 
@@ -102,7 +103,7 @@ namespace mnemosy::core
 
 
 		if (!dirEntry.exists() || !dirEntry.is_regular_file() || dirEntry.is_directory()) {
-			MNEMOSY_ERROR("FileDirectories::GetUserLibDataFile: The filepath does not point to a valid file. {}", userLibDataFile.generic_string());
+			MNEMOSY_WARN("FileDirectories::GetUserLibDataFile: The filepath does not point to a valid file. {}", userLibDataFile.generic_string());
 		}
 
 
@@ -220,36 +221,25 @@ namespace mnemosy::core
 
 		namespace fs = std::filesystem;
 
-		// check if data file exists 
-		if(!CheckLibraryDataFile()) {
-			//	if not, create file and set user path to default path
-			m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
-			// saveDataFile with default file as userFile but with bool flag that user has not set it custom
-			SaveUserLibraryDirectoryToDataFile(m_mnemosyDefaultLibraryDirectory);
-			return;
+		bool success;
+		JsonSettings libDir;
+
+		fs::path dataFilePath = m_mnemosyLibraryDataFile.path();
+
+
+		libDir.SettingsFilePrettyPrintSet(true);
+
+		libDir.SettingsFileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
+		if(!success){
+			MNEMOSY_WARN("FileDirectories::LoadUserLibrary: Failed to open library directory data file. Message: {}", libDir.ErrorStringLastGet());
 		}
-		
-		//data file exists
-		
-		// read data file and extract path
 
-		std::fstream dataFileStream;
-		dataFileStream.open(m_mnemosyLibraryDataFile.path());
 
-		nlohmann::json readFile;
-		try {
-			readFile = nlohmann::json::parse(dataFileStream);
-		}
-		catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Error Parsing File. Message: {}", err.what());
-			return;
-		}
-		dataFileStream.close();
+		std::string libraryPathFromFile = libDir.SettingReadString(success,"libraryDirectory",m_mnemosyDefaultLibraryDirectory.path().generic_string(),true);
 
-		std::string libraryPathFromFile = readFile["Directories"]["MaterialLibraryDirectory"].get<std::string>();
-		readFile.clear();
+		libDir.SettingsFileClose(success,dataFilePath);
 
-		
+
 		// checking if path is valid
 		fs::directory_entry directoryEntryFromFile;
 		try {
@@ -272,11 +262,114 @@ namespace mnemosy::core
 		// when we reach here, the path read from file should exsist and be valid
 		m_mnemosyUserLibraryDirectory = fs::directory_entry(libraryPathFromFile);
 
+
+
+		return;
+
+
+		// namespace fs = std::filesystem;
+
+		// // check if data file exists 
+		// if(!CheckLibraryDataFile()) {
+		// 	//	if not, create file and set user path to default path
+		// 	m_mnemosyUserLibraryDirectory = m_mnemosyDefaultLibraryDirectory;
+		// 	// saveDataFile with default file as userFile but with bool flag that user has not set it custom
+		// 	SaveUserLibraryDirectoryToDataFile(m_mnemosyDefaultLibraryDirectory);
+		// 	return;
+		// }
+		
+		// //data file exists
+		
+		// // read data file and extract path
+
+		// std::fstream dataFileStream;
+		// dataFileStream.open(m_mnemosyLibraryDataFile.path());
+
+		// nlohmann::json readFile;
+		// try {
+		// 	readFile = nlohmann::json::parse(dataFileStream);
+		// }
+		// catch (nlohmann::json::parse_error err) {
+		// 	MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Error Parsing File. Message: {}", err.what());
+		// 	return;
+		// }
+		// dataFileStream.close();
+
+		// std::string libraryPathFromFile = readFile["Directories"]["MaterialLibraryDirectory"].get<std::string>();
+		// readFile.clear();
+
+		
+		// // checking if path is valid
+		// fs::directory_entry directoryEntryFromFile;
+		// try {
+		// 	directoryEntryFromFile = fs::directory_entry(libraryPathFromFile);
+		// }
+		// catch (fs::filesystem_error err) {
+		// 	MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: System error initilizing directory {}\nError Message: {}", libraryPathFromFile,err.what());
+		// 	SetDefaultLibraryPath();
+		// 	return;
+		// }
+
+		// // final check if the path is valid
+		// if (!directoryEntryFromFile.exists()) {
+		// 	// if not create it
+		// 	MNEMOSY_ERROR("FileDirectories::LoadUserLibraryDirectoryFromDataFile: Directory Does not exists..  did you delete it ? {} ", directoryEntryFromFile.path().generic_string());
+		// 	SetDefaultLibraryPath();
+		// 	return;
+		// }
+
+		// // when we reach here, the path read from file should exsist and be valid
+		// m_mnemosyUserLibraryDirectory = fs::directory_entry(libraryPathFromFile);
+
 	}
 
 	void FileDirectories::SaveUserLibraryDirectoryToDataFile(const std::filesystem::directory_entry& libraryDirectoryPath) {
 		
+
 		// check if path is a valid path on disc.
+		if (!libraryDirectoryPath.exists()) { 
+			
+			// if not create it
+			MNEMOSY_INFO("FileDirectories::SaveUserLibraryDirectoryToDataFile: Directory Does not exists.. creating Directories {} ", libraryDirectoryPath.path().generic_string());
+			std::filesystem::create_directories(libraryDirectoryPath.path());
+		}
+		else { // exists
+
+			if (!libraryDirectoryPath.is_directory())
+			{
+				MNEMOSY_ERROR("FileDirectories::SaveUserLibraryDirectoryToDataFile: Path {} is not a directory.", libraryDirectoryPath.path().generic_string());
+					return;
+			}
+		}
+		
+		MNEMOSY_INFO("Saving {} as library directory", libraryDirectoryPath.path().generic_string());
+
+		m_mnemosyUserLibraryDirectory = libraryDirectoryPath;
+
+
+		bool success;
+
+		JsonSettings libDir;
+
+		std::filesystem::path dataFilePath = m_mnemosyLibraryDataFile.path();
+
+		//std::filesystem::path libDirPath = libraryDirectoryPath.path();
+
+		libDir.SettingsFilePrettyPrintSet(true);
+
+		libDir.SettingsFileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
+		if(!success){
+			MNEMOSY_WARN("FileDirectories::SaveUserLibrary: Failed to open library directory data file. Message: {}", libDir.ErrorStringLastGet());
+		}
+
+		libDir.SettingWriteString(success,"libraryDirectory",libraryDirectoryPath.path().generic_string());
+
+		libDir.SettingsFileClose(success,dataFilePath);
+
+		return;
+
+
+/*		// check if path is a valid path on disc.
 		if (!libraryDirectoryPath.exists()) { 
 			
 			// if not create it
@@ -324,7 +417,7 @@ namespace mnemosy::core
 			dataFileStream << LibraryDataFileJson.dump(-1);
 
 
-		dataFileStream.close();
+		dataFileStream.close();*/
 	}
 
 	bool FileDirectories::CheckLibraryDataFile() {

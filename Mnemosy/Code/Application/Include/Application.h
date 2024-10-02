@@ -15,6 +15,11 @@ namespace mnemosy::gui
 	class GuiPanelManager;
 }
 
+namespace mnemosy::systems
+{
+	class GuiUserSettingsManager;
+}
+
 namespace mnemosy
 {
 	// SINGLETON CLASS
@@ -34,6 +39,7 @@ namespace mnemosy
 		void Shutdown();
 
 		gui::GuiPanelManager& GetGuiPanelManager() { return *m_pGuiPanelManager; }
+		systems::GuiUserSettingsManager& GetGuiUserSettingsManager() {return *m_pGuiUserSettingsManager;}
 	private:
 
 		MnemosyEngine& m_mnemosyEngine;
@@ -41,6 +47,9 @@ namespace mnemosy
 		input::CameraInputController* m_pCameraController = nullptr;
 		input::SceneInputController* m_pSceneInputController = nullptr;
 		gui::GuiPanelManager* m_pGuiPanelManager = nullptr;
+		systems::GuiUserSettingsManager* m_pGuiUserSettingsManager = nullptr;
+
+
 
 	};
 }

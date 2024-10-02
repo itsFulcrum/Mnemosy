@@ -16,7 +16,6 @@
 #include "Include/Systems/ThumbnailManager.h"
 #include "Include/Systems/TextureGenerationManager.h"
 #include "Include/Systems/ExportManager.h"
-#include "Include/Systems/UserSettingsManager.h"
 #include "Include/Systems/MeshRegistry.h"
 
 #include "Include/Graphics/Material.h"
@@ -128,8 +127,6 @@ namespace mnemosy
 
 		m_pUserInterface = std::make_unique<gui::UserInterface>();
 		//MNEMOSY_TRACE("UserInterface Initialized");
-
-		m_pUserSettingsManager = std::make_unique<systems::UserSettingsManager>();
 
 
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();

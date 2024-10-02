@@ -5,6 +5,11 @@
 namespace mnemosy::core
 {
 
+	JsonSettings::JsonSettings(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
+
+		SettingsFileOpen(errorCheck, filepath, headerName,fileDescription);
+	}
+
 	void JsonSettings::SettingsFileOpen(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
 
 		namespace fs = std::filesystem;
@@ -323,7 +328,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::string JsonSettings::SettingReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue) {
+	std::string JsonSettings::SettingReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue,const bool writeDefaultIfNotFound) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -334,8 +339,14 @@ namespace mnemosy::core
 		std::string output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+
+			if(writeDefaultIfNotFound){
+
+				m_jsonObject[name] = defaultValue;
+			}else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 

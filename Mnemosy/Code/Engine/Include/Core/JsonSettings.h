@@ -14,6 +14,7 @@ namespace mnemosy::core {
 	class JsonSettings {
 
 	public:
+		JsonSettings(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription);
 		JsonSettings() = default;
 		~JsonSettings() = default;
 
@@ -46,7 +47,7 @@ namespace mnemosy::core {
 		bool SettingReadBool(bool& errorCheck, const std::string& name, const bool defaultValue);
 		int SettingReadInt(bool& errorCheck, const std::string& name, const int defaultValue);
 		float SettingReadFloat(bool& errorCheck, const std::string& name, const float defaultValue);
-		std::string SettingReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue);
+		std::string SettingReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue,const bool writeDefaultIfNotFound);
 
 		std::vector<bool> SettingReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue);
 		std::vector<int> SettingReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue);
