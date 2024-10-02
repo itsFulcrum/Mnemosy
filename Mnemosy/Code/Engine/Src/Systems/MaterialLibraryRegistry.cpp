@@ -1,9 +1,11 @@
 #include "Include/Systems/MaterialLibraryRegistry.h"
 
 #include "Include/MnemosyEngine.h"
+#include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Core/JsonSettings.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
@@ -37,6 +39,9 @@ namespace mnemosy::systems {
 	{
 		namespace fs = std::filesystem;
 
+#ifdef MNEMOSY_CONFIG_DEBUG
+		prettyPrintMaterialFiles = true;
+#endif
 
 		m_folderTree = new FolderTree(jsonLibKey_RootNodeName);
 
@@ -399,7 +404,144 @@ namespace mnemosy::systems {
 	}
 
 	void MaterialLibraryRegistry::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector) {
+		namespace fs = std::filesystem;
 
+		std::string oldName = materialInfo->name;
+		unsigned int matID = materialInfo->runtime_ID;
+
+		if (materialInfo->name == newName)
+			return;
+
+
+		// rename material internally
+		m_folderTree->RenameMaterial(materialInfo, newName);
+
+		std::string finalName = materialInfo->name;
+
+		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path materialDir = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName);
+
+		// change name of data file.
+		{
+			fs::path newDataFilePath = materialDir / fs::path(finalName + ".mnsydata");
+			fs::path oldDataFilePath = materialDir / fs::path(oldName + ".mnsydata");
+
+			bool success = false;
+			core::JsonSettings matFile;
+
+			matFile.SettingsFileOpen(success,oldDataFilePath,jsonMatKey_header,jsonMatKey_description);
+			if(!success)
+			{
+				MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: Error opening material file {} file. Message: {}",oldDataFilePath.generic_string(), matFile.ErrorStringLastGet());
+				return;
+			}
+
+
+			matFile.SettingWriteString(success, jsonMatKey_name,finalName);
+
+			// Renaming all accosiated textures
+			// loops through all possilbe texture types as defined in PBRTextureType enum
+			for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_COUNT; i++) {
+
+				std::string assignedKey = graphics::TextureDefinitions::GetJsonMatKey_assigned_FromTextureType((graphics::PBRTextureType)i);
+
+				bool textureTypeIsAssigned = matFile.SettingReadBool(success,assignedKey,false,false);
+
+				if (textureTypeIsAssigned){
+
+					std::string pathJsonKey = graphics::TextureDefinitions::GetJsonMatKey_path_FromTextureType((graphics::PBRTextureType)i);
+
+					std::string oldFileName = matFile.SettingReadString(success,pathJsonKey,jsonMatKey_pathNotAssigned,false);
+					std::string newFileName = graphics::TextureDefinitions::GetTextureFileNameFromTextureType(finalName, (graphics::PBRTextureType)i);
+
+					fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+					fs::path newTextureFile = materialDir / fs::path(newFileName);
+
+					try {
+						fs::rename(oldTextureFile, newTextureFile);
+					}
+					catch (fs::filesystem_error e) {
+						MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what());
+					}
+
+					matFile.SettingWriteString(success,pathJsonKey,newFileName);
+				}
+			}
+
+			// now we get all channelpacked textures with this material and rename them too
+
+			bool hasPacked = matFile.SettingReadBool(success, jsonMatKey_hasChannelPacked,false,true);
+
+			if (hasPacked) {
+
+				std::vector<std::string> suffixes = matFile.SettingReadVectorString(success,jsonMatKey_packedSuffixes,std::vector<std::string>(),false);
+
+
+				if (!suffixes.empty()) {
+
+
+					// rename channel packed textures
+					for (int i = 0; i < suffixes.size(); i++) {
+
+						std::string oldFileName = oldName   + suffixes[i] + texture_textureFileType;
+						std::string newFileName = finalName + suffixes[i] + texture_textureFileType;
+
+						fs::path oldFilePath = materialDir / fs::path(oldFileName);
+						fs::path newFilePath = materialDir / fs::path(newFileName);
+
+						try {
+							fs::rename(oldFilePath, newFilePath);
+						}
+						catch (fs::filesystem_error e) {
+							MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming channelpacked texture file. \nError message: {}", e.what());
+						}
+					}
+				}
+			}
+
+			// change name of thumbnail file
+			std::string oldFileName = matFile.SettingReadString(success,jsonMatKey_thumbnailPath,jsonMatKey_pathNotAssigned,false);
+			std::string newFileName = finalName + texture_fileSuffix_thumbnail;
+			fs::path oldTextureFile = materialDir / fs::path(oldFileName);
+			fs::path newTextureFile = materialDir / fs::path(newFileName);
+			try { fs::rename(oldTextureFile, newTextureFile); }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry:ChangeMaterialName: System error renaming file. \nError message: {}", e.what()); }
+
+			matFile.SettingWriteString(success,jsonMatKey_thumbnailPath,newFileName);
+
+			// outputting updated file
+
+			if(prettyPrintMaterialFiles)
+				matFile.SettingsFilePrettyPrintSet(true);
+
+			matFile.SettingsFileClose(success,oldDataFilePath);
+
+			try {fs::rename(oldDataFilePath, newDataFilePath);}
+			catch (fs::filesystem_error error) {MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming dataFile. \nError message: {}", error.what());}
+		}
+
+		// change name of material folder.
+		{
+			fs::path oldPath = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName);
+			fs::path newPath = libraryDir / fs::path(node->pathFromRoot) / fs::path(finalName);
+
+			try { fs::rename(oldPath, newPath);}
+			catch (fs::filesystem_error error) {MNEMOSY_ERROR("MaterialLibraryRegistry::ChangeMaterialName: System error renaming directory. \nError message: {}", error.what());}
+		}
+
+		// check if we are changing the active material
+		if (m_activeMaterialID == matID) {
+			// set updated path for data file
+			MnemosyEngine::GetInstance().GetScene().GetActiveMaterial().Name = finalName;
+			fs::path newDataPath = libraryDir / fs::path(node->pathFromRoot) / fs::path(finalName) / fs::path(finalName + ".mnsydata");
+			m_activeMaterialDataFilePath = newDataPath;
+		}
+
+		// save library data file;
+		SaveActiveMaterialToFile();
+		SaveUserDirectoriesData();
+
+/*
 		namespace fs = std::filesystem;
 
 		std::string oldName = materialInfo->name;
@@ -542,6 +684,7 @@ namespace mnemosy::systems {
 		// save library data file;
 		SaveActiveMaterialToFile();
 		SaveUserDirectoriesData();
+*/
 	}
 
 	void MaterialLibraryRegistry::DeleteMaterial(FolderNode* node, systems::MaterialInfo* materialInfo, int positionInVector) {
@@ -755,154 +898,6 @@ namespace mnemosy::systems {
 
 	}
 
-	void MaterialLibraryRegistry::LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory,systems::MaterialInfo* materialInfo,FolderNode* parentNode)
-	{
-
-		namespace fs = std::filesystem;
-
-
-		MNEMOSY_DEBUG("MaterialLibraryRegistry::LoadActiveMaterialFromFile: Loading Material: {}", materialInfo->name);
-		// save active material first
-		if (m_userMaterialBound) {
-			SaveActiveMaterialToFile();
-		}
-
-		// load json file
-		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
-		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo->name + ".mnsydata");
-
-		std::ifstream dataFileStream;
-		dataFileStream.open(dataFile.generic_string());
-
-
-		nlohmann::json readFile;
-		try {
-			readFile = nlohmann::json::parse(dataFileStream);
-		}
-		catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile: Error parsing data file: {} \nMessage: {}",dataFile.generic_string(), err.what());
-			return;
-		}
-
-		graphics::Material* mat = new graphics::Material();
-		{
-
-			mat->Name		= readFile[jsonMatKey_name].get<std::string>();
-
-			mat->HasPackedTextures = readFile[jsonMatKey_hasChannelPacked].get<bool>();
-
-			if (mat->HasPackedTextures) {
-
-				mat->PackedTexturesSuffixes = readFile[jsonMatKey_packedSuffixes].get<std::vector<std::string>>();
-			}
-
-			mat->Albedo.r	= readFile[jsonMatKey_albedo_r].get<float>();
-			mat->Albedo.g	= readFile[jsonMatKey_albedo_g].get<float>();
-			mat->Albedo.b	= readFile[jsonMatKey_albedo_b].get<float>();
-			mat->Roughness	= readFile[jsonMatKey_roughness].get<float>();
-			mat->IsSmoothnessTexture = readFile[jsonMatKey_isSmoothness].get<bool>();
-
-			mat->Metallic	= readFile[jsonMatKey_metallic].get<float>();
-
-			mat->Emission.r = readFile[jsonMatKey_emission_r].get<float>();
-			mat->Emission.g = readFile[jsonMatKey_emission_g].get<float>();
-			mat->Emission.b = readFile[jsonMatKey_emission_b].get<float>();
-			mat->EmissionStrength = readFile[jsonMatKey_emissionStrength].get<float>();
-			mat->UseEmissiveAsMask = readFile[jsonMatKey_useEmissiveAsMask].get<bool>();
-
-			mat->NormalStrength = readFile[jsonMatKey_normalStrength].get<float>();
-			int normalFormat = readFile[jsonMatKey_normalMapFormat].get<int>();
-			if (normalFormat == 0) {
-				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
-			}
-			else if (normalFormat == 1) {
-				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
-			}
-
-			mat->HeightDepth = readFile[jsonMatKey_heightDepth].get<float>();
-			mat->MaxHeight = readFile[jsonMatKey_maxHeight].get<float>();
-			mat->OpacityTreshhold = readFile[jsonMatKey_opacityThreshold].get<float>();
-			mat->UseDitheredAlpha = readFile[jsonMatKey_useDitheredAlpha].get<bool>();
-
-			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
-			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
-
-			bool albedoTexture		= readFile[jsonMatKey_albedoAssigned].get<bool>();
-			bool roughnessTexture	= readFile[jsonMatKey_roughAssigned].get<bool>();
-			bool metalTexture		= readFile[jsonMatKey_metalAssigned].get<bool>();
-			bool emissionTexture	= readFile[jsonMatKey_emissionAssigned].get<bool>();
-			bool normalTexture		= readFile[jsonMatKey_normalAssigned].get<bool>();
-			bool aoTexture			= readFile[jsonMatKey_aoAssigned].get<bool>();
-			bool heightTexture		= readFile[jsonMatKey_heightAssigned].get<bool>();
-			bool opacityTexture		= readFile[jsonMatKey_opacityAssigned].get<bool>();
-
-			if (albedoTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
-				graphics::Texture* albedoTex = new graphics::Texture();
-
-				albedoTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO, albedoTex);
-			}
-			if (roughnessTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
-				graphics::Texture* roughnessTex = new graphics::Texture();
-
-				roughnessTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughnessTex);
-			}
-			if (metalTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_metalPath].get<std::string>();
-				graphics::Texture* metallicTex = new graphics::Texture();
-
-				metallicTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_METALLIC, metallicTex);
-			}
-			if (emissionTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_emissionPath].get<std::string>();
-				graphics::Texture* emissionTex = new graphics::Texture();
-				emissionTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_EMISSION, emissionTex);
-			}
-			if (normalTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
-				graphics::Texture* normalTex = new graphics::Texture();
-				normalTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_NORMAL, normalTex);
-			}
-			if (aoTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
-				graphics::Texture* aoTex = new graphics::Texture();
-
-				aoTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION, aoTex);
-			}
-			if (heightTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
-				graphics::Texture* heightTex = new graphics::Texture();
-
-				heightTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT, heightTex);
-			}
-			if (opacityTexture) {
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
-				graphics::Texture* opacityTex = new graphics::Texture();
-
-				opacityTex->GenerateFromFile(path.c_str(), true, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
-				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_OPACITY, opacityTex);
-			}
-
-
-			dataFileStream.close();
-		}
-
-		m_userMaterialBound = true;
-		m_activeMaterialDataFilePath = dataFile;
-		m_activeMaterialID = materialInfo->runtime_ID;
-		m_folderNodeOfActiveMaterial = parentNode;
-
-		MnemosyEngine::GetInstance().GetScene().SetMaterial(mat);
-	}
-
 	void MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo, FolderNode* parentNode) {
 
 		namespace fs = std::filesystem;
@@ -914,19 +909,15 @@ namespace mnemosy::systems {
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
 		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo->name + ".mnsydata");
 
-		std::ifstream dataFileStream;
-		dataFileStream.open(dataFile.generic_string());
 
-		nlohmann::json readFile;
-		try {
-			readFile = nlohmann::json::parse(dataFileStream);
-		}
-		catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error parsing data file: {} \nMessage: {}", dataFile.generic_string(), err.what());
-			dataFileStream.close();
+		bool success = false;
+
+		core::JsonSettings matFile;		
+		matFile.SettingsFileOpen(success, dataFile, jsonMatKey_header, jsonMatKey_description);
+		if(!success){
+			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error opening data file: {} \nMessage: {}", dataFile.generic_string(), matFile.ErrorStringLastGet());
 			return;
 		}
-		dataFileStream.close();
 
 
 
@@ -936,132 +927,131 @@ namespace mnemosy::systems {
 			// First kick off a thread for each assigned texture to load
 
 			// Start a thread for each assigned texture to load it into a openCV matrix which is a member of texture
-			// the join thread and load that texture form the matrix and opload to openGl
-			// open gl calls must all be from the main thread so we have to do it like this
-
-
+			// then join thread and load that texture form the matrix and upload to openGl
+			// openGl calls must all be from the main thread so we have to do it like this
 
 			// Albedo Map
-			bool albedoAssigned = readFile[jsonMatKey_albedoAssigned].get<bool>();
+			bool albedoAssigned = matFile.SettingReadBool(success,jsonMatKey_albedoAssigned,false,false);
 			graphics::Texture* albedoTex		= new graphics::Texture();
 			std::thread thread_load_albedo;
 
 			if (albedoAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_albedoPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_albedoPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_albedo = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*albedoTex), path);
 			}
 
 
 			// Roughness Map
-			bool roughnessAssigned = readFile[jsonMatKey_roughAssigned].get<bool>();
+			bool roughnessAssigned = matFile.SettingReadBool(success,jsonMatKey_roughAssigned,false,false);
 			graphics::Texture* roughnessTex		= new graphics::Texture();
 			std::thread thread_load_roughness;
 
 			if (roughnessAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_roughPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_roughPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_roughness = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*roughnessTex),path);
 			}
 
 			// Metallic Map
-			bool metallicAssigned = readFile[jsonMatKey_metalAssigned].get<bool>();
+			bool metallicAssigned = matFile.SettingReadBool(success,jsonMatKey_metalAssigned,false,false);
 			graphics::Texture* metallicTex		= new graphics::Texture();
 			std::thread thread_load_metalllic;
 
 
 			if (metallicAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_metalPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_metalPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_metalllic = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*metallicTex), path);
 			}
 
 			// Emissive Map
-			bool emissiveAssigned = readFile[jsonMatKey_emissionAssigned].get<bool>();
+			bool emissiveAssigned = matFile.SettingReadBool(success,jsonMatKey_emissionAssigned,false,false);
 			graphics::Texture* emissionTex		= new graphics::Texture();
 			std::thread thread_load_emissive;
 
 
 			if (emissiveAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_emissionPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_emissionPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_emissive = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*emissionTex), path);
 			}
 
 			// Normal Map
-			bool normalAssigned = readFile[jsonMatKey_normalAssigned].get<bool>();
+			bool normalAssigned = matFile.SettingReadBool(success,jsonMatKey_normalAssigned,false,false);
 			graphics::Texture* normalTex		= new graphics::Texture();
 			std::thread thread_load_normal;
 
 			if (normalAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_normalPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_normalPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_normal = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*normalTex), path);
 			}
 
 
 			// AO map
-			bool aoAssigned = readFile[jsonMatKey_aoAssigned].get<bool>();
+			bool aoAssigned = matFile.SettingReadBool(success,jsonMatKey_aoAssigned,false,false);
 			graphics::Texture* aoTex			= new graphics::Texture();
 			std::thread thread_load_ao;
 
 			if (aoAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_aoPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_aoPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_ao = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*aoTex), path);
 			}
 
 
 			// Height map
-			bool heightAssigned = readFile[jsonMatKey_heightAssigned].get<bool>();
+			bool heightAssigned = matFile.SettingReadBool(success,jsonMatKey_heightAssigned,false,false);
 			graphics::Texture* heightTex = new graphics::Texture();
 			std::thread thread_load_height;
 
 			if (heightAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_heightPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_heightPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_height = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*heightTex), path);
 			}
 
 			// Opacity Map
-			bool opacityAssigned = readFile[jsonMatKey_opacityAssigned].get<bool>();
+			bool opacityAssigned = matFile.SettingReadBool(success,jsonMatKey_opacityAssigned,false,false);
 			graphics::Texture* opacityTex		= new graphics::Texture();
 			std::thread thread_load_opacity;
 
 			if (opacityAssigned) {
 
-				std::string path = materialDir.generic_string() + "/" + readFile[jsonMatKey_opacityPath].get<std::string>();
+				std::string path = materialDir.generic_string() + "/" + matFile.SettingReadString(success,jsonMatKey_opacityPath,jsonMatKey_pathNotAssigned,false);
 				thread_load_opacity = std::thread(&graphics::Texture::LoadIntoCVMat, std::ref(*opacityTex),path);
 			}
 
 			// Once all threads are going we let the main thread do the rest of the work
 
-			mat->Name = readFile[jsonMatKey_name].get<std::string>();
+			mat->Name = matFile.SettingReadString(success,jsonMatKey_name,"noName",false);
 
-			mat->HasPackedTextures = readFile[jsonMatKey_hasChannelPacked].get<bool>();
+			mat->HasPackedTextures = matFile.SettingReadBool(success,jsonMatKey_hasChannelPacked,false,true);
 
 			if (mat->HasPackedTextures) {
 
-				mat->PackedTexturesSuffixes = readFile[jsonMatKey_packedSuffixes].get<std::vector<std::string>>();
+				mat->PackedTexturesSuffixes = matFile.SettingReadVectorString(success,jsonMatKey_packedSuffixes,std::vector<std::string>(),false); 
 			}
 
 
-			mat->Albedo.r = readFile[jsonMatKey_albedo_r].get<float>();
-			mat->Albedo.g = readFile[jsonMatKey_albedo_g].get<float>();
-			mat->Albedo.b = readFile[jsonMatKey_albedo_b].get<float>();
-			mat->Roughness = readFile[jsonMatKey_roughness].get<float>();
-			mat->IsSmoothnessTexture = readFile[jsonMatKey_isSmoothness].get<bool>();
+			mat->Albedo.r = matFile.SettingReadFloat(success,jsonMatKey_albedo_r,0.8f,true);
+			mat->Albedo.g = matFile.SettingReadFloat(success,jsonMatKey_albedo_g,0.8f,true);
+			mat->Albedo.b = matFile.SettingReadFloat(success,jsonMatKey_albedo_b,0.8f,true);
+			mat->Roughness = matFile.SettingReadFloat(success,jsonMatKey_roughness,0.1f,true);
+			mat->IsSmoothnessTexture = matFile.SettingReadBool(success,jsonMatKey_isSmoothness,false,true);
 
-			mat->Metallic = readFile[jsonMatKey_metallic].get<float>();
+			mat->Metallic = matFile.SettingReadFloat(success,jsonMatKey_metallic,0.0f,true);
 
-			mat->Emission.r = readFile[jsonMatKey_emission_r].get<float>();
-			mat->Emission.g = readFile[jsonMatKey_emission_g].get<float>();
-			mat->Emission.b = readFile[jsonMatKey_emission_b].get<float>();
-			mat->EmissionStrength = readFile[jsonMatKey_emissionStrength].get<float>();
-			mat->UseEmissiveAsMask = readFile[jsonMatKey_useEmissiveAsMask].get<bool>();
+			mat->Emission.r = matFile.SettingReadFloat(success,jsonMatKey_emission_r,0.0f,true);
+			mat->Emission.g = matFile.SettingReadFloat(success,jsonMatKey_emission_g,0.0f,true);
+			mat->Emission.b = matFile.SettingReadFloat(success,jsonMatKey_emission_b,0.0f,true);
+			mat->EmissionStrength = matFile.SettingReadFloat(success,jsonMatKey_emissionStrength,0.0f,true);
+			mat->UseEmissiveAsMask = matFile.SettingReadBool(success,jsonMatKey_useEmissiveAsMask,false,true);
 
-			mat->NormalStrength = readFile[jsonMatKey_normalStrength].get<float>();
-			int normalFormat = readFile[jsonMatKey_normalMapFormat].get<int>();
+			mat->NormalStrength = matFile.SettingReadFloat(success,jsonMatKey_normalStrength,1.0f,true);
+
+			int normalFormat = matFile.SettingReadInt(success,jsonMatKey_normalMapFormat,0,true);
 			if (normalFormat == 0) {
 				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
 			}
@@ -1069,13 +1059,21 @@ namespace mnemosy::systems {
 				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
 			}
 
-			mat->HeightDepth = readFile[jsonMatKey_heightDepth].get<float>();
-			mat->MaxHeight = readFile[jsonMatKey_maxHeight].get<float>();
-			mat->OpacityTreshhold = readFile[jsonMatKey_opacityThreshold].get<float>();
-			mat->UseDitheredAlpha = readFile[jsonMatKey_useDitheredAlpha].get<bool>();
+			mat->HeightDepth = matFile.SettingReadFloat(success,jsonMatKey_heightDepth,0.0f,true);
+			mat->MaxHeight = matFile.SettingReadFloat(success,jsonMatKey_maxHeight,0.0f,true);
+			mat->OpacityTreshhold = matFile.SettingReadFloat(success,jsonMatKey_opacityThreshold,0.5f,true);
+			mat->UseDitheredAlpha = matFile.SettingReadBool(success,jsonMatKey_useDitheredAlpha,false,true);
 
-			mat->UVTiling.x = readFile[jsonMatKey_uvScale_x].get<float>();
-			mat->UVTiling.y = readFile[jsonMatKey_uvScale_y].get<float>();
+			mat->UVTiling.x = matFile.SettingReadFloat(success,jsonMatKey_uvScale_x,1.0f,true);
+			mat->UVTiling.y = matFile.SettingReadFloat(success,jsonMatKey_uvScale_y,1.0f,true);
+
+
+			if (prettyPrintMaterialFiles)
+				matFile.SettingsFilePrettyPrintSet(true);
+
+			matFile.SettingsFileClose(success,dataFile);
+
+
 
 			// we do this here and not at the top of the file to utilize the time we might be waiting for threads better
 			SaveActiveMaterialToFile();
@@ -1211,7 +1209,6 @@ namespace mnemosy::systems {
 	}
 
 	void MaterialLibraryRegistry::SaveActiveMaterialToFile() {
-
 		namespace fs = std::filesystem;
 
 		if (!m_userMaterialBound)
@@ -1228,107 +1225,81 @@ namespace mnemosy::systems {
 			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailOfActiveMaterial(thumbnailAbsolutePath,m_selectedFolderNode, m_activeMaterialID);
 		}
 
-		std::ofstream dataFileStream;
-		dataFileStream.open(m_activeMaterialDataFilePath.generic_string());
+		bool success = false;
 
-		nlohmann::json MaterialJson; // top level json object
-		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
-
-		MaterialJson[jsonMatKey_hasChannelPacked] = activeMat.HasPackedTextures;
-
-		if (activeMat.HasPackedTextures) {
-			MaterialJson[jsonMatKey_packedSuffixes] = activeMat.PackedTexturesSuffixes;
+		core::JsonSettings matFile;		
+		matFile.SettingsFileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
+		if(!success){
+			MNEMOSY_WARN("MaterialLibraryRegistry::SaveActiveMaterialToFile: Failed to open material data file. msg: {}", matFile.ErrorStringLastGet());		
 		}
 
+		// write all material data to file.
 
-		MaterialJson[jsonMatKey_name] = activeMat.Name;
+		matFile.SettingWriteBool(success,jsonMatKey_hasChannelPacked, activeMat.HasPackedTextures);
 
-		MaterialJson[jsonMatKey_albedo_r] = activeMat.Albedo.r; // maybe convert from range 0-255 to 0-1 range by deviding by 255
-		MaterialJson[jsonMatKey_albedo_g] = activeMat.Albedo.g;
-		MaterialJson[jsonMatKey_albedo_b] = activeMat.Albedo.b;
+		if (activeMat.HasPackedTextures) {
+			matFile.SettingWriteVectorString(success,jsonMatKey_packedSuffixes, activeMat.PackedTexturesSuffixes);
+		}
 
-		MaterialJson[jsonMatKey_roughness] = activeMat.Roughness;
-		MaterialJson[jsonMatKey_isSmoothness] = activeMat.IsSmoothnessTexture;
+		matFile.SettingErase(success,"1_Mnemosy_Data_File"); // keep this here for now but this key is not longer needed and depricated
 
-		MaterialJson[jsonMatKey_metallic] = activeMat.Metallic;
-
-		MaterialJson[jsonMatKey_emission_r] = activeMat.Emission.r;
-		MaterialJson[jsonMatKey_emission_g] = activeMat.Emission.g;
-		MaterialJson[jsonMatKey_emission_b] = activeMat.Emission.b;
-		MaterialJson[jsonMatKey_emissionStrength] = activeMat.EmissionStrength;
-		MaterialJson[jsonMatKey_useEmissiveAsMask] = activeMat.UseEmissiveAsMask;
-
-
-		MaterialJson[jsonMatKey_normalStrength] = activeMat.NormalStrength;
-		MaterialJson[jsonMatKey_normalMapFormat] = activeMat.GetNormalFormatAsInt(); // 0 = OpenGl, 1 = DirectX
-
-		MaterialJson[jsonMatKey_heightDepth] = activeMat.HeightDepth;
-		MaterialJson[jsonMatKey_maxHeight] = activeMat.MaxHeight;
-		MaterialJson[jsonMatKey_opacityThreshold] = activeMat.OpacityTreshhold;
-		MaterialJson[jsonMatKey_useDitheredAlpha] = activeMat.UseDitheredAlpha;
+		matFile.SettingWriteString(success,jsonMatKey_name, activeMat.Name);
 		
-		MaterialJson[jsonMatKey_uvScale_x] = activeMat.UVTiling.x;
-		MaterialJson[jsonMatKey_uvScale_y] = activeMat.UVTiling.y;
+		matFile.SettingWriteFloat(success,jsonMatKey_albedo_r, activeMat.Albedo.r);
+		matFile.SettingWriteFloat(success,jsonMatKey_albedo_g, activeMat.Albedo.g);
+		matFile.SettingWriteFloat(success,jsonMatKey_albedo_b, activeMat.Albedo.b);
 
-		bool albedoAssigned		= activeMat.isAlbedoAssigned();
-		bool roughAssigned		= activeMat.isRoughnessAssigned();
-		bool metalAssigned		= activeMat.isMetallicAssigned();
-		bool emissionAssigned	= activeMat.isEmissiveAssigned();
-		bool normalAssigned		= activeMat.isNormalAssigned();
-		bool aoAssigned			= activeMat.isAoAssigned();
-		bool heightAssigned		= activeMat.isHeightAssigned();
-		bool opacityAssigned	= activeMat.isOpacityAssigned();
+		matFile.SettingWriteFloat(success,jsonMatKey_roughness, activeMat.Roughness);
+		matFile.SettingWriteBool(success,jsonMatKey_isSmoothness, activeMat.IsSmoothnessTexture);
 
-		std::string albedoPath		= jsonMatKey_pathNotAssigned;
-		std::string roughnessPath	= jsonMatKey_pathNotAssigned;
-		std::string metallicPath	= jsonMatKey_pathNotAssigned;
-		std::string emissionPath	= jsonMatKey_pathNotAssigned;
-		std::string normalPath		= jsonMatKey_pathNotAssigned;
-		std::string aoPath			= jsonMatKey_pathNotAssigned;
-		std::string heightPath		= jsonMatKey_pathNotAssigned;
-		std::string opacityPath		= jsonMatKey_pathNotAssigned;
+		matFile.SettingWriteFloat(success,jsonMatKey_metallic, activeMat.Metallic);
+
+		matFile.SettingWriteFloat(success,jsonMatKey_emission_r, activeMat.Emission.r);
+		matFile.SettingWriteFloat(success,jsonMatKey_emission_g, activeMat.Emission.g);
+		matFile.SettingWriteFloat(success,jsonMatKey_emission_b, activeMat.Emission.b);
+		matFile.SettingWriteFloat(success,jsonMatKey_emissionStrength, activeMat.EmissionStrength);
+		matFile.SettingWriteBool(success,jsonMatKey_useEmissiveAsMask, activeMat.UseEmissiveAsMask);
 
 
-		std::string matName = activeMat.Name;
+		matFile.SettingWriteFloat(success,jsonMatKey_normalStrength, activeMat.NormalStrength);
+		matFile.SettingWriteInt(success,jsonMatKey_normalMapFormat, activeMat.GetNormalFormatAsInt()); // 0 = OpenGl, 1 = DirectX
 
-		if (albedoAssigned)		{ albedoPath	= matName	+ texture_fileSuffix_albedo; }
-		if (roughAssigned)		{ roughnessPath = matName	+ texture_fileSuffix_roughness; }
-		if (metalAssigned)		{ metallicPath	= matName	+ texture_fileSuffix_metallic; }
-		if (emissionAssigned)	{ emissionPath	= matName	+ texture_fileSuffix_emissive; }
-		if (normalAssigned)		{ normalPath	= matName	+ texture_fileSuffix_normal; }
-		if (aoAssigned)			{ aoPath		= matName	+ texture_fileSuffix_ambientOcclusion; }
-		if (heightAssigned)		{ heightPath	= matName	+ texture_fileSuffix_height; }
-		if (opacityAssigned)	{ opacityPath	= matName	+ texture_fileSuffix_opacity; }
+		matFile.SettingWriteFloat(success,jsonMatKey_heightDepth, activeMat.HeightDepth);
+		matFile.SettingWriteFloat(success,jsonMatKey_maxHeight, activeMat.MaxHeight);
+		matFile.SettingWriteFloat(success,jsonMatKey_opacityThreshold, activeMat.OpacityTreshhold);
+		matFile.SettingWriteBool(success,jsonMatKey_useDitheredAlpha, activeMat.UseDitheredAlpha);
 
+		matFile.SettingWriteFloat(success,jsonMatKey_uvScale_x, activeMat.UVTiling.x);
+		matFile.SettingWriteFloat(success,jsonMatKey_uvScale_y, activeMat.UVTiling.y);
 
-		MaterialJson[jsonMatKey_albedoAssigned]		= albedoAssigned;
-		MaterialJson[jsonMatKey_roughAssigned]		= roughAssigned;
-		MaterialJson[jsonMatKey_metalAssigned]		= metalAssigned;
-		MaterialJson[jsonMatKey_emissionAssigned]	= emissionAssigned;
-		MaterialJson[jsonMatKey_normalAssigned]		= normalAssigned;
-		MaterialJson[jsonMatKey_aoAssigned]			= aoAssigned;
-		MaterialJson[jsonMatKey_heightAssigned]		= heightAssigned;
-		MaterialJson[jsonMatKey_opacityAssigned]	= opacityAssigned;
+		// loops through all possilbe texture types as defined in PBRTextureType enum
+		// for each type write the texture filename and assigned bool to the file.
+		for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_COUNT; i++) {
 
-		MaterialJson[jsonMatKey_albedoPath]		= albedoPath;
-		MaterialJson[jsonMatKey_roughPath]		= roughnessPath;
-		MaterialJson[jsonMatKey_metalPath]		= metallicPath;
-		MaterialJson[jsonMatKey_emissionPath]	= emissionPath;
-		MaterialJson[jsonMatKey_normalPath]		= normalPath;
-		MaterialJson[jsonMatKey_aoPath]			= aoPath;
-		MaterialJson[jsonMatKey_heightPath]		= heightPath;
-		MaterialJson[jsonMatKey_opacityPath]	= opacityPath;
+			graphics::PBRTextureType currentTextureType = (graphics::PBRTextureType)i;
 
+			bool textureTypeIsAssigned = activeMat.IsTextureTypeAssigned(currentTextureType);
 
+			std::string jsonMatKey_path_ofTextureType = graphics::TextureDefinitions::GetJsonMatKey_path_FromTextureType(currentTextureType);
+			std::string jsonMatKey_assigned_ofTextureType = graphics::TextureDefinitions::GetJsonMatKey_assigned_FromTextureType(currentTextureType);
 
-		MaterialJson[jsonMatKey_thumbnailPath] = thumbnailPath.generic_string();
+			std::string textureFilePath = jsonMatKey_pathNotAssigned;
+
+			if(textureTypeIsAssigned){
+				textureFilePath	=  graphics::TextureDefinitions::GetTextureFileNameFromTextureType(activeMat.Name,currentTextureType);
+			}
+
+			matFile.SettingWriteBool(success, jsonMatKey_assigned_ofTextureType, textureTypeIsAssigned);
+			matFile.SettingWriteString(success, jsonMatKey_path_ofTextureType, textureFilePath);
+		}
+
+		matFile.SettingWriteString(success, jsonMatKey_thumbnailPath,thumbnailPath.generic_string());
+
 
 		if (prettyPrintMaterialFiles)
-			dataFileStream << MaterialJson.dump(4);
-		else
-			dataFileStream << MaterialJson.dump(-1);
-		dataFileStream.close();
+			matFile.SettingsFilePrettyPrintSet(true);
 
+		matFile.SettingsFileClose(success, m_activeMaterialDataFilePath);
 	}
 
 	void MaterialLibraryRegistry::SetDefaultMaterial() {
@@ -1401,8 +1372,6 @@ namespace mnemosy::systems {
 		graphics::TextureFormat format = graphics::MNSY_RGB8;
 
 
-
-
 		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
 
 			filename = activeMat.Name + texture_fileSuffix_albedo;
@@ -1458,68 +1427,30 @@ namespace mnemosy::systems {
 		exportManager.ExportGlTexture_PngOrTiff(tex->GetID(), exportInfo);
 
 
+		core::JsonSettings matFile;		
 
-		// save material data file
-		std::ifstream readFileStream;
-		readFileStream.open(m_activeMaterialDataFilePath.generic_string());
-
-		nlohmann::json readFile;
-		try {
-			readFile = nlohmann::json::parse(readFileStream);
-		}
-		catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadTextureForActiveMaterial: Error Parsing Data File. Message: {}", err.what());
-			readFileStream.close();
-			delete tex;
+		matFile.SettingsFileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
+		if(!success){
+			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadTextureForActiveMaterial: Error Opening Data File. Message: {}", matFile.ErrorStringLastGet());
+		 	delete tex;
 			return;
 		}
-		readFileStream.close();
 
-		nlohmann::json outFile = readFile;
 
-		std::ofstream outFileStream;
-		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
+		// set path to assigned in the data file
+		{
+			std::string jsonMatKey_path_ofTextureType = graphics::TextureDefinitions::GetJsonMatKey_path_FromTextureType(textureType);
+			std::string jsonMatKey_assigned_ofTextureType = graphics::TextureDefinitions::GetJsonMatKey_assigned_FromTextureType(textureType);
 
-		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
-			outFile[jsonMatKey_albedoAssigned] = true;
-			outFile[jsonMatKey_albedoPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_NORMAL){
-			outFile[jsonMatKey_normalAssigned] = true;
-			outFile[jsonMatKey_normalPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_ROUGHNESS) {
-			outFile[jsonMatKey_roughAssigned] = true;
-			outFile[jsonMatKey_roughPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
-			outFile[jsonMatKey_metalAssigned] = true;
-			outFile[jsonMatKey_metalPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
-			outFile[jsonMatKey_aoAssigned] = true;
-			outFile[jsonMatKey_aoPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
-			outFile[jsonMatKey_emissionAssigned] = true;
-			outFile[jsonMatKey_emissionPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_HEIGHT) {
-			outFile[jsonMatKey_heightAssigned] = true;
-			outFile[jsonMatKey_heightPath] = filename;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_OPACITY) {
-			outFile[jsonMatKey_opacityAssigned] = true;
-			outFile[jsonMatKey_opacityPath] = filename;
+			matFile.SettingWriteBool(success,jsonMatKey_assigned_ofTextureType,true);
+			matFile.SettingWriteString(success,jsonMatKey_path_ofTextureType,filename);
 		}
 
 
 		if (prettyPrintMaterialFiles)
-			outFileStream << outFile.dump(4);
-		else
-			outFileStream << outFile.dump(-1);
+			matFile.SettingsFilePrettyPrintSet(true);
 
-		outFileStream.close();
+		matFile.SettingsFileClose(success, m_activeMaterialDataFilePath);
 
 		// load texture to material
 		activeMat.assignTexture(textureType, tex);
@@ -1527,124 +1458,68 @@ namespace mnemosy::systems {
 	}
 
 	void MaterialLibraryRegistry::DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType)
-  {
-
-
-		namespace fs = std::filesystem;
+    {
+  		namespace fs = std::filesystem;
 
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
 
-		if (!UserMaterialBound()) { // if its default aterial
+		if (!UserMaterialBound()) { // if its default material // should not be possible using the gui bc default material is not editable 
 			activeMat.removeTexture(textureType);
 			return;
 		}
-		// read file into json object
-		std::ifstream readFileStream;
-		readFileStream.open(m_activeMaterialDataFilePath.generic_string());
 
-		nlohmann::json readFile;
-		try {
-			readFile = nlohmann::json::parse(readFileStream);
-		}
-		catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: Error parsing data file.\nError message: {}", err.what());
-			readFileStream.close();
-			return;
-		}
-		readFileStream.close();
 
-		// write to json object
-		nlohmann::json outFile = readFile;
+		bool success = false;
+
+		core::JsonSettings matFile;
+		matFile.SettingsFileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
+
 
 		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
-		if (textureType == graphics::MNSY_TEXTURE_ALBEDO) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_albedoPath].get<std::string>());
-			try { fs::remove(textureFile); }
+
+
+		// find filename of the texture then remove it form disk and reset the path to "notAssigned" in the material meta data file.
+		{
+
+			std::string jsonMatKey_path_ofTextureType = graphics::TextureDefinitions::GetJsonMatKey_path_FromTextureType(textureType);
+
+
+			fs::path textureFilePath = materialDir / fs::path(matFile.SettingReadString(success,jsonMatKey_path_ofTextureType,jsonMatKey_pathNotAssigned,false));
+			try { fs::remove(textureFilePath); }
 			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
 
-			outFile[jsonMatKey_albedoAssigned] = false;
-			outFile[jsonMatKey_albedoPath] = jsonMatKey_pathNotAssigned;
+			std::string jsonMatKey_assigned_ofTextureType = graphics::TextureDefinitions::GetJsonMatKey_assigned_FromTextureType(textureType);
+
+			matFile.SettingWriteBool(success,jsonMatKey_assigned_ofTextureType,false);
+			matFile.SettingWriteString(success,jsonMatKey_path_ofTextureType,jsonMatKey_pathNotAssigned);
+
+			// special case texture types
+
+			if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
+
+				activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+				matFile.SettingWriteInt(success,jsonMatKey_normalMapFormat,0);
+
+			}
+			else if(textureType == graphics::MNSY_TEXTURE_ROUGHNESS){
+				
+				activeMat.IsSmoothnessTexture = false;
+				matFile.SettingWriteBool(success,jsonMatKey_isSmoothness,false);
+			}
+			else if(textureType == graphics::MNSY_TEXTURE_EMISSION){
+				activeMat.UseEmissiveAsMask = false;
+				matFile.SettingWriteBool(success,jsonMatKey_useEmissiveAsMask,false);
+			}			
 		}
-		else if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_normalPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
-
-			outFile[jsonMatKey_normalAssigned] = false;
-			outFile[jsonMatKey_normalPath] = jsonMatKey_pathNotAssigned;
-			outFile[jsonMatKey_normalMapFormat] = 0;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_ROUGHNESS) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_roughPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			activeMat.IsSmoothnessTexture = false;
-
-			outFile[jsonMatKey_isSmoothness] = false;
-			outFile[jsonMatKey_roughAssigned] = false;
-			outFile[jsonMatKey_roughPath] = jsonMatKey_pathNotAssigned;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_METALLIC) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_metalPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			outFile[jsonMatKey_metalAssigned] = false;
-			outFile[jsonMatKey_metalPath] = jsonMatKey_pathNotAssigned;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_AMBIENTOCCLUSION) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_aoPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			outFile[jsonMatKey_aoAssigned] = false;
-			outFile[jsonMatKey_aoPath] = jsonMatKey_pathNotAssigned;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_EMISSION) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_emissionPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			outFile[jsonMatKey_emissionAssigned] = false;
-			outFile[jsonMatKey_emissionPath] = jsonMatKey_pathNotAssigned;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_HEIGHT) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_heightPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			outFile[jsonMatKey_heightAssigned] = false;
-			outFile[jsonMatKey_heightPath] = jsonMatKey_pathNotAssigned;
-		}
-		else if (textureType == graphics::MNSY_TEXTURE_OPACITY) {
-			fs::path textureFile = materialDir / fs::path(outFile[jsonMatKey_opacityPath].get<std::string>());
-			try { fs::remove(textureFile); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
-
-			activeMat.UseEmissiveAsMask = false;
-			outFile[jsonMatKey_useEmissiveAsMask] = false;
-			outFile[jsonMatKey_opacityAssigned] = false;
-			outFile[jsonMatKey_opacityPath] = jsonMatKey_pathNotAssigned;
-		}
-
-
-
-		std::ofstream outFileStream;
-		outFileStream.open(m_activeMaterialDataFilePath.generic_string());
-
+		
 		if (prettyPrintMaterialFiles)
-			outFileStream << outFile.dump(4);
-		else
-			outFileStream << outFile.dump(-1);
-		outFileStream.close();
+			matFile.SettingsFilePrettyPrintSet(true);
+
+		matFile.SettingsFileClose(success, m_activeMaterialDataFilePath);
 
 		activeMat.removeTexture(textureType);
 	}
-
 
 	void MaterialLibraryRegistry::OpenFolderNode(FolderNode* node){
 
@@ -1856,7 +1731,6 @@ namespace mnemosy::systems {
 		}
 
 		return paths;
-
 	}
 
 	bool MaterialLibraryRegistry::SearchMaterialsForKeyword(const std::string& keyword) {
@@ -1873,72 +1747,68 @@ namespace mnemosy::systems {
 
 	void MaterialLibraryRegistry::CreateNewMaterialDataFile(std::filesystem::path& folderPath, std::string& name) {
 
-		std::filesystem::path materialDataFile = folderPath / std::filesystem::path(name + ".mnsydata");
+		std::filesystem::path materialDataFilePath = folderPath / std::filesystem::path(name + ".mnsydata");
 
-		std::ofstream dataFileStream;
-		dataFileStream.open(materialDataFile.generic_string());
+		bool success = false;
 
-
-		nlohmann::json MaterialJson; // top level json object
-		MaterialJson[jsonMatKey_MnemosyDataFile] = jsonMatKey_MnemosyDataFileTxt;
-		MaterialJson[jsonMatKey_name]		= name;
-
-		MaterialJson[jsonMatKey_hasChannelPacked] = false;
-
-		MaterialJson[jsonMatKey_albedo_r]	= 0.8f;
-		MaterialJson[jsonMatKey_albedo_g]	= 0.8f;
-		MaterialJson[jsonMatKey_albedo_b]	= 0.8f;
-
-		MaterialJson[jsonMatKey_roughness]	= 0.1f;
-		MaterialJson[jsonMatKey_metallic]	= 0.0f;
-
-		MaterialJson[jsonMatKey_emission_r]	= 0.0f;
-		MaterialJson[jsonMatKey_emission_g]	= 0.0f;
-		MaterialJson[jsonMatKey_emission_b]	= 0.0f;
-		MaterialJson[jsonMatKey_emissionStrength]	= 0.0f;
-		MaterialJson[jsonMatKey_useEmissiveAsMask]	= false;
+		core::JsonSettings matFile;		
+		matFile.SettingsFileOpen(success, materialDataFilePath, jsonMatKey_header, jsonMatKey_description);
 
 
-		MaterialJson[jsonMatKey_normalStrength]		= 1.0f;
-		MaterialJson[jsonMatKey_normalMapFormat]	= 0; // 0 = OpenGl, 1 = DirectX
+		matFile.SettingWriteString(success,jsonMatKey_name, name);
+		matFile.SettingWriteBool(success,jsonMatKey_hasChannelPacked, false);
+		
+		matFile.SettingWriteFloat(success,jsonMatKey_albedo_r, 0.8f);
+		matFile.SettingWriteFloat(success,jsonMatKey_albedo_g, 0.8f);
+		matFile.SettingWriteFloat(success,jsonMatKey_albedo_b, 0.8f);
+		
+		matFile.SettingWriteFloat(success,jsonMatKey_roughness, 0.1f);
+		matFile.SettingWriteFloat(success,jsonMatKey_metallic, 0.0f);
 
-		MaterialJson[jsonMatKey_isSmoothness]		= false;
+		matFile.SettingWriteFloat(success,jsonMatKey_emission_r, 0.0f);
+		matFile.SettingWriteFloat(success,jsonMatKey_emission_g, 0.0f);
+		matFile.SettingWriteFloat(success,jsonMatKey_emission_b, 0.0f);
+		matFile.SettingWriteFloat(success,jsonMatKey_emissionStrength, 0.0f);
+		matFile.SettingWriteBool(success,jsonMatKey_useEmissiveAsMask, false);
 
-		MaterialJson[jsonMatKey_heightDepth]		= 0.0f;
-		MaterialJson[jsonMatKey_maxHeight]			= 0.0f;
-		MaterialJson[jsonMatKey_opacityThreshold]	= 0.5;
-		MaterialJson[jsonMatKey_useDitheredAlpha]	= false;
+		matFile.SettingWriteFloat(success,jsonMatKey_normalStrength, 1.0f);
+		matFile.SettingWriteInt(success,jsonMatKey_normalMapFormat, 0);
 
-		MaterialJson[jsonMatKey_uvScale_x]	= 1.0f;
-		MaterialJson[jsonMatKey_uvScale_y]	= 1.0f;
+		matFile.SettingWriteBool(success,jsonMatKey_isSmoothness, false);
+		matFile.SettingWriteFloat(success,jsonMatKey_heightDepth, 0.0f);
+		matFile.SettingWriteFloat(success,jsonMatKey_maxHeight, 0.0f);
+		matFile.SettingWriteFloat(success,jsonMatKey_opacityThreshold, 0.5f);
+		matFile.SettingWriteBool(success,jsonMatKey_useDitheredAlpha, false);
 
-		MaterialJson[jsonMatKey_albedoAssigned]		= false;
-		MaterialJson[jsonMatKey_roughAssigned]		= false;
-		MaterialJson[jsonMatKey_metalAssigned]		= false;
-		MaterialJson[jsonMatKey_emissionAssigned]	= false;
-		MaterialJson[jsonMatKey_normalAssigned]		= false;
-		MaterialJson[jsonMatKey_aoAssigned]			= false;
-		MaterialJson[jsonMatKey_heightAssigned]		= false;
-		MaterialJson[jsonMatKey_opacityAssigned]	= false;
+		matFile.SettingWriteFloat(success,jsonMatKey_uvScale_x, 1.0f);
+		matFile.SettingWriteFloat(success,jsonMatKey_uvScale_y, 1.0f);
 
-		MaterialJson[jsonMatKey_albedoPath]		= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_roughPath]		= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_metalPath]		= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_emissionPath]	= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_normalPath]		= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_aoPath]			= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_heightPath]		= jsonMatKey_pathNotAssigned;
-		MaterialJson[jsonMatKey_opacityPath]	= jsonMatKey_pathNotAssigned;
 
-		MaterialJson[jsonMatKey_thumbnailPath] = name + texture_fileSuffix_thumbnail;
+		matFile.SettingWriteBool(success,jsonMatKey_albedoAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_roughAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_metalAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_emissionAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_normalAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_aoAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_heightAssigned, false);
+		matFile.SettingWriteBool(success,jsonMatKey_opacityAssigned, false);
+
+		matFile.SettingWriteString(success,jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_roughPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_metalPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_emissionPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_normalPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_aoPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_heightPath, jsonMatKey_pathNotAssigned);
+		matFile.SettingWriteString(success,jsonMatKey_opacityPath, jsonMatKey_pathNotAssigned);
+
+		matFile.SettingWriteString(success,jsonMatKey_thumbnailPath, std::string(name + texture_fileSuffix_thumbnail));
 
 
 		if (prettyPrintMaterialFiles)
-			dataFileStream << MaterialJson.dump(4);
-		else
-			dataFileStream << MaterialJson.dump(-1);
+			matFile.SettingsFilePrettyPrintSet(true);
 
-		dataFileStream.close();
+		matFile.SettingsFileClose(success, materialDataFilePath);
 	}
 
 	void MaterialLibraryRegistry::CreateDirectoryForNode(FolderNode* node) {

@@ -227,7 +227,7 @@ namespace mnemosy::core
 	}
 
 // Read Methods
-	bool JsonSettings::SettingReadBool(bool& errorCheck, const std::string& name, const bool defaultValue){
+	bool JsonSettings::SettingReadBool(bool& errorCheck, const std::string& name, const bool defaultValue,const bool writeDefaultIfNotFound){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -239,8 +239,15 @@ namespace mnemosy::core
 		bool output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
+
 			return output;
 		}
 
@@ -261,7 +268,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	int JsonSettings::SettingReadInt(bool& errorCheck, const std::string& name, const int defaultValue){
+	int JsonSettings::SettingReadInt(bool& errorCheck, const std::string& name, const int defaultValue,const bool writeDefaultIfNotFound){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -272,8 +279,14 @@ namespace mnemosy::core
 		int output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 
@@ -295,7 +308,7 @@ namespace mnemosy::core
 	}
 	
 
-	float JsonSettings::SettingReadFloat(bool& errorCheck, const std::string& name, const float defaultValue){
+	float JsonSettings::SettingReadFloat(bool& errorCheck, const std::string& name, const float defaultValue,const bool writeDefaultIfNotFound){
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -306,8 +319,14 @@ namespace mnemosy::core
 		float output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 
@@ -367,7 +386,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<bool> JsonSettings::SettingReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue) {
+	std::vector<bool> JsonSettings::SettingReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue,const bool writeDefaultIfNotFound) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -378,8 +397,14 @@ namespace mnemosy::core
 		std::vector<bool> output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+			
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 
@@ -400,7 +425,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<int> JsonSettings::SettingReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue) {
+	std::vector<int> JsonSettings::SettingReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue,const bool writeDefaultIfNotFound) {
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -411,8 +436,13 @@ namespace mnemosy::core
 		std::vector<int> output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 
@@ -433,7 +463,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<float> JsonSettings::SettingReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue){
+	std::vector<float> JsonSettings::SettingReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue,const bool writeDefaultIfNotFound){
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -444,8 +474,13 @@ namespace mnemosy::core
 		std::vector<float> output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 
@@ -466,7 +501,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<std::string> JsonSettings::SettingReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue){
+	std::vector<std::string> JsonSettings::SettingReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue,const bool writeDefaultIfNotFound){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -477,8 +512,13 @@ namespace mnemosy::core
 		std::vector<std::string> output = defaultValue;
 
 		if(!m_jsonObject.contains(name)) {
-			errorCheck = false;
-			m_lastErrorString = "the given key does not exist yet - returning default";
+			if(writeDefaultIfNotFound){
+				m_jsonObject[name] = defaultValue;
+			}
+			else{
+				errorCheck = false;
+				m_lastErrorString = "the given key does not exist yet - returning default";
+			}
 			return output;
 		}
 

@@ -56,8 +56,6 @@ namespace mnemosy::systems
 
 		void DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix);
 
-
-		void LoadActiveMaterialFromFile(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo,FolderNode* parentNode);
 		void LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo,FolderNode* parentNode);
 
 		void SaveActiveMaterialToFile();

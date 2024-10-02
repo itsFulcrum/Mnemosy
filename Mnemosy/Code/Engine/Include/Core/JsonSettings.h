@@ -29,10 +29,7 @@ namespace mnemosy::core {
 		std::string ErrorStringLastGet();
 
 
-
-
 		// write methods
-		// FIXME: you can technically write to the json object before opening a file..
 		void SettingWriteBool(bool& errorCheck, const std::string& name, const bool value);
 		void SettingWriteInt(bool& errorCheck, const std::string& name, const int value);
 		void SettingWriteFloat(bool& errorCheck, const std::string& name, const float value);
@@ -44,21 +41,21 @@ namespace mnemosy::core {
 		void SettingWriteVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& value);
 
 		// read methods
-		bool SettingReadBool(bool& errorCheck, const std::string& name, const bool defaultValue);
-		int SettingReadInt(bool& errorCheck, const std::string& name, const int defaultValue);
-		float SettingReadFloat(bool& errorCheck, const std::string& name, const float defaultValue);
+		bool SettingReadBool(bool& errorCheck, const std::string& name, const bool defaultValue,const bool writeDefaultIfNotFound);
+		int SettingReadInt(bool& errorCheck, const std::string& name, const int defaultValue,const bool writeDefaultIfNotFound);
+		float SettingReadFloat(bool& errorCheck, const std::string& name, const float defaultValue,const bool writeDefaultIfNotFound);
 		std::string SettingReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue,const bool writeDefaultIfNotFound);
 
-		std::vector<bool> SettingReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue);
-		std::vector<int> SettingReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue);
-		std::vector<float> SettingReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue);
-		std::vector<std::string>  SettingReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue);
+		std::vector<bool> SettingReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue,const bool writeDefaultIfNotFound);
+		std::vector<int> SettingReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue,const bool writeDefaultIfNotFound);
+		std::vector<float> SettingReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue,const bool writeDefaultIfNotFound);
+		std::vector<std::string>  SettingReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue,const bool writeDefaultIfNotFound);
 
 
 	private:
 		nlohmann::json m_jsonObject;
 
-		bool m_prettyPrint = true;
+		bool m_prettyPrint = false;
 		bool m_fileIsOpen = false;
 		std::string m_lastErrorString = "none";
 
@@ -76,14 +73,15 @@ namespace mnemosy::core {
 	
 		// create a settings object
 		mnemosy::core::JsonSettings settings;
-		
-		// optionally set wheather to pretty print or not.
-		settings.SettingsFilePrettyPrintSet(true);
 
 
 		std::filesystem::path TestFilePath = std::filesystem::path("c:\example\testFile.json");
 		
 		// almost all methods take a bool for error checking as the first parameter
+		// its most important for opening the file bc it may be possible that the file is not correct or corrupted
+		// write methods only fail if the files has not been opend
+		// if read methods fails they simply return the default value
+		
 		bool success = false;
 	
 		// first open the file
@@ -94,8 +92,6 @@ namespace mnemosy::core {
 			return;
 		}
 		
-	
-
 
 		//settings.SettingsFileWhipe(success);
 
@@ -105,40 +101,38 @@ namespace mnemosy::core {
 		// }
 
 
-
-		// Read And Write to the file while its open
-
+		// Write Entries
 		bool aBoolean = true;
 		settings.SettingWriteBool(success, "testBool", aBoolean);
 		
-
 		std::vector<std::string> aVectorOfStrings(4);
 		aVectorOfStrings[0]("h");
 		aVectorOfStrings[1]("e");
 		aVectorOfStrings[2]("y");
 		settings.SettingsWriteVectorString(success,"testVector", aVectorOfStrings);
 
-
+		// Read Entries
+		bool writeDefaultValueIfKeyNotFound = true;
 		bool defaultValue = false;
-		settings.SettingReadBool(success,"testBool", defaultValue);
+		bool readBoolean = settings.SettingReadBool(success,"testBool", defaultValue, writeDefaultValueIfKeyNotFound);
 
-
-		settings.SettingReadVectorString(success,"testVector",std::vector<std::string>());
-
+		std::vector<std::string> = settings.SettingReadVectorString(success,"testVector",std::vector<std::string>(),writeDefaultValueIfKeyNotFound);
 		
-		// to erase an entry use
-
+		// Erase Entries
 		settings.SettingErase(success, "testBool");
 		if(!success){
 			// log error if neccesarry 
 		}
 		
-		// or whipe the entire file.
+		// Whipe the entire file.
 		settings.SettingsFileWhipe(success);
 
-		
 
-		// at the end close the file.  this is where all the contents actually get written to the file.
+
+		// optionally set wheather to pretty print or not, default is false.
+		settings.SettingsFilePrettyPrintSet(true);
+
+		// At the end close the file.  This is where all the contents actually get written to the file.
 
 		settings.SettingsFileClose(success,TestFilePath);
 

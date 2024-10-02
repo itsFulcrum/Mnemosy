@@ -56,12 +56,12 @@ namespace mnemosy::systems {
 
 		// load gui panel states
 
-		bool gp_documentation_Open		= user.SettingReadBool(success,"guiPanel_documentation_isOpen", true);
-		bool gp_sceneSettings_Open		= user.SettingReadBool(success,"guiPanel_settings_isOpen", true);
-		bool gp_materialLibrary_Open	= user.SettingReadBool(success,"guiPanel_materialLibrary_isOpen", true);
-		bool gp_materialEditor_Open		= user.SettingReadBool(success,"guiPanel_materialEditor_isOpen", true);
-		bool gp_viewport_Open			= user.SettingReadBool(success,"guiPanel_viewport_isOpen", true);
-		bool gp_contents_Open			= user.SettingReadBool(success,"guiPanel_contents_isOpen", true);
+		bool gp_documentation_Open		= user.SettingReadBool(success,"guiPanel_documentation_isOpen", true,true);
+		bool gp_sceneSettings_Open		= user.SettingReadBool(success,"guiPanel_settings_isOpen", true,true);
+		bool gp_materialLibrary_Open	= user.SettingReadBool(success,"guiPanel_materialLibrary_isOpen", true,true);
+		bool gp_materialEditor_Open		= user.SettingReadBool(success,"guiPanel_materialEditor_isOpen", true,true);
+		bool gp_viewport_Open			= user.SettingReadBool(success,"guiPanel_viewport_isOpen", true,true);
+		bool gp_contents_Open			= user.SettingReadBool(success,"guiPanel_contents_isOpen", true,true);
 
 		
 		// set gui panel states
@@ -75,7 +75,7 @@ namespace mnemosy::systems {
 		userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_CONTENTS).SetActive(gp_contents_Open);
 
 
-		float guiPanel_contents_buttonSize = user.SettingReadFloat(success,"guiPanel_contents_buttonSize", 128.0f);
+		float guiPanel_contents_buttonSize = user.SettingReadFloat(success,"guiPanel_contents_buttonSize", 128.0f,true);
 		Application::GetInstance().GetGuiPanelManager().GetContentsPanel().ImageButtonSizeSet(guiPanel_contents_buttonSize);
 
 		user.SettingsFileClose(success, m_userSettingsDataFilePath);

@@ -26,7 +26,10 @@ namespace mnemosy::systems {
 
 // json identifiers for material data file
 #define jsonMatKey_MnemosyDataFile	"1_Mnemosy_Data_File"	// std::string - header
-#define jsonMatKey_MnemosyDataFileTxt "Material Meta Data"	// text description of header
+#define jsonMatKey_MnemosyDataFileTxt "Mnemosy Data File"	// text description of header
+
+#define jsonMatKey_header			"Mnemosy Data File"		// text description of header
+#define jsonMatKey_description		"Contains material meta data" // text description
 #define jsonMatKey_name				"name"					// std:.string - name of the material
 
 #define jsonMatKey_hasChannelPacked "hasChannelPacked"		// bool - if a texture has channelpacked textures

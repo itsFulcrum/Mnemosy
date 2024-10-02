@@ -24,6 +24,7 @@ namespace mnemosy::graphics {
 		MNSY_TEXTURE_NONE				= 9
 	};
 	enum NormalMapFormat {
+		// FIXME: typo, should be OPENGL // fix in visual studio
 		MNSY_NORMAL_FORMAT_OPENGl = 0,
 		MNSY_NORMAL_FORMAT_DIRECTX = 1
 	};
