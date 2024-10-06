@@ -37,6 +37,7 @@ namespace mnemosy::systems
 		unsigned int width;
 		unsigned int height;
 		graphics::TextureFormat textureFormat;
+		graphics::ImageFileType imageFileType;
 	};
 
 
@@ -62,18 +63,15 @@ namespace mnemosy::systems
 		graphics::NormalMapFormat GetNormalMapExportFormat() { return m_exportNormalFormat; }
 
 
+		void GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo);
 		void ExportGlTexture_PngOrTiff(const int glTextureId,TextureExportInfo& exportInfo);
-
-		std::vector<std::string>& GetLastExportedFilePaths();
 
 
 		void SetExportRoughnessAsSmoothness(bool exportRoughAsSmooth) { m_exportRoughnessAsSmoothness = exportRoughAsSmooth; }
 		bool GetExportRoughnessAsSmoothness() { return m_exportRoughnessAsSmoothness; }
+
 	private:
 		void ExportAsKtx2(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material);
-
-
-		std::vector<std::string> m_lastExportedFilePaths;
 
 		std::string GetExportNormalFormatString();
 		std::string GetExportImageFormatString();

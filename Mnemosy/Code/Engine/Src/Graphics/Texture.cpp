@@ -13,6 +13,10 @@
 
 #include <math.h>
 
+#include <filesystem>
+#include "Include/Graphics/Utils/Picture.h"
+#include "Include/Core/Utils/StringUtils.h"
+
 namespace mnemosy::graphics
 {
 	Texture::Texture() {
@@ -27,9 +31,18 @@ namespace mnemosy::graphics
 	}
 
 	bool Texture::GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps, PBRTextureType pbrType) {
-		clear();
-				
+		
+		//// test loading tiff files
+		//std::filesystem::path pa = std::filesystem::path(imagePath);
+		//std::string ext = pa.extension().generic_string();
+		//mnemosy::core::StringUtils::MakeStringLowerCase(ext);
+		//if (ext == ".tif" || ext == ".tiff") {
 
+		//	return LoadFromFile(imagePath,  flipImageVertically, generateMipmaps,  pbrType);
+		//}
+		
+		clear();
+		
 		cv::Mat pic = cv::imread(imagePath, cv::IMREAD_UNCHANGED);
 
 		if (pic.empty()) {
@@ -126,7 +139,7 @@ namespace mnemosy::graphics
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, pic.ptr());
 
 			}
-			else if (bitDepth == 2) { // not tested
+			else if (bitDepth == 2) { 
 
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_SHORT, pic.ptr());
 			}
@@ -375,6 +388,122 @@ namespace mnemosy::graphics
 		}
 		glBindTexture(GL_TEXTURE_2D, m_ID);
 
+	}
+
+	// in development not fully features yet
+	bool Texture::LoadFromFile(const char* imagePath, const bool flipImageVertically, const bool generateMipmaps, PBRTextureType pbrType) {
+
+
+		MNEMOSY_WARN("Loading with libtiff");
+
+		graphics::PictureErrorCode errorCode = PictureErrorCode::MNSY_PICTURE_ERROR_NONE;
+		
+		graphics::PictureInfo info = graphics::Picture::ReadTiff(errorCode, imagePath, true);
+
+		if (errorCode != graphics::PictureErrorCode::MNSY_PICTURE_ERROR_NONE) {
+			MNEMOSY_ERROR("Texture::LoadFromFile: Failed to load tiff image: {} \nMessage: {}", imagePath, graphics::Picture::ErrorStringGet(errorCode));
+
+			if (info.pixels != nullptr) {
+				free(info.pixels);
+			}
+
+			return false;
+		}
+
+
+		graphics::TextureFormat format = info.textureFormat;
+
+
+		uint8_t channels = 0;
+		uint8_t bitsPerChannel = 0; // will be either 8 , 16  or 32
+		size_t bytesPerPixel = 0;
+
+		graphics::TextureDefinitions::GetInfoFromTextureFormat(format,channels,bitsPerChannel,bytesPerPixel);
+		m_channelsAmount = channels;
+		m_width = info.width;
+		m_height = info.height;
+
+
+
+		bool convertSingleChannelToRGB = false;
+		if (m_channelsAmount == 1) {
+			if (pbrType == graphics::MNSY_TEXTURE_ALBEDO || pbrType == graphics::MNSY_TEXTURE_EMISSION) {
+				m_channelsAmount = 3;
+				convertSingleChannelToRGB = true;
+			}
+		}
+
+		//depth 0 = 8bit unsigned byte, 2 0 16bit UNSIGNED SHORT // 4 not tested
+
+		//int bitDepth = pic.depth();
+		//cv::flip(pic, pic, 0);
+
+		// ensure byte alignment
+		int restWidth = m_width % 4;
+		unsigned int padding = 4;
+
+		if (restWidth != 0) {
+			padding = 1;
+		}
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, padding);
+
+		MNEMOSY_TRACE("pixel: {}x{} format: {}", m_width, m_height, graphics::TextureDefinitions::GetTextureFormatAsString(format));
+
+
+		glGenTextures(1, &m_ID);
+		glBindTexture(GL_TEXTURE_2D, m_ID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		//depth 0 = 8bit unsigned byte, 2 0 16bit UNSIGNED SHORT // 4 not tested
+
+
+		if (format == MNSY_RG8 || format == MNSY_RG16 || format == MNSY_RG32) {
+			// error not supported
+			MNEMOSY_WARN("Faild to load image: loading textures with 2 channels is not supported. {}",imagePath);
+			m_ID = 0;
+			m_isInitialized = false;
+			return false;
+		}
+
+		// TODO: convert to rgb if convertSingleChannelToRGB is true
+
+
+		// upload the gl texture
+		
+		void* pixelBuffer = info.pixels;
+
+		switch (format)
+		{
+		case mnemosy::graphics::MNSY_NONE: break;
+		// 8 bit
+		case mnemosy::graphics::MNSY_R8:    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED , m_width, m_height, 0, GL_RED , GL_UNSIGNED_BYTE, pixelBuffer);	break;
+		case mnemosy::graphics::MNSY_RGB8:  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB , m_width, m_height, 0, GL_RGB , GL_UNSIGNED_BYTE, pixelBuffer);	break;
+		case mnemosy::graphics::MNSY_RGBA8: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelBuffer);	break;
+		// 16 bit
+		case mnemosy::graphics::MNSY_R16:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED , m_width, m_height, 0, GL_RED , GL_UNSIGNED_SHORT, pixelBuffer);	break;
+		case mnemosy::graphics::MNSY_RGB16:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB , m_width, m_height, 0, GL_RGB , GL_UNSIGNED_SHORT, pixelBuffer);	break;
+		case mnemosy::graphics::MNSY_RGBA16:glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_SHORT, pixelBuffer);	break;
+		// 32 bit
+		case mnemosy::graphics::MNSY_R32:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED , m_width, m_height, 0, GL_RED , GL_FLOAT, pixelBuffer);			break;
+		case mnemosy::graphics::MNSY_RGB32:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB , m_width, m_height, 0, GL_RGB , GL_FLOAT, pixelBuffer);			break;
+		case mnemosy::graphics::MNSY_RGBA32:glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_FLOAT, pixelBuffer);			break;
+		
+		default:break;
+		}
+
+
+		m_isInitialized = true;
+		free(pixelBuffer);
+
+		if (generateMipmaps) {
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+
+		return true;
 	}
 
 } // !mnemosy::graphics

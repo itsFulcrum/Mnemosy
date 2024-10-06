@@ -24,18 +24,27 @@ namespace mnemosy::graphics {
 		MNSY_TEXTURE_NONE				= 9
 	};
 	enum NormalMapFormat {
-		// FIXME: typo, should be OPENGL // fix in visual studio
-		MNSY_NORMAL_FORMAT_OPENGl = 0,
+		MNSY_NORMAL_FORMAT_OPENGL = 0,
 		MNSY_NORMAL_FORMAT_DIRECTX = 1
+	};	
+
+	// convert to this in the future
+	enum ImageFileType {
+		MNSY_FILE_TYPE_TIF = 0,	// 
+		MNSY_FILE_TYPE_PNG = 1,	// 
+		MNSY_FILE_TYPE_JPG = 2, // 
+		MNSY_FILE_TYPE_HDR = 3, // 
+		MNSY_FILE_TYPE_EXR = 4, // not supported yet
+		MNSY_FILE_TYPE_KTX2 = 5 // not supported yet
 	};
 
+	// TODO: Remove this and switch to the upper enum 
 	enum ExportImageFormat {
-		//MNSY_KTX2 = 0,
 		MNSY_TIF = 0,
 		MNSY_PNG = 1
 	};
 
-
+	// the order here is important dont change it
 	enum TextureFormat {
 		MNSY_NONE		= 0,
 		MNSY_R8			= 1,
@@ -335,6 +344,61 @@ namespace mnemosy::graphics {
 			return std::string("NONE");
 		}
 
+		static std::string GetTextureFormatAsString(graphics::TextureFormat format){
+
+			switch (format)
+			{
+			case (MNSY_NONE):
+				return std::string("None");
+				break;
+			case (MNSY_R8):
+				return std::string("R8");
+				break;
+			case (MNSY_RG8):
+				return std::string("RG8");
+				break;
+			case (MNSY_RGB8):
+				return std::string("RGB8");
+				break;
+			case (MNSY_RGBA8):
+				return std::string("RGBA8");
+				break;
+
+			case (MNSY_R16):
+				return std::string("R16");
+				break;
+			case (MNSY_RG16):
+				return std::string("RG16");
+				break;
+			case (MNSY_RGB16):
+				return std::string("RGB16");
+				break;
+			case (MNSY_RGBA16):
+				return std::string("RGBA16");
+				break;
+
+			case (MNSY_R32):
+				return std::string("R32");
+				break;
+			case (MNSY_RG32):
+				return std::string("RG32");
+				break;
+			case (MNSY_RGB32):
+				return std::string("RGB32");
+				break;
+			case (MNSY_RGBA32):
+				return std::string("RGBA32");
+				break;
+
+			default:
+				return std::string("None");;
+				break;
+			}
+
+			return std::string("NONE");
+
+		}
+
 
 		static void str_tolower(std::string& s)
 		{
@@ -429,6 +493,35 @@ namespace mnemosy::graphics {
 			return PBRTextureType::MNSY_TEXTURE_NONE;
 		}
 
+
+		static void GetInfoFromTextureFormat(const graphics::TextureFormat format, uint8_t& outChannelsAmount, uint8_t& outBitsPerChannel, size_t& outBytePerPixel) {
+
+			if (format == graphics::TextureFormat::MNSY_NONE) {
+				return;
+			}
+
+			// amount of color channels
+			uint8_t channels = (uint8_t)format % 4;
+			if (channels == 0) {
+				channels = 4;
+			}
+			outChannelsAmount = channels;
+
+			// asume 8 bits per pixel
+			outBitsPerChannel = 8;
+			outBytePerPixel = channels * sizeof(uint8_t);
+
+			if (format == graphics::MNSY_R16 || format == graphics::MNSY_RG16 || format == graphics::MNSY_RGB16 || format == graphics::MNSY_RGBA16) {
+				outBitsPerChannel = 16;
+				outBytePerPixel = channels * sizeof(uint16_t);
+			}
+			else if (format == MNSY_R32 || format == MNSY_RG32 || format == MNSY_RGB32 || format == MNSY_RGBA32) {
+				outBitsPerChannel = 32;
+				outBytePerPixel = channels * sizeof(uint32_t);
+			}
+
+		}
+		
 	};
 
 

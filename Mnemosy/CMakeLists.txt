@@ -63,6 +63,11 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(nlohmann_json_subDir "Code/Dependencies/json-3.9.1/")
 add_subdirectory(${nlohmann_json_subDir})
 
+#libTiff
+set(libTiff_subDir "Code/Dependencies/libtiff-master")
+include(${CMAKE_CURRENT_LIST_DIR}/${libTiff_subDir}/cmake-Mnemosy_libTiff_options.cmake)
+add_subdirectory(${libTiff_subDir})
+
 ## OPEN CV
 include(${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/cmake-Mnemosy_OpenCVOptions.cmake)
 set(OpenCV_DIR "Code/Dependencies/openCV/opencvBuild/install/")
@@ -133,6 +138,7 @@ assimp
 stbImage
 ktx
 ${OpenCV_LIBS}
+tiff
 )
 
 target_link_libraries(${APP_PROJECT} PRIVATE ${ENGINE_PROJECT} )

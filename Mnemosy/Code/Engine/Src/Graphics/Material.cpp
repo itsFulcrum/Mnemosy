@@ -76,7 +76,7 @@ namespace mnemosy::graphics
 		HeightDepth = 0.0f;
 		MaxHeight = 0.0f;
 		UVTiling = glm::vec2(1.0f, 1.0f);
-		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGl;
+		NormalTextureFormat = MNSY_NORMAL_FORMAT_OPENGL;
 		OpacityTreshhold = 0.5f;
 		UseDitheredAlpha = false;
 		HasPackedTextures = false;
@@ -214,7 +214,7 @@ namespace mnemosy::graphics
 				delete m_pNormalTexture;
 				m_pNormalTexture = nullptr;
 			}
-			SetNormalMapFormat(MNSY_NORMAL_FORMAT_OPENGl);
+			SetNormalMapFormat(MNSY_NORMAL_FORMAT_OPENGL);
 			break;
 		case MNSY_TEXTURE_AMBIENTOCCLUSION:
 

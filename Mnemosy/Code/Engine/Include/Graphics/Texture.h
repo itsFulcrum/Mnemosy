@@ -39,6 +39,8 @@ namespace mnemosy::graphics
 		unsigned int GetHeight() { return m_height; }
 
 	private:
+		bool LoadFromFile(const char* imagePath, const bool flipImageVertically, const bool generateMipmaps, PBRTextureType pbrType);
+
 		cv::Mat m_cvMat;
 		bool m_matrixLoaded = false;
 

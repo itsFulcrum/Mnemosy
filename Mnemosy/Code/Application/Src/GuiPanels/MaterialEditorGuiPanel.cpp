@@ -569,7 +569,7 @@ namespace mnemosy::gui
 
 					// save normal format to material data file.
 					if (format_current == 0) {
-						activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+						activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL);
 					}
 					else if (format_current == 1) {
 						activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);

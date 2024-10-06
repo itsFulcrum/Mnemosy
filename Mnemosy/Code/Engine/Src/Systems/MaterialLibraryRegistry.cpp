@@ -1053,7 +1053,7 @@ namespace mnemosy::systems {
 
 			int normalFormat = matFile.SettingReadInt(success,jsonMatKey_normalMapFormat,0,true);
 			if (normalFormat == 0) {
-				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL);
 			}
 			else if (normalFormat == 1) {
 				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
@@ -1380,7 +1380,7 @@ namespace mnemosy::systems {
 		}
 		else if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
 
-			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+			activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL);
 			filename = activeMat.Name + texture_fileSuffix_normal;
 			exportPath = materialDir / fs::path(filename);
 			format = graphics::MNSY_RGB16;
@@ -1498,7 +1498,7 @@ namespace mnemosy::systems {
 
 			if (textureType == graphics::MNSY_TEXTURE_NORMAL) {
 
-				activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGl);
+				activeMat.SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL);
 				matFile.SettingWriteInt(success,jsonMatKey_normalMapFormat,0);
 
 			}
