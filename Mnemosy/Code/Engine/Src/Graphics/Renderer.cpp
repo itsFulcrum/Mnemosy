@@ -4,6 +4,7 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Core/JsonSettings.h"
 
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Camera.h"
@@ -25,8 +26,8 @@ namespace mnemosy::graphics
 {
 	// public
 
-	Renderer::Renderer() 
-	{
+	Renderer::Renderer()  {
+
 		MnemosyEngine& engine = MnemosyEngine::GetInstance();
 
 		std::filesystem::path shaders = engine.GetFileDirectories().GetShadersPath();
@@ -82,11 +83,12 @@ namespace mnemosy::graphics
 			m_shaderSkyboxFileWatcher.RegisterFile(shaders / fs::path("skybox.frag"));
 		}
 
+		LoadUserSettings();
 	}
 
 	Renderer::~Renderer()
 	{
-		
+		SaveUserSettings();
 
 		delete m_pPbrShader;
 		delete m_pLightShader;
@@ -470,7 +472,7 @@ namespace mnemosy::graphics
 
 	void Renderer::RenderThumbnail(Material& activeMaterial) {
 
-		unsigned int res = m_thumbnailResolution;
+		unsigned int thumbRes = GetThumbnailResolutionValue(m_thumbnailResolution);
 		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
 		
 		RenderModes userRenderMode = m_renderMode;
@@ -481,13 +483,31 @@ namespace mnemosy::graphics
 		SetPbrShaderLightUniforms(thumbScene.GetLight());
 		SetShaderSkyboxUniforms(thumbScene.GetSkybox());
 
-		thumbScene.GetCamera().SetScreenSize(res, res); // we should really only need to do this once..
+		thumbScene.GetCamera().SetScreenSize(thumbRes, thumbRes); // we should really only need to do this once..
 
 		m_projectionMatrix = thumbScene.GetCamera().GetProjectionMatrix();
 		m_viewMatrix = thumbScene.GetCamera().GetViewMatrix();
 
 		// Start Frame
-		glViewport(0, 0,res, res);
+		glViewport(0, 0, thumbRes, thumbRes);
+		
+		// resize thumbnail render texture
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_Value, GL_RGB, thumbRes, thumbRes, GL_TRUE);
+
+		// rezie thumbnail renderbuffer
+		glBindRenderbuffer(GL_RENDERBUFFER, m_thumb_MSAA_RBO);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_thumb_MSAA_Value, GL_DEPTH24_STENCIL8, thumbRes, thumbRes);
+
+		// resize thumbnail blit fbo
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_blitFBO);
+
+		glBindTexture(GL_TEXTURE_2D, m_thumb_blitTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, thumbRes, thumbRes, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// ====
 		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_MSAA_FBO);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -506,7 +526,7 @@ namespace mnemosy::graphics
 		// End Frame
 		// blit msaa framebuffer to normal framebuffer
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER,m_thumb_blitFBO);
-		glBlitFramebuffer(0, 0, res, res, 0, 0, res, res, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, thumbRes, thumbRes, 0, 0, thumbRes, thumbRes, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		// unbind frambuffers
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -527,6 +547,20 @@ namespace mnemosy::graphics
 		}
 
 		m_msaaSamplesSettings = samples;
+	}
+
+	unsigned int Renderer::GetThumbnailResolutionValue(ThumbnailResolution thumbnailResolution) {
+		switch (thumbnailResolution)
+		{
+		case mnemosy::graphics::MNSY_THUMBNAILRES_64:	return 64;	break;
+		case mnemosy::graphics::MNSY_THUMBNAILRES_128:	return 128;	break;
+		case mnemosy::graphics::MNSY_THUMBNAILRES_256:	return 256;	break;
+		case mnemosy::graphics::MNSY_THUMBNAILRES_512:	return 512; break;
+		default: return 128;
+			break;
+		}
+
+		return 0;
 	}
 
 	// private
@@ -609,7 +643,9 @@ namespace mnemosy::graphics
 
 	void Renderer::CreateThumbnailFramebuffers() {
 
-		const int thumbnailMSAA = 4;
+		const int thumbnailMSAA = m_thumb_MSAA_Value;
+
+		int thumbnailRes = GetThumbnailResolutionValue(m_thumbnailResolution);
 		
 		// Gen msaa framebuffer
 		glGenFramebuffers(1, &m_thumb_MSAA_FBO);
@@ -618,14 +654,14 @@ namespace mnemosy::graphics
 		// Generate msaa render texture
 		glGenTextures(1, &m_thumb_MSAA_renderTexture_ID);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID);
-		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, thumbnailMSAA, GL_RGB, m_thumbnailResolution, m_thumbnailResolution, GL_TRUE);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, thumbnailMSAA, GL_RGB, thumbnailRes, thumbnailRes, GL_TRUE);
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID, 0);
 
 		glGenRenderbuffers(1, &m_thumb_MSAA_RBO);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_thumb_MSAA_RBO);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, thumbnailMSAA, GL_DEPTH24_STENCIL8, m_thumbnailResolution, m_thumbnailResolution);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, thumbnailMSAA, GL_DEPTH24_STENCIL8, thumbnailRes, thumbnailRes);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_thumb_MSAA_RBO);
 
@@ -642,7 +678,7 @@ namespace mnemosy::graphics
 
 		glGenTextures(1, &m_thumb_blitTexture_ID);
 		glBindTexture(GL_TEXTURE_2D, m_thumb_blitTexture_ID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_thumbnailResolution, m_thumbnailResolution, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, thumbnailRes, thumbnailRes, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -768,6 +804,86 @@ namespace mnemosy::graphics
 
 
 		}
+
+
+	}
+
+	void Renderer::LoadUserSettings() {
+
+		std::filesystem::path renderSettingsFilePath = MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / std::filesystem::path("renderSettings.mnsydata");
+
+		bool success;
+
+		core::JsonSettings renderSettings;
+		renderSettings.FileOpen(success,renderSettingsFilePath,"Mnemosy Settings File","Stores Render Settings");
+		if (!success) {
+			MNEMOSY_ERROR("Rederer: Faild to open user settings file: {}", renderSettings.ErrorStringLastGet());
+		}
+
+
+
+		int Msaa = renderSettings.ReadInt(success,"renderSettings_MSAA", 4, true);
+		int thumbnailRes = renderSettings.ReadInt(success, "renderSettings_ThumbnailResolution", 256, true);
+
+		renderSettings.FilePrettyPrintSet(true);
+		renderSettings.FileClose(success,renderSettingsFilePath);
+
+
+		// apply msaa
+		if (Msaa == 0) {
+			SetMSAASamples(graphics::MSAAsamples::MSAAOFF);
+		}
+		else if (Msaa == 2) {
+			SetMSAASamples(graphics::MSAAsamples::MSAA2X);
+		}
+		else if (Msaa == 4) {
+			SetMSAASamples(graphics::MSAAsamples::MSAA4X);
+		}
+		else if (Msaa == 8) {
+			SetMSAASamples(graphics::MSAAsamples::MSAA8X);
+		}
+		else if (Msaa == 16) {
+			SetMSAASamples(graphics::MSAAsamples::MSAA16X);
+		}
+		else {
+			SetMSAASamples(graphics::MSAAsamples::MSAA4X);
+		}
+
+		// apply thumbnailResolution
+
+
+		for (int thumbResEnum = 0; thumbResEnum < (int)ThumbnailResolution::MNSY_THUMBNAILRES_COUNT; thumbResEnum++) {
+
+			if (thumbnailRes == GetThumbnailResolutionValue((ThumbnailResolution)thumbResEnum)) {
+
+				SetThumbnailResolution((ThumbnailResolution)thumbResEnum);
+				break;
+			}
+		}
+
+	}
+
+	void Renderer::SaveUserSettings() {
+
+		std::filesystem::path renderSettingsFilePath = MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / std::filesystem::path("renderSettings.mnsydata");
+
+
+		int Msaa = GetMSAAIntValue();
+
+		int thumbnailRes = GetThumbnailResolutionValue(m_thumbnailResolution);
+
+
+		bool success;
+
+		core::JsonSettings renderSettings;
+		renderSettings.FileOpen(success, renderSettingsFilePath, "Mnemosy Settings File", "Stores Render Settings");
+
+		renderSettings.WriteInt(success, "renderSettings_MSAA", Msaa);
+		renderSettings.WriteInt(success, "renderSettings_ThumbnailResolution", thumbnailRes);
+
+
+		renderSettings.FilePrettyPrintSet(true);
+		renderSettings.FileClose(success, renderSettingsFilePath);
 
 
 	}

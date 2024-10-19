@@ -175,7 +175,7 @@ namespace mnemosy::systems {
 			fs::rename(oldPath, newPath);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::RenameDirectory: System error renaming directory: {} \nError message: {}", oldPath.generic_string(), newPath.generic_string(), error.what());
+			MNEMOSY_ERROR("System error renaming directory: Maybe contents of the folder are opend in another process or program? {} \nError message: {}", oldPath.generic_string(), newPath.generic_string(), error.what());
 
 			// revert name if system can't rename the file on disk
 			m_folderTree->RenameFolder(node, oldName);
@@ -666,7 +666,7 @@ namespace mnemosy::systems {
 		SaveActiveMaterialToFile();
 	}
 
-	void MaterialLibraryRegistry::GenerateChannelPackedTexture(graphics::Material& activeMat, std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height) {
+	void MaterialLibraryRegistry::GenerateChannelPackedTexture(graphics::Material& activeMat, std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height, uint8_t bitDepth) {
 
 		// check if the file extention is valid
 
@@ -697,7 +697,7 @@ namespace mnemosy::systems {
 		std::string filename = activeMat.Name + suffix + texture_textureFileType; // materialName_suffix.tif
 		std::filesystem::path channelPackedExportPath = GetActiveMaterialFolderPath() / std::filesystem::path(filename);
 
-		MnemosyEngine::GetInstance().GetTextureGenerationManager().GenerateChannelPackedTexture(activeMat, channelPackedExportPath.generic_string().c_str(),true,packType,packComponent_R,packComponent_G,packComponent_B,packComponent_A, width,height);
+		MnemosyEngine::GetInstance().GetTextureGenerationManager().GenerateChannelPackedTexture(activeMat, channelPackedExportPath.generic_string().c_str(),true,packType,packComponent_R,packComponent_G,packComponent_B,packComponent_A, width,height,bitDepth);
 
 		// Enlist into suffixes of active mat
 		activeMat.HasPackedTextures = true;
@@ -752,298 +752,25 @@ namespace mnemosy::systems {
 
 	}
 
-	// TODO: update this to use Picture interface for texture loading
-	void MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo, FolderNode* parentNode) {
+	// TODO: Check wheather all files are still present in the next to the material data file.
+	void MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded(systems::MaterialInfo* materialInfo) {
 
 		namespace fs = std::filesystem;
 
 		double beginTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 
 
-		// load json file
-		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory;
-		fs::path dataFile = m_fileDirectories.GetLibraryDirectoryPath() / materialDirectory / fs::path(materialInfo->name + ".mnsydata");
+		graphics::Material* mat = LoadMaterialFromFile_Multithreaded(materialInfo);
 
+		MNEMOSY_ASSERT(mat != nullptr, "This should not happen");
 
-		bool success = false;
+		SaveActiveMaterialToFile();
 
-		core::JsonSettings matFile;		
-		matFile.FileOpen(success, dataFile, jsonMatKey_header, jsonMatKey_description);
-		if(!success){
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error opening data file: {} \nMessage: {}", dataFile.generic_string(), matFile.ErrorStringLastGet());
-			return;
-		}
+		m_userMaterialBound = true;
+		m_activeMaterialDataFilePath = m_fileDirectories.GetLibraryDirectoryPath() / materialInfo->parent->pathFromRoot / fs::path(materialInfo->name) / fs::path(materialInfo->name + ".mnsydata");
+		m_activeMaterialID = materialInfo->runtime_ID;
+		m_folderNodeOfActiveMaterial = materialInfo->parent;
 
-
-
-		graphics::Material* mat = new graphics::Material();
-
-		{
-			// First kick off a thread for each assigned texture to load
-
-			// Start a thread for each assigned texture to load it into a openCV matrix which is a member of texture
-			// then join thread and load that texture form the matrix and upload to openGl
-			// openGl calls must all be from the main thread so we have to do it like this
-
-			// Albedo Map
-			bool albedoAssigned = matFile.ReadBool(success,jsonMatKey_albedoAssigned,false,false);
-			std::thread thread_load_albedo;
-			graphics::PictureError albedo_picErr;
-			graphics::PictureInfo albedo_picInfo;
-			if (albedoAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned, false);
-				thread_load_albedo = std::thread(&graphics::Picture::ReadPicture_thread,std::ref(albedo_picErr), std::ref(albedo_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
-			}
-
-
-			// Roughness Map
-			bool roughnessAssigned = matFile.ReadBool(success,jsonMatKey_roughAssigned,false,false);
-			graphics::PictureError roughness_picErr;
-			graphics::PictureInfo roughness_picInfo;
-			std::thread thread_load_roughness;
-
-			if (roughnessAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_roughPath,jsonMatKey_pathNotAssigned,false);
-				thread_load_roughness = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(roughness_picErr), std::ref(roughness_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
-			}
-
-			// Metallic Map
-			bool metallicAssigned = matFile.ReadBool(success,jsonMatKey_metalAssigned,false,false);
-			graphics::PictureError metallic_picErr;
-			graphics::PictureInfo  metallic_picInfo;
-			std::thread thread_load_metallic;
-			if (metallicAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_metalPath,jsonMatKey_pathNotAssigned,false);				
-				thread_load_metallic = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(metallic_picErr), std::ref(metallic_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
-			}
-
-			// Emissive Map
-			bool emissiveAssigned = matFile.ReadBool(success,jsonMatKey_emissionAssigned,false,false);
-			graphics::PictureError emissive_picErr;
-			graphics::PictureInfo  emissive_picInfo;
-			std::thread thread_load_emissive;
-			if (emissiveAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_emissionPath,jsonMatKey_pathNotAssigned,false);
-				thread_load_emissive = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(emissive_picErr), std::ref(emissive_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
-			}
-
-			// Normal Map
-			bool normalAssigned = matFile.ReadBool(success,jsonMatKey_normalAssigned,false,false);
-			graphics::PictureError normal_picErr;
-			graphics::PictureInfo  normal_picInfo;
-			
-			std::thread thread_load_normal;
-			if (normalAssigned) {
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_normalPath,jsonMatKey_pathNotAssigned,false);
-				thread_load_normal = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(normal_picErr), std::ref(normal_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
-			}
-
-
-			// AO map
-			bool aoAssigned = matFile.ReadBool(success,jsonMatKey_aoAssigned,false,false);
-			graphics::PictureError ao_picErr;
-			graphics::PictureInfo  ao_picInfo;
-			std::thread thread_load_ao;
-			if (aoAssigned) {
-
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_aoPath,jsonMatKey_pathNotAssigned,false);
-				thread_load_ao = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(ao_picErr), std::ref(ao_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
-			}
-
-
-			// Height map
-			bool heightAssigned = matFile.ReadBool(success,jsonMatKey_heightAssigned,false,false);
-			graphics::PictureError height_picErr;
-			graphics::PictureInfo  height_picInfo;
-			std::thread thread_load_height;
-			if (heightAssigned) {
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_heightPath,jsonMatKey_pathNotAssigned,false);
-				thread_load_height = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(height_picErr), std::ref(height_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
-			}
-
-			// Opacity Map
-			bool opacityAssigned = matFile.ReadBool(success,jsonMatKey_opacityAssigned,false,false);
-			graphics::PictureError opacity_picErr;
-			graphics::PictureInfo  opacity_picInfo;
-			std::thread thread_load_opacity;
-			if (opacityAssigned) {
-				std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success,jsonMatKey_opacityPath,jsonMatKey_pathNotAssigned,false);
-				thread_load_opacity = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(opacity_picErr), std::ref(opacity_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
-			}
-
-			// Once all threads are going we let the main thread do the rest of the work
-			{				
-				mat->Name = matFile.ReadString(success,jsonMatKey_name,"noName",false);
-
-				mat->HasPackedTextures = matFile.ReadBool(success,jsonMatKey_hasChannelPacked,false,true);
-
-				if (mat->HasPackedTextures) {
-
-					mat->PackedTexturesSuffixes = matFile.ReadVectorString(success,jsonMatKey_packedSuffixes,std::vector<std::string>(),false); 
-				}
-
-
-				mat->Albedo.r = matFile.ReadFloat(success,jsonMatKey_albedo_r,0.8f,true);
-				mat->Albedo.g = matFile.ReadFloat(success,jsonMatKey_albedo_g,0.8f,true);
-				mat->Albedo.b = matFile.ReadFloat(success,jsonMatKey_albedo_b,0.8f,true);
-				mat->Roughness = matFile.ReadFloat(success,jsonMatKey_roughness,0.1f,true);
-				mat->IsSmoothnessTexture = matFile.ReadBool(success,jsonMatKey_isSmoothness,false,true);
-
-				mat->Metallic = matFile.ReadFloat(success,jsonMatKey_metallic,0.0f,true);
-
-				mat->Emission.r = matFile.ReadFloat(success,jsonMatKey_emission_r,0.0f,true);
-				mat->Emission.g = matFile.ReadFloat(success,jsonMatKey_emission_g,0.0f,true);
-				mat->Emission.b = matFile.ReadFloat(success,jsonMatKey_emission_b,0.0f,true);
-				mat->EmissionStrength = matFile.ReadFloat(success,jsonMatKey_emissionStrength,0.0f,true);
-				mat->UseEmissiveAsMask = matFile.ReadBool(success,jsonMatKey_useEmissiveAsMask,false,true);
-
-				mat->NormalStrength = matFile.ReadFloat(success,jsonMatKey_normalStrength,1.0f,true);
-
-				int normalFormat = matFile.ReadInt(success,jsonMatKey_normalMapFormat,0,true);
-				if (normalFormat == 0) {
-					mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL);
-				}
-				else if (normalFormat == 1) {
-					mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
-				}
-
-				mat->HeightDepth = matFile.ReadFloat(success,jsonMatKey_heightDepth,0.0f,true);
-				mat->MaxHeight = matFile.ReadFloat(success,jsonMatKey_maxHeight,0.0f,true);
-				mat->OpacityTreshhold = matFile.ReadFloat(success,jsonMatKey_opacityThreshold,0.5f,true);
-				mat->UseDitheredAlpha = matFile.ReadBool(success,jsonMatKey_useDitheredAlpha,false,true);
-
-				mat->UVTiling.x = matFile.ReadFloat(success,jsonMatKey_uvScale_x,1.0f,true);
-				mat->UVTiling.y = matFile.ReadFloat(success,jsonMatKey_uvScale_y,1.0f,true);
-
-
-				if (prettyPrintMaterialFiles)
-					matFile.FilePrettyPrintSet(true);
-
-				matFile.FileClose(success,dataFile);
-				
-
-
-				SaveActiveMaterialToFile(); // we do this here and not at the top of the file to utilize the time we might be waiting for threads better
-
-				m_userMaterialBound = true;
-				m_activeMaterialDataFilePath = dataFile;
-				m_activeMaterialID = materialInfo->runtime_ID;
-				m_folderNodeOfActiveMaterial = parentNode;
-			}
-
-			// == join threads
-			if (albedoAssigned) {
-				thread_load_albedo.join();
-				
-				if (albedo_picErr.wasSuccessfull){
-
-					graphics::Texture* albedoTex = new graphics::Texture();
-					albedoTex->GenerateOpenGlTexture(albedo_picInfo,true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO, albedoTex);
-					free(albedo_picInfo.pixels);
-				}
-				else {
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading albedo Texture \nMessage: {}", albedo_picErr.what);
-				}
-			}
-
-			if (roughnessAssigned) {
-				thread_load_roughness.join();
-				if (roughness_picErr.wasSuccessfull) {
-					graphics::Texture* roughnessTex = new graphics::Texture();
-					roughnessTex->GenerateOpenGlTexture(roughness_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughnessTex);
-					free(roughness_picInfo.pixels);
-				}
-				else {
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading roughness Texture \nMessage: {}", roughness_picErr.what);
-				}
-			}
-
-
-			if (metallicAssigned) {
-				thread_load_metallic.join();
-				if(metallic_picErr.wasSuccessfull){
-					graphics::Texture* metallicTex		= new graphics::Texture();
-					metallicTex->GenerateOpenGlTexture(metallic_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_METALLIC, metallicTex);
-					free(metallic_picInfo.pixels);
-				}
-				else{
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Metallic Texture \nMessage: {}", metallic_picErr.what);
-				}
-			}
-
-			if (emissiveAssigned) {
-				thread_load_emissive.join();
-				if(emissive_picErr.wasSuccessfull){
-					graphics::Texture* emissionTex		= new graphics::Texture();
-					emissionTex->GenerateOpenGlTexture(emissive_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_EMISSION, emissionTex);
-					free(emissive_picInfo.pixels);
-				}
-				else{
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Emission Texture \nMessage: {}", emissive_picErr.what);
-				}
-			}
-
-			if (normalAssigned) {
-				thread_load_normal.join();
-				if(emissive_picErr.wasSuccessfull){
-					graphics::Texture* normalTex		= new graphics::Texture();
-					normalTex->GenerateOpenGlTexture(normal_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_NORMAL,normalTex);
-					free(normal_picInfo.pixels);
-				}
-				else{
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Normal Texture \nMessage: {}", normal_picErr.what);
-				}
-			}
-
-			if (aoAssigned) {
-				thread_load_ao.join();
-				if(ao_picErr.wasSuccessfull){
-					graphics::Texture* aoTex = new graphics::Texture();
-					aoTex->GenerateOpenGlTexture(ao_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION, aoTex);
-					free(ao_picInfo.pixels);
-				}
-				else{
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading AmbientOcclusion Texture \nMessage: {}", ao_picErr.what);
-				}
-			}
-
-			if (heightAssigned) {
-				thread_load_height.join();
-				if(height_picErr.wasSuccessfull){
-					graphics::Texture* heightTex = new graphics::Texture();
-					heightTex->GenerateOpenGlTexture(height_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT, heightTex);
-					free(height_picInfo.pixels);
-				}
-				else{
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Height Texture \nMessage: {}", height_picErr.what);
-				}
-			}
-
-			if (opacityAssigned) {
-				thread_load_opacity.join();
-
-				if(opacity_picErr.wasSuccessfull){
-					graphics::Texture* opacityTex = new graphics::Texture();	
-					opacityTex->GenerateOpenGlTexture(opacity_picInfo, true);
-					mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_OPACITY, opacityTex);
-					free(opacity_picInfo.pixels);
-				}
-				else{
-					MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Opacity Texture \nMessage: {}", opacity_picErr.what);
-				}
-			}
-		}
 
 		MnemosyEngine::GetInstance().GetScene().SetMaterial(mat);
 
@@ -1053,6 +780,392 @@ namespace mnemosy::systems {
 		MNEMOSY_TRACE("Loaded Material in {} seconds", endTime - beginTime);
 	}
 
+	graphics::Material* MaterialLibraryRegistry::LoadMaterialFromFile_Multithreaded(systems::MaterialInfo* materialInfo) {
+
+		namespace fs = std::filesystem;
+
+
+		// load json file
+		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialInfo->parent->pathFromRoot / fs::path(materialInfo->name);
+		fs::path dataFile = materialDir / fs::path(materialInfo->name + ".mnsydata");
+
+
+		bool success = false;
+
+		core::JsonSettings matFile;
+		matFile.FileOpen(success, dataFile, jsonMatKey_header, jsonMatKey_description);
+		if (!success) {
+			MNEMOSY_WARN("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error opening data file: {} \nMessage: {}", dataFile.generic_string(), matFile.ErrorStringLastGet());
+			//return nullptr;
+		}
+
+
+
+		// Check if all channelpacked textures still exist at their location. if not update the material file
+		{
+			bool hasChannelPacked = matFile.ReadBool(success, jsonMatKey_hasChannelPacked, false, false);
+			if (hasChannelPacked) {
+				std::vector<std::string> packSuffixes = matFile.ReadVectorString(success, jsonMatKey_packedSuffixes, std::vector<std::string>(), false);
+				if (!packSuffixes.empty()) {
+
+					std::vector<std::string> packSuffixesCopy;
+					for (int i = 0; i < packSuffixes.size(); i++) {
+
+						fs::path packedTexPath = materialDir / fs::path(materialInfo->name + packSuffixes[i] + ".tif");
+
+						if (fs::exists(packedTexPath)) {
+
+							packSuffixesCopy.push_back(packSuffixes[i]);
+						}
+					}
+				
+					if (!packSuffixesCopy.empty()) {
+						matFile.WriteVectorString(success,jsonMatKey_packedSuffixes,packSuffixesCopy);
+
+						packSuffixesCopy.clear();
+					}
+					else {
+						matFile.WriteBool(success, jsonMatKey_hasChannelPacked, false);
+						matFile.Entry_Erase(success, jsonMatKey_packedSuffixes);
+					}
+
+				}
+				else {
+					matFile.WriteBool(success, jsonMatKey_hasChannelPacked, false);
+				}
+
+				packSuffixes.clear();
+			}
+		}
+
+
+		
+		// First kick off a thread for each assigned texture to load
+
+		// Start a thread for each assigned texture to load it into memory of PictureInfo struct.
+		// Then join threads upload to openGl on the main thread.
+		// openGl calls must all be from the main thread so we have to do it like this
+		// also check if the textture files actually exist and update acordingly.
+		
+		// Albedo Map
+		bool albedoAssigned = matFile.ReadBool(success, jsonMatKey_albedoAssigned, false, false);
+		
+		std::thread thread_load_albedo;
+		graphics::PictureError albedo_picErr;
+		graphics::PictureInfo albedo_picInfo;
+		if (albedoAssigned) {
+
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned, false);
+
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_albedoAssigned, false);
+				albedoAssigned = false;
+			}
+			else {
+				thread_load_albedo = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(albedo_picErr), std::ref(albedo_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
+			}
+		}
+
+
+		// Roughness Map
+		bool roughnessAssigned = matFile.ReadBool(success, jsonMatKey_roughAssigned, false, false);
+		graphics::PictureError roughness_picErr;
+		graphics::PictureInfo roughness_picInfo;
+		std::thread thread_load_roughness;
+
+		if (roughnessAssigned) {
+
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_roughPath, jsonMatKey_pathNotAssigned, false);
+
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_roughPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_roughAssigned, false);
+				roughnessAssigned = false;
+			}
+			else {
+				thread_load_roughness = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(roughness_picErr), std::ref(roughness_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+			}
+		}
+
+		// Metallic Map
+		bool metallicAssigned = matFile.ReadBool(success, jsonMatKey_metalAssigned, false, false);
+		graphics::PictureError metallic_picErr;
+		graphics::PictureInfo  metallic_picInfo;
+		std::thread thread_load_metallic;
+		if (metallicAssigned) {
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_metalPath, jsonMatKey_pathNotAssigned, false);
+
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_metalPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_metalAssigned, false);
+				metallicAssigned = false;
+			}
+			else {
+				thread_load_metallic = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(metallic_picErr), std::ref(metallic_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
+			}
+		}
+
+		// Emissive Map
+		bool emissiveAssigned = matFile.ReadBool(success, jsonMatKey_emissionAssigned, false, false);
+		graphics::PictureError emissive_picErr;
+		graphics::PictureInfo  emissive_picInfo;
+		std::thread thread_load_emissive;
+		if (emissiveAssigned) {
+
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_emissionPath, jsonMatKey_pathNotAssigned, false);
+
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_emissionPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_emissionAssigned, false);
+				emissiveAssigned = false;
+			}
+			else {
+				thread_load_emissive = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(emissive_picErr), std::ref(emissive_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
+			}
+
+		}
+
+		// Normal Map
+		bool normalAssigned = matFile.ReadBool(success, jsonMatKey_normalAssigned, false, false);
+		graphics::PictureError normal_picErr;
+		graphics::PictureInfo  normal_picInfo;
+
+		std::thread thread_load_normal;
+		if (normalAssigned) {
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_normalPath, jsonMatKey_pathNotAssigned, false);
+
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_normalPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_normalAssigned, false);
+				normalAssigned = false;
+			}
+			else {
+				thread_load_normal = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(normal_picErr), std::ref(normal_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+			}
+
+		}
+
+
+		// AO map
+		bool aoAssigned = matFile.ReadBool(success, jsonMatKey_aoAssigned, false, false);
+		graphics::PictureError ao_picErr;
+		graphics::PictureInfo  ao_picInfo;
+		std::thread thread_load_ao;
+		if (aoAssigned) {
+
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_aoPath, jsonMatKey_pathNotAssigned, false);
+
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_aoPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_aoAssigned, false);
+				aoAssigned = false;
+			}
+			else {
+				thread_load_ao = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(ao_picErr), std::ref(ao_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
+			}
+		}
+
+		// Height map
+		bool heightAssigned = matFile.ReadBool(success, jsonMatKey_heightAssigned, false, false);
+		graphics::PictureError height_picErr;
+		graphics::PictureInfo  height_picInfo;
+		std::thread thread_load_height;
+		if (heightAssigned) {
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_heightPath, jsonMatKey_pathNotAssigned, false);
+			
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_heightPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_heightAssigned, false);
+				heightAssigned = false;
+			}
+			else {
+				thread_load_height = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(height_picErr), std::ref(height_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
+			}
+		}
+
+		// Opacity Map
+		bool opacityAssigned = matFile.ReadBool(success, jsonMatKey_opacityAssigned, false, false);
+		graphics::PictureError opacity_picErr;
+		graphics::PictureInfo  opacity_picInfo;
+		std::thread thread_load_opacity;
+		if (opacityAssigned) {
+			std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_opacityPath, jsonMatKey_pathNotAssigned, false);
+			
+			if (!fs::exists(path)) {
+				matFile.WriteString(success, jsonMatKey_opacityPath, jsonMatKey_pathNotAssigned);
+				matFile.WriteBool(success  , jsonMatKey_opacityAssigned, false);
+				opacityAssigned = false;
+			}
+			else {
+				thread_load_opacity = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(opacity_picErr), std::ref(opacity_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
+			}
+		}
+
+		graphics::Material* mat = new graphics::Material();
+		// Once all threads are going we let the main thread do the rest of the work
+		{
+			mat->Name = matFile.ReadString(success, jsonMatKey_name, materialInfo->name,true);
+
+			mat->HasPackedTextures = matFile.ReadBool(success, jsonMatKey_hasChannelPacked, false, true);
+
+			if (mat->HasPackedTextures) {
+
+				mat->PackedTexturesSuffixes = matFile.ReadVectorString(success, jsonMatKey_packedSuffixes, std::vector<std::string>(), false);
+			}
+
+
+			mat->Albedo.r = matFile.ReadFloat(success, jsonMatKey_albedo_r, 0.8f, true);
+			mat->Albedo.g = matFile.ReadFloat(success, jsonMatKey_albedo_g, 0.8f, true);
+			mat->Albedo.b = matFile.ReadFloat(success, jsonMatKey_albedo_b, 0.8f, true);
+			mat->Roughness = matFile.ReadFloat(success, jsonMatKey_roughness, 0.1f, true);
+			mat->IsSmoothnessTexture = matFile.ReadBool(success, jsonMatKey_isSmoothness, false, true);
+
+			mat->Metallic = matFile.ReadFloat(success, jsonMatKey_metallic, 0.0f, true);
+
+			mat->Emission.r = matFile.ReadFloat(success, jsonMatKey_emission_r, 0.0f, true);
+			mat->Emission.g = matFile.ReadFloat(success, jsonMatKey_emission_g, 0.0f, true);
+			mat->Emission.b = matFile.ReadFloat(success, jsonMatKey_emission_b, 0.0f, true);
+			mat->EmissionStrength = matFile.ReadFloat(success, jsonMatKey_emissionStrength, 0.0f, true);
+			mat->UseEmissiveAsMask = matFile.ReadBool(success, jsonMatKey_useEmissiveAsMask, false, true);
+
+			mat->NormalStrength = matFile.ReadFloat(success, jsonMatKey_normalStrength, 1.0f, true);
+
+			int normalFormat = matFile.ReadInt(success, jsonMatKey_normalMapFormat, 0, true);
+			if (normalFormat == 0) {
+				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL);
+			}
+			else if (normalFormat == 1) {
+				mat->SetNormalMapFormat(graphics::MNSY_NORMAL_FORMAT_DIRECTX);
+			}
+
+			mat->HeightDepth = matFile.ReadFloat(success, jsonMatKey_heightDepth, 0.0f, true);
+			mat->MaxHeight = matFile.ReadFloat(success, jsonMatKey_maxHeight, 0.0f, true);
+			mat->OpacityTreshhold = matFile.ReadFloat(success, jsonMatKey_opacityThreshold, 0.5f, true);
+			mat->UseDitheredAlpha = matFile.ReadBool(success, jsonMatKey_useDitheredAlpha, false, true);
+
+			mat->UVTiling.x = matFile.ReadFloat(success, jsonMatKey_uvScale_x, 1.0f, true);
+			mat->UVTiling.y = matFile.ReadFloat(success, jsonMatKey_uvScale_y, 1.0f, true);
+
+
+			if (prettyPrintMaterialFiles)
+				matFile.FilePrettyPrintSet(true);
+
+			matFile.FileClose(success, dataFile);
+
+		}
+
+		// == join threads
+		if (albedoAssigned) {
+			thread_load_albedo.join();
+
+			if (albedo_picErr.wasSuccessfull) {
+
+				graphics::Texture* albedoTex = new graphics::Texture();
+				albedoTex->GenerateOpenGlTexture(albedo_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO, albedoTex);
+				free(albedo_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading albedo Texture \nMessage: {}", albedo_picErr.what);
+			}
+		}
+
+		if (roughnessAssigned) {
+			thread_load_roughness.join();
+			if (roughness_picErr.wasSuccessfull) {
+				graphics::Texture* roughnessTex = new graphics::Texture();
+				roughnessTex->GenerateOpenGlTexture(roughness_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughnessTex);
+				free(roughness_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading roughness Texture \nMessage: {}", roughness_picErr.what);
+			}
+		}
+
+
+		if (metallicAssigned) {
+			thread_load_metallic.join();
+			if (metallic_picErr.wasSuccessfull) {
+				graphics::Texture* metallicTex = new graphics::Texture();
+				metallicTex->GenerateOpenGlTexture(metallic_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_METALLIC, metallicTex);
+				free(metallic_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Metallic Texture \nMessage: {}", metallic_picErr.what);
+			}
+		}
+
+		if (emissiveAssigned) {
+			thread_load_emissive.join();
+			if (emissive_picErr.wasSuccessfull) {
+				graphics::Texture* emissionTex = new graphics::Texture();
+				emissionTex->GenerateOpenGlTexture(emissive_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_EMISSION, emissionTex);
+				free(emissive_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Emission Texture \nMessage: {}", emissive_picErr.what);
+			}
+		}
+
+		if (normalAssigned) {
+			thread_load_normal.join();
+			if (emissive_picErr.wasSuccessfull) {
+				graphics::Texture* normalTex = new graphics::Texture();
+				normalTex->GenerateOpenGlTexture(normal_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_NORMAL, normalTex);
+				free(normal_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Normal Texture \nMessage: {}", normal_picErr.what);
+			}
+		}
+
+		if (aoAssigned) {
+			thread_load_ao.join();
+			if (ao_picErr.wasSuccessfull) {
+				graphics::Texture* aoTex = new graphics::Texture();
+				aoTex->GenerateOpenGlTexture(ao_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION, aoTex);
+				free(ao_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading AmbientOcclusion Texture \nMessage: {}", ao_picErr.what);
+			}
+		}
+
+		if (heightAssigned) {
+			thread_load_height.join();
+			if (height_picErr.wasSuccessfull) {
+				graphics::Texture* heightTex = new graphics::Texture();
+				heightTex->GenerateOpenGlTexture(height_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT, heightTex);
+				free(height_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Height Texture \nMessage: {}", height_picErr.what);
+			}
+		}
+
+		if (opacityAssigned) {
+			thread_load_opacity.join();
+
+			if (opacity_picErr.wasSuccessfull) {
+				graphics::Texture* opacityTex = new graphics::Texture();
+				opacityTex->GenerateOpenGlTexture(opacity_picInfo, true);
+				mat->assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_OPACITY, opacityTex);
+				free(opacity_picInfo.pixels);
+			}
+			else {
+				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Opacity Texture \nMessage: {}", opacity_picErr.what);
+			}
+		}
+
+		return mat;
+	}
 	void MaterialLibraryRegistry::SaveActiveMaterialToFile() {
 		namespace fs = std::filesystem;
 

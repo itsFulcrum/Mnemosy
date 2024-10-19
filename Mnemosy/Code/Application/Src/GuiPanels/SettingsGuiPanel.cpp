@@ -504,19 +504,17 @@ namespace mnemosy::gui
 		}
 
 
-
-
-
 		// --- Render Settings
 		if (ImGui::TreeNode("Render Settings"))
 		{
 			ImGui::Spacing();
 
+
 #ifdef mnemosy_gui_showDebugInfo
 
-
+			core::Clock& clock = engine.GetClock();
+			
 			ImGui::SeparatorText("Debug Info");
-
 			// show fps and frametime in ms
 			int fps = clock.GetFPS();
 			float deltaSeconds = clock.GetFrameTime();
@@ -526,22 +524,37 @@ namespace mnemosy::gui
 #endif // mnemosy_gui_showDebugInfo
 
 			// --- Render Settings
-
 			{
-				graphics::Renderer& renderer = engine.GetRenderer();
-				core::Window& window = engine.GetWindow();
-				core::Clock& clock = engine.GetClock();
 
-				const char* MSAA_Settings[5] = { "OFF","2X","4X","8X","16X" }; // they need to be ordered the same as in renderer MSAAsamples Enum
-				int previewMSAA_Current = renderer.GetMSAAEnumAsInt();
-				ImGui::Combo("MSAA", &previewMSAA_Current, MSAA_Settings, IM_ARRAYSIZE(MSAA_Settings));
-				if (previewMSAA_Current != renderer.GetMSAAEnumAsInt())
+				graphics::Renderer& renderer = engine.GetRenderer();
+
+				// MSAA
 				{
-					renderer.SetMSAASamples((graphics::MSAAsamples)previewMSAA_Current);
+					const char* MSAA_Settings[5] = { "OFF","2X","4X","8X","16X" }; // they need to be ordered the same as in renderer MSAAsamples Enum
+					int previewMSAA_Current = renderer.GetMSAAEnumAsInt();
+					ImGui::Combo("MSAA", &previewMSAA_Current, MSAA_Settings, IM_ARRAYSIZE(MSAA_Settings));
+					if (previewMSAA_Current != renderer.GetMSAAEnumAsInt())
+					{
+						renderer.SetMSAASamples((graphics::MSAAsamples)previewMSAA_Current);
+					}
+
 				}
 
-			}
+				// thumbnail res
+				{
+					const char* Thumbnail_Resolutions[4] = { "64","128","256","512"}; // they need to be ordered the same as in renderer MSAAsamples Enum
 
+					int current_thumb_res = (int)renderer.GetThumbnailResolutionEnum();
+					ImGui::Combo("Thumbnail Resolution", &current_thumb_res, Thumbnail_Resolutions, IM_ARRAYSIZE(Thumbnail_Resolutions));
+					if (current_thumb_res != (int)renderer.GetThumbnailResolutionEnum()) {
+						renderer.SetThumbnailResolution((graphics::ThumbnailResolution)current_thumb_res);
+					}
+
+				}
+
+
+
+			}
 
 			ImGui::TreePop();
 		}

@@ -20,7 +20,7 @@ namespace mnemosy::core {
 
 		void FileOpen(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription);
 		void FileClose(bool& errorCheck,const std::filesystem::path& filepath);
-
+		bool FileIsOpen() { return m_fileIsOpen; }
 		void FileWhipe(bool& errorCheck);
 		void Entry_Erase(bool& errorCheck, const std::string& name);
 

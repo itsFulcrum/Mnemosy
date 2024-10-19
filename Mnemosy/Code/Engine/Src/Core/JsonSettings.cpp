@@ -23,13 +23,51 @@ namespace mnemosy::core
 			return;
 		}
 
+		if (!filepath.has_extension()) {
+			errorCheck = false;
+			m_lastErrorString = "filepath is pointing to a folder not a file: " + filepath.generic_string();
+			m_fileIsOpen = false;
+			return;
+		}
 
-		fs::directory_entry settingsFile = fs::directory_entry(filepath);
+		fs::directory_entry settingsFile;
+
+		try {
+			settingsFile = fs::directory_entry(filepath);
+		}
+		catch (fs::filesystem_error err) {
+			errorCheck = false;
+			m_lastErrorString = "Faild to initialze direcotry entry: " + std::string(err.what());
+			m_fileIsOpen = false;
+			return;
+		}
+
+		// if the parent folder of the filepath provided does not exist we create it here.
+		if (!settingsFile.exists()) {
+
+			// we already check that the filepath has a valid extention so here we check wheather the parent path exists, if not we create the directories
+			fs::path folder = filepath.parent_path();
+
+			fs::directory_entry parentFolder = fs::directory_entry(folder);
+
+			if (!parentFolder.exists()) {
+
+				try {
+					fs::create_directories(folder);
+				}
+				catch (fs::filesystem_error err) {
+					errorCheck = false;
+					m_lastErrorString = "provided filepath folders did not exist. atempting to create those folders faild: \nFilesystem error:" + std::string(err.what());
+					m_fileIsOpen = false;
+					return;
+				}
+			}
+		}
+
 
 		// if file doesn't exist yet create it
 		if (!settingsFile.exists() || !settingsFile.is_regular_file()) {
-			
-			
+
 			m_jsonObject["1_Header"] = headerName;
 			m_jsonObject["2_Description"] = fileDescription;
 
@@ -58,10 +96,14 @@ namespace mnemosy::core
 		} catch (nlohmann::json::parse_error err){
 
 			errorCheck = false;
-			m_fileIsOpen = false;
-			m_lastErrorString = err.what();
+			m_fileIsOpen = true;
+			m_lastErrorString = "Faild to read json file - invalid json contents? File will be cleared. Message:" + std::string(err.what());
 			inputFileStream.close();
-			return;
+
+			// if we fail to read in the filecontents for example if the file contents are not valid json,
+			// we clear everything and start with an empty json file.
+			// clear the file but 
+			m_jsonObject.clear();
 		}
 
 		inputFileStream.close();

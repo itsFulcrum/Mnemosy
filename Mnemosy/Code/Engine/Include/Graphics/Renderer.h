@@ -31,6 +31,16 @@ namespace mnemosy::graphics
 		MSAA16X
 	};
 
+	enum ThumbnailResolution
+	{
+		MNSY_THUMBNAILRES_64	= 0,
+		MNSY_THUMBNAILRES_128	= 1,
+		MNSY_THUMBNAILRES_256	= 2,
+		MNSY_THUMBNAILRES_512	= 3,
+		MNSY_THUMBNAILRES_COUNT
+
+	};
+
 	enum RenderModes
 	{
 		MNSY_RENDERMODE_SHADED				= 0,
@@ -83,13 +93,21 @@ namespace mnemosy::graphics
 
 		int GetMSAAEnumAsInt() { return (int)m_msaaSamplesSettings; }
 		void SetMSAASamples(const MSAAsamples& samples);
-		unsigned int GetThumbnailResolution() { return m_thumbnailResolution; };
+		
+		unsigned int GetThumbnailResolutionValue(ThumbnailResolution thumbnailResolution);
+		void SetThumbnailResolution(ThumbnailResolution thumbnailResolution) { m_thumbnailResolution = thumbnailResolution; }
+		ThumbnailResolution GetThumbnailResolutionEnum() { return m_thumbnailResolution; }
 		
 		int GetCurrentRenderModeInt() { return (int)m_renderMode; }
 		void SetRenderMode(RenderModes mode);
 
 		void HotReloadPbrShader(float deltaSeconds);
+
 	private:
+
+		void LoadUserSettings();
+		void SaveUserSettings();
+
 
 		void CreateRenderingFramebuffer(unsigned int width, unsigned int height);
 		void CreateBlitFramebuffer(unsigned int width, unsigned int height);
@@ -130,8 +148,10 @@ namespace mnemosy::graphics
 		bool m_msaaOff = false;
 
 		// Thumbnails
-		const uint16_t m_thumbnailResolution = 256;
+		ThumbnailResolution m_thumbnailResolution = ThumbnailResolution::MNSY_THUMBNAILRES_128;
 
+
+		unsigned int m_thumb_MSAA_Value = 16;
 		unsigned int m_thumb_MSAA_FBO = 0;
 		unsigned int m_thumb_MSAA_RBO = 0;
 		unsigned int m_thumb_MSAA_renderTexture_ID = 0;

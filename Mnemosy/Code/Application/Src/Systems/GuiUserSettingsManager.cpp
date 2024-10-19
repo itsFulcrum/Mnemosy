@@ -17,15 +17,13 @@
 #include "Include/Gui/GuiPanel.h"
 
 
-//#include <vector>
+#include <filesystem>
 #include <string>
 
 
 namespace mnemosy::systems {
 
 	GuiUserSettingsManager::GuiUserSettingsManager() {
-
-		m_userSettingsDataFilePath = std::filesystem::path(MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / std::filesystem::path("GuiUserSettings.mnsydata"));
 
 	}
 
@@ -34,13 +32,14 @@ namespace mnemosy::systems {
 
 	void GuiUserSettingsManager::UserSettingsLoad(bool restoreDefaults) {
 
+		std::filesystem::path guiUserSettings_filepath = std::filesystem::path(MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / std::filesystem::path("guiViewportsSettings.mnsydata"));
 
 		bool success = false;
 
 		core::JsonSettings user;
 		user.FilePrettyPrintSet(true);
 		
-		user.FileOpen(success,m_userSettingsDataFilePath, "Mnemosy Settings File", "This file stores user settings");
+		user.FileOpen(success,guiUserSettings_filepath, "Mnemosy Settings File", "This file stores user settings");
 		if(!success){
 			MNEMOSY_WARN("UserSettingsManager::SaveToFile: Failed to open user settings file: Msg: {}", user.ErrorStringLastGet());
 		}
@@ -49,8 +48,8 @@ namespace mnemosy::systems {
 
 			// to restore defaults we simply delete everything then close file to save it and then subsequent read calls will return the defaults.
 			user.FileWhipe(success);
-			user.FileClose(success, m_userSettingsDataFilePath);
-			user.FileOpen(success,m_userSettingsDataFilePath, "Mnemosy Settings File", "This file stores user settings");
+			user.FileClose(success, guiUserSettings_filepath);
+			user.FileOpen(success,guiUserSettings_filepath, "Mnemosy Settings File", "This file stores user settings");
 		}
 
 
@@ -78,11 +77,13 @@ namespace mnemosy::systems {
 		float guiPanel_contents_buttonSize = user.ReadFloat(success,"guiPanel_contents_buttonSize", 128.0f,true);
 		Application::GetInstance().GetGuiPanelManager().GetContentsPanel().ImageButtonSizeSet(guiPanel_contents_buttonSize);
 
-		user.FileClose(success, m_userSettingsDataFilePath);
+		user.FileClose(success, guiUserSettings_filepath);
 
 	}
 
 	void GuiUserSettingsManager::UserSettingsSave() {
+
+		std::filesystem::path guiUserSettings_filepath = std::filesystem::path(MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / std::filesystem::path("guiViewportsSettings.mnsydata"));
 
 
 		bool success = false;
@@ -90,7 +91,7 @@ namespace mnemosy::systems {
 		core::JsonSettings user;
 		user.FilePrettyPrintSet(true);
 		
-		user.FileOpen(success,m_userSettingsDataFilePath, "Mnemosy Settings File", "This file stores user settings");
+		user.FileOpen(success,guiUserSettings_filepath, "Mnemosy Settings File", "This file stores user settings");
 		if(!success){
 			MNEMOSY_WARN("UserSettingsManager::SaveToFile: Failed to open user settings file: Msg: {}", user.ErrorStringLastGet());
 		}
@@ -109,7 +110,7 @@ namespace mnemosy::systems {
 		float guiPanel_contents_buttonSize = Application::GetInstance().GetGuiPanelManager().GetContentsPanel().ImageButtonSizeGet();
 		user.WriteFloat(success,"guiPanel_contents_buttonSize", guiPanel_contents_buttonSize);
 
-		user.FileClose(success, m_userSettingsDataFilePath);
+		user.FileClose(success, guiUserSettings_filepath);
 
 	}
 

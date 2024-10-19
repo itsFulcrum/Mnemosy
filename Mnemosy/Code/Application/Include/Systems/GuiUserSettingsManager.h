@@ -1,10 +1,6 @@
 #ifndef GUI_USER_SETTINGS_MANAGER_H
 #define GUI_USER_SETTINGS_MANAGER_H
 
-
-#include <filesystem>
-
-
 namespace mnemosy::systems {
 
 	class GuiUserSettingsManager {
@@ -20,7 +16,7 @@ namespace mnemosy::systems {
 
 	private:
 
-		std::filesystem::path m_userSettingsDataFilePath;
+		//std::filesystem::path m_userSettingsDataFilePath;
 
 	};
 

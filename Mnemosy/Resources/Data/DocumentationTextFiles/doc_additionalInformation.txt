@@ -9,9 +9,11 @@ But you can copy them or paste them into a application.
 Because Tif is widely used you can directly drag and drop your images from withing menemosy into most other applicatons.
 There is a button at the top of the material editor.
 
-Mnemosy stores colored textures (Albedo, Emissive) internally with 8 bits per pixel.
-Non-Colored textures (Normal, Roughness, Metallic etc.) are stored with 16 bits per pixel.
-The same is true for exporting textures out of Mnemosy.
+Mnemosy will attempt to store textures always in the highest possilbe format they were imported in. 
+This means if a texture was imported with 32 bit per channel it will be stored in will be stored internally as 32 bit aswell.
+Inversely if a texture only has 8 bit, from jpg for example it will also be stored as 8 bit to not waste disk space.
+Due to the variaty of possilbe image formats and configuration it is not always guaranteed though.
+For some image formats like .exr for example where each color channel may have a differnt bit depth then the others mnemosy may promote or demote channels.
 
 Normal maps internally are stored in the OpenGl format.
 One because Mnemosy has an OpenGl renderer and second, because most normal maps found online are in this format.

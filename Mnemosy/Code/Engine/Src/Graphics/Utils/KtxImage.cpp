@@ -268,6 +268,8 @@ namespace mnemosy::graphics
 
 		errorCode = ktxTexture_WriteToNamedFile(ktxTexture(texture), filepath);
 		if (errorCode != 0)	{
+
+			//MNEMOSY_ASSERT(false, "");
 			MNEMOSY_ERROR("KtxImage::SaveKtx: WriteToNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
 			ktxTexture_Destroy(ktxTexture(texture));
 			return false;
@@ -434,7 +436,7 @@ namespace mnemosy::graphics
 		errorCode = ktxTexture_WriteToNamedFile(ktxTexture(texture), filepath);
 		if (errorCode != 0)
 		{
-			MNEMOSY_ERROR("KtxImage::SaveKtx: WriteToNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
+			MNEMOSY_ERROR("KtxImage::SaveCubemapKtx: WriteToNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
 			ktxTexture_Destroy(ktxTexture(texture));
 			return false;
 		}
@@ -664,7 +666,7 @@ namespace mnemosy::graphics
 		// export to file
 		errorCode = ktxTexture_WriteToNamedFile(ktxTexture(texture), filepath);
 		if (errorCode != 0) {
-			MNEMOSY_ERROR("KtxImage::SaveKtx: WriteToNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
+			MNEMOSY_ERROR("KtxImage::ExportGLTexture: WriteToNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
 			ktxTexture_Destroy(ktxTexture(texture));
 			return false;
 		}

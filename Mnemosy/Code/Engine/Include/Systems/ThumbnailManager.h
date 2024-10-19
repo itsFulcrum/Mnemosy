@@ -24,6 +24,8 @@ namespace mnemosy::systems {
 		void Update();
 				
 		void RenderThumbnailOfActiveMaterial(std::filesystem::path& pathToThumbnail,FolderNode* selectedFolder,unsigned int activeMaterialID);
+		void RenderThumbnailOfMaterial(MaterialInfo* materialInfo);
+
 
 		void AddMaterialForThumbnailing(MaterialInfo* material);
 		void RemoveMaterialFromThumbnailing(MaterialInfo* material);

@@ -1058,9 +1058,6 @@ namespace mnemosy::gui
 				ImGui::Text(fileNamePreview.c_str());
 			}
 
-
-
-
 			ImGui::Spacing();
 			ImGui::Spacing();
 
@@ -1083,7 +1080,13 @@ namespace mnemosy::gui
 			ImGui::Text("Pack Fromat: ");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(150);
-			ImGui::Combo(" ##PckFmt", &current_packtype, graphics::TexDefinitions::ChannelPackTypes_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackComponents_string));
+			ImGui::Combo(" ##PckFmt", &current_packtype, graphics::TexDefinitions::ChannelPackTypes_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackTypes_string));
+
+			static int current_bitDepth = 1;
+			ImGui::Text("Bit Depth: ");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(150);
+			ImGui::Combo(" ##BitDepth", &current_bitDepth, graphics::TexDefinitions::BitDepthTypes_string, IM_ARRAYSIZE(graphics::TexDefinitions::BitDepthTypes_string));
 
 
 			// select pack components for each channel of pack type
@@ -1133,7 +1136,15 @@ namespace mnemosy::gui
 				graphics::ChannelPackComponent B = (graphics::ChannelPackComponent)curr_packComponent_B;
 				graphics::ChannelPackComponent A = (graphics::ChannelPackComponent)curr_packComponent_A;
 
-				m_materialRegistry.GenerateChannelPackedTexture(activeMat,fileSuffix, packType,R,G,B,A,resolutionX,resolutionY);
+				int bitDepth = 16;
+				if (current_bitDepth == 0) {
+					bitDepth = 8;
+				}
+				else if (current_bitDepth == 2) {
+					bitDepth = 32;
+				}
+
+				m_materialRegistry.GenerateChannelPackedTexture(activeMat,fileSuffix, packType,R,G,B,A,resolutionX,resolutionY,bitDepth);
 			}
 
 

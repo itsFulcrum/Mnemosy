@@ -4,11 +4,16 @@ First, select a folder location where all your texture files will be stored.
 Choose a location that has enough disk space available.
 Press the "Select Folder..." button int the "Settings" panel to choose a new one.
 
-You should NEVER manually move, delete, rename or mess with this folder in any way.
-You may lose all your files!!
+You should NEVER manually move, delete, rename or mess with the contents of this folder in any way.
 If you want to move this directory to another location simply click
-the "Select Folder..." button and if it contains any files you can choose to copy
-your existing files to the new location.
+the "Select Folder..." button again and you can chose to copy or delete the contents of the old library to the knew location.
+
+You may want to copy your library to another PC or have several independent libraries on your system.
+Next to the folder where the library is stored there is always a text file called "MnemosyMaterialLibraryData.mnsydata" plus a backup copy of this file.
+This file is neccesary for mnemosy to know where all the textures and materials are stored inside the library.
+You can copy the folder and the "MnemosyMaterialLibraryData.mnsydata" file to a new location or pc.
+To load it into Mnemosy go to "Data" and select "Load Existing Library"
+then select if it should become the knew default library an then select the "MnemosyMaterialLibraryData.mnsydata" file from your file explorer.
 
 2.
 Mnemosy has several window panels. They are a accessible from the "views" dropdown in the main menu bar.

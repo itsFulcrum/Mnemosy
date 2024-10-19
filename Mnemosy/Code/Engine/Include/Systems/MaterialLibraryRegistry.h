@@ -51,11 +51,13 @@ namespace mnemosy::systems
 
 		void GenereateOpacityFromAlbedoAlpha(graphics::Material& activeMat);
 
-		void GenerateChannelPackedTexture(graphics::Material& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height);
+		void GenerateChannelPackedTexture(graphics::Material& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height,uint8_t bitDepth);
 
 		void DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix);
 
-		void LoadActiveMaterialFromFile_Multithreaded(std::filesystem::path& materialDirectory, systems::MaterialInfo* materialInfo,FolderNode* parentNode);
+		void LoadActiveMaterialFromFile_Multithreaded(systems::MaterialInfo* materialInfo);
+		graphics::Material* LoadMaterialFromFile_Multithreaded( systems::MaterialInfo* materialInfo);
+
 
 		void SaveActiveMaterialToFile();
 		void SetDefaultMaterial();

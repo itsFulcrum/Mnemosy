@@ -2,6 +2,7 @@
 
 #include "Include/Core/Log.h"
 #include "Include/MnemosyEngine.h"
+#include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Core/FileDirectories.h"
 #include "Include/Graphics/Scene.h"
@@ -79,14 +80,16 @@ namespace mnemosy::systems {
 
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
 
-		fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
+		//fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
 		fs::path thumbnailAbsolutePath = pathToThumbnail;
 
 		graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();
 		renderer.RenderThumbnail(activeMat);
 
 		graphics::KtxImage thumbnailKtx;
-		thumbnailKtx.ExportGlTexture(thumbnailAbsolutePath.generic_string().c_str(), renderer.GetThumbnailRenderTextureID(), 3, renderer.GetThumbnailResolution(), renderer.GetThumbnailResolution(), graphics::ktxImgFormat::MNSY_COLOR, false);
+
+		int thumbnailRes = renderer.GetThumbnailResolutionValue(renderer.GetThumbnailResolutionEnum());
+		thumbnailKtx.ExportGlTexture(thumbnailAbsolutePath.generic_string().c_str(), renderer.GetThumbnailRenderTextureID(), 3, thumbnailRes, thumbnailRes, graphics::ktxImgFormat::MNSY_COLOR, false);
 
 		// check if the active material is part of the active materials
 		if (!m_activeMaterials.empty()) {
@@ -101,6 +104,42 @@ namespace mnemosy::systems {
 			}
 		}
 
+	}
+
+	void ThumbnailManager::RenderThumbnailOfMaterial(MaterialInfo* materialInfo) {
+
+		fs::path libPath = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+		fs::path matPath = libPath /  materialInfo->parent->pathFromRoot / fs::path(materialInfo->name);
+
+		graphics::Material* mat = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadMaterialFromFile_Multithreaded(materialInfo);
+
+		MNEMOSY_ASSERT(materialInfo != nullptr, "This should not happen");
+
+		fs::path thumbnailPath = matPath  / fs::path(materialInfo->name + "_thumbnail.ktx2");
+
+		graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();
+		renderer.RenderThumbnail(*mat);
+
+		graphics::KtxImage thumbnailKtx;
+
+		int thumbnailRes = renderer.GetThumbnailResolutionValue(renderer.GetThumbnailResolutionEnum());
+		thumbnailKtx.ExportGlTexture(thumbnailPath.generic_string().c_str(), renderer.GetThumbnailRenderTextureID(), 3, thumbnailRes, thumbnailRes, graphics::ktxImgFormat::MNSY_COLOR, false);
+
+
+		delete mat;
+
+		// check if the active material is part of the active materials
+		if (!m_activeMaterials.empty()) {
+
+			for (int i = 0; i < m_activeMaterials.size(); i++) {
+
+				if (m_activeMaterials[i]->runtime_ID == materialInfo->runtime_ID) {
+
+					m_thumbnailsQuedForRefresh.push_back(m_activeMaterials[i]);
+					break;
+				}
+			}
+		}
 	}
 
 	void ThumbnailManager::AddMaterialForThumbnailing(MaterialInfo* material) {
@@ -197,7 +236,10 @@ namespace mnemosy::systems {
 			}
 		}
 		else {
-			MNEMOSY_WARN("Failed to load thumbnail for material: {}, thumbnail file does not exist at {}", material->name, thumbnailPath.generic_string());
+			MNEMOSY_WARN("Failed to load thumbnail, Generating new: {}",  thumbnailPath.generic_string());
+
+			// this is potentially super slow but should work and generate a new thumbnail
+			RenderThumbnailOfMaterial(material);
 		}
 
 	}

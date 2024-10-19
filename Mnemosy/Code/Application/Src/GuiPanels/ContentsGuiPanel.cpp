@@ -88,7 +88,12 @@ namespace mnemosy::gui {
 				std::string& matName = selectedNode->subMaterials[i]->name;
 
 				// first casting to a uint64 is neccesary to get rid of waring for casting to void* in next line
+				
 				uint64_t textureId = (uint64_t)selectedNode->subMaterials[i]->thumbnailTexure_ID;
+				if (!selectedNode->subMaterials[i]->thumbnailLoaded) {
+					textureId = 0;
+				}
+
 				bool pressed = ImGui::ImageButton((void*)textureId, button_size, ImVec2(0, 1), ImVec2(1, 0));
 				//bool pressed = ImGui::ImageButton((void*)(selectedNode->subMaterials[i]->thumbnailTexure_ID), button_size, ImVec2(0, 1), ImVec2(1, 0));
 
@@ -98,8 +103,8 @@ namespace mnemosy::gui {
 					// check if its already the active material
 					if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i]->runtime_ID) {
 
-						fs::path matDir = selectedNode->pathFromRoot / fs::path(matName);
-						m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(matDir, selectedNode->subMaterials[i], selectedNode);
+						//fs::path matDir = selectedNode->pathFromRoot / fs::path(matName);
+						m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(selectedNode->subMaterials[i]);
 					}
 				}
 				// Calculate size of the name and shorten it if its longer then the button size
@@ -176,8 +181,8 @@ namespace mnemosy::gui {
 					// check if its already the active material
 					if (m_materialRegistry.GetActiveMaterialID() != matInfo->runtime_ID) {
 
-						fs::path matDir = matInfo->parent->pathFromRoot / fs::path(matName);
-						m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(matDir, matInfo, matInfo->parent);
+						//::path matDir = matInfo->parent->pathFromRoot / fs::path(matName);
+						m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded( matInfo);
 					}
 				}
 

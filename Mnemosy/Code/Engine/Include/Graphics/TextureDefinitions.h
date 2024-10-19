@@ -125,10 +125,10 @@ namespace mnemosy::graphics {
 
 
 	namespace TexDefinitions {
-		const static char* ImageFileFormats_string[6] = { ".tif",".png",".jpg",".hdr",".exr",".ktx2" }; // must be ordered the same as enum 'ImageFileFormat'
-		const static char* NormalMapFormats_string[2] = { "OpenGl", "DirectX" }; // must be ordered the same as enum 'NormalMapFormat'
-		const static char* ChannelPackTypes_string[2] = { "R+G+B", "R+G+B+A" }; // must be ordered the same as enum 'ChannelPackType'
-
+		const static char* ImageFileFormats_string[6]	= { ".tif",".png",".jpg",".hdr",".exr",".ktx2" }; // must be ordered the same as enum 'ImageFileFormat'
+		const static char* NormalMapFormats_string[2]	= { "OpenGl", "DirectX" }; // must be ordered the same as enum 'NormalMapFormat'
+		const static char* ChannelPackTypes_string[2]	= { "R+G+B", "R+G+B+A" }; // must be ordered the same as enum 'ChannelPackType'
+		const static char* BitDepthTypes_string[3]		= { "8","16","32" };
 		// includes more bc some formats have more than one valid extention like jpeg/jpg
 		// if we add one here we need to update the function 'get_imageFileFormat_from_fileExtentionString' below
 		const static std::vector<std::string> ValidFileFormatsExtentions_string = { ".tif",".tiff",".png",".jpg",".jpeg",".exr",".hdr",".ktx2" }; 

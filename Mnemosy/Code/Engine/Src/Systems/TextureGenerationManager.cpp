@@ -248,7 +248,7 @@ namespace mnemosy::systems
 
 	}
 
-	bool TextureGenerationManager::GenerateChannelPackedTexture(graphics::Material& material, const char* exportPath, bool exportTexture, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height)
+	bool TextureGenerationManager::GenerateChannelPackedTexture(graphics::Material& material, const char* exportPath, bool exportTexture, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height, uint8_t bitDepth)
 	{
 
 		if (!IsInitialized()) {
@@ -436,15 +436,37 @@ namespace mnemosy::systems
 		// DRAW CALL
 		DrawQuad();
 
-		// Export to png or tiff file
+		// Export texture
 		if (exportTexture) {
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
 
+
+
 			graphics::TextureFormat Format = graphics::MNSY_RGBA16;
 
-			if (packType == graphics::MNSY_PACKTYPE_RGB) {
-				Format = graphics::MNSY_RGB16;
+			if (packType == graphics::ChannelPackType::MNSY_PACKTYPE_RGB) {
+				
+				if (bitDepth == 8) {
+					Format = graphics::MNSY_RGB8;
+				}
+				else if (bitDepth == 16) {
+					Format = graphics::MNSY_RGB16;
+				}
+				else if (bitDepth == 32) {
+					Format = graphics::MNSY_RGB32;
+				}
+			}
+			else if (packType == graphics::ChannelPackType::MNSY_PACKTYPE_RGBA) {
+				if (bitDepth == 8) {
+					Format = graphics::MNSY_RGBA8;
+				}
+				else if (bitDepth == 16) {
+					Format = graphics::MNSY_RGBA16;
+				}
+				else if (bitDepth == 32) {
+					Format = graphics::MNSY_RGBA32;
+				}
 			}
 
 			std::filesystem::path p = { exportPath };
