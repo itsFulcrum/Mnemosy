@@ -5,7 +5,7 @@
 #include <string>
 #include <filesystem>
 
-#include <nlohmann/json.hpp>
+//#include <nlohmann/json.hpp>
 
 namespace mnemosy::systems {
 	struct MaterialInfo;
@@ -22,7 +22,6 @@ namespace mnemosy::graphics {
 	enum ChannelPackComponent;
 	class Material;
 	class Texture;
-
 }
 
 namespace mnemosy::systems
@@ -63,7 +62,7 @@ namespace mnemosy::systems
 
 		bool UserMaterialBound() { return m_userMaterialBound; }
 
-		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::string& filepath);
+		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::filesystem::path& filepath);
 		void DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType);
 		
 

@@ -4,7 +4,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
 
-#include "External/ImGui/imgui.h"
+#include "ImGui/imgui.h"
 
 #include <filesystem>
 #include <fstream>

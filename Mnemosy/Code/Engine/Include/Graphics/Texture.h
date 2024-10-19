@@ -4,12 +4,15 @@
 
 #include <string>
 
-#include "opencv2/core/mat.hpp"
+//#include "opencv2/core/mat.hpp"
 
 
 namespace mnemosy::graphics {
 	enum PBRTextureType;
+	enum TextureFormat;
+	struct PictureInfo;
 }
+
 
 namespace mnemosy::graphics 
 {
@@ -18,43 +21,34 @@ namespace mnemosy::graphics
 
 		Texture();
 		~Texture();
-		// todo remove flip parameter
-		bool GenerateFromFile(const char* imagePath,const bool flipImageVertically,const bool generateMipmaps, PBRTextureType pbrType);
-		bool LoadFromKtx(const char* imagePath);
-
-		void LoadIntoCVMat(std::string path);
-		bool GenerateFromCVMat();
-
+		
+		void GenerateOpenGlTexture(const PictureInfo info, const bool generateMipmaps);
 
 
 		bool containsData() const;
 		void clear();
-		void BindToLocation(const unsigned int activeTextureLocation);
-		void UnbindLocation(const unsigned int activeTextureLocation);
-		// TODO: add functions to set filter mode and Wrap behavior
-
+		void BindToLocation(const uint8_t activeTextureLocation);
+		void UnbindLocation(const uint8_t activeTextureLocation);
+		
 		unsigned int GetID() { return m_ID; }
-		unsigned int GetChannelsAmount() { return m_channelsAmount; };
+		unsigned int GetChannelsAmount();
+
+
+		TextureFormat GetTextureFormat() {return m_textureFormat;}
+		bool IsHalfFloat() { return m_isHalfFloat; }
 		unsigned int GetWidth() { return m_width; }
 		unsigned int GetHeight() { return m_height; }
 
 	private:
-		bool LoadFromFile(const char* imagePath, const bool flipImageVertically, const bool generateMipmaps, PBRTextureType pbrType);
-
-		cv::Mat m_cvMat;
-		bool m_matrixLoaded = false;
-
-		bool m_isInitialized = false;
-
 		unsigned int m_ID = 0;
-		unsigned int m_lastBoundLocation = 0;
-		
-		unsigned int m_channelsAmount = 0;
-		unsigned int m_width = 0;
-		unsigned int m_height = 0;
+		TextureFormat m_textureFormat;
 
+		uint16_t m_width = 0; 
+		uint16_t m_height = 0; 
 
-		
+		bool m_isInitialized = false; 
+		uint8_t m_lastBoundLocation = 0; 
+		bool m_isHalfFloat = false; 
 	};
 
 } // mnemosy::graphics

@@ -3,7 +3,8 @@
 #include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
 
-#include "Include/Graphics/Image.h"
+#include "Include/Graphics/Utils/Picture.h"
+//#include "Include/Graphics/Image.h"
 
 #include <string>
 #define GLFW_INCLUDE_NONE
@@ -100,19 +101,21 @@ namespace mnemosy::core
 			Shutdown();
 		}
 
-		// Load and set Window Icon
-		graphics::Image* icon = new graphics::Image();
-		bool success = icon->LoadImageFromFile("../Resources/Textures/mnemosy_icon.png",false);
-		if (success) {
+
+		// using STB_Read() because glfw image apparently expects 8 bit data and ReadPng outputs the highest possible bit depth while STB_Read converts to bit
+		graphics::PictureError err;
+		graphics::PictureInfo picInfo = graphics::Picture::STB_Read(err, "../Resources/Textures/mnemosy_icon.png",false);
+
+		if (err.wasSuccessfull) {
 
 			GLFWimage glfwImages[1];
-			glfwImages[0].width		= icon->width;
-			glfwImages[0].height	= icon->height;
-			glfwImages[0].pixels	= icon->imageData;
+			glfwImages[0].width		= picInfo.width;
+			glfwImages[0].height	= picInfo.height;
+			glfwImages[0].pixels	= (unsigned char*)picInfo.pixels;
 			glfwSetWindowIcon(m_pWindow,1,glfwImages);
+
 		}
-		delete icon;
-		icon = nullptr;
+		free(picInfo.pixels);
 
 
 

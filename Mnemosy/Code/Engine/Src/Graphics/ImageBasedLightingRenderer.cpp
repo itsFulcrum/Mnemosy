@@ -8,12 +8,6 @@
 #include "Include/Graphics/ModelLoader.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 
-// needed if loading and saving brdf lut to .tif file
-//#include <opencv2/core.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/imgproc.hpp>
-//#include <opencv2/core/utils/logger.hpp>
-
 #include <filesystem>
 #include <glad/glad.h>
 

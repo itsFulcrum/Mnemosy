@@ -3,7 +3,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/JsonSettings.h"
 
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 #include <fstream>
 
 namespace mnemosy::core
@@ -108,6 +108,26 @@ namespace mnemosy::core
 
 
 		return userLibDataFile;
+	}
+
+	const std::filesystem::path FileDirectories::GetUserSettingsPath() {
+
+		std::filesystem::path p = GetDataPath() / std::filesystem::path("UserSettings");
+
+		std::filesystem::directory_entry dir = std::filesystem::directory_entry(p);
+
+		if (!dir.exists()) {
+
+			try {
+				std::filesystem::create_directories(p);
+			}
+			catch (std::filesystem::filesystem_error err){
+				
+				MNEMOSY_CRITICAL("Faild to create directory for User Settings. \nMessage: {}", err.what());
+			}
+		}
+
+		return p;
 	}
 	
 	const std::filesystem::path FileDirectories::GetLibraryDirectoryPath() {
@@ -227,17 +247,17 @@ namespace mnemosy::core
 		fs::path dataFilePath = m_mnemosyLibraryDataFile.path();
 
 
-		libDir.SettingsFilePrettyPrintSet(true);
+		libDir.FilePrettyPrintSet(true);
 
-		libDir.SettingsFileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
+		libDir.FileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
 		if(!success){
 			MNEMOSY_WARN("FileDirectories::LoadUserLibrary: Failed to open library directory data file. Message: {}", libDir.ErrorStringLastGet());
 		}
 
 
-		std::string libraryPathFromFile = libDir.SettingReadString(success,"libraryDirectory",m_mnemosyDefaultLibraryDirectory.path().generic_string(),true);
+		std::string libraryPathFromFile = libDir.ReadString(success,"libraryDirectory",m_mnemosyDefaultLibraryDirectory.path().generic_string(),true);
 
-		libDir.SettingsFileClose(success,dataFilePath);
+		libDir.FileClose(success,dataFilePath);
 
 
 		// checking if path is valid
@@ -355,16 +375,16 @@ namespace mnemosy::core
 
 		//std::filesystem::path libDirPath = libraryDirectoryPath.path();
 
-		libDir.SettingsFilePrettyPrintSet(true);
+		libDir.FilePrettyPrintSet(true);
 
-		libDir.SettingsFileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
+		libDir.FileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
 		if(!success){
 			MNEMOSY_WARN("FileDirectories::SaveUserLibrary: Failed to open library directory data file. Message: {}", libDir.ErrorStringLastGet());
 		}
 
-		libDir.SettingWriteString(success,"libraryDirectory",libraryDirectoryPath.path().generic_string());
+		libDir.WriteString(success,"libraryDirectory",libraryDirectoryPath.path().generic_string());
 
-		libDir.SettingsFileClose(success,dataFilePath);
+		libDir.FileClose(success,dataFilePath);
 
 		return;
 

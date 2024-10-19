@@ -163,25 +163,6 @@ namespace mnemosy::graphics
 
 	}
 
-	void Material::assignTexture(const PBRTextureType& pbrType, const std::string& filePath) {
-
-		MNEMOSY_ASSERT(pbrType != MNSY_TEXTURE_COUNT, "Do not use this function to add custom packed textures");
-
-		Texture* tex = new Texture();
-		bool loadedSuccesfull = tex->GenerateFromFile(filePath.c_str(),true,true,pbrType);
-
-		if (!loadedSuccesfull) {
-
-			tex->clear();
-			delete tex;
-			tex = nullptr;
-			return;
-		}
-
-		assignTexture(pbrType, tex);
-
-	}
-
 	void Material::removeTexture(const PBRTextureType& pbrTextureType) {
 		
 		switch (pbrTextureType)

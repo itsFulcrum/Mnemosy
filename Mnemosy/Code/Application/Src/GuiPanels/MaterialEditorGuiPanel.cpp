@@ -22,9 +22,9 @@
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
+#include "Include/Graphics/Utils/Picture.h"
 
 #include <glm/glm.hpp>
-
 
 namespace mnemosy::gui
 {	
@@ -166,19 +166,20 @@ namespace mnemosy::gui
 
 			int exportImageFormat_current = (int)m_exportManager.GetExportImageFormat();
 
-			ImGui::Combo("Image Format ##Export", &exportImageFormat_current, m_exportFormats, IM_ARRAYSIZE(m_exportFormats));
+			ImGui::Combo("Image Format ##Export", &exportImageFormat_current, graphics::TexDefinitions::ImageFileFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::ImageFileFormats_string));
+
 			ImGui::SetItemTooltip("Specify the image format used for exporting");
 
 			// if format changed
 			if ((int)m_exportManager.GetExportImageFormat() != exportImageFormat_current) {
 
-				m_exportManager.SetExportImageFormat((graphics::ExportImageFormat)exportImageFormat_current);
+				m_exportManager.SetExportImageFormat((graphics::ImageFileFormat)exportImageFormat_current);
 			}
 
 
 			// Normal Map Format
 			int exportNormalFormat_current = (int)m_exportManager.GetNormalMapExportFormat();
-			ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, m_normalMapFormats, IM_ARRAYSIZE(m_normalMapFormats));
+			ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, graphics::TexDefinitions::NormalMapFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::NormalMapFormats_string));
 			ImGui::SetItemTooltip("Specify the normal map format to export normal maps with");
 
 			// if format changed
@@ -205,7 +206,7 @@ namespace mnemosy::gui
 
 				graphics::PBRTextureType texType = (graphics::PBRTextureType)i;
 
-				std::string textureTypeName = graphics::TextureDefinitions::GetTextureNameFromEnumType(texType);
+				std::string textureTypeName = graphics::TexUtil::get_string_from_PBRTextureType(texType);
 				std::string label = "Export " + textureTypeName;
 
 
@@ -324,7 +325,9 @@ namespace mnemosy::gui
 
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ALBEDO, filepath);
+
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ALBEDO, p);
 					SaveMaterial();
 				}
 			}
@@ -390,7 +393,8 @@ namespace mnemosy::gui
 				if (!filepath.empty()) {
 
 					activeMat.IsSmoothnessTexture = false;
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, p);
 					SaveMaterial();
 				}
 			}
@@ -463,25 +467,32 @@ namespace mnemosy::gui
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().InvertRoughness(activeMat, roughnessPath.generic_string().c_str(), true);
 
 
-
-					MNEMOSY_TRACE("Converted");
-
-
-
-					// TODO:
 					// Load newly created texture as new roughness texture 
-					activeMat.GetRoughnessTexture().GenerateFromFile(roughnessPath.generic_string().c_str(), true, true,graphics::MNSY_TEXTURE_ROUGHNESS);
 
-					MNEMOSY_TRACE("Loaded New Roughness texture");
+					graphics::PictureError picErrorCheck;
+					graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErrorCheck,roughnessPath.generic_string().c_str(),true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+
+					if (!picErrorCheck.wasSuccessfull) {
+
+						MNEMOSY_WARN("Faild to read newly created roughness texture: {}, \nMessage: {}",roughnessPath.generic_string(),picErrorCheck.what);
+					}
+					else {
+						MNEMOSY_TRACE("Loaded New Roughness texture");
+						graphics::Texture* roughTex = new graphics::Texture();
+
+						roughTex->GenerateOpenGlTexture(picInfo,true);
+						activeMat.assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS, roughTex);
+						free(picInfo.pixels);
+					}
 
 
 
-
-					// save is Smoothness to data file
+					// its better to save this even if reading the new texture failed because it was aperantly written and if we dont update the meta data it will be out of sync
 					activeMat.IsSmoothnessTexture = isSmoothness;
 
 					SaveMaterial();
 					MNEMOSY_TRACE("SavedMaterialFile");
+
 
 				}
 
@@ -509,7 +520,8 @@ namespace mnemosy::gui
 
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_NORMAL, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_NORMAL, p);
 					SaveMaterial();
 				}
 			}
@@ -552,7 +564,7 @@ namespace mnemosy::gui
 
 				int format_current = activeMat.GetNormalFormatAsInt();
 
-				ImGui::Combo("Normal Map Format", &format_current, m_normalMapFormats, IM_ARRAYSIZE(m_normalMapFormats));
+				ImGui::Combo("Normal Map Format", &format_current, graphics::TexDefinitions::NormalMapFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::NormalMapFormats_string));
 				ImGui::SetItemTooltip("Specify the normal map format of the source texture");
 
 				// if format changed
@@ -578,7 +590,20 @@ namespace mnemosy::gui
 
 					// Load newly created texture as new normal map 
 
-					activeMat.GetNormalTexture().GenerateFromFile(normalMapPath.generic_string().c_str(), true, true,graphics::MNSY_TEXTURE_NORMAL);
+					graphics::PictureError picErrorCheck;
+					graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErrorCheck, normalMapPath.generic_string().c_str(), true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+
+					if (!picErrorCheck.wasSuccessfull) {
+
+						MNEMOSY_WARN("Faild to read newly created normal map texture: {}, \nMessage: {}", normalMapPath.generic_string(), picErrorCheck.what);
+					}
+					else {
+						MNEMOSY_TRACE("Loaded New Roughness texture");
+						graphics::Texture* normalTex = new graphics::Texture();
+						normalTex->GenerateOpenGlTexture(picInfo,true);
+						free(picInfo.pixels);
+						activeMat.assignTexture(graphics::PBRTextureType::MNSY_TEXTURE_NORMAL, normalTex);
+					}
 
 					SaveMaterial();
 
@@ -607,7 +632,8 @@ namespace mnemosy::gui
 			if (ImGui::Button("Load Texture...##Metallic", m_buttonSizeLoad)) {
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_METALLIC, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_METALLIC, p);
 					SaveMaterial();
 				}
 			}
@@ -666,7 +692,8 @@ namespace mnemosy::gui
 			if (ImGui::Button("Load Texture...##AO", m_buttonSizeLoad)) {
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, p);
 					SaveMaterial();
 				}
 			}
@@ -711,7 +738,8 @@ namespace mnemosy::gui
 			if (ImGui::Button("Load Texture...##Emissive", m_buttonSizeLoad)) {
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_EMISSION, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_EMISSION, p);
 					SaveMaterial();
 
 				}
@@ -805,7 +833,8 @@ namespace mnemosy::gui
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_HEIGHT, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_HEIGHT, p);
 					SaveMaterial();
 				}
 			}
@@ -880,7 +909,8 @@ namespace mnemosy::gui
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 
 				if (!filepath.empty()) {
-					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_OPACITY, filepath);
+					std::filesystem::path p = { filepath };
+					m_materialRegistry.LoadTextureForActiveMaterial(graphics::MNSY_TEXTURE_OPACITY, p);
 					SaveMaterial();
 				}
 			}
@@ -964,8 +994,7 @@ namespace mnemosy::gui
 
 	}
 
-	void MaterialEditorGuiPanel::DrawChannelPackUI(graphics::Material& activeMat)
-	{
+	void MaterialEditorGuiPanel::DrawChannelPackUI(graphics::Material& activeMat) {
 		ImGui::Spacing();
 		ImGui::Spacing();
 
@@ -1054,7 +1083,7 @@ namespace mnemosy::gui
 			ImGui::Text("Pack Fromat: ");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(150);
-			ImGui::Combo(" ##PckFmt", &current_packtype, m_packTypes, IM_ARRAYSIZE(m_packTypes));
+			ImGui::Combo(" ##PckFmt", &current_packtype, graphics::TexDefinitions::ChannelPackTypes_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackComponents_string));
 
 
 			// select pack components for each channel of pack type
@@ -1070,18 +1099,18 @@ namespace mnemosy::gui
 			ImGui::Text("R - Channel");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(200);
-			ImGui::Combo(" ## R_channel", &curr_packComponent_R, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+			ImGui::Combo(" ## R_channel", &curr_packComponent_R, graphics::TexDefinitions::ChannelPackComponents_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackComponents_string));
 
 			ImGui::Text("G - Channel");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(200);
-			ImGui::Combo(" ## G_channel", &curr_packComponent_G, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+			ImGui::Combo(" ## G_channel", &curr_packComponent_G, graphics::TexDefinitions::ChannelPackComponents_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackComponents_string));
 
 			
 			ImGui::Text("B - Channel");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(200);
-			ImGui::Combo(" ## B_channel", &curr_packComponent_B, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+			ImGui::Combo(" ## B_channel", &curr_packComponent_B, graphics::TexDefinitions::ChannelPackComponents_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackComponents_string));
 			
 			
 			if ((graphics::ChannelPackType)current_packtype == graphics::ChannelPackType::MNSY_PACKTYPE_RGBA) {
@@ -1089,7 +1118,7 @@ namespace mnemosy::gui
 				ImGui::Text("A - Channel");
 				ImGui::SameLine();
 				ImGui::SetNextItemWidth(200);
-				ImGui::Combo(" ## A_channel", &curr_packComponent_A, m_packComponents, IM_ARRAYSIZE(m_packComponents));
+				ImGui::Combo(" ## A_channel", &curr_packComponent_A, graphics::TexDefinitions::ChannelPackComponents_string, IM_ARRAYSIZE(graphics::TexDefinitions::ChannelPackComponents_string));
 			}
 
 			ImGui::Spacing();
@@ -1110,15 +1139,6 @@ namespace mnemosy::gui
 
 			ImGui::TreePop();
 		}
-
-
-
-
-
-
-
-
-
 	}
 
 	// Callback when files are droped into mnemosy
@@ -1143,7 +1163,8 @@ namespace mnemosy::gui
 
 		// try handle only first one an check if it is above a specific button
 		{
-			std::string firstPath = dropedFilePaths[0];
+			std::filesystem::path firstPath = { dropedFilePaths[0] };
+			//std::string firstPath = dropedFilePaths[0];
 			fs::directory_entry firstFile = fs::directory_entry(firstPath);
 
 
@@ -1154,7 +1175,7 @@ namespace mnemosy::gui
 				return;
 
 			std::string extention = firstFile.path().extension().generic_string();
-			if (extention == ".png" || extention == ".tif" || extention == ".tiff" || extention == ".jpg" || extention == ".jpeg") {
+			if (graphics::TexUtil::is_image_file_extention_supported(extention)) {
 				//MNEMOSY_DEBUG("MaterialEditorGuiPanel::OnFileDropInput: FirstFile is Valid File. Filetype: {}",extention);
 				// Valid texture file
 
@@ -1227,7 +1248,7 @@ namespace mnemosy::gui
 			if(filepath.has_extension()){
 
 				std::string fileExtention = filepath.extension().generic_string();
-				if (fileExtention == ".png" || fileExtention == ".tif" || fileExtention == ".tiff" || fileExtention == ".jpg" || fileExtention == ".jpeg") {
+				if (graphics::TexUtil::is_image_file_extention_supported(fileExtention)) {
 
 
 
@@ -1237,7 +1258,7 @@ namespace mnemosy::gui
 
 					std::string filenameString = filename.generic_string();
 
-					graphics::PBRTextureType type = graphics::TextureDefinitions::GetTypeFromFileName(filenameString);
+					graphics::PBRTextureType type = graphics::TexUtil::get_PBRTextureType_from_filename(filenameString);
 
 
 					if (type != graphics::MNSY_TEXTURE_NONE && type != graphics::MNSY_TEXTURE_COUNT) {
@@ -1246,8 +1267,7 @@ namespace mnemosy::gui
 						//std::string typeString = graphics::TextureDefinitions::GetTextureNameFromEnumType(type);
 						//MNEMOSY_TRACE("FileDrop: {}, Matches Type: {} Path: {}", filenameString,typeString, filepath.generic_string());
 
-						std::string filepathString = filepath.generic_string();
-						m_materialRegistry.LoadTextureForActiveMaterial(type, filepathString);
+						m_materialRegistry.LoadTextureForActiveMaterial(type, filepath);
 					}
 					else {
 						MNEMOSY_WARN("Could not determine pbr type for texture with name: {}, {}", filename.generic_string(), filepath.generic_string());

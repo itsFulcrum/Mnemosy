@@ -24,11 +24,11 @@
 # OF THIS SOFTWARE.
 
 # Strip chopping
-option(strip-chopping "strip chopping (whether or not to convert single-strip uncompressed images to mutiple strips of specified size to reduce memory usage)" ON)
+option(tiff_strip-chopping "strip chopping (whether or not to convert single-strip uncompressed images to mutiple strips of specified size to reduce memory usage)" ON)
 set(TIFF_DEFAULT_STRIP_SIZE 8192 CACHE STRING "default size of the strip in bytes (when strip chopping is enabled)")
 
 set(STRIPCHOP_DEFAULT)
-if(strip-chopping)
+if(tiff_strip-chopping)
     set(STRIPCHOP_DEFAULT TRUE)
     if(TIFF_DEFAULT_STRIP_SIZE)
         set(STRIP_SIZE_DEFAULT "${TIFF_DEFAULT_STRIP_SIZE}")
@@ -38,25 +38,25 @@ endif()
 set(TIFF_MAX_DIR_COUNT 1048576 CACHE STRING "Maximum number of TIFF directories that libtiff can browse through")
 
 # Defer loading of strip/tile offsets
-option(defer-strile-load "enable deferred strip/tile offset/size loading (also available at runtime with the 'D' flag of TIFFOpen())" OFF)
-set(DEFER_STRILE_LOAD ${defer-strile-load})
+option(tiff_defer-strile-load "enable deferred strip/tile offset/size loading (also available at runtime with the 'D' flag of TIFFOpen())" OFF)
+set(DEFER_STRILE_LOAD ${tiff_defer-strile-load})
 
 # CHUNKY_STRIP_READ_SUPPORT
-option(chunky-strip-read "enable reading large strips in chunks for TIFFReadScanline() (experimental)" OFF)
-set(CHUNKY_STRIP_READ_SUPPORT ${chunky-strip-read})
+option(tiff_chunky-strip-read "enable reading large strips in chunks for TIFFReadScanline() (experimental)" OFF)
+set(CHUNKY_STRIP_READ_SUPPORT ${tiff_chunky-strip-read})
 
 # SUBIFD support
 set(SUBIFD_SUPPORT 1)
 
 # Default handling of ASSOCALPHA support.
-option(extrasample-as-alpha "the RGBA interface will treat a fourth sample with no EXTRASAMPLE_ value as being ASSOCALPHA. Many packages produce RGBA files but don't mark the alpha properly" ON)
-if(extrasample-as-alpha)
+option(tiff_extrasample-as-alpha "the RGBA interface will treat a fourth sample with no EXTRASAMPLE_ value as being ASSOCALPHA. Many packages produce RGBA files but don't mark the alpha properly" ON)
+if(tiff_extrasample-as-alpha)
     set(DEFAULT_EXTRASAMPLE_AS_ALPHA 1)
 endif()
 
 # Default handling of YCbCr subsampling support.
 # See Bug 168 in Bugzilla, and JPEGFixupTestSubsampling() for details.
-option(check-ycbcr-subsampling "enable picking up YCbCr subsampling info from the JPEG data stream to support files lacking the tag" ON)
-if (check-ycbcr-subsampling)
+option(tiff_check-ycbcr-subsampling "enable picking up YCbCr subsampling info from the JPEG data stream to support files lacking the tag" ON)
+if (tiff_check-ycbcr-subsampling)
     set(CHECK_JPEG_YCBCR_SUBSAMPLING 1)
 endif()

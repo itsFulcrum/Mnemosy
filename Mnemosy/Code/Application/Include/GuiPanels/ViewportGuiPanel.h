@@ -3,7 +3,7 @@
 
 #include "Include/Gui/GuiPanel.h"
 
-#include "External/ImGui/imgui.h"
+#include "ImGui/imgui.h"
 
 
 namespace mnemosy {

@@ -2,7 +2,7 @@
 
 #include "Include/Core/Log.h"
 
-#include <External/ImGui/imgui.h>
+#include <ImGui/imgui.h>
 
 namespace mnemosy::gui
 {

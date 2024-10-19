@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD 20)
 
 
-## to build with command line use:
-# cmake --build . --target Mnemosy --config Release
+## to build use command:
+# cmake --build . --target Mnemosy --config release
+# cmake --build . --target Mnemosy --config debug
 
 set(ENGINE_PROJECT "MnemosyEngine")
 set(APP_PROJECT "Mnemosy")
@@ -20,8 +21,25 @@ file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${mnemosy_build_dir}/)
 
 include(GNUInstallDirs)
 
+
+# static everything please
+set(BUILD_SHARED_LIBS             	OFF CACHE BOOL "" FORCE)
+set(USE_MSVC_RUNTIME_LIBRARY_DLL	OFF CACHE BOOL "" FORCE)
+set(USE_STATIC_CRT             	 	 ON CACHE BOOL "" FORCE)
+
+add_compile_options(
+          $<$<CONFIG:>:/MT>
+          $<$<CONFIG:Debug>:/MTd>
+          $<$<CONFIG:Release>:/MT>
+)
+
+
 # ==== Load External libraries
 # =============================================
+
+
+set(DEPENDENCIES_DIR ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies)
+
 #OpenGL
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS})
@@ -35,69 +53,86 @@ add_subdirectory(${glfw_subDir})
 set(glad_subDir "Code/Dependencies/glad")
 add_subdirectory(${glad_subDir})
 
-# SpdLog
-set(spdLog_subDir "Code/Dependencies/spdlog-1.x/")
-include(${CMAKE_CURRENT_LIST_DIR}/${spdLog_subDir}cmake-Mnemosy-SpdLogOptions.cmake)
-add_subdirectory(${spdLog_subDir})
-
-#stbImage
-set(stbImage_subDir "Code/Dependencies/stbImage/")
-add_subdirectory(${stbImage_subDir})
 
 #GLM
 set(glm_subDir "Code/Dependencies/glm/")
 add_subdirectory(${glm_subDir})
 
-#Assimp
-set(assimp_subDir "Code/Dependencies/assimp-master")
-include(${CMAKE_CURRENT_LIST_DIR}/${assimp_subDir}/cmake-Mnemosy-AssimpOptions.cmake)
-add_subdirectory(${assimp_subDir})
+# SpdLog
+set(spdLog_subDir "Code/Dependencies/spdlog-1.x/")
+include(${CMAKE_CURRENT_LIST_DIR}/${spdLog_subDir}cmake-Mnemosy-SpdLogOptions.cmake)
+add_subdirectory(${spdLog_subDir})
+
+# nlohmann Json
+set(nlohmannJson_subDir ${DEPENDENCIES_DIR}/nlohmannjson)
+add_subdirectory(${nlohmannJson_subDir})
+
+## == Image libraries
+
+
+# == ZLIB
+set(zlib_subDir ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/zlib-1.3.1)
+add_subdirectory(${zlib_subDir})
+
+SET(ZLIB_LIBRARY zlibstatic)
+SET(ZLIB_ROOT ${zlib_subDir})
+
+find_package(ZLIB REQUIRED)
+message("MNEMOSY ZLIB Found "  ${ZLIB_FOUND})
+
+
+# stbImage Read
+set(stbImageRead_subDir ${DEPENDENCIES_DIR}/stbImageRead)
+add_subdirectory(${stbImageRead_subDir})
+
+# stbImage Write
+set(stbImageWrite_subDir  ${DEPENDENCIES_DIR}/stbImageWrite)
+add_subdirectory(${stbImageWrite_subDir})
+
+# lodepng
+set(lodepng_subDir ${DEPENDENCIES_DIR}/lodepng)
+add_subdirectory(${lodepng_subDir})
 
 # KTX
-set(ktx_software_subDir "Code/Dependencies/KTX-Software-main/")
-include(${CMAKE_CURRENT_LIST_DIR}/${ktx_software_subDir}cmake-Mnemosy-LibKtxOptions.cmake)
-add_subdirectory(${ktx_software_subDir})
+set(libktx_subDir ${DEPENDENCIES_DIR}/KTX-Software-main)
+include(${libktx_subDir}/cmake-Mnemosy-LibKtxOptions.cmake)
+add_subdirectory(${libktx_subDir})
 
-# Json
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-set(nlohmann_json_subDir "Code/Dependencies/json-3.9.1/")
-add_subdirectory(${nlohmann_json_subDir})
 
 #libTiff
-set(libTiff_subDir "Code/Dependencies/libtiff-master")
-include(${CMAKE_CURRENT_LIST_DIR}/${libTiff_subDir}/cmake-Mnemosy_libTiff_options.cmake)
+set(libTiff_subDir ${DEPENDENCIES_DIR}/libtiff-master)
+include(${libTiff_subDir}/cmake-Mnemosy_libTiff_options.cmake)
 add_subdirectory(${libTiff_subDir})
 
-## OPEN CV
-include(${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/cmake-Mnemosy_OpenCVOptions.cmake)
-set(OpenCV_DIR "Code/Dependencies/openCV/opencvBuild/install/")
-find_package(OpenCV REQUIRED PATHS "Code/Dependencies/openCV/opencvBuild/install/x64/vc17/bin/")
 
-# copy open cv dlls into the build directory
-file(MAKE_DIRECTORY ${mnemosy_build_dir})
-file(MAKE_DIRECTORY ${mnemosy_build_dir}/Debug)
-file(MAKE_DIRECTORY ${mnemosy_build_dir}/Release)
-# Copy debug/release dlls to respective executable directory
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490d.dll"        ${mnemosy_build_dir}/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490d.dll"   ${mnemosy_build_dir}/Debug/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490d.dll"     ${mnemosy_build_dir}/Debug/ COPYONLY)
+#Open EXR
+set(openExr_subDir ${DEPENDENCIES_DIR}/openexr-release)
+include(${openExr_subDir}/cmake-Mnemosy_openExr_options.cmake)
+add_subdirectory(${openExr_subDir})
 
-configure_file("${_OpenCV_LIB_PATH}/opencv_core490.dll"         ${mnemosy_build_dir}/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgcodecs490.dll"    ${mnemosy_build_dir}/Release/ COPYONLY)
-configure_file("${_OpenCV_LIB_PATH}/opencv_imgproc490.dll"      ${mnemosy_build_dir}/Release/ COPYONLY)
+
+
+#Assimp
+set(assimp_subDir ${DEPENDENCIES_DIR}/assimp-master)
+include(${assimp_subDir}/cmake-Mnemosy-AssimpOptions.cmake)
+add_subdirectory(${assimp_subDir})
+
+
 
 # ==== Load Internal Sources
 # Setting ENGINE source files to: ENGINE_SOURCE_FILES
-set(ENGINE_SOURCE_PATH Code/Engine)
-include(${CMAKE_CURRENT_LIST_DIR}/${ENGINE_SOURCE_PATH}/cmake-EngineSourceFiles.cmake)
+set(ENGINE_SOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
+include(${ENGINE_SOURCE_PATH}/cmake-EngineSourceFiles.cmake)
 
 #ImGui
 # Setting ImGui source files to: IMGUI_SOURCE_FILES
-include(${CMAKE_CURRENT_LIST_DIR}/Code/Engine/External/ImGui/cmake-ImGuiSourceFiles.cmake)
+include(${DEPENDENCIES_DIR}/ImGui/cmake-ImGuiSourceFiles.cmake)
+set(ImGui_Include_Dir ${DEPENDENCIES_DIR}/ImGui)
 
 # Setting Application source files to: APP_SOURCE_FILES
-set(APP_SOURCE_PATH Code/Application)
-include(${CMAKE_CURRENT_LIST_DIR}/Code/Application/cmake-ApplicationSourceFiles.cmake)
+set(APP_SOURCE_PATH ${CMAKE_CURRENT_LIST_DIR}/Code/Application)
+include(${APP_SOURCE_PATH}/cmake-ApplicationSourceFiles.cmake)
+
 
 
 # === LINKING ===
@@ -106,39 +141,55 @@ include(${CMAKE_CURRENT_LIST_DIR}/Code/Application/cmake-ApplicationSourceFiles.
 set(ALL_SOURCE_FILES ${ENGINE_SOURCE_FILES} ${IMGUI_SOURCE_FILES})
 
 add_library(${ENGINE_PROJECT} ${ALL_SOURCE_FILES})
-target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${ENGINE_SOURCE_PATH})
+
+#target_include_directories(${ENGINE_PROJECT} PRIVATE ${nlohmannJson_subDir}/include/)
+
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${ImGui_Include_Dir})
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${zlib_subDir} ${CMAKE_CURRENT_BINARY_DIR}/Code/Dependencies/zlib-1.3.1)
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${assimp_subDir}/include/)
+
+target_include_directories(${ENGINE_PROJECT} PRIVATE ${libktx_subDir}/lib/)
+
+
 
 add_executable(${APP_PROJECT} ${APP_SOURCE_FILES})
-target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Engine)
-target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Application)
+target_include_directories(${APP_PROJECT} PRIVATE ${ENGINE_SOURCE_PATH})
+target_include_directories(${APP_PROJECT} PRIVATE ${APP_SOURCE_PATH})
+target_include_directories(${APP_PROJECT} PRIVATE ${ImGui_Include_Dir})
 
+
+
+source_group(TREE ${APP_SOURCE_PATH} FILES ${APP_SOURCE_FILES})
+source_group(TREE ${ENGINE_SOURCE_PATH} FILES ${ENGINE_SOURCE_FILES})
 
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${APP_PROJECT})
-source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/${APP_SOURCE_PATH} FILES ${APP_SOURCE_FILES})
-source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/${ENGINE_SOURCE_PATH} FILES ${ALL_SOURCE_FILES})
 
-# include external librariy headers
-target_include_directories(${ENGINE_PROJECT} PRIVATE libs/assimp-src/include)
-target_include_directories(${ENGINE_PROJECT} PRIVATE ${ktx_software_subDir}lib/)
-target_include_directories(${ENGINE_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
-target_include_directories(${APP_PROJECT} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies/openCV/opencvBuild/install/include)
+
 # public for libraries that application also needs
 target_link_libraries(${ENGINE_PROJECT} PUBLIC
 glfw
 glm
-nlohmann_json::nlohmann_json
+nlohmann_json
 spdlog::spdlog_header_only
+
 )
+
 
 target_link_libraries(${ENGINE_PROJECT} PRIVATE
 OpenGL::GL
 glad
-assimp
-stbImage
-ktx
-${OpenCV_LIBS}
+
+zlibstatic
 tiff
+lodepng
+ktx
+OpenEXR
+stbImageWrite
+stbImageRead
+
+assimp
 )
 
 target_link_libraries(${APP_PROJECT} PRIVATE ${ENGINE_PROJECT} )

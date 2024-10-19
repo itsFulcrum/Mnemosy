@@ -52,7 +52,6 @@ namespace mnemosy::graphics
 
 		void SetNormalMapFormat(const NormalMapFormat& format);
 		void assignTexture(const PBRTextureType& pbrType, Texture* texture);
-		void assignTexture(const PBRTextureType& pbrType, const std::string& filePath);
 		void removeTexture(const PBRTextureType& pbrType);
 		void setMaterialUniforms(Shader& shader);
 

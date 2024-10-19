@@ -7,7 +7,7 @@
 #include <vector>
 #include <filesystem>
 
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 
 namespace mnemosy::systems
 {

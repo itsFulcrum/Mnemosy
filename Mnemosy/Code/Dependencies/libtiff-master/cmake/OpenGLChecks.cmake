@@ -43,8 +43,8 @@ check_include_file(GLUT/glut.h HAVE_GLUT_GLUT_H)
 check_include_file(OpenGL/gl.h HAVE_OPENGL_GL_H)
 check_include_file(OpenGL/glu.h HAVE_OPENGL_GLU_H)
 
-option(tiff-opengl "use OpenGL (required for tiffgt viewer)" ${HAVE_OPENGL})
+option(tiff_opengl "use OpenGL (required for tiffgt viewer)" ${HAVE_OPENGL})
 
-if (tiff-opengl AND HAVE_OPENGL)
+if (tiff_opengl AND HAVE_OPENGL)
     set(OPENGL_SUPPORT TRUE)
 endif()

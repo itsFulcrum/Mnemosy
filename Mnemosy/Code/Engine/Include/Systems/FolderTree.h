@@ -4,7 +4,7 @@
 
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 
 namespace mnemosy::systems {
 	struct MaterialInfo;

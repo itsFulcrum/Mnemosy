@@ -24,7 +24,7 @@ namespace mnemosy::core
 		const std::filesystem::path GetShadersPath();
 		const std::filesystem::path GetDocumentationFilesPath();
 		const std::filesystem::path GetUserLibDataFile();
-
+		const std::filesystem::path GetUserSettingsPath();
 
 		const std::filesystem::path GetLibraryDirectoryPath();
 

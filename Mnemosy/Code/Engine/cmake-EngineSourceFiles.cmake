@@ -79,8 +79,6 @@ ${ENGINE_SOURCE_PATH}/Include/Graphics/Material.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Material.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Camera.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Camera.cpp
-${ENGINE_SOURCE_PATH}/Include/Graphics/Image.h
-${ENGINE_SOURCE_PATH}/Src/Graphics/Image.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Cubemap.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Cubemap.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/ImageBasedLightingRenderer.h

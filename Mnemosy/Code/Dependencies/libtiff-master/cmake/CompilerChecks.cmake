@@ -30,10 +30,10 @@ include(CheckCCompilerFlag)
 # These are annoyingly verbose, produce false positives or don't work
 # nicely with all supported compiler versions, so are disabled unless
 # explicitly enabled.
-option(extra-warnings "Enable extra compiler warnings" OFF)
+option(tiff_extra-warnings "Enable extra compiler warnings" OFF)
 
 # This will cause the compiler to fail when an error occurs.
-option(fatal-warnings "Compiler warnings are errors" OFF)
+option(tiff_fatal-warnings "Compiler warnings are errors" OFF)
 
 # Check if the compiler supports each of the following additional
 # flags, and enable them if supported.  This greatly improves the
@@ -49,7 +49,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
             -Wdisabled-optimization
             -Wno-unknown-pragmas
             -fstrict-aliasing)
-    if(extra-warnings)
+    if(tiff_extra-warnings)
         list(APPEND test_flags
                 -pedantic
                 -Wextra
@@ -95,20 +95,20 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR
                 -Wmissing-prototypes
                 -Wunreachable-code)
     endif()
-    if(fatal-warnings)
+    if(tiff_fatal-warnings)
         list(APPEND test_flags
                 -Werror)
     endif()
 elseif(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     set(test_flags)
-    if(extra-warnings)
+    if(tiff_extra-warnings)
         list(APPEND test_flags
                 /W4)
     else()
         list(APPEND test_flags
                 /W3)
     endif()
-    if (fatal-warnings)
+    if (tiff_fatal-warnings)
         list(APPEND test_flags
                 /WX)
     endif()

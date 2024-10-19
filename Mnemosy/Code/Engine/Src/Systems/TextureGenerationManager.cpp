@@ -3,12 +3,14 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/FileDirectories.h"
 #include "Include/Core/Log.h"
-#include "Include/Graphics/Material.h"
-#include "Include/Graphics/TextureDefinitions.h"
-#include "Include/Graphics/Texture.h"
-#include "Include/Graphics/Shader.h"
-#include "Include/Graphics/Utils/KtxImage.h"
+
 #include "Include/Systems/ExportManager.h"
+
+#include "Include/Graphics/TextureDefinitions.h"
+#include "Include/Graphics/Utils/KtxImage.h"
+#include "Include/Graphics/Texture.h"
+#include "Include/Graphics/Material.h"
+#include "Include/Graphics/Shader.h"
 
 #include <glad/glad.h>
 
@@ -100,17 +102,21 @@ namespace mnemosy::systems
 		if (exportTexture) {
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
-			//fs::path p = fs::path(exportPath);
-			//exporter.ExportGlTexturePngOrTiff_Depricated(p, m_renderTexture_ID, width, height);
+			fs::path p = fs::path(exportPath);
+
+			// normal maps should always have RGB channels
+			graphics::TextureFormat channelFormat = graphics::TexUtil::get_channel_textureFormat(material.GetNormalTexture().GetTextureFormat());
+			graphics::TextureFormat format = graphics::TextureFormat::MNSY_RGB8;
+			if (channelFormat == graphics::TextureFormat::MNSY_R16) {
+				format = graphics::TextureFormat::MNSY_RGB16;
+			}
+			else if (channelFormat == graphics::TextureFormat::MNSY_R32) {
+				format = graphics::TextureFormat::MNSY_RGB32;
+			}
 
 
-			TextureExportInfo info = TextureExportInfo(std::string(exportPath), width, height, graphics::MNSY_RGB16);
-			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
-
-
-
-			//graphics::KtxImage img;
-			//img.ExportGlTexture(exportPath, m_renderTexture_ID, 3, width, height, graphics::MNSY_NORMAL, true);
+			TextureExportInfo info = TextureExportInfo(p, width, height, format,false);
+			exporter.GLTextureExport(m_renderTexture_ID, info,graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
 		}
 
 		// === END FRAME
@@ -118,8 +124,7 @@ namespace mnemosy::systems
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void TextureGenerationManager::InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture) {
-		
+	void TextureGenerationManager::InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture) {		
 		
 		MNEMOSY_ASSERT(material.isRoughnessAssigned(), "Check before calling this function if material has a roughness map");
 
@@ -136,7 +141,7 @@ namespace mnemosy::systems
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 		// Resize render texture
 		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGB, GL_FLOAT, nullptr); // TODO check if we can just change the parameters here
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, nullptr); 
 
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -149,7 +154,7 @@ namespace mnemosy::systems
 
 		// Setup Shader
 		m_pTextureGenShader->Use();
-		m_pTextureGenShader->SetUniformInt("_mode", 1); // _mode 0 is for filpping normal y channel
+		m_pTextureGenShader->SetUniformInt("_mode", 1); // _mode 1 is for inverting roughness
 
 		material.GetRoughnessTexture().BindToLocation(0);
 		m_pTextureGenShader->SetUniformInt("_texture0", 0);
@@ -171,11 +176,12 @@ namespace mnemosy::systems
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
 			
-			TextureExportInfo info = TextureExportInfo(std::string(exportPath),width,height,graphics::MNSY_R16);
+			graphics::TextureFormat format = graphics::TexUtil::get_channel_textureFormat(material.GetRoughnessTexture().GetTextureFormat());
 
-			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
+			std::filesystem::path p = { exportPath };
+			TextureExportInfo info = TextureExportInfo(p,width,height,format,false);
 
-			//exporter.ExportGlTexturePngOrTiff_Depricated(p, m_renderTexture_ID, width, height);
+			exporter.GLTextureExport(m_renderTexture_ID,info,graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
 		}
 
 		// === END FRAME
@@ -202,7 +208,7 @@ namespace mnemosy::systems
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 		// Resize render texture
 		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, width, height, 0, GL_RGBA, GL_UNSIGNED_SHORT, nullptr);
 
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -228,10 +234,12 @@ namespace mnemosy::systems
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
 
+			graphics::TextureFormat channelFormat = graphics::TexUtil::get_channel_textureFormat( material.GetAlbedoTexture().GetTextureFormat());
 
-			TextureExportInfo info = TextureExportInfo(std::string(exportPath), width, height, graphics::MNSY_R16);
 
-			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
+			std::filesystem::path p = { exportPath };
+			TextureExportInfo info = TextureExportInfo(p, width, height, channelFormat,false);
+			exporter.GLTextureExport(m_renderTexture_ID,info,graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
 		}
 
 		// === END FRAME
@@ -254,7 +262,7 @@ namespace mnemosy::systems
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 		// Resize render texture
 		glBindTexture(GL_TEXTURE_2D, m_renderTexture_ID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -283,7 +291,7 @@ namespace mnemosy::systems
 
 			if (channel_r_tex == nullptr) {
 
-				std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_R);
+				std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_R);
 				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 				channel_r_assignSampler = false;
 			}
@@ -320,7 +328,7 @@ namespace mnemosy::systems
 			graphics::Texture* channel_g_tex = material.GetTextureFromPackComponent(packComponent_G);
 
 			if (channel_g_tex == nullptr) {
-				std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_G);
+				std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_G);
 				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 				channel_g_assignSampler = false;
 			}
@@ -357,7 +365,7 @@ namespace mnemosy::systems
 			graphics::Texture* channel_b_tex = material.GetTextureFromPackComponent(packComponent_B);
 
 			if (channel_b_tex == nullptr) {
-				std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_B);
+				std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_B);
 				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 				channel_b_assignSampler = false;
 			}
@@ -395,7 +403,7 @@ namespace mnemosy::systems
 				graphics::Texture* channel_a_tex = material.GetTextureFromPackComponent(packComponent_A);
 
 				if (channel_a_tex == nullptr) {
-					std::string packComponentString = graphics::TextureDefinitions::GetNameOfPackComponent(packComponent_A);
+					std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_A);
 					MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 					channel_a_assignSampler = false;
 				}
@@ -418,16 +426,11 @@ namespace mnemosy::systems
 				else {
 					m_pTextureGenShader->SetUniformBool("_channel_a_invert", false);
 				}
-
 			}
 			else {
 
 				m_pTextureGenShader->SetUniformBool("_channel_a_isAssigned", false);
 			}
-
-
-
-
 		}
 
 		// DRAW CALL
@@ -444,13 +447,11 @@ namespace mnemosy::systems
 				Format = graphics::MNSY_RGB16;
 			}
 
+			std::filesystem::path p = { exportPath };
+			TextureExportInfo info = TextureExportInfo(p, width, height, Format,false);
 
-			TextureExportInfo info = TextureExportInfo(std::string(exportPath), width, height, Format);
-
-			exporter.ExportGlTexture_PngOrTiff(m_renderTexture_ID, info);
+			exporter.GLTextureExport(m_renderTexture_ID,info,graphics::PBRTextureType::MNSY_TEXTURE_NONE);
 		}
-
-
 
 
 		// === END FRAME

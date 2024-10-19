@@ -18,7 +18,7 @@
 namespace mnemosy::systems {
 
 	ThumbnailManager::ThumbnailManager() {
-	
+
 	}
 
 	ThumbnailManager::~ThumbnailManager() {

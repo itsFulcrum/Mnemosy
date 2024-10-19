@@ -8,8 +8,8 @@
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/FolderTreeNode.h"
 
-#include "External/ImGui/imgui.h"
-#include "External/ImGui/imgui_stdlib.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_stdlib.h"
 
 #include <string>
 #include <vector>

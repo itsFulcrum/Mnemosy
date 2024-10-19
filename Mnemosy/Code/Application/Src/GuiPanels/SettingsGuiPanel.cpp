@@ -19,7 +19,7 @@
 #include "Include/Graphics/Renderer.h"
 
 
-#include "External/ImGui/imgui.h"
+#include "ImGui/imgui.h"
 
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS

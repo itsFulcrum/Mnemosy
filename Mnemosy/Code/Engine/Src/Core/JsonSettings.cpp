@@ -7,10 +7,10 @@ namespace mnemosy::core
 
 	JsonSettings::JsonSettings(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
 
-		SettingsFileOpen(errorCheck, filepath, headerName,fileDescription);
+		FileOpen(errorCheck, filepath, headerName,fileDescription);
 	}
 
-	void JsonSettings::SettingsFileOpen(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
+	void JsonSettings::FileOpen(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
 
 		namespace fs = std::filesystem;
 
@@ -74,7 +74,7 @@ namespace mnemosy::core
 
 	}
 
-	void JsonSettings::SettingsFileClose(bool& errorCheck, const std::filesystem::path& filepath){
+	void JsonSettings::FileClose(bool& errorCheck, const std::filesystem::path& filepath){
 
 		errorCheck = true;
 
@@ -98,10 +98,11 @@ namespace mnemosy::core
 
 		outFileStream.close();
 
+		m_jsonObject.clear();
 		m_jsonObject = nlohmann::json();
 	}
 
-	void JsonSettings::SettingsFileWhipe(bool& errorCheck){
+	void JsonSettings::FileWhipe(bool& errorCheck){
 
 		errorCheck = true;
 		if(!m_fileIsOpen){
@@ -114,7 +115,7 @@ namespace mnemosy::core
 
 	}
 
-	void JsonSettings::SettingErase(bool& errorCheck, const std::string& name){
+	void JsonSettings::Entry_Erase(bool& errorCheck, const std::string& name){
 
 		errorCheck = true;
 
@@ -135,7 +136,7 @@ namespace mnemosy::core
 
 	}	
 
-	void JsonSettings::SettingsFilePrettyPrintSet(const bool prettyPrint){
+	void JsonSettings::FilePrettyPrintSet(const bool prettyPrint){
 		m_prettyPrint = prettyPrint;
 	}
 
@@ -145,7 +146,7 @@ namespace mnemosy::core
 
 
 // Write methods
-	void JsonSettings::SettingWriteBool(bool& errorCheck, const std::string& name, const bool value){
+	void JsonSettings::WriteBool(bool& errorCheck, const std::string& name, const bool value){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -155,7 +156,7 @@ namespace mnemosy::core
 		m_jsonObject[name] = value;
 	}
 
-	void JsonSettings::SettingWriteInt(bool& errorCheck, const std::string& name, const int value) {
+	void JsonSettings::WriteInt(bool& errorCheck, const std::string& name, const int value) {
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -165,7 +166,7 @@ namespace mnemosy::core
 		m_jsonObject[name] = value;
 	}
 
-	void JsonSettings::SettingWriteFloat(bool& errorCheck, const std::string& name, const float value) {
+	void JsonSettings::WriteFloat(bool& errorCheck, const std::string& name, const float value) {
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -175,7 +176,7 @@ namespace mnemosy::core
 		m_jsonObject[name] = value;
 	}
 	
-	void JsonSettings::SettingWriteString(bool& errorCheck, const std::string& name, const std::string& value) {
+	void JsonSettings::WriteString(bool& errorCheck, const std::string& name, const std::string& value) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -186,7 +187,7 @@ namespace mnemosy::core
 	}
 
 
-	void JsonSettings::SettingWriteVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& value) {
+	void JsonSettings::WriteVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& value) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -196,7 +197,7 @@ namespace mnemosy::core
 		m_jsonObject[name] = value;
 	}
 
-	void JsonSettings::SettingWriteVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& value) {
+	void JsonSettings::WriteVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& value) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -206,7 +207,7 @@ namespace mnemosy::core
 		m_jsonObject[name] = value;
 	}
 
-	void JsonSettings::SettingWriteVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& value) {
+	void JsonSettings::WriteVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& value) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -216,7 +217,7 @@ namespace mnemosy::core
 		m_jsonObject[name] = value;
 	}
 
-	void JsonSettings::SettingWriteVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& value) {
+	void JsonSettings::WriteVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& value) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -227,7 +228,7 @@ namespace mnemosy::core
 	}
 
 // Read Methods
-	bool JsonSettings::SettingReadBool(bool& errorCheck, const std::string& name, const bool defaultValue,const bool writeDefaultIfNotFound){
+	bool JsonSettings::ReadBool(bool& errorCheck, const std::string& name, const bool defaultValue,const bool writeDefaultIfNotFound){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -268,7 +269,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	int JsonSettings::SettingReadInt(bool& errorCheck, const std::string& name, const int defaultValue,const bool writeDefaultIfNotFound){
+	int JsonSettings::ReadInt(bool& errorCheck, const std::string& name, const int defaultValue,const bool writeDefaultIfNotFound){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -308,7 +309,7 @@ namespace mnemosy::core
 	}
 	
 
-	float JsonSettings::SettingReadFloat(bool& errorCheck, const std::string& name, const float defaultValue,const bool writeDefaultIfNotFound){
+	float JsonSettings::ReadFloat(bool& errorCheck, const std::string& name, const float defaultValue,const bool writeDefaultIfNotFound){
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -347,7 +348,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::string JsonSettings::SettingReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue,const bool writeDefaultIfNotFound) {
+	std::string JsonSettings::ReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue,const bool writeDefaultIfNotFound) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -386,7 +387,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<bool> JsonSettings::SettingReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue,const bool writeDefaultIfNotFound) {
+	std::vector<bool> JsonSettings::ReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue,const bool writeDefaultIfNotFound) {
 
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -425,7 +426,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<int> JsonSettings::SettingReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue,const bool writeDefaultIfNotFound) {
+	std::vector<int> JsonSettings::ReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue,const bool writeDefaultIfNotFound) {
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -463,7 +464,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<float> JsonSettings::SettingReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue,const bool writeDefaultIfNotFound){
+	std::vector<float> JsonSettings::ReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue,const bool writeDefaultIfNotFound){
 		
 		if(!m_fileIsOpen){
 			errorCheck = false;
@@ -501,7 +502,7 @@ namespace mnemosy::core
 		return output;
 	}
 
-	std::vector<std::string> JsonSettings::SettingReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue,const bool writeDefaultIfNotFound){
+	std::vector<std::string> JsonSettings::ReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue,const bool writeDefaultIfNotFound){
 
 		if(!m_fileIsOpen){
 			errorCheck = false;

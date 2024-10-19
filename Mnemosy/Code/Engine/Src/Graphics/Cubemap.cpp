@@ -5,11 +5,14 @@
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
-#include "Include/Graphics/Image.h"
+//#include "Include/Graphics/Image.h"
 #include "Include/Graphics/Utils/KtxImage.h"
+
+#include "Include/Graphics/Utils/Picture.h"
 
 #include <glad/glad.h>
 #include <memory>
+#include <filesystem>
 
 namespace mnemosy::graphics
 {
@@ -38,24 +41,70 @@ namespace mnemosy::graphics
 		
 		bool loadingSuccessfull = false;
 		{
-			// TODO : Load using OpenCV not stbImage -> move all image loading to either ktx or OpenCv 
-			std::unique_ptr<Image>  img = std::make_unique<Image>();
-			bool successfull = img->LoadImageFromFileFLOAT(imagePath, false);
-			if (!successfull) {
-				MNEMOSY_ERROR("Failed to load image from file: {}", imagePath);
+			graphics::PictureError errorCheck;
+						
+			graphics::PictureInfo info = graphics::Picture::ReadPicture(errorCheck, imagePath, false,PBRTextureType::MNSY_TEXTURE_NONE);
+
+			if (!errorCheck.wasSuccessfull) {
+
+				MNEMOSY_ERROR("Failed to load image from file: {} Message: {}", imagePath, errorCheck.what);
 				loadingSuccessfull = false;
 				return loadingSuccessfull;
 			}
 
 			glGenTextures(1, &m_equirectangularTextureID);
 			glBindTexture(GL_TEXTURE_2D, m_equirectangularTextureID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, img->width, img->height, 0, GL_RGB, GL_FLOAT, img->imageDataFLOAT); // upload data to gpu
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+				
+			graphics::TextureFormat format = info.textureFormat;
+
+			uint16_t width = info.width;
+			uint16_t height = info.height;
+
+			size_t halfFloatType = GL_UNSIGNED_SHORT;
+			if (info.isHalfFloat) {
+				halfFloatType = GL_HALF_FLOAT;
+			}
+
+			bool invalidFormat = false;
+			switch (format)
+			{
+			case graphics::MNSY_NONE:	invalidFormat = true;	break;
+				// 8 bit
+			case graphics::MNSY_R8:		invalidFormat = true;	break;
+			case graphics::MNSY_RG8:	invalidFormat = true;	break;
+			case graphics::MNSY_RGB8:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8	, width, height, 0, GL_RGB , GL_UNSIGNED_BYTE, info.pixels);	break;
+			case graphics::MNSY_RGBA8:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8	, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, info.pixels);	break;
+				// 16 bit
+			case graphics::MNSY_R16:	invalidFormat = true;	break;
+			case graphics::MNSY_RG16:	invalidFormat = true;	break;
+			case graphics::MNSY_RGB16:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16	, width, height, 0, GL_RGB , halfFloatType, info.pixels);	break;
+			case graphics::MNSY_RGBA16:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, width, height, 0, GL_RGBA, halfFloatType, info.pixels);	break;
+				// 32 bit
+			case graphics::MNSY_R32:	invalidFormat = true;	break;
+			case graphics::MNSY_RG32:	invalidFormat = true;	break;
+			case graphics::MNSY_RGB32:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F , width, height, 0, GL_RGB , GL_FLOAT, info.pixels);	break;
+			case graphics::MNSY_RGBA32:	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, info.pixels);	break;
+
+			default:break;
+			}
+
+			free(info.pixels);
+				
+			if (invalidFormat) {
+				MNEMOSY_ERROR("Failed to load image from file: {} - the image has an invalid format for use as a skybox, Format: {}", imagePath, graphics::TexUtil::get_string_from_textureFormat(format));
+				loadingSuccessfull = false;
+				glDeleteTextures(1, &m_equirectangularTextureID);
+				return false;
+			}
+
 			glGenerateMipmap(GL_TEXTURE_2D);
 			m_equirectangularTexture_isGenerated = true;
+
 		}
 		
 		// Generate Convolution maps

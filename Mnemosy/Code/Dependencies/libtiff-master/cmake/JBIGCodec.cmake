@@ -39,9 +39,9 @@ if(JBIG_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
 endif()
 
-option(jbig "use ISO JBIG compression (requires JBIT-KIT library)" ${JBIG_FOUND})
+option(tiff_jbig "use ISO JBIG compression (requires JBIT-KIT library)" ${JBIG_FOUND})
 
-if (jbig AND JBIG_FOUND)
+if (tiff_jbig AND JBIG_FOUND)
     set(JBIG_SUPPORT TRUE)
 endif()
 

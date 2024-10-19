@@ -63,7 +63,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtiff-4.pc.in
         ${CMAKE_CURRENT_BINARY_DIR}/libtiff-4.pc @ONLY)
 
 # Install pkg-config file
-if (tiff-install)
+if (tiff_install)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtiff-4.pc
             DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()

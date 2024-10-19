@@ -57,8 +57,8 @@ if(ZSTD_FOUND)
     endif()
 endif()
 
-option(zstd "use libzstd (required for ZSTD compression)" ${ZSTD_USABLE})
+option(tiff_zstd "use libzstd (required for ZSTD compression)" ${ZSTD_USABLE})
 
-if (zstd AND ZSTD_USABLE)
+if (tiff_zstd AND ZSTD_USABLE)
     set(ZSTD_SUPPORT TRUE)
 endif()

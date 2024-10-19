@@ -3,8 +3,8 @@
 
 #include "Include/Gui/GuiPanel.h"
 
-#include "External/ImGui/imgui.h"
-#include "External/ImGui/imgui_stdlib.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_stdlib.h"
 
 #include <vector>
 #include <string>
@@ -51,35 +51,6 @@ namespace mnemosy::gui
 		ImVec2 m_buttonSizeLoad = ImVec2(120, 0);
 		ImVec2 m_buttonSizeDelete = ImVec2(80, 0);
 		ImVec2 m_buttonDrag = ImVec2(120.0f, 45.0f);
-
-
-		const char* m_normalMapFormats[2] = { "OpenGl", "DirectX" }; // they need to be ordered the same as in material NormalMapFormat Enum
-		const char* m_exportFormats[2] = { "tiff","png" }; // they need to be ordered the same as in ExportManager ExportImageFormats
-
-		const char* m_packTypes[2] = { "R+G+B", "R+G+B+A" }; // they need to be orderd the same as ChannelPackType in texture definitions
-		// they need to be orderd the same as ChannelPackComponent in texture definitions
-		const char* m_packComponents[16] =
-		{
-			"None",
-			"Albedo R",
-			"Albedo G",
-			"Albedo B",
-
-			"Normal R",
-			"Normal G",
-			"Normal B",
-			
-			"Emmissive R",
-			"Emmissive G",
-			"Emmissive B",
-
-			"Roughness",
-			"Smoothness",
-			"Metallic",
-			"Ambient Occlusion",
-			"Height",
-			"Opacity"
-		};
 
 		ImGuiInputTextFlags m_textInputFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;
 

@@ -3,8 +3,8 @@
 
 #include "Include/Gui/GuiPanel.h"
 
-#include "External/ImGui/imgui.h"
-#include "External/ImGui/imgui_stdlib.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_stdlib.h"
 
 
 #include <vector>

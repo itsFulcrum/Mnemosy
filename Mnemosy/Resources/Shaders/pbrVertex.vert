@@ -53,13 +53,13 @@ void main()
 
 
 	vec3 T = normalize(vec3(_normalMatrix * vec4(aTangent,   0.0)));
-  vec3 B = normalize(vec3(_normalMatrix * vec4(aBitangent, 0.0)));
-  vec3 N = normalize(vec3(_normalMatrix * vec4(aNormal,    0.0)));
-  tangentToWorldMatrix = mat3(T, B, N);
+  	vec3 B = normalize(vec3(_normalMatrix * vec4(aBitangent, 0.0)));
+  	vec3 N = normalize(vec3(_normalMatrix * vec4(aNormal,    0.0)));
+  	tangentToWorldMatrix = mat3(T, B, N);
 
 	//vec3 T1 = normalize(vec3(_modelMatrix * vec4(aTangent,   0.0)));
-  //vec3 B1 = normalize(vec3(_modelMatrix * vec4(aBitangent, 0.0)));
-  //vec3 N1 = normalize(vec3(_modelMatrix * vec4(aNormal,    0.0)));
+  	//vec3 B1 = normalize(vec3(_modelMatrix * vec4(aBitangent, 0.0)));
+  	//vec3 N1 = normalize(vec3(_modelMatrix * vec4(aNormal,    0.0)));
 	//TBN = transpose(mat3(T1, B1, N1));
 	TBN = transpose(tangentToWorldMatrix);
 }

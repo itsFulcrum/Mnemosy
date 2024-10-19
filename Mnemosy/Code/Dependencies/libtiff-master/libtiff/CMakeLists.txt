@@ -136,7 +136,8 @@ set(tiff_libs_private_list "") # cmake list
 set(tiff_requires_private "") # cmake string
 
 if(ZIP_SUPPORT)
-  target_link_libraries(tiff PRIVATE ZLIB::ZLIB)
+  target_link_libraries(tiff PRIVATE zlibstatic)  ## Modified be mnemosy because it cant find zconf.h otherwise..
+  #target_link_libraries(tiff PRIVATE ZLIB::ZLIB)
   string(APPEND tiff_requires_private " zlib")
 endif()
 if(ZIP_SUPPORT AND LIBDEFLATE_SUPPORT)
@@ -205,7 +206,7 @@ if(HAVE_LD_VERSION_SCRIPT)
                         "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiff.map")
 endif()
 
-if(tiff-install)
+if(tiff_install)
   export(TARGETS tiff NAMESPACE TIFF:: FILE "${CMAKE_CURRENT_BINARY_DIR}/libtiffTargets.cmake")
   install(TARGETS tiff EXPORT TiffTargets
           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -264,7 +265,7 @@ if(CXX_SUPPORT)
                           "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiffxx.map")
   endif()
 
-  if(tiff-install)
+  if(tiff_install)
     install(TARGETS tiffxx
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

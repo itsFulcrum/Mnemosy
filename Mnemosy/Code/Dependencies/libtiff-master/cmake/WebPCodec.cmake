@@ -28,8 +28,8 @@ set(WEBP_SUPPORT FALSE)
 
 find_package(WebP)
 
-option(webp "use libwebp (required for WEBP compression)" ${WebP_FOUND})
+option(tiff_webp "use libwebp (required for WEBP compression)" ${WebP_FOUND})
 
-if (webp AND WebP_FOUND)
+if (tiff_webp  AND WebP_FOUND)
     set(WEBP_SUPPORT TRUE)
 endif()

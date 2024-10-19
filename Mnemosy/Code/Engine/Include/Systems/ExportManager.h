@@ -26,18 +26,19 @@ namespace mnemosy::systems
 		
 		TextureExportInfo() = default;
 
-		TextureExportInfo(std::string _exportPath, unsigned int _width, unsigned int _height, graphics::TextureFormat _textureFormat)
+		TextureExportInfo(std::filesystem::path _exportPath, uint16_t _width, uint16_t _height, graphics::TextureFormat _textureFormat,bool _isHalfFloat)
 			: path{ _exportPath }
 			, width{_width}
 			, height{_height}
 			, textureFormat{_textureFormat}
+			, isHalfFloat{_isHalfFloat}
 		{}
 
-		std::string path;
-		unsigned int width;
-		unsigned int height;
+		std::filesystem::path path;
+		uint16_t width;
+		uint16_t height;
 		graphics::TextureFormat textureFormat;
-		graphics::ImageFileType imageFileType;
+		bool isHalfFloat; // half float here deterimines not the source data but in what data we want to export, important for .exr images
 	};
 
 
@@ -50,33 +51,26 @@ namespace mnemosy::systems
 
 		bool ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
 
+		void GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo, graphics::PBRTextureType PBRTypeHint);
 		
-		void SetExportImageFormat(graphics::ExportImageFormat format) { m_exportImageFormat = format; }
-		const graphics::ExportImageFormat GetExportImageFormat() { return m_exportImageFormat; }
 
+		// Export settings
 
+		// TODO load and save them across sessions
 
+		const graphics::ImageFileFormat GetExportImageFormat() { return m_exportFileFormat; }
+		void SetExportImageFormat(graphics::ImageFileFormat format) { m_exportFileFormat = format; }
 
-
-		//void SetNormalMapExportFormatInt(int format);
-		void SetNormalMapExportFormat(graphics::NormalMapFormat format) { m_exportNormalFormat = format; }
 		graphics::NormalMapFormat GetNormalMapExportFormat() { return m_exportNormalFormat; }
-
-
-		void GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo);
-		void ExportGlTexture_PngOrTiff(const int glTextureId,TextureExportInfo& exportInfo);
+		void SetNormalMapExportFormat(graphics::NormalMapFormat format) { m_exportNormalFormat = format; }
 
 
 		void SetExportRoughnessAsSmoothness(bool exportRoughAsSmooth) { m_exportRoughnessAsSmoothness = exportRoughAsSmooth; }
 		bool GetExportRoughnessAsSmoothness() { return m_exportRoughnessAsSmoothness; }
 
 	private:
-		void ExportAsKtx2(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material);
-
-		std::string GetExportNormalFormatString();
-		std::string GetExportImageFormatString();
-
-		graphics::ExportImageFormat m_exportImageFormat;
+		
+		graphics::ImageFileFormat m_exportFileFormat;
 		graphics::NormalMapFormat m_exportNormalFormat;
 		bool m_exportRoughnessAsSmoothness;
 	};

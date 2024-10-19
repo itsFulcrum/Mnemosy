@@ -27,7 +27,7 @@
 # Option for Pixar log-format algorithm
 # Pixar log format
 set(PIXARLOG_SUPPORT FALSE)
-option(pixarlog "support for Pixar log-format algorithm (requires Zlib)" ${ZLIB_SUPPORT})
-if(pixarlog AND ZLIB_SUPPORT)
+option(tiff_pixarlog "support for Pixar log-format algorithm (requires Zlib)" ${ZLIB_SUPPORT})
+if(tiff_pixarlog AND ZLIB_SUPPORT)
     set(PIXARLOG_SUPPORT TRUE)
 endif()

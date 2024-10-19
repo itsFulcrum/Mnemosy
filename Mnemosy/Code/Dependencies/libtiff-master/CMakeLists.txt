@@ -24,10 +24,16 @@
 # LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
 # OF THIS SOFTWARE.
 
-cmake_minimum_required(VERSION 3.9.0)
+### NOTICE
+# This file was slightly modified by Mnemosy because some of the tiff options are not prefixed with tiff plus zlib was not properly linked to 
+
+
+cmake_minimum_required(VERSION 3.25)
+
+
 
 # Default policy is from 3.9.0
-cmake_policy(VERSION 3.9.0)
+#cmake_policy(VERSION 3.9.0)
 
 # Find CMake modules in cmake/
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -38,9 +44,14 @@ message(STATUS "Building tiff version ${LIBTIFF_VERSION_FULL}")
 
 # Project definition
 set(CMAKE_C_STANDARD 99)
+
 project(tiff
         VERSION "${LIBTIFF_VERSION}"
         LANGUAGES C CXX)
+# cmake_policy(PUSH)
+#     cmake_policy(SET CMP0074 NEW)
+# cmake_policy(POP)
+
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
   # libtiff is being included as a subproject of some other project.
@@ -50,15 +61,15 @@ else()
   option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 endif()
 
-option(tiff-tools "build TIFF tools" ON)
-option(tiff-tests "build TIFF tests" ON)
-option(tiff-contrib "build TIFF contrib" ON)
-option(tiff-docs "build TIFF documentation" ON)
-option(tiff-deprecated "build TIFF deprecated features" OFF)
-option(tiff-install "install TIFF targets" ${TIFF_INSTALL_DEFAULT})
+option(tiff_tools "build TIFF tools" ON)
+option(tiff_tests "build TIFF tests" ON)
+option(tiff_contrib "build TIFF contrib" ON)
+option(tiff_docs "build TIFF documentation" ON)
+option(tiff_deprecated "build TIFF deprecated features" OFF)
+option(tiff_install "install TIFF targets" ${TIFF_INSTALL_DEFAULT})
 
 # Disable deprecated features to ensure clean build
-if (tiff-deprecated)
+if (tiff_deprecated)
   add_definitions(-DTIFF_DISABLE_DEPRECATED)
 endif()
 
@@ -143,17 +154,18 @@ include(Release)
 # Process subdirectories
 add_subdirectory(port)
 add_subdirectory(libtiff)
-if(tiff-tools)
+
+if(tiff_tools)
   add_subdirectory(tools)
 endif()
-if(tiff-tests)
+if(tiff_tests)
   add_subdirectory(test)
 endif()
-if(tiff-contrib)
+if(tiff_contrib)
   add_subdirectory(contrib)
 endif()
 add_subdirectory(build)
-if(tiff-docs)
+if(tiff_docs)
   add_subdirectory(doc)
 endif()
 
@@ -175,11 +187,11 @@ message(STATUS "  Documentation directory:            ${LIBTIFF_DOCDIR}")
 message(STATUS "  C compiler:                         ${CMAKE_C_COMPILER}")
 message(STATUS "  C++ compiler:                       ${CMAKE_CXX_COMPILER}")
 message(STATUS "  Build shared libraries:             ${BUILD_SHARED_LIBS}")
-message(STATUS "  Build tools:                        ${tiff-tools}")
-message(STATUS "  Build tests:                        ${tiff-tests}")
-message(STATUS "  Build contrib:                      ${tiff-contrib}")
-message(STATUS "  Build docs:                         ${tiff-docs}")
-message(STATUS "  Build deprecated features:          ${tiff-deprecated}")
+message(STATUS "  Build tools:                        ${tiff_tools}")
+message(STATUS "  Build tests:                        ${tiff_tests}")
+message(STATUS "  Build contrib:                      ${tiff_contrib}")
+message(STATUS "  Build docs:                         ${tiff_docs}")
+message(STATUS "  Build deprecated features:          ${tiff_deprecated}")
 message(STATUS "  Enable linker symbol versioning:    ${HAVE_LD_VERSION_SCRIPT}")
 message(STATUS "  Support Microsoft Document Imaging: ${mdi}")
 message(STATUS "  Use win32 IO:                       ${USE_WIN32_FILEIO}")
@@ -193,11 +205,11 @@ message(STATUS "  NeXT 2-bit RLE algorithm:           ${next}")
 message(STATUS "  LogLuv high dynamic range encoding: ${logluv}")
 message(STATUS "")
 message(STATUS " Support for external codecs:")
-message(STATUS "  ZLIB support:                       Requested:${zlib} Availability:${ZLIB_FOUND} Support:${ZLIB_SUPPORT}")
+message(STATUS "  ZLIB support:                       Requested:${tiff_zlib} Availability:${ZLIB_FOUND} Support:${ZLIB_SUPPORT}")
 if(ZLIB_SUPPORT)
-  message(STATUS "  libdeflate support:                 Requested:${libdeflate} Availability:${DEFLATE_FOUND} Support:${LIBDEFLATE_SUPPORT}")
+  message(STATUS "  libdeflate support:                 Requested:${tiff_libdeflate} Availability:${DEFLATE_FOUND} Support:${LIBDEFLATE_SUPPORT}")
 else()
-  message(STATUS "  libdeflate support:                 Requested:${libdeflate} Availability:${DEFLATE_FOUND} Support:${LIBDEFLATE_SUPPORT} (Depends on ZLIB Support)")
+  message(STATUS "  libdeflate support:                 Requested:${tiff_libdeflate} Availability:${DEFLATE_FOUND} Support:${LIBDEFLATE_SUPPORT} (Depends on ZLIB Support)")
 endif()
 if(ZLIB_SUPPORT)
   message(STATUS "  Pixar log-format algorithm:         Requested:${pixarlog} Availability:${ZLIB_FOUND} Support:${PIXARLOG_SUPPORT}")
@@ -228,5 +240,5 @@ message(STATUS "")
 message(STATUS "  C++ support:                        ${cxx} (requested) ${CXX_SUPPORT} (availability)")
 message(STATUS "")
 # message(STATUS "  X Athena Widgets support:           ${HAVE_XAW}")
-message(STATUS "  OpenGL support:                     Requested:${tiff-opengl} Availability:${HAVE_OPENGL} Support:${OPENGL_SUPPORT}")
+message(STATUS "  OpenGL support:                     Requested:${tiff_opengl} Availability:${HAVE_OPENGL} Support:${OPENGL_SUPPORT}")
 message(STATUS "")
