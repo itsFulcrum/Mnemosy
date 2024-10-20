@@ -1,6 +1,0 @@
-{
-    "1_Header": "Mnemosy Settings File",
-    "2_Description": "Stores Render Settings",
-    "renderSettings_MSAA": 4,
-    "renderSettings_ThumbnailResolution": 256
-}

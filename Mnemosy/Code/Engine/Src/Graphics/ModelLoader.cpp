@@ -19,7 +19,7 @@ namespace mnemosy::graphics
 	{
 
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_CalcTangentSpace );
 		//const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 		// could use several options such as | aiProcess_GenNormals, aiProcess_OptimizeMeshes,aiProcess_SplitLargeMeshes,aiProcess_FlipUVs
 		// importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenNormals );

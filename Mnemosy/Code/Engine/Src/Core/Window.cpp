@@ -188,10 +188,7 @@ namespace mnemosy::core
 		m_viewportData.posX = viewStartPosX;
 		m_viewportData.posY = viewStartPosY;
 	}
-	void Window::SetWindowSize_InternalByIntputSystem(const unsigned int width, const unsigned int height)
-	{
-
-		//MNEMOSY_DEBUG("Window::SetWindowSize to width: {} Height: {} ", width, height);
+	void Window::SetWindowSize_InternalByIntputSystem(const unsigned int width, const unsigned int height) {
 		m_currentWindowWidth = width;
 		m_currentWindowHeight = height;
 	}

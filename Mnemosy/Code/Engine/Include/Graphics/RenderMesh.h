@@ -13,7 +13,6 @@ namespace mnemosy::graphics
 
 	class RenderMesh {
 	public:
-		RenderMesh();
 		RenderMesh(const char* path);
 		~RenderMesh();
 
@@ -23,7 +22,7 @@ namespace mnemosy::graphics
 		Transform transform;
 	
 	private:
-		void ClearModelData();
+		//void ClearModelData();
 		
 		uint16_t m_modelData_id;
 

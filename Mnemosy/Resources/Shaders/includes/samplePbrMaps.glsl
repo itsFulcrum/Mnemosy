@@ -74,8 +74,10 @@ precision highp float;
   {
     vec3 normalMap = texture(normalSampler,uv).xyz;
     normalMap = lerp(normalMap.xyz, vec3(0.5f,0.5f,1.0f),normalValue);
+
+    //normalMap.y = 1 - normalMap.y;
     // convert 0 to 1 range to -1 to 1
-    normalMap = normalize(normalMap * 2 - 1);
+    normalMap = normalMap * 2 - 1;//normalize(normalMap * 2 - 1);
 
     //normalMap = NormalStrengthSpherical(normalMap,strength); // unity version looks better than using spherical coords and is also much faster
     normalMap = vec3(normalMap.xy * strength,mix(1,normalMap.z,clamp(strength,0,1)));

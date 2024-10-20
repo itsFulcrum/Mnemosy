@@ -63,8 +63,6 @@ namespace mnemosy::systems {
 		graphics::ModelLoader modelLoader;
 		graphics::ModelData* model = modelLoader.LoadModelDataFromFile(filepath.c_str());
 
-		//MNEMOSY_DEBUG("MeshRegistry::LoadMesh: Loaded Mesh {}", filepath)
-
 		m_loadedMeshes.push_back(model);
 		m_loadedMeshesPaths.push_back(filepath);
 
