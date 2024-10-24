@@ -1,7 +1,7 @@
 #include "Include/Core/FileDirectories.h"
 
 #include "Include/Core/Log.h"
-#include "Include/Core/JsonSettings.h"
+//#include "Include/Core/JsonSettings.h"
 
 #include <json.hpp>
 #include <fstream>
@@ -242,7 +242,7 @@ namespace mnemosy::core
 		namespace fs = std::filesystem;
 
 		bool success;
-		JsonSettings libDir;
+		flcrm::JsonSettings libDir;
 
 		fs::path dataFilePath = m_mnemosyLibraryDataFile.path();
 
@@ -369,22 +369,22 @@ namespace mnemosy::core
 
 		bool success;
 
-		JsonSettings libDir;
+		flcrm::JsonSettings libDirFile;
 
 		std::filesystem::path dataFilePath = m_mnemosyLibraryDataFile.path();
 
 		//std::filesystem::path libDirPath = libraryDirectoryPath.path();
 
-		libDir.FilePrettyPrintSet(true);
+		libDirFile.FilePrettyPrintSet(true);
 
-		libDir.FileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
+		libDirFile.FileOpen(success, dataFilePath, "Mnemosy Data File", "This Stores the path to the current library directory");
 		if(!success){
-			MNEMOSY_WARN("FileDirectories::SaveUserLibrary: Failed to open library directory data file. Message: {}", libDir.ErrorStringLastGet());
+			MNEMOSY_WARN("FileDirectories::SaveUserLibrary: Failed to open library directory data file. Message: {}", libDirFile.ErrorStringLastGet());
 		}
 
-		libDir.WriteString(success,"libraryDirectory",libraryDirectoryPath.path().generic_string());
+		libDirFile.WriteString(success,"libraryDirectory",libraryDirectoryPath.path().generic_string());
 
-		libDir.FileClose(success,dataFilePath);
+		libDirFile.FileClose(success,dataFilePath);
 
 		return;
 

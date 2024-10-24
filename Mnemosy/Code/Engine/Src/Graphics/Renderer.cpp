@@ -4,7 +4,8 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
-#include "Include/Core/JsonSettings.h"
+#include <json.hpp>
+
 
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Camera.h"
@@ -725,7 +726,7 @@ namespace mnemosy::graphics
 
 		float waitTime = 5.0f;
 #ifdef MNEMOSY_CONFIG_DEBUG
-		waitTime = 1.0f;
+		waitTime = 0.5f;
 #endif // MNEMOSY_CONFIG_DEBUG
 
 
@@ -814,7 +815,7 @@ namespace mnemosy::graphics
 
 		bool success;
 
-		core::JsonSettings renderSettings;
+		flcrm::JsonSettings renderSettings;
 		renderSettings.FileOpen(success,renderSettingsFilePath,"Mnemosy Settings File","Stores Render Settings");
 		if (!success) {
 			MNEMOSY_ERROR("Rederer: Faild to open user settings file: {}", renderSettings.ErrorStringLastGet());
@@ -875,7 +876,7 @@ namespace mnemosy::graphics
 
 		bool success;
 
-		core::JsonSettings renderSettings;
+		flcrm::JsonSettings renderSettings;
 		renderSettings.FileOpen(success, renderSettingsFilePath, "Mnemosy Settings File", "Stores Render Settings");
 
 		renderSettings.WriteInt(success, "renderSettings_MSAA", Msaa);

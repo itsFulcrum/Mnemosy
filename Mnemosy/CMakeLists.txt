@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD 20)
 
 
-## to build use command:
-# cmake --build . --target Mnemosy --config release
-# cmake --build . --target Mnemosy --config debug
+# Command - Generate build files
+# /Mnemosy: cmake -B Solution -G "Visual Studio 17 2022"
+
+# Command - Build project:
+# /Mnemosy/Solution: cmake --build . --target Mnemosy --config release
+# /Mnemosy/Solution: cmake --build . --target Mnemosy --config debug
 
 set(ENGINE_PROJECT "MnemosyEngine")
 set(APP_PROJECT "Mnemosy")

@@ -5,8 +5,8 @@
 #define MNEMOSY_VERSION_MINOR 7
 #define MNEMOSY_VERSION_SUFFIX "alpha"
 
-#define MNEMOSY_CONFIG_DEBUG
-//#define MNEMOSY_CONFIG_RELEASE
+//#define MNEMOSY_CONFIG_DEBUG
+#define MNEMOSY_CONFIG_RELEASE
 
 
 // only tested on widows so far

@@ -5,7 +5,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
 #include "Include/Core/FileDirectories.h"
-#include "Include/Core/JsonSettings.h"
+#include <json.hpp>
 
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/TextureDefinitions.h"
@@ -421,7 +421,7 @@ namespace mnemosy::systems {
 			fs::path oldDataFilePath = materialDir / fs::path(oldName + ".mnsydata");
 
 			bool success = false;
-			core::JsonSettings matFile;
+			flcrm::JsonSettings matFile;
 
 			matFile.FileOpen(success,oldDataFilePath,jsonMatKey_header,jsonMatKey_description);
 			if(!success)
@@ -792,7 +792,7 @@ namespace mnemosy::systems {
 
 		bool success = false;
 
-		core::JsonSettings matFile;
+		flcrm::JsonSettings matFile;
 		matFile.FileOpen(success, dataFile, jsonMatKey_header, jsonMatKey_description);
 		if (!success) {
 			MNEMOSY_WARN("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error opening data file: {} \nMessage: {}", dataFile.generic_string(), matFile.ErrorStringLastGet());
@@ -826,7 +826,7 @@ namespace mnemosy::systems {
 					}
 					else {
 						matFile.WriteBool(success, jsonMatKey_hasChannelPacked, false);
-						matFile.Entry_Erase(success, jsonMatKey_packedSuffixes);
+						matFile.EntryErase(success, jsonMatKey_packedSuffixes);
 					}
 
 				}
@@ -1185,7 +1185,7 @@ namespace mnemosy::systems {
 
 		bool success = false;
 
-		core::JsonSettings matFile;		
+		flcrm::JsonSettings matFile;		
 		matFile.FileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
 		if(!success){
 			MNEMOSY_WARN("MaterialLibraryRegistry::SaveActiveMaterialToFile: Failed to open material data file. msg: {}", matFile.ErrorStringLastGet());		
@@ -1199,7 +1199,7 @@ namespace mnemosy::systems {
 			matFile.WriteVectorString(success,jsonMatKey_packedSuffixes, activeMat.PackedTexturesSuffixes);
 		}
 
-		matFile.Entry_Erase(success,"1_Mnemosy_Data_File"); // keep this here for now but this key is not longer needed and depricated
+		matFile.EntryErase(success,"1_Mnemosy_Data_File"); // keep this here for now but this key is not longer needed and depricated
 
 		matFile.WriteString(success,jsonMatKey_name, activeMat.Name);
 		
@@ -1272,7 +1272,6 @@ namespace mnemosy::systems {
 		MnemosyEngine::GetInstance().GetScene().SetMaterial(defaultMaterial);
 	}
 
-	// TODO: 
 	void MaterialLibraryRegistry::LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::filesystem::path& filepath) {
 
 		namespace fs = std::filesystem;
@@ -1376,7 +1375,7 @@ namespace mnemosy::systems {
 
 
 		// update Material Meta data file.
-		core::JsonSettings matFile;
+		flcrm::JsonSettings matFile;
 		bool success = false;
 
 		matFile.FileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
@@ -1420,7 +1419,7 @@ namespace mnemosy::systems {
 
 		bool success = false;
 
-		core::JsonSettings matFile;
+		flcrm::JsonSettings matFile;
 		matFile.FileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
 
 
@@ -1700,7 +1699,7 @@ namespace mnemosy::systems {
 
 		bool success = false;
 
-		core::JsonSettings matFile;		
+		flcrm::JsonSettings matFile;		
 		matFile.FileOpen(success, materialDataFilePath, jsonMatKey_header, jsonMatKey_description);
 
 

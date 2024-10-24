@@ -25445,3 +25445,732 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 
 
 #endif  // INCLUDE_NLOHMANN_JSON_HPP_
+
+
+
+// ==========================================================================================================
+// ==========================================================================================================
+// ==========================================================================================================
+
+//              END NLOHMANN JSON
+
+// ==========================================================================================================
+// ==========================================================================================================
+// ==========================================================================================================
+
+
+
+// The following part is a wrapper around the nlohmann json library written NOT by the original author but licenced under the same MIT license
+// How to use is at the vary bottom of this file.
+
+
+/*
+
+MIT License 
+
+Copyright (c) 2024 Janis Civan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+
+
+
+
+#ifndef JSON_SETTINGS_H
+#define JSON_SETTINGS_H
+
+// HOW TO USE AT THE BOTTOM OF THE FILE
+
+#include <filesystem>
+#include <string>
+#include <vector>
+#include <fstream>
+
+
+namespace flcrm {
+
+    class JsonSettings {
+
+    public:
+        JsonSettings(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
+            FileOpen(errorCheck, filepath, headerName,fileDescription);
+        }
+
+        JsonSettings() = default;
+        ~JsonSettings() = default;
+
+        void FileOpen(bool& errorCheck, const std::filesystem::path& filepath, const std::string& headerName, const std::string& fileDescription){
+            namespace fs = std::filesystem;
+
+            errorCheck = true;
+
+            if(m_fileIsOpen){
+
+                errorCheck = false;
+                m_lastErrorString = "file is already open - it has to be closed first";
+                return;
+            }
+
+            if (!filepath.has_extension()) {
+                errorCheck = false;
+                m_lastErrorString = "filepath is pointing to a folder not a file: " + filepath.generic_string();
+                m_fileIsOpen = false;
+                return;
+            }
+
+            fs::directory_entry settingsFile;
+
+            try {
+                settingsFile = fs::directory_entry(filepath);
+            }
+            catch (fs::filesystem_error err) {
+                errorCheck = false;
+                m_lastErrorString = "Faild to initialze direcotry entry: " + std::string(err.what());
+                m_fileIsOpen = false;
+                return;
+            }
+
+            // if the parent folder of the filepath provided does not exist we create it here.
+            if (!settingsFile.exists()) {
+
+                // we already check that the filepath has a valid extention so here we check wheather the parent path exists, if not we create the directories
+                fs::path folder = filepath.parent_path();
+
+                fs::directory_entry parentFolder = fs::directory_entry(folder);
+
+                if (!parentFolder.exists()) {
+
+                    try {
+                        fs::create_directories(folder);
+                    }
+                    catch (fs::filesystem_error err) {
+                        errorCheck = false;
+                        m_lastErrorString = "provided filepath folders did not exist. atempting to create those folders faild: \nFilesystem error:" + std::string(err.what());
+                        m_fileIsOpen = false;
+                        return;
+                    }
+                }
+            }
+
+
+            // if file doesn't exist yet create it
+            if (!settingsFile.exists() || !settingsFile.is_regular_file()) {
+
+                m_jsonObject["1_Header"] = headerName;
+                m_jsonObject["2_Description"] = fileDescription;
+
+                std::ofstream outFileStream;
+                outFileStream.open(filepath);
+
+                if(m_prettyPrint){
+                    outFileStream << m_jsonObject.dump(4);
+                }else{
+                    outFileStream << m_jsonObject.dump(-1);
+                }
+
+                outFileStream.close();
+                
+                m_fileIsOpen = true;
+                return;
+            }
+
+            // otherwise read in the json file
+
+            std::ifstream inputFileStream;
+            inputFileStream.open(filepath);
+
+            try {
+                m_jsonObject = nlohmann::json::parse(inputFileStream);
+            } catch (nlohmann::json::parse_error err){
+
+                errorCheck = false;
+                m_fileIsOpen = true;
+                m_lastErrorString = "Faild to read json file - invalid json contents? File will be cleared. Message:" + std::string(err.what());
+                inputFileStream.close();
+
+                // if we fail to read in the filecontents for example if the file contents are not valid json,
+                // we clear everything and start with an empty json file.
+                // clear the file but 
+                m_jsonObject.clear();
+            }
+
+            inputFileStream.close();
+
+            // header and description should always be set, if file was whiped for example they would dissapear bec its still a valid json file
+            m_jsonObject["1_Header"] = headerName;
+            m_jsonObject["2_Description"] = fileDescription;
+            
+            m_fileIsOpen = true;
+        }
+
+        void FileClose(bool& errorCheck,const std::filesystem::path& filepath){
+            errorCheck = true;
+
+            if(!m_fileIsOpen)
+            {
+                errorCheck = false;
+                m_lastErrorString = "No file has been opend yet.";
+                return;
+            }
+
+
+            std::ofstream outFileStream;
+            outFileStream.open(filepath);
+
+            if(m_prettyPrint){
+                outFileStream << m_jsonObject.dump(4);
+            }
+            else{
+                outFileStream << m_jsonObject.dump(-1);
+            }
+
+            outFileStream.close();
+
+            m_jsonObject.clear();
+            m_jsonObject = nlohmann::json();
+        }
+
+        bool FileIsOpen() { return m_fileIsOpen; }
+
+        void FileWhipe(bool& errorCheck){
+            errorCheck = true;
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "cannot whipe file because it hasn't been opend yet";
+                return;
+            }
+
+            m_jsonObject.clear();
+        }
+
+        void EntryErase(bool& errorCheck, const std::string& name){
+            errorCheck = true;
+
+            if(!m_jsonObject.contains(name)){
+                errorCheck = false;
+                m_lastErrorString = std::string("file does not contain the key: " + name + " to erase it.");
+                return;
+            }
+
+            try {
+                m_jsonObject.erase(m_jsonObject.find(name));
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+                return;
+            }
+        }
+
+        void FilePrettyPrintSet(const bool prettyPrint){
+            m_prettyPrint = prettyPrint;
+        }
+
+
+        std::string ErrorStringLastGet(){
+            return m_lastErrorString;
+        }
+
+
+        // write methods
+        void WriteBool(bool& errorCheck, const std::string& name, const bool value){
+            if(!m_fileIsOpen){
+            errorCheck = false;
+            m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+        void WriteInt(bool& errorCheck, const std::string& name, const int value){
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+             m_jsonObject[name] = value;
+        }
+
+        void WriteFloat(bool& errorCheck, const std::string& name, const float value){
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+        void WriteString(bool& errorCheck, const std::string& name, const std::string& value) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+
+        void WriteVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& value) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+        void WriteVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& value) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+        void WriteVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& value) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+        void WriteVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& value) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you have to open the file first before you can write to it.";
+            }
+
+            m_jsonObject[name] = value;
+        }
+
+    // Read Methods
+        bool ReadBool(bool& errorCheck, const std::string& name, const bool defaultValue,const bool writeDefaultIfNotFound){
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+
+            errorCheck = true;
+            bool output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_boolean()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<bool>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+        int ReadInt(bool& errorCheck, const std::string& name, const int defaultValue,const bool writeDefaultIfNotFound){
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            int output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_number_integer()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<int>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+        
+
+        float ReadFloat(bool& errorCheck, const std::string& name, const float defaultValue,const bool writeDefaultIfNotFound){
+            
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            float output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_number_float()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<float>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+        std::string ReadString(bool& errorCheck, const std::string& name, const std::string& defaultValue,const bool writeDefaultIfNotFound) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            std::string output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+
+                if(writeDefaultIfNotFound){
+
+                    m_jsonObject[name] = defaultValue;
+                }else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_string()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<std::string>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+        std::vector<bool> ReadVectorBool(bool& errorCheck, const std::string& name, const std::vector<bool>& defaultValue,const bool writeDefaultIfNotFound) {
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            std::vector<bool> output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+                
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_array()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<std::vector<bool>>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+        std::vector<int> ReadVectorInt(bool& errorCheck, const std::string& name, const std::vector<int>& defaultValue,const bool writeDefaultIfNotFound) {
+            
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            std::vector<int> output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_array()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<std::vector<int>>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+        std::vector<float> ReadVectorFloat(bool& errorCheck, const std::string& name, const std::vector<float>& defaultValue,const bool writeDefaultIfNotFound){
+            
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            std::vector<float> output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_array()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<std::vector<float>>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+        std::vector<std::string> ReadVectorString(bool& errorCheck, const std::string& name, const std::vector<std::string>& defaultValue,const bool writeDefaultIfNotFound){
+
+            if(!m_fileIsOpen){
+                errorCheck = false;
+                m_lastErrorString = "you cannot read yet because no file has been opened yet";
+            }
+
+            errorCheck = true;
+            std::vector<std::string> output = defaultValue;
+
+            if(!m_jsonObject.contains(name)) {
+                if(writeDefaultIfNotFound){
+                    m_jsonObject[name] = defaultValue;
+                }
+                else{
+                    errorCheck = false;
+                    m_lastErrorString = "the given key does not exist yet - returning default";
+                }
+                return output;
+            }
+
+            if(!m_jsonObject[name].is_array()) {
+                errorCheck = false;
+                m_lastErrorString = "value does not have the correct type - returning default";
+                return output;
+            }
+
+            try {
+                output = m_jsonObject[name].get<std::vector<std::string>>();
+            }
+            catch (const nlohmann::json::exception& e) {
+                errorCheck = false;
+                m_lastErrorString = e.what();
+            } 
+
+            return output;
+        }
+
+
+    private:
+        nlohmann::json m_jsonObject;
+
+        bool m_prettyPrint = false;
+        bool m_fileIsOpen = false;
+        std::string m_lastErrorString = "none";
+
+    };
+
+} // ! namespace flcrm
+
+#endif // ! JSON_SETTINGS_H
+
+
+
+// How to use
+
+// JsonSettings is intended as a failsafe an quick way to read/write data to disk. 
+// It uses nlohmann::json internally and only creates a single json object inside the file that contains everything.
+// all read methods take a default value that is returned if the file or the entry doesn't exist yet. 
+
+// Quick note. if you only want to read data it is not strictly nessesary to close the file. 
+// the file is actually closed already in FileOpen(), however the data will persits in the internally loaded json object untils the JsonSettings object goes out of scope
+// when anything was changed for example if for ReadMethods the writeDefaultValueIfKeyNotFound is set then the file has to be closed to update the data in the file.
+
+/*  
+
+    void example(){
+    
+        // create a settings object
+        mnemosy::core::JsonSettings settings;
+
+
+        std::filesystem::path TestFilePath = std::filesystem::path("c:\example\testFile.json");
+        
+        // almost all methods take a bool for error checking as the first parameter
+        // its most important for opening the file bc it may be possible that the file is not correct or corrupted
+        // write methods only fail if the files has not been opend
+        // if read methods fails they simply return the default value
+        // if an error occures the last thrown error message will be returned by settings.ErrorStringLastGet();
+        // most of the time it should be save to use without error checking only if files are corruped or the entire folder is missing the filesystem may throw an error
+
+        bool success = false;
+    
+        // first open the file
+        settings.FileOpen(success, TestFilePath, std::string("HeaderGoesHere"),std::string("This is a test file"));
+        if(!success){
+            // if any error check fails you can receive an error string of the last thrown error with settings.ErrorStringLastGet();
+            std::cout << "Failed to open settings file. message: " << settings.ErrrorStringLastGet() << "\n";
+            return;
+        }
+
+
+        // Write Entries
+        bool aBoolean = true;
+        settings.WriteBool(success, "testBool", aBoolean);
+        
+        std::vector<std::string> aVectorOfStrings(3);
+        aVectorOfStrings[0]("h");
+        aVectorOfStrings[1]("e");
+        aVectorOfStrings[2]("y");
+        settings.WriteVectorString(success,"testVector", aVectorOfStrings);
+
+        // Read Entries
+        bool writeDefaultValueIfKeyNotFound = true;
+        bool defaultValue = false;
+        bool readBoolean = settings.ReadBool(success,"testBool", defaultValue, writeDefaultValueIfKeyNotFound);
+
+        // if this fails the empty vector will be returned. but you can populated it with default values if you need to always get something
+        std::vector<std::string> = settings.ReadVectorString(success,"testVector",std::vector<std::string>(),writeDefaultValueIfKeyNotFound);
+        
+        // Erase Entries
+        settings.EntryErase(success, "testBool");
+        if(!success){
+            // log error if neccesarry 
+        }
+        
+        // Whipe the entire file.
+        settings.FileWhipe(success);
+
+
+
+        // optionally set wheather to pretty print or not, default is false.
+        settings.FilePrettyPrintSet(true);
+
+        // At the end close the file.  This is where all the contents actually get written to the file.
+
+        settings.FileClose(success,TestFilePath);
+
+    }
+
+*/

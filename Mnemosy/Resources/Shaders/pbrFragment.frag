@@ -101,24 +101,30 @@ void ApplyAlphaDiscard(float opacity,vec2 opacityValue,vec2 screenSpaceUV, vec2 
 	 	discard;
 }
 
-float SampleHeight(vec2 currUV) {
-	float h = texture(_heightMap, currUV).r;
- 	h = saturate(h + _maxHeight);
+float SampleHeight(sampler2D heightSampler, vec2 currUV, float maxHeight) {
+	float h = texture(heightSampler, currUV).r;
+ 	h = saturate(h + maxHeight);
 	return 1.0f - h;
 }
 
-vec2 SteepParralaxUV(vec2 uvs){
+vec2 SteepParralaxUV(bool heightMapExists,sampler2D heightSampler, vec2 uvs, float depth, float maxHeight, vec3 camPosWS,vec3 fragPosWS){
 
-	float hightScale = _heightDepth * 0.01f * (1 + _maxHeight) * (1 + _maxHeight);
+
+	if(!heightMapExists){
+		return uvs;
+	}
+
+
+	float hightScale = depth * 0.01f * (1 + maxHeight) * (1 + maxHeight);
 
 	// working in tangent space
-	vec3 viewPos_TS = TBN * _cameraPositionWS;
-	vec3 fragPos_TS = TBN * position_WS;
+	vec3 viewPos_TS = TBN * camPosWS;
+	vec3 fragPos_TS = TBN * fragPosWS;
 	vec3 viewDir_TS = normalize(viewPos_TS - fragPos_TS);
 
 
-	float minLayers = 2.0f  * _heightDepth + 1.0f;
-	float maxLayers = 16.0f * _heightDepth;
+	float minLayers = 2.0f  * depth + 1.0f;
+	float maxLayers = 16.0f * depth;
 	float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir_TS), 0.0));
 
 	// the depth to sample for each layer
@@ -130,15 +136,12 @@ vec2 SteepParralaxUV(vec2 uvs){
 
 	// get initial values
 	vec2  currentUV = uvs;
-	float currentDepthMapValue = SampleHeight(currentUV);
-
-
-	//float d = 1 - ( saturate(texture(_heightMap, currentUV).r + _maxHeight) );
+	float currentDepthMapValue = SampleHeight(heightSampler,currentUV,maxHeight);
 
 	while(currentLayerDepth < currentDepthMapValue)
 	{
 	 currentUV -= offset;
-	 currentDepthMapValue = SampleHeight(currentUV);
+	 currentDepthMapValue = SampleHeight(heightSampler,currentUV,maxHeight);
 	 currentLayerDepth += layerDepth;
 	}
 
@@ -150,16 +153,11 @@ void main()
 {
 	////// SURFACE DATA ============================================================================================= ////
 	//// ============================================================================================================ ////
-	//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 
-		vec2 UVCorrds = uv;
 
-		if(_heightAssigned) {
-			UVCorrds = SteepParralaxUV(uv);
-		}
+		vec3 viewDir_WS = normalize(position_WS - _cameraPositionWS);
 
-///// ===
-
+		vec2 UVCorrds = SteepParralaxUV(_heightAssigned, _heightMap, uv, _heightDepth,_maxHeight,_cameraPositionWS,position_WS );
 
 		float opacity = SampleOpacityMap(_opacityMap,UVCorrds);
 		ApplyAlphaDiscard(opacity,_opacityValue,screenUV,pixelSize,_useDitheredAlpha);
@@ -180,10 +178,8 @@ void main()
 	//// ============================================================================================================ ////
 			LightingData lightingData;
 
-			vec3 fragmentPosition  = position_WS;
-
-			lightingData.fragmentPosition = fragmentPosition;
-			lightingData.viewDirection = normalize(fragmentPosition - _cameraPositionWS);
+			lightingData.fragmentPosition = position_WS;
+			lightingData.viewDirection = viewDir_WS;
 			lightingData.skyboxRotation = _skyboxRotation;
 			lightingData.skyboxExposure = _skyboxExposure;
 			lightingData.lightPosition = _lightPositionWS;
@@ -200,11 +196,5 @@ void main()
 	//// ============================================================================================================ ////
 			fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
 			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
-			//fragmentOutputColor = vec4(vertexAO);
-			//fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
-			//float r = texture(_roughnessMap,uv).r;
-			//float r = sampleRoughnessMap(_roughnessMap,uv,_roughnessValue);
-			//fragmentOutputColor.rgb = vec3(1,1,1);
-			//fragmentOutputColor.rgb = texture(_brdfLUT, uv).rgb;
 
 }

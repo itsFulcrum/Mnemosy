@@ -27,10 +27,9 @@ namespace mnemosy::graphics
 		void BindBrdfLutTexture(unsigned int location);
 
 	private:
-		void RenderBrdfLutTextureAndSafeTif(const std::string& exportpath, bool exportToFile);
 		void RenderBrdfLutTextureAndSafeKtx(const char* exportpath,bool exportToFile);
 		void LoadBrdfLutTexture();
-		void LoadBrdfLutTextureTiff();
+
 		void DrawIntoFramebuffer();
 
 	private:

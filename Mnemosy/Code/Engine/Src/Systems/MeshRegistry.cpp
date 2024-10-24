@@ -1,10 +1,10 @@
 #include "Include/Systems/MeshRegistry.h"
 
+#include "Include/MnemosyEngine.h"
+#include "Include/Core/Clock.h"
 #include "Include/Core/Log.h"
 #include "Include/Graphics/ModelLoader.h"
 #include "Include/Graphics/ModelData.h"
-
-
 
 
 namespace mnemosy::systems {
@@ -57,7 +57,7 @@ namespace mnemosy::systems {
 			}
 		}
 
-
+		double beginTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 		// mesh is not contained in the registry yet
 
 		graphics::ModelLoader modelLoader;
@@ -65,6 +65,11 @@ namespace mnemosy::systems {
 
 		m_loadedMeshes.push_back(model);
 		m_loadedMeshesPaths.push_back(filepath);
+
+
+		double endTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+		MNEMOSY_TRACE("Loaded New Mesh in {}, seconds", endTime - beginTime);
+
 
 
 		return m_loadedMeshes.size() -1; // yes id is equal to list index

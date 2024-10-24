@@ -11,7 +11,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
 
-#include "Include/Core/JsonSettings.h"
+#include <json.hpp>
 
 #include "Include/Gui/UserInterface.h"
 #include "Include/Gui/GuiPanel.h"
@@ -36,7 +36,7 @@ namespace mnemosy::systems {
 
 		bool success = false;
 
-		core::JsonSettings user;
+		flcrm::JsonSettings user;
 		user.FilePrettyPrintSet(true);
 		
 		user.FileOpen(success,guiUserSettings_filepath, "Mnemosy Settings File", "This file stores user settings");
@@ -88,7 +88,7 @@ namespace mnemosy::systems {
 
 		bool success = false;
 
-		core::JsonSettings user;
+		flcrm::JsonSettings user;
 		user.FilePrettyPrintSet(true);
 		
 		user.FileOpen(success,guiUserSettings_filepath, "Mnemosy Settings File", "This file stores user settings");

@@ -17,8 +17,6 @@ ${ENGINE_SOURCE_PATH}/Include/Core/Clock.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/FileDirectories.h
 ${ENGINE_SOURCE_PATH}/Src/Core/FileDirectories.cpp
-${ENGINE_SOURCE_PATH}/Include/Core/JsonSettings.h
-${ENGINE_SOURCE_PATH}/Src/Core/JsonSettings.cpp
 
 
 

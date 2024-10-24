@@ -3,7 +3,7 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
-#include "Include/Core/JsonSettings.h"
+#include "json.hpp"
 
 #include "Include/Systems/TextureGenerationManager.h"
 
@@ -34,7 +34,7 @@ namespace mnemosy::systems
 
 		bool success = false;
 
-		core::JsonSettings settings;
+		flcrm::JsonSettings settings;
 		settings.FileOpen(success,p,"Mnemosy_Settings","Contains user settings for exporting images");
 
 
@@ -84,7 +84,7 @@ namespace mnemosy::systems
 		
 
 
-		core::JsonSettings settings;
+		flcrm::JsonSettings settings;
 		settings.FileOpen(success, p, "Mnemosy_Settings", "Contains user settings for exporting images");
 
 		settings.WriteBool(success, "export_NormalAsOpenGl", exportNormalAsOpenGl);

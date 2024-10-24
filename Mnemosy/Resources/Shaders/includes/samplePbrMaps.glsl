@@ -44,8 +44,6 @@ precision highp float;
 
   float sampleRoughnessMap(sampler2D roughnessSampler,vec2 uv,vec2 roughnessValue)
   {
-    //vec4 roughnessMap = texture(roughnessSampler,uv);
-    //float roughness = grayscaleLinear(roughnessMap.rgb);
     float roughness = texture(roughnessSampler,uv).r;
     roughness = lerp(roughness,roughnessValue.x,roughnessValue.y);
     return clamp(roughness,0.0,1.0);
@@ -53,8 +51,6 @@ precision highp float;
 
   float sampleMetallicMap(sampler2D metallicSampler,vec2 uv,vec2 metallicValue)
   {
-    //vec4 metallicMap = texture(metallicSampler,uv);
-    //float metallic = grayscaleLinear(metallicMap.rgb);
     float metallic = texture(metallicSampler,uv).r;
     metallic = lerp(metallic,metallicValue.x,metallicValue.y);
     return clamp(metallic,0.0,1.0);
@@ -75,7 +71,6 @@ precision highp float;
     vec3 normalMap = texture(normalSampler,uv).xyz;
     normalMap = lerp(normalMap.xyz, vec3(0.5f,0.5f,1.0f),normalValue);
 
-    //normalMap.y = 1 - normalMap.y;
     // convert 0 to 1 range to -1 to 1
     normalMap = normalMap * 2 - 1;//normalize(normalMap * 2 - 1);
 

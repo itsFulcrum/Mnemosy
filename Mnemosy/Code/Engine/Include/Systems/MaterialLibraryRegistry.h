@@ -5,8 +5,6 @@
 #include <string>
 #include <filesystem>
 
-//#include <nlohmann/json.hpp>
-
 namespace mnemosy::systems {
 	struct MaterialInfo;
 	struct FolderNode;
