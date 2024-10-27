@@ -1,7 +1,10 @@
 #ifndef COLOR_FUNCTIONS_GLSL
 #define COLOR_FUNCTIONS_GLSL
 
+#include agx.glsl
+
 precision highp float;
+
 //////////// Color Correction functions
 // =============================================================================================================
 
@@ -42,46 +45,122 @@ vec4 applyExposure(vec4 color,float exposure)
 }
 
 
-
 //////////// Gamma Functions
 // =============================================================================================================
+// input is asumed to be in 0 to 1 range
+float linear_to_srgb_float(float linear){
 
-// This is not a correct sRGB converstion just a standard simple gamma correct.
-
-vec4 linearTosRGB(vec4 linearColor)
-{
-  return vec4(pow(linearColor.rgb, vec3(1/2.2f)),linearColor.a);
+  if(linear <= 0.0031308f){
+    return linear * 12.92f;
+  }
+    
+  return 1.055f*pow(linear,(1.0f / 2.4f) ) - 0.055f;
 }
 
-vec4 sRGBToLinear(vec4 sRGBColor)
+// input is asumed to be in 0 to 1 range
+float srgb_to_linear_float(float srgb){
+
+  if(srgb <= 0.04045f){
+    return srgb/12.92f;
+  }
+
+  return pow( (srgb + 0.055f)/ 1.055f, 2.4f);
+}
+
+
+// correct srgb transform functions but not super efficiant
+vec4 srgb_to_linear(vec4 sRGBColor) {
+
+    float r = srgb_to_linear_float(sRGBColor.r);
+    float g = srgb_to_linear_float(sRGBColor.g);
+    float b = srgb_to_linear_float(sRGBColor.b);
+
+    return vec4(r,g,b,sRGBColor.a);
+}
+
+vec4 linear_to_srgb(vec4 linearColor)
+{
+
+  float r = linear_to_srgb_float(linearColor.r);
+  float g = linear_to_srgb_float(linearColor.g);
+  float b = linear_to_srgb_float(linearColor.b);
+
+  return vec4(r,g,b,linearColor.a);
+}
+
+// cheap srgb but not 100% accurate
+vec4 linear_to_srgb_cheap(vec4 linearColor)
+{
+  return vec4(pow(linearColor.rgb, vec3(0.454545)),linearColor.a);
+}
+
+vec4 srgb_to_linear_cheap(vec4 sRGBColor)
 {
     return vec4(pow(sRGBColor.rgb, vec3(2.2f)),sRGBColor.a);
 }
 
+
+vec3 tonemap_agx(vec3 linearHdr){
+
+  return agx(linearHdr);
+}
+
+
+// Narkowicz 2015, "ACES Filmic Tone Mapping Curve"
+vec3 tonemap_aces(vec3 x) {
+  const float a = 2.51;
+  const float b = 0.03;
+  const float c = 2.43;
+  const float d = 0.59;
+  const float e = 0.14;
+  return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
+
 // default values could be sigma=0.7, n = 1.1;
-vec3 tonemapSCurve(vec3 value, float sigma, float n)
+vec3 tonemap_SCurve(vec3 value, float sigma, float n)
 {
   vec3 pow_value = pow(value, vec3(n));
   return pow_value / (pow_value + pow(sigma, n));
 }
 
-// reinhard Tone mapping is one of the simplest tone mapping algorithms
-vec4 toneMapping(vec4 hdrColor)
-{
-  return vec4(hdrColor.rgb / (hdrColor.rgb+vec3(1.0f) ), hdrColor.a);
+// reinhard Tone mapping is one of the simplest tone mapping algorithms but performs pretty good
+vec3 tonemap_reinhard(vec3 hdrColor) {
+  return hdrColor / (1.0 + hdrColor);
 }
 
-vec4 exposureToneMapping(vec4 hdrColor, float exposure)
-{
-  vec3 toneMappedLDR = vec3(1.0f) - exp(-hdrColor.rgb * exposure);
-  return  vec4(toneMappedLDR,hdrColor.a);
+vec3 tonemap_filmic(vec3 x) {
+  vec3 X = max(vec3(0.0), x - 0.004);
+  vec3 result = (X * (6.2 * X + 0.5)) / (X * (6.2 * X + 1.7) + 0.06);
+  return pow(result, vec3(2.2));
 }
+
 
 vec4 postProcess(vec4 color, float exposure)
 {
+  
   vec4 exposureCorrected = applyExposure(color,exposure);
-  vec4 toneMappedLDR = toneMapping(exposureCorrected);
-  return linearTosRGB(toneMappedLDR);
+  
+
+  // agx
+  vec3 toneMappedLDR = tonemap_agx(exposureCorrected.rgb);
+
+  // aces
+  // vec3 toneMappedLDR = tonemap_aces(exposureCorrected.rgb);
+
+
+  // reihard
+  // vec3 toneMappedLDR = tonemap_reinhard(exposureCorrected.rgb);
+  
+  // propper filmic
+  // vec3 toneMappedLDR = tonemap_filmic(exposureCorrected.rgb);
+
+
+  // clamped , like blender standart view transform
+  //vec3 toneMappedLDR = clamp(exposureCorrected.rgb,0.0f,1.0f);
+
+
+  return linear_to_srgb(vec4(toneMappedLDR.rgb,color.a));
 }
 
 

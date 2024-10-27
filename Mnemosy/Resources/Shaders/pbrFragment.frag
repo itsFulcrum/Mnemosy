@@ -192,6 +192,7 @@ void main()
 
 			vec4 shadedFragmentColorLinear = lightingPBR(surfaceData,lightingData,_irradianceMap,_prefilterMap,_brdfLUT);
 
+
 	////// POST PROCCESSING ========================================================================================= ////
 	//// ============================================================================================================ ////
 			fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);

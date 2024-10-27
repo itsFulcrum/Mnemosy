@@ -1,15 +1,8 @@
 #include "Include/GuiPanels/ViewportGuiPanel.h"
 
-#include "Include/Application.h"
-
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Window.h"
-#include "Include/Systems/SkyboxAssetRegistry.h"
-
 #include "Include/Graphics/Renderer.h"
-#include "Include/Graphics/Skybox.h"
-#include "Include/Graphics/RenderMesh.h"
-#include "Include/Graphics/Scene.h"
 
 
 namespace mnemosy::gui

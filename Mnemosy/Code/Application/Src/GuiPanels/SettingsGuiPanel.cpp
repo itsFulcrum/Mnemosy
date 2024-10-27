@@ -1,10 +1,9 @@
 #include "Include/GuiPanels/SettingsGuiPanel.h"
 
-#include "Include/Core/Log.h"
-
 #include "Include/MnemosyConfig.h"
 #include "Include/MnemosyEngine.h"
-#include "Include/Application.h"
+#include "Include/Core/Log.h"
+
 
 #include "Include/Core/FileDirectories.h"
 
@@ -34,7 +33,6 @@ namespace mnemosy::gui
 	{
 		panelName = "Settings";
 		panelType = MNSY_GUI_PANEL_SETTINGS;
-		//m_currentSelectedSkybox = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry().GetPositionByName("Market");  // TODO: make this part of the skybox registry so we can keep it in sync with viewport
 	}
 
 	void SettingsGuiPanel::Draw()
@@ -153,14 +151,9 @@ namespace mnemosy::gui
 
 		}
 
-
-
 		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Spacing();
-
-
-
 
 
 		// --- Render Mesh settings

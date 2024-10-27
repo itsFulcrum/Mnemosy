@@ -114,8 +114,14 @@ namespace mnemosy::core
 			glfwImages[0].pixels	= (unsigned char*)picInfo.pixels;
 			glfwSetWindowIcon(m_pWindow,1,glfwImages);
 
+			if(picInfo.pixels)
+				free(picInfo.pixels);
 		}
-		free(picInfo.pixels);
+		else {
+			MNEMOSY_WARN("Unable To Set Window Icon: {}", err.what);
+		}
+
+
 
 
 

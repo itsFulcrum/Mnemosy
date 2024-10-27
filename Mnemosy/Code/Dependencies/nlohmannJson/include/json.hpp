@@ -26112,7 +26112,7 @@ namespace flcrm {
     void example(){
     
         // create a settings object
-        mnemosy::core::JsonSettings settings;
+        flcrm::JsonSettings settings;
 
 
         std::filesystem::path TestFilePath = std::filesystem::path("c:\example\testFile.json");

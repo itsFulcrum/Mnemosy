@@ -79,11 +79,10 @@ void main()
     skyboxColor = texture(_skybox, cubeMapSampleVector);
   }
 
-
   skyboxColor = applyExposure(skyboxColor,_exposure);
 
   skyboxColor.rgb *= _colorTint;
-  vec3 background = sRGBToLinear(vec4(_backgroundColor,1.0f)).rgb;
+  vec3 background = srgb_to_linear_cheap(vec4(_backgroundColor,1.0f)).rgb;
 
 
   //vec2 screenSpace01 = (screenSpacePos + 1) *0.5;
@@ -93,7 +92,6 @@ void main()
   float gradient = saturate(length(screenUV));
   vec3 gradientColor = lerp(background,vec3(0.01f,0.01f,0.01f),_gradientOpacity);
 
-
   background = lerp(background,gradientColor, gradient);
 
   fragmenColorLinear.rgb = mix(background.rgb,skyboxColor.rgb,_opacity);
@@ -101,6 +99,7 @@ void main()
   // POST PROCCESSING
   //fragmentOutputColor = vec4(0.0f,0.0f,0.0f,1.0f);
 
-
   fragmentOutputColor = postProcess(fragmenColorLinear,0.0);
 }
+
+

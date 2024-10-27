@@ -19,8 +19,14 @@ namespace mnemosy::gui
 	class GuiPanelManager {
 
 	public:
-		GuiPanelManager();
-		~GuiPanelManager();
+		GuiPanelManager() = default;
+		~GuiPanelManager() = default;
+
+		void Init();
+		void Shutdown();
+
+		void UserSettingsLoad(bool restoreDefaults);
+		void UserSettingsSave();
 
 		ViewportGuiPanel&			GetViewportPanel()			{ return *m_pViewportPanel; }
 		SettingsGuiPanel&			GetSettingsPanel()			{ return *m_pSettingsPanel; }
@@ -30,9 +36,6 @@ namespace mnemosy::gui
 		ContentsGuiPanel&			GetContentsPanel()			{ return *m_pContentsPanel; }
 
 	private:
-
-
-
 		MainMenuBarGuiPanel*		m_pMainMenuBarPanel		= nullptr;
 		ViewportGuiPanel*			m_pViewportPanel		= nullptr;
 		SettingsGuiPanel*			m_pSettingsPanel		= nullptr;

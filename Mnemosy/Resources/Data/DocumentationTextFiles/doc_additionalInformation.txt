@@ -10,15 +10,19 @@ Because Tif is widely used you can directly drag and drop your images from withi
 There is a button at the top of the material editor.
 
 Mnemosy will attempt to store textures always in the highest possilbe format they were imported in. 
-This means if a texture was imported with 32 bit per channel it will be stored in will be stored internally as 32 bit aswell.
+This means if a texture was imported with 32 bit per channel it will be stored internally as 32 bit aswell.
 Inversely if a texture only has 8 bit, from jpg for example it will also be stored as 8 bit to not waste disk space.
 Due to the variaty of possilbe image formats and configuration it is not always guaranteed though.
-For some image formats like .exr for example where each color channel may have a differnt bit depth then the others mnemosy may promote or demote channels.
+For some image formats like .exr for example where each color channel may have a differnt bit depth then the other one mnemosy may promote or demote channels to fit the others.
 
 Normal maps internally are stored in the OpenGl format.
-One because Mnemosy has an OpenGl renderer and second, because most normal maps found online are in this format.
-However if you import custom made textures, like from Substance, you should specify this in the material editor.
+Most normal maps found online are in this format.
+However if you import custom made textures, you can specify this in the material editor.
 Upon export you can also choose which normal format to use.
 
-Mnemosy uses the Metallic-Roughness pbr model so we use roughness instead of gloss/smoothness maps.
-However there is a converstion option in the material editor or at export.
+Mnemosy uses the Metallic-Roughness PBR model so it uses roughness instead of gloss/smoothness maps.
+However there is also a converstion option for this in the material editor or at export.
+
+
+Color Management:
+Mnemosy internally renders in linear color space. When importing textures, Non color textures (Roughness, Normal, Metallic, Height, Ao, Opacity) are asumed to be in linear color space already. Color textures (Albedo, Emission) are asumed to be encoded in sRGB color. When importing images from HDR file formats (.exr and .hdr) Mnemosy asumes that those are always in linear color space and performs no convertion. Mnemosy uses the fast approximation (gamma 2.2) to convert these into linear space. After main rendering Mnemosy uses Agx tonemapping and propper linear to sRGB function to convert from HDR to LDR color for final view on displays.

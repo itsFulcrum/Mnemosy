@@ -10,11 +10,11 @@ precision highp float;
   {
     vec4 albedoMap = texture(albedoSampler,uv);
     //albedoMap = clamp(albedoMap,0.0,1.0);
-    albedoMap = sRGBToLinear(albedoMap);
+    albedoMap = srgb_to_linear_cheap(albedoMap);
 
-    vec3 albedoSolidColor = sRGBToLinear(albedoColorValue).rgb;
+    vec3 albedoSolidColor = srgb_to_linear_cheap(albedoColorValue).rgb;
 
-    vec3 albedoOut =  lerp(albedoMap.rgb,albedoSolidColor.rgb,albedoColorValue.w);
+    vec3 albedoOut = lerp(albedoMap.rgb,albedoSolidColor.rgb,albedoColorValue.w);
 
     return vec4(albedoOut.rgb,albedoMap.a);
   }
@@ -24,9 +24,9 @@ precision highp float;
     vec4 emissionMap = texture(emissionSampler,uv);
 
 
-    vec4 emissionLinear = sRGBToLinear (emissionMap);
+    vec4 emissionLinear = srgb_to_linear_cheap(emissionMap);
 
-    vec3 emissionSolidColor = sRGBToLinear(emissionColorValue).rgb;
+    vec3 emissionSolidColor = srgb_to_linear_cheap(emissionColorValue).rgb;
 
     vec3 emissionOut = vec3(0.0f,0.0f,0.0f);
 

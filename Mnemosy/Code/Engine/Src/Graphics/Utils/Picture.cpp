@@ -29,7 +29,7 @@
 
 // jpg, hdr - stbImage
 //#define STBI_NO_JPEG
-#define STBI_NO_PNG
+//#define STBI_NO_PNG
 #define STBI_NO_BMP
 #define STBI_NO_PSD
 #define STBI_NO_TGA
@@ -2043,11 +2043,29 @@ namespace mnemosy::graphics {
 		outPictureError.wasSuccessfull = true;
 		outPictureError.what = "";
 
-		int width, height, channels;
+		std::filesystem::path p = { filepath };
+		
+		if (!std::filesystem::exists(p)) {
+			outPictureError.wasSuccessfull = false;
+			outPictureError.what = "STB_Read: Filepath does not exists";
+
+			return PictureInfo();
+		}
+
+
+
+		int width = 0, height = 0, channels = 0;
 		
 		stbi_set_flip_vertically_on_load(flipVertically);
-		unsigned char* buffer = stbi_load(filepath, &width, &height, &channels, 0);
+		unsigned char* buffer = stbi_load(filepath, &width, &height, &channels, 4);
 
+
+		if (buffer == nullptr) {
+			outPictureError.wasSuccessfull = false;
+			outPictureError.what = "STB_Read: Unable to read image";
+
+			return PictureInfo();
+		}
 
 		PictureInfo outInfo;
 		outInfo.width = width;
@@ -2087,11 +2105,21 @@ namespace mnemosy::graphics {
 	}
 
 	float Picture::pic_util_linear2srgb_float(float linearValue) {
-		return std::pow(linearValue, (1 / 2.2f));
+
+		if(linearValue <= 0.0031308f){
+	    	return linearValue * 12.92f;
+	  	}
+	    
+	  	return 1.055f* std::pow(linearValue,(1.0f / 2.4f) ) - 0.055f;
 	}
 
 	float Picture::pic_util_srgb2linear_float(float srgbValue) {
-		return std::pow(srgbValue, 2.2f);
+
+		if(srgbValue <= 0.04045f){
+		    return srgbValue/12.92f;
+		 }
+
+		 return std::pow( (srgbValue + 0.055f)/ 1.055f, 2.4f);
 	}
 
 }

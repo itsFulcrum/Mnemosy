@@ -1,16 +1,17 @@
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 
-
-#include "Include/Core/Log.h"
-#include "Include/Application.h"
 #include "Include/ApplicationConfig.h"
 
 #include "Include/MnemosyEngine.h"
-#include "Include/Graphics/Renderer.h"
+
+#include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/ThumbnailManager.h"
+
+#include "Include/Graphics/Renderer.h"
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"

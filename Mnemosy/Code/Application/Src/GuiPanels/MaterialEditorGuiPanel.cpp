@@ -1,13 +1,14 @@
 #include "Include/GuiPanels/MaterialEditorGuiPanel.h"
 
-#include "Include/Application.h"
 #include "Include/ApplicationConfig.h"
 #include "Include/MnemosyEngine.h"
 
 #include "Include/Core/Clock.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+#ifdef MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
+#endif // MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/DropHandler_Windows.h"
 
 
