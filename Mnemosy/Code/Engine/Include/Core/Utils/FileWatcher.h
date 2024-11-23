@@ -14,7 +14,6 @@ namespace mnemosy::core {
 		FileWatcher();
 		~FileWatcher();
 
-
 		void RegisterFile(fs::path filePath);
 		bool DidAnyFileChange();
 
@@ -23,7 +22,6 @@ namespace mnemosy::core {
 		std::vector<fs::path> m_paths;
 		std::vector<fs::file_time_type> m_fileTimeTypes;
 	};
-
 
 } // namespace mnemosy::core
 

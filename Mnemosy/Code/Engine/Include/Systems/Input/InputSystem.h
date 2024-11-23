@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
+#include <stdint.h>
 #include <functional>
 
 namespace mnemosy::systems
@@ -34,10 +35,10 @@ namespace mnemosy::systems
 	struct KeyboardInputEntry
 	{
 		int id = 0;
-		bool wasPressedLastFrame = false;
-		bool callbackOnlyOnce = true;
 		int glfw_pressEventToListenTo = GLFW_PRESS;
 		int glfw_keyToListenTo = GLFW_KEY_SPACE;
+		bool wasPressedLastFrame = false;
+		bool callbackOnlyOnce = true;
 		TCallbackSignatureDouble callbackFunction;
 	};
 	struct MouseButtonInputEntry
@@ -70,8 +71,12 @@ namespace mnemosy::systems
 	class InputSystem
 	{
 	public:
-		InputSystem();
-		~InputSystem();
+		InputSystem() = default;
+		~InputSystem() = default;
+
+		void Init();
+		void Shutdown();
+
 
 		int RegisterKeyboardInput(int glfwKeyboardKey, int glfwPressEvent, bool callbacksOnlyOnce, TCallbackSignatureDouble callbackFunction);
 		int RegisterMouseButtonInput(int glfwMouseButton, int glfwPressEvent, TCallbackSignatureDouble callbackFunction);
@@ -107,21 +112,24 @@ namespace mnemosy::systems
 		void ProcessUserInputs() { m_processUserInputs = true; }
 		void DontProcessUserInputs() { m_processUserInputs = false; }
 
-		// currently not in useKeep for latermaybe
 		void HandleMouseOverViewport();
 	
 	private:
 		GLFWwindow* m_pWindow;
+		
 		double m_deltaSeconds = 0;
+		double m_mouseLastFrameXPos = 0.0;
+		double m_mouseLastFrameYPos = 0.0;
 
 		bool m_processUserInputs = true;
+		bool m_firstMouseInput = true;
 
-		int m_keyboardIdCounter = 0;
-		int m_mouseButtonIdCounter = 0;
-		int m_mouseCursorIdCounter = 0;
-		int m_mouseScrollIdCounter = 0;
-		int m_windowResizeIdCounter = 0;
-		int m_dropIdCounter = 0;
+		uint16_t m_keyboardIdCounter = 0;
+		uint16_t m_mouseButtonIdCounter = 0;
+		uint16_t m_mouseCursorIdCounter = 0;
+		uint16_t m_mouseScrollIdCounter = 0;
+		uint16_t m_windowResizeIdCounter = 0;
+		uint16_t m_dropIdCounter = 0;
 
 		std::vector<KeyboardInputEntry> m_keyboardEntries;
 		std::vector<MouseButtonInputEntry> m_mouseButtonEntries;
@@ -129,12 +137,6 @@ namespace mnemosy::systems
 		std::vector<MouseScrollInputEntry> m_mouseScrollEntries;
 		std::vector<WindowResizeInputEntry> m_windowResizeEntries;
 		std::vector<DropInputEntry> m_dropEntries;
-
-
-		bool m_firstMouseInput = true;
-
-		double m_mouseLastFrameXPos = 0.0;
-		double m_mouseLastFrameYPos = 0.0;
 
 	};
 

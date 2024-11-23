@@ -9,19 +9,21 @@
 
 namespace mnemosy::systems {
 
-	MeshRegistry::MeshRegistry() {
+	void MeshRegistry::Init()
+	{
+
 
 	}
 
-	MeshRegistry::~MeshRegistry() {
-
+	void MeshRegistry::Shutdown()
+	{
 		// free all the meshes
 
 		if (!m_loadedMeshes.empty()) {
 
 			for (int i = 0; i < m_loadedMeshes.size(); i++) {
 
-				
+
 				// free sub vectors
 				for (int m = 0; m < m_loadedMeshes[i]->meshes.size(); m++) {
 

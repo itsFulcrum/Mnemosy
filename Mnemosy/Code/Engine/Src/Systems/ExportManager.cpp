@@ -13,20 +13,16 @@
 #include "Include/Graphics/Utils/Picture.h"
 
 #include <glad/glad.h>
-//#include <opencv2/core.hpp>
-//#include <opencv2/imgcodecs.hpp>
-//#include <opencv2/imgproc.hpp>
-//#include <opencv2/core/utils/logger.hpp>
 
 namespace mnemosy::systems
 {
-	// public methods
 
-	ExportManager::ExportManager()
-		: m_exportFileFormat(graphics::ImageFileFormat::MNSY_FILE_FORMAT_PNG)
-		, m_exportNormalFormat(graphics::MNSY_NORMAL_FORMAT_OPENGL)
-		, m_exportRoughnessAsSmoothness(false)
-	{
+
+
+	void ExportManager::Init() {
+		m_exportFileFormat = graphics::ImageFileFormat::MNSY_FILE_FORMAT_PNG;
+		m_exportNormalFormat = graphics::MNSY_NORMAL_FORMAT_OPENGL;
+		m_exportRoughnessAsSmoothness = false;
 
 		// load user settings
 
@@ -35,7 +31,7 @@ namespace mnemosy::systems
 		bool success = false;
 
 		flcrm::JsonSettings settings;
-		settings.FileOpen(success,p,"Mnemosy_Settings","Contains user settings for exporting images");
+		settings.FileOpen(success, p, "Mnemosy_Settings", "Contains user settings for exporting images");
 
 
 		bool exportNormalAsOpenGl = settings.ReadBool(success, "export_NormalAsOpenGl", true, true);
@@ -44,7 +40,7 @@ namespace mnemosy::systems
 
 		settings.FilePrettyPrintSet(true);
 
-		settings.FileClose(success,p);
+		settings.FileClose(success, p);
 
 		// apply user settings
 		if (exportNormalAsOpenGl) {
@@ -61,10 +57,11 @@ namespace mnemosy::systems
 		SetExportImageFormat(imageFormat);
 
 
+
 	}
 
-	ExportManager::~ExportManager() {
-
+	void ExportManager::Shutdown()
+	{
 		// save user settings
 		std::filesystem::path p = MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / std::filesystem::path("exportSettings.mnsydata");
 
@@ -81,7 +78,7 @@ namespace mnemosy::systems
 		bool exportRoughnessAsSmoothness = m_exportRoughnessAsSmoothness;
 
 		std::string exportFormatExtention = graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat);
-		
+
 
 
 		flcrm::JsonSettings settings;
@@ -93,8 +90,8 @@ namespace mnemosy::systems
 
 		settings.FilePrettyPrintSet(true);
 		settings.FileClose(success, p);
-	}
 
+	}
 
 	// Export selected textures of a material. Which textures to export should be specified in the std::vector<bool> exportTypesOrdered which need an entry for each texture type in the same order as the enum types defined in PBRTextureType in TextureDefinitions.h
 	bool ExportManager::ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {

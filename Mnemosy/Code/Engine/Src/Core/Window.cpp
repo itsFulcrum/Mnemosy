@@ -56,12 +56,19 @@ namespace mnemosy::core
 		MNEMOSY_BREAK;
 	}
 
-	Window::Window(const char* WindowTitle)
-	{
-		//m_pWindow = nullptr;
+
+
+	void Window::Init(const char* WindowTitle){
 
 		m_currentWindowWidth = MNEMOSY_SRC_WINDOW_WIDTH;
 		m_currentWindowHeight = MNEMOSY_SRC_WIDNOW_HEIGHT;
+
+		m_pWindow = nullptr;
+
+		m_viewportData.height = 1;
+		m_viewportData.width = 1;
+		m_viewportData.posX = 1;
+		m_viewportData.posY = 1;
 
 		// setup window
 		glfwInit();
@@ -86,14 +93,8 @@ namespace mnemosy::core
 		}
 		glfwMakeContextCurrent(m_pWindow);
 		
-		if (m_vsyncEnabled)
-		{
-			glfwSwapInterval(1);
-		}
-		else
-		{
-			glfwSwapInterval(0);
-		}
+		// enable vsync by default
+		glfwSwapInterval(1);
 
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
@@ -122,9 +123,6 @@ namespace mnemosy::core
 		}
 
 
-
-
-
 		glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 
@@ -142,7 +140,6 @@ namespace mnemosy::core
 		glDisable(GL_FRAMEBUFFER_SRGB); // srgb is manually handled in the shaders
 
 		// draw Polygons opaque (Fully shaded)
-
 		glCullFace(GL_FRONT);
 		glFrontFace(GL_CW);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -161,15 +158,6 @@ namespace mnemosy::core
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		}
 #endif // MNEMOSY_CONFIG_DEBUG
-
-	}
-
-	Window::~Window()
-	{
-		if (m_pWindow)
-		{
-			Shutdown();
-		}
 	}
 
 	void Window::Shutdown()
@@ -204,12 +192,10 @@ namespace mnemosy::core
 		if (enable)
 		{
 			glfwSwapInterval(1);
-			m_vsyncEnabled = true;
 		}
 		else
 		{
 			glfwSwapInterval(0);
-			m_vsyncEnabled = false;
 		}
 
 	}

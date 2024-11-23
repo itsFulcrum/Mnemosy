@@ -31,21 +31,39 @@
 namespace mnemosy::systems {
 	// == public methods
 
-	MaterialLibraryRegistry::MaterialLibraryRegistry()
-		: m_fileDirectories{MnemosyEngine::GetInstance().GetFileDirectories()}
+	void MaterialLibraryRegistry::Init()
 	{
+		m_folderTree = nullptr;
+		m_folderNodeOfActiveMaterial = nullptr;
+		inSearchMode = false;
+
+		m_fileDirectories = nullptr;
+		m_selectedFolderNode = nullptr;
+
+		m_activeMaterialID = 0; 
+		m_userMaterialBound = false;
+
+		// data file 
+		prettyPrintDataFile = false;
+		prettyPrintMaterialFiles = false;
+
+
+
 		namespace fs = std::filesystem;
 
 #ifdef MNEMOSY_CONFIG_DEBUG
 		prettyPrintMaterialFiles = true;
 #endif
 
-		m_folderTree = new FolderTree(jsonLibKey_RootNodeName);
+		m_folderTree = arena_placement_new(FolderTree);
+		m_folderTree->Init(jsonLibKey_RootNodeName);
+
 
 		m_folderNodeOfActiveMaterial = nullptr;
 
+		m_fileDirectories = &MnemosyEngine::GetInstance().GetFileDirectories();
 
-		fs::path pathToUserDirectoriesDataFile = m_fileDirectories.GetUserLibDataFile();
+		fs::path pathToUserDirectoriesDataFile = m_fileDirectories->GetUserLibDataFile();
 
 		if (!CheckDataFile(pathToUserDirectoriesDataFile)) {
 			MNEMOSY_WARN("Failed to read materialLibraryData file: Creating new empty file at {}", pathToUserDirectoriesDataFile.generic_string());
@@ -59,24 +77,24 @@ namespace mnemosy::systems {
 
 		unsigned int materialCount = m_folderTree->RecursiveCountMaterials(m_folderTree->GetRootPtr(), 0);
 
-		MNEMOSY_DEBUG("Loaded Material Library in {} Seconds, Loaded {} Material Entries",timeEnd-timeStart, materialCount);
+		MNEMOSY_DEBUG("Loaded Material Library in {} Seconds, Loaded {} Material Entries", timeEnd - timeStart, materialCount);
 
 
 		m_selectedFolderNode = m_folderTree->GetRootPtr();
+
+
 	}
 
-	MaterialLibraryRegistry::~MaterialLibraryRegistry() {
-
+	void MaterialLibraryRegistry::Shutdown()
+	{
 		SaveUserDirectoriesData();
-
-		delete m_folderTree;
-		m_folderTree = nullptr;
+		m_folderTree->Shutdown();
 	}
 
 
 	void MaterialLibraryRegistry::LoadUserDirectoriesFromFile() {
 
-		std::filesystem::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
+		std::filesystem::path materialLibraryDataFilePath = m_fileDirectories->GetUserLibDataFile();
 
 		if (!CheckDataFile(materialLibraryDataFilePath)) {
 
@@ -94,10 +112,11 @@ namespace mnemosy::systems {
 			dataFileStream.close();
 			return;
 		}
+		dataFileStream.close();
+
 
 		m_folderTree->LoadFromJson(readFile);
 
-		dataFileStream.close();
 	}
 
   	void MaterialLibraryRegistry::SaveUserDirectoriesData() {
@@ -105,12 +124,12 @@ namespace mnemosy::systems {
 
 
 		// this function throws warnings if we change the library directory.
-		fs::path materialLibraryDataFilePath = m_fileDirectories.GetUserLibDataFile();
+		fs::path materialLibraryDataFilePath = m_fileDirectories->GetUserLibDataFile();
 
 		if (CheckDataFile(materialLibraryDataFilePath)) {
 
 			// if data file exists we first make a backup copy
-			fs::path copyTo = m_fileDirectories.GetDataPath() / fs::path("MnemosyMaterialLibraryData_LAST_BACKUP.mnsydata");
+			fs::path copyTo = m_fileDirectories->GetDataPath() / fs::path("MnemosyMaterialLibraryData_LAST_BACKUP.mnsydata");
 			try {
 				fs::copy(materialLibraryDataFilePath, copyTo, fs::copy_options::overwrite_existing);
 			}
@@ -162,7 +181,7 @@ namespace mnemosy::systems {
 		}
 
 		// store old path because pathFromRoot is upadeted inside RenameFolder() method
-		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
 		fs::path oldPath = libraryDir / fs::path(node->pathFromRoot);
 		std::string oldName = node->name;
 
@@ -342,7 +361,7 @@ namespace mnemosy::systems {
 
 		MaterialInfo* matInfo = m_folderTree->CreateNewMaterial(node, name);
 
-		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
 		// create directory for material
 		fs::path materialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(matInfo->name);
 
@@ -370,7 +389,7 @@ namespace mnemosy::systems {
 		// create default material data file
 
 		// Copy Default thumbnail image
-		fs::path pathToDefaultThumbnail = m_fileDirectories.GetTexturesPath() / fs::path("default_thumbnail.ktx2");
+		fs::path pathToDefaultThumbnail = m_fileDirectories->GetTexturesPath() / fs::path("default_thumbnail.ktx2");
 		fs::path pathToMaterialThumbnail = materialDirectory / fs::path(matInfo->name + texture_fileSuffix_thumbnail);
 
 		try {
@@ -412,7 +431,7 @@ namespace mnemosy::systems {
 
 		std::string finalName = materialInfo->name;
 
-		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
 		fs::path materialDir = libraryDir / fs::path(node->pathFromRoot) / fs::path(oldName);
 
 		// change name of data file.
@@ -549,7 +568,7 @@ namespace mnemosy::systems {
 			MnemosyEngine::GetInstance().GetThumbnailManager().RemoveMaterialFromThumbnailing(materialInfo);
 		}
 
-		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
 
 		// delete files
 		fs::path pathToMaterialDirectory = libraryDir / fs::path(node->pathFromRoot) / fs::path(materialInfo->name);
@@ -579,7 +598,7 @@ namespace mnemosy::systems {
 
 		// move material folder / copy dir and remove dir
 		std::string materialName = materialInfo->name; // temporary storing name here
-		fs::path libraryDir = m_fileDirectories.GetLibraryDirectoryPath();
+		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
 
 		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
 			//fs::rename(fromPath, toPath / fromPath.filename());
@@ -767,7 +786,7 @@ namespace mnemosy::systems {
 		SaveActiveMaterialToFile();
 
 		m_userMaterialBound = true;
-		m_activeMaterialDataFilePath = m_fileDirectories.GetLibraryDirectoryPath() / materialInfo->parent->pathFromRoot / fs::path(materialInfo->name) / fs::path(materialInfo->name + ".mnsydata");
+		m_activeMaterialDataFilePath = m_fileDirectories->GetLibraryDirectoryPath() / materialInfo->parent->pathFromRoot / fs::path(materialInfo->name) / fs::path(materialInfo->name + ".mnsydata");
 		m_activeMaterialID = materialInfo->runtime_ID;
 		m_folderNodeOfActiveMaterial = materialInfo->parent;
 
@@ -786,7 +805,7 @@ namespace mnemosy::systems {
 
 
 		// load json file
-		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / materialInfo->parent->pathFromRoot / fs::path(materialInfo->name);
+		fs::path materialDir = m_fileDirectories->GetLibraryDirectoryPath() / materialInfo->parent->pathFromRoot / fs::path(materialInfo->name);
 		fs::path dataFile = materialDir / fs::path(materialInfo->name + ".mnsydata");
 
 
@@ -1178,7 +1197,7 @@ namespace mnemosy::systems {
 		fs::path thumbnailPath = fs::path(activeMat.Name + texture_fileSuffix_thumbnail);
 
 		{ // Render thumbnail of active material
-			fs::path libDir = m_fileDirectories.GetLibraryDirectoryPath();
+			fs::path libDir = m_fileDirectories->GetLibraryDirectoryPath();
 			fs::path thumbnailAbsolutePath = libDir / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name) / thumbnailPath;
 			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailOfActiveMaterial(thumbnailAbsolutePath,m_selectedFolderNode, m_activeMaterialID);
 		}
@@ -1299,7 +1318,7 @@ namespace mnemosy::systems {
 			return;
 		}
 
-		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+		fs::path materialDir = m_fileDirectories->GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
 		std::string filename;
 		fs::path exportPath;
@@ -1423,7 +1442,7 @@ namespace mnemosy::systems {
 		matFile.FileOpen(success, m_activeMaterialDataFilePath, jsonMatKey_header, jsonMatKey_description);
 
 
-		fs::path materialDir = m_fileDirectories.GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
+		fs::path materialDir = m_fileDirectories->GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
 
 
@@ -1593,22 +1612,22 @@ namespace mnemosy::systems {
 		MNEMOSY_ASSERT(UserMaterialBound(), "You should check if active material is bound before calling this Method");
 
 		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
-		return m_fileDirectories.GetLibraryDirectoryPath() / m_folderNodeOfActiveMaterial->pathFromRoot / std::filesystem::path(activeMat.Name);
+		return m_fileDirectories->GetLibraryDirectoryPath() / m_folderNodeOfActiveMaterial->pathFromRoot / std::filesystem::path(activeMat.Name);
 	}
 
 
 	std::filesystem::path MaterialLibraryRegistry::GetLibraryPath()
 	{
-		return m_fileDirectories.GetLibraryDirectoryPath();
+		return m_fileDirectories->GetLibraryDirectoryPath();
 	}
 
 	std::filesystem::path MaterialLibraryRegistry::GetFolderPath(FolderNode* node)
 	{
-		return m_fileDirectories.GetLibraryDirectoryPath() / node->pathFromRoot;
+		return m_fileDirectories->GetLibraryDirectoryPath() / node->pathFromRoot;
 	}
 
 	std::filesystem::path MaterialLibraryRegistry::GetMaterialPath(FolderNode* folderNode, MaterialInfo* matInfo) {
-		return m_fileDirectories.GetLibraryDirectoryPath() / folderNode->pathFromRoot / std::filesystem::path(matInfo->name);
+		return m_fileDirectories->GetLibraryDirectoryPath() / folderNode->pathFromRoot / std::filesystem::path(matInfo->name);
 	}
 
 	std::vector<std::string> MaterialLibraryRegistry::GetFilepathsOfActiveMat(graphics::Material& activeMat) {

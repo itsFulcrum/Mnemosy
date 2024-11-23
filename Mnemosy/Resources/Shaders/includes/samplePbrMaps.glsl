@@ -78,7 +78,7 @@ precision highp float;
     normalMap = vec3(normalMap.xy * strength,mix(1,normalMap.z,clamp(strength,0,1)));
 
 
-    normalMap = normalize(normalMap);
+    normalMap = normalize(normalMap); // this is probably redundant
     //vec3(In.xy * Strength, lerp(1, In.z, saturate(Strength)));
 
     // transform normal into the space we want. as of now lighting is done in worldspace

@@ -32,8 +32,11 @@ namespace mnemosy::graphics
 	class Scene
 	{
 	public:
-		Scene();
-		~Scene();
+		Scene()  = default;
+		~Scene() = default;
+
+		void Init();
+		void Shutdown();
 
 		void Update();
 

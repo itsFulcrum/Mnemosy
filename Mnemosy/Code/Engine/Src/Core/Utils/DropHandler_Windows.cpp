@@ -25,19 +25,10 @@ namespace mnemosy::core {
 	
 	//==== public methods
 
-	DropHandler::DropHandler() {
-
-		//Initialize();
-	}
-
-	DropHandler::~DropHandler() {
-		
-	}
-
-	void DropHandler::Initialize(GLFWwindow& window) {
+	void DropHandler::Init(GLFWwindow& window) {
 		
 		// Dont need this if we initialize ole
-		//hr = CoInitialize(NULL); // we probably dont need this
+		//hr = CoInitialize(NULL); 
 		//Check_HRESULT_Error("DropHandler::Initialize::CoInitialize() ", hr);
 
 		HRESULT hr = OleInitialize(NULL);
@@ -70,9 +61,12 @@ namespace mnemosy::core {
 		
 	}
 
-	void DropHandler::Uninitialize() {
+	void DropHandler::Shutdown() {
 		
-		OleUninitialize();
+		// I think the reason this crashes is because glfw already calls these functions when terminating the window..
+		// OleUninitialize();
+		//HRESULT hr = RevokeDragDrop(glfwGetWin32Window(&MnemosyEngine::GetInstance().GetWindow().GetWindow()));
+		//Check_HRESULT_Error("DropHandler::Uninitialze:RevokeDragDrop: ", hr);
 		
 		if(m_pDropSourceFactory)
 			delete m_pDropSourceFactory;
@@ -85,9 +79,6 @@ namespace mnemosy::core {
 		m_pDataObjectFactory = nullptr;
 		m_pEnumFormatEtcFactory = nullptr;		
 
-		// I think the reason this crashes is because glfw already calls this function when we close the window..
-		//HRESULT hr = RevokeDragDrop(glfwGetWin32Window(&MnemosyEngine::GetInstance().GetWindow().GetWindow()));
-		//Check_HRESULT_Error("DropHandler::Uninitialze:RevokeDragDrop: ", hr);
 
 		if (m_pDropManager) {
 			delete m_pDropManager;

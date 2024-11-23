@@ -16,22 +16,21 @@
 
 namespace mnemosy::graphics
 {
-	Scene::Scene()
-	{
+
+	void Scene::Init() {
+		m_currentPreviewMesh = PreviewMesh::Default;	
+		m_activeMaterial = nullptr;
+
 		//MNEMOSY_TRACE("Start Init Scene");
 		mnemosy::core::Window& window = MnemosyEngine::GetInstance().GetWindow();
 
 
-		core::FileDirectories& fd =  MnemosyEngine::GetInstance().GetFileDirectories();
+		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 
 		std::filesystem::path previewMesh = fd.GetPreviewMeshesPath() / std::filesystem::path("mnemosy_previewMesh_mnemosy.fbx");
 
-
 		m_camera = std::make_unique<Camera>(window.GetWindowWidth(), window.GetWindowHeight());
 		m_light = std::make_unique<Light>();
-
-
-
 
 		m_mesh = std::make_unique<RenderMesh>(previewMesh.generic_string().c_str());
 
@@ -48,8 +47,10 @@ namespace mnemosy::graphics
 		m_activeMaterial = new Material();
 
 		Setup();
+
 	}
-	Scene::~Scene() {
+
+	void Scene::Shutdown() {
 
 		if (m_activeMaterial) {
 

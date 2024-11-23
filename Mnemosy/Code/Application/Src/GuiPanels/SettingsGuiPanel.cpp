@@ -3,6 +3,8 @@
 #include "Include/MnemosyConfig.h"
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/Clock.h"
+#include "Include/ApplicationConfig.h"
 
 
 #include "Include/Core/FileDirectories.h"
@@ -503,7 +505,7 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 
 
-#ifdef mnemosy_gui_showDebugInfo
+#ifdef mnemosy_gui_showFps
 
 			core::Clock& clock = engine.GetClock();
 			

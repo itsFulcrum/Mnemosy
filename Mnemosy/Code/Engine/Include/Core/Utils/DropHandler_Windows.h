@@ -36,11 +36,11 @@ namespace mnemosy::core {
 	class DropHandler
 	{
 	public:
-		DropHandler();
-		~DropHandler();
+		DropHandler() = default;
+		~DropHandler() = default;
 
-		void Initialize(GLFWwindow& window);
-		void Uninitialize();
+		void Init(GLFWwindow& window);
+		void Shutdown();
 
         void BeginDrag(std::vector<std::string>& filesToDrag);
 

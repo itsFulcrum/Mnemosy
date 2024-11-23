@@ -18,9 +18,12 @@ namespace mnemosy::graphics
 	class ThumbnailScene
 	{
 	public:
-		ThumbnailScene();
-		~ThumbnailScene();
+		ThumbnailScene()  = default;
+		~ThumbnailScene() = default;
 		
+		void Init();
+		void Shutdown();
+
 		void Update();
 
 		// getters

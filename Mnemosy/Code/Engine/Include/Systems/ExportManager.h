@@ -45,9 +45,11 @@ namespace mnemosy::systems
 	class ExportManager
 	{
 	public:
-		ExportManager();
-		~ExportManager();
+		ExportManager() = default;
+		~ExportManager() = default;
 
+		void Init();
+		void Shutdown();
 
 		bool ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
 
@@ -55,8 +57,6 @@ namespace mnemosy::systems
 		
 
 		// Export settings
-
-		// TODO load and save them across sessions
 
 		const graphics::ImageFileFormat GetExportImageFormat() { return m_exportFileFormat; }
 		void SetExportImageFormat(graphics::ImageFileFormat format) { m_exportFileFormat = format; }

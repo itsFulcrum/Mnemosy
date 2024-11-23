@@ -9,7 +9,11 @@
 
 namespace mnemosy::gui
 {
-	UserInterface::UserInterface() {
+	void UserInterface::Init() {
+
+		m_mainMenuBarGuiPanel = nullptr;
+		m_window_flags = ImGuiWindowFlags_NoScrollbar;
+
 
 		// ImGui Setup
 		// 
@@ -18,7 +22,7 @@ namespace mnemosy::gui
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		
+
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -26,7 +30,7 @@ namespace mnemosy::gui
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;     // Enable Multi-Viewport / Platform Windows
 
-		
+
 		SetupImGuiStyle();
 
 
@@ -36,8 +40,12 @@ namespace mnemosy::gui
 		//ImGui_ImplGlfw_InitForOpenGL(&MnemosyEngine::GetInstance().GetWindow().GetWindow(), true);
 		ImGui_ImplGlfw_InitForOpenGL(current, true);
 		ImGui_ImplOpenGL3_Init(glsl_version);
+
 	}
-	UserInterface::~UserInterface() {
+
+	void UserInterface::Shutdown() {
+
+		m_guiPanels.clear();
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
@@ -49,8 +57,6 @@ namespace mnemosy::gui
 
 		ImGui::DockSpaceOverViewport();
 		ImGuiIO& io = ImGui::GetIO();
-
-
 
 
 		if (m_mainMenuBarGuiPanel)

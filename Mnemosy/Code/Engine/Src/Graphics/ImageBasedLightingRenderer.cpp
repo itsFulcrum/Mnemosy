@@ -1,7 +1,9 @@
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 
-#include "Include/Core/Log.h"
 #include "Include/MnemosyEngine.h"
+#include "Include/Core/Log.h"
+
+
 #include "Include/Core/FileDirectories.h"
 #include "Include/Graphics/ModelData.h"
 #include "Include/Graphics/Shader.h"
@@ -14,21 +16,30 @@
 
 namespace mnemosy::graphics
 {
-	ImageBasedLightingRenderer::ImageBasedLightingRenderer() {
+
+	void ImageBasedLightingRenderer::Init()
+	{
+
+		m_fbo = 0;
+		m_brdfLutTextureID = 0;
+		ModelData* m_unitCube = nullptr;
+		m_brdfLutResolution = 512;
+
+
 		m_framebufferGenerated = false;
 		m_brdfLutTexture_isGenerated = false;
 
 		LoadBrdfLutTexture();
+
 	}
 
-	ImageBasedLightingRenderer::~ImageBasedLightingRenderer() {
-		
+	void ImageBasedLightingRenderer::Shutdown() {
 		if (m_framebufferGenerated) {
 			glDeleteFramebuffers(1, &m_fbo);
 			m_fbo = 0;
 			m_framebufferGenerated = false;
 		}
-		
+
 		delete m_unitCube;
 		m_unitCube = nullptr;
 	}
@@ -292,6 +303,7 @@ namespace mnemosy::graphics
 
 	}
 
+	// TODO: Replace model loader with mesh registry
 	void ImageBasedLightingRenderer::InitializeMeshAndShader() {
 
 		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();

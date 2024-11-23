@@ -106,7 +106,8 @@ void main()
 
 			// opacity
 			else if(_mode == 8){
-				float opacity = SampleOpacityMap(_opacityMap,uv);
+
+				float opacity = lerp(SampleOpacityMap(_opacityMap,uv), 1.0f,_opacityValue.y);
 				color.rgb = vec3(opacity);
 			}
 

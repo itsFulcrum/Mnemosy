@@ -15,8 +15,12 @@ namespace mnemosy::systems {
 	class FolderTree {
 
 	public:
-		FolderTree(std::string rootName);
-		~FolderTree();
+		FolderTree()  = default;
+		~FolderTree() = default;
+
+
+		void Init(std::string rootName);
+		void Shutdown();
 
 		FolderNode& GetRoot() { return *m_rootNode; }
 		FolderNode* GetRootPtr() { return m_rootNode; }

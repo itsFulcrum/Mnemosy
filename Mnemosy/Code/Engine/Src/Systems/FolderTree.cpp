@@ -7,17 +7,15 @@
 
 namespace mnemosy::systems {
 
-	FolderTree::FolderTree(std::string rootName)
-		: m_runtimeIDCounter{1}
-		, m_runtimeMaterialIDCounter{1}
-		, m_rootNodeName{rootName}
-	{
+	void FolderTree::Init(std::string rootName) {
+		m_runtimeIDCounter = 1;
+		m_runtimeMaterialIDCounter = 1;
+		m_rootNodeName = std::string(rootName);
+
 		m_rootNode = CreateNewFolder_Internal(nullptr, m_rootNodeName);
 	}
 
-
-	FolderTree::~FolderTree()
-	{
+	void FolderTree::Shutdown() {
 		RecursivDeleteHierarchy(m_rootNode);
 
 		if (!m_searchResults.empty()) {
@@ -195,7 +193,7 @@ namespace mnemosy::systems {
 
 	void FolderTree::LoadFromJson(nlohmann::json& rootJson) {
 
-		bool rootIsLeaf = rootJson["3_UserDirectories"][m_rootNodeName]["2_isLeaf"].get<bool>();
+		//bool rootIsLeaf = rootJson["3_UserDirectories"][m_rootNodeName]["2_isLeaf"].get<bool>();
 
 		nlohmann::json firstTreeEntryJson = rootJson["3_UserDirectories"][m_rootNodeName];
 

@@ -12,7 +12,9 @@ namespace mnemosy::systems
 {
 	// Public Methods
 
-	SkyboxAssetRegistry::SkyboxAssetRegistry() {
+	void SkyboxAssetRegistry::Init() {
+
+		prettyPrintDataFile = false;
 
 		m_dataFileName = "SkyboxAssetsRegistry.mnsydata";
 		m_pathToDatafile = MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath().generic_string() + "/" + m_dataFileName;
@@ -22,9 +24,10 @@ namespace mnemosy::systems
 		m_currentSelected = GetPositionByName("Market");
 	}
 
-	SkyboxAssetRegistry::~SkyboxAssetRegistry()
-	{
+	void SkyboxAssetRegistry::Shutdown() {
+
 		SaveAllEntriesToDataFile();
+
 	}
 
 	bool SkyboxAssetRegistry::CheckIfExists(const std::string& name)

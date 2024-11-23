@@ -3,6 +3,8 @@
 #include includes/mathFunctions.glsl
 
 layout (location = 0) in vec3 aPosition;
+
+
 precision highp float;
 out vec3 cubeMapSampleVector;
 out vec3 cubeSampleRight;
@@ -20,6 +22,8 @@ void main()
     cubeSampleUp = normalize(cross(cubeSampleRight,cubeMapSampleVector));
 
     fragPos = _projectionMatrix * _viewMatrix * vec4(aPosition,1.0f);
+
+    
     screenSpacePos = fragPos.xy / fragPos.w;
 
     gl_Position = fragPos.xyww;

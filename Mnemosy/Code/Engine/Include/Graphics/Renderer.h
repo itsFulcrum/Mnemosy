@@ -57,9 +57,11 @@ namespace mnemosy::graphics
 	class Renderer
 	{
 	public:
-		Renderer();
-		~Renderer();
+		Renderer()  = default;
+		~Renderer() = default;
 
+		void Init();
+		void Shutdown();
 
 		void BindFramebuffer();
 		void UnbindFramebuffer();

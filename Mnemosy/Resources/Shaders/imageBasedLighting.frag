@@ -219,10 +219,10 @@ void main(void)
 		{
 			fragmentColor.rgb = equirectangularToCubeMap(_currentFace, texCoord);
 		}
-    else if (_mode == 1)
-    {
-      fragmentColor.rgb = irradianceConvolute(_currentFace, texCoord);
-    }
+	    else if (_mode == 1)
+	    {
+	      fragmentColor.rgb = irradianceConvolute(_currentFace, texCoord);
+	    }
 		else if(_mode == 2)
 		{
 			fragmentColor.rgb = prefilterConvolute(_currentFace,texCoord);
@@ -231,6 +231,4 @@ void main(void)
 		{
 			fragmentColor.rg = IntegrateBRDF(texCoord.x, texCoord.y);
 		}
-
-
 }

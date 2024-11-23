@@ -49,13 +49,28 @@ namespace mnemosy::systems
 		inputSystem = nullptr;
 		delete inputSystem;
 	}
+	
 
-// inputSystem.RegisterKeyboardInput(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS, true, std::bind(&SceneInputController::OnKeyPressed_LEFT_SHIFT, this, std::placeholders::_1));
-// #define MNEMOSY_ASSERT(x, msg)	if((x)) {} else { MNEMOSY_CRITICAL("ASSERT - {}\n\t{}\n\tin file {}\n\ton line {}", #x, msg, __FILE__, __LINE__); MNEMOSY_BREAK}
+	// InputSystem
+
+	void InputSystem::Init() {
+
+		m_deltaSeconds = 0;
+		m_mouseLastFrameXPos = 0.0;
+		m_mouseLastFrameYPos = 0.0;
+
+		m_processUserInputs = true;
+		m_firstMouseInput = true;
+
+		m_keyboardIdCounter = 0;
+		m_mouseButtonIdCounter = 0;
+		m_mouseCursorIdCounter = 0;
+		m_mouseScrollIdCounter = 0;
+		m_windowResizeIdCounter = 0;
+		m_dropIdCounter = 0;
 
 
-	InputSystem::InputSystem()
-	{
+
 		m_pWindow = &MnemosyEngine::GetInstance().GetWindow().GetWindow();
 		glfwSetWindowUserPointer(m_pWindow, this);
 
@@ -65,11 +80,9 @@ namespace mnemosy::systems
 		glfwSetCursorPosCallback(m_pWindow, mouse_cursor_callback);
 
 		glfwSetDropCallback(m_pWindow, drop_callback);
-
 	}
 
-	InputSystem::~InputSystem()
-	{
+	void InputSystem::Shutdown() {
 
 		m_keyboardEntries.clear();
 		m_mouseButtonEntries.clear();
@@ -79,6 +92,7 @@ namespace mnemosy::systems
 		m_dropEntries.clear();
 
 		m_pWindow = nullptr;
+
 	}
 
 	int InputSystem::RegisterKeyboardInput(int glfwKeyboardKey, int glfwPressEvent, bool callbackOnlyOnce, TCallbackSignatureDouble callbackFunction)

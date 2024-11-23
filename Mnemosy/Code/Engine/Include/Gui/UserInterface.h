@@ -16,8 +16,11 @@ namespace mnemosy::gui
 	class UserInterface
 	{
 	public:
-		UserInterface();
-		~UserInterface();
+		UserInterface()  = default;
+		~UserInterface() = default;
+
+		void Init();
+		void Shutdown();
 
 		void Render();
 

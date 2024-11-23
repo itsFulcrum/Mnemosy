@@ -16,9 +16,8 @@
 
 namespace mnemosy::graphics
 {
-	ThumbnailScene::ThumbnailScene() {
 
-
+	void ThumbnailScene::Init() {
 		core::FileDirectories& fd = MnemosyEngine::GetInstance().GetFileDirectories();
 
 		std::filesystem::path cylinderMesh = fd.GetPreviewMeshesPath() / std::filesystem::path("mnemosy_previewMesh_cylinder.fbx");
@@ -27,19 +26,20 @@ namespace mnemosy::graphics
 
 		//MNEMOSY_TRACE("Start Init Scene");
 		mnemosy::core::Window& window = MnemosyEngine::GetInstance().GetWindow();
-		
+
 		m_camera = std::make_unique<Camera>(window.GetWindowWidth(), window.GetWindowHeight());
-		
+
 		m_mesh = std::make_unique<RenderMesh>(cylinderMesh.generic_string().c_str());
-	
+
 		m_light = std::make_unique<Light>();
-		
+
 		m_skybox = std::make_unique<Skybox>(standardSkybox.generic_string().c_str(), 1024);
 
 
 		Setup();
 	}
-	ThumbnailScene::~ThumbnailScene() {
+
+	void ThumbnailScene::Shutdown() {
 
 	}
 
@@ -47,15 +47,10 @@ namespace mnemosy::graphics
 	{
 		MnemosyEngine& instance = MnemosyEngine::GetInstance();
 
-
 		m_camera->SetScreenSize(instance.GetWindow().GetViewportWidth(), instance.GetWindow().GetViewportHeight());
-		//m_scene->GetCamera().SetScreenSize(m_pWindow->GetWindowWidth(), m_pWindow->GetWindowHeight());
 
 		instance.GetRenderer().SetViewMatrix(m_camera->GetViewMatrix());
 		instance.GetRenderer().SetProjectionMatrix(m_camera->GetProjectionMatrix());
-
-		//m_pRenderer->SetViewMatrix(m_scene->GetCamera().GetViewMatrix());
-		//m_pRenderer->SetProjectionMatrix(m_scene->GetCamera().GetProjectionMatrix());
 	}
 
 

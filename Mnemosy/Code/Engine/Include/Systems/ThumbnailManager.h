@@ -18,9 +18,13 @@ namespace mnemosy::systems {
 
 	class ThumbnailManager {
 	public:
-		ThumbnailManager();
-		~ThumbnailManager();
+		ThumbnailManager()  = default;
+		~ThumbnailManager() = default;
 		
+		void Init();
+		void Shutdown();
+
+
 		void Update();
 				
 		void RenderThumbnailOfActiveMaterial(std::filesystem::path& pathToThumbnail,FolderNode* selectedFolder,unsigned int activeMaterialID);

@@ -20,8 +20,12 @@ namespace mnemosy::systems
 
 
 	public:
-		TextureGenerationManager();
-		~TextureGenerationManager();
+		TextureGenerationManager()  = default;
+		~TextureGenerationManager() = default;
+
+		void Init();
+		void Shutdown();
+
 
 		// Method to invert the y channel of the normal map texture of the material passed as a parameter.
 		void FlipNormalMap(const char* exportPath, graphics::Material& material,bool exportTexture);

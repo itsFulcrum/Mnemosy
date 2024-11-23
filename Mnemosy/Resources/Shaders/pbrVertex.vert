@@ -4,9 +4,8 @@
 layout (location=0) in vec3 aPos;
 layout (location=1) in vec3 aNormal;
 layout (location=2) in vec3 aTangent;
-layout (location=3) in vec3 aBitangent;
-layout (location=4) in vec3 aColor;
-layout (location=5) in vec2 aTexCoord;
+layout (location=3) in vec3 aColor;
+layout (location=4) in vec2 aTexCoord;
 
 // uniform data
 uniform mat4 _modelMatrix;
@@ -31,38 +30,37 @@ out mat3 TBN;
 
 out vec2 pixelSize; // width and height of framebuffer
 
-
-
 void main()
 {
-	vec4 fragPos = _projectionMatrix * _viewMatrix * _modelMatrix * vec4(aPos.xyz, 1.0);
-	gl_Position = fragPos;
+
+	// apparently this is slightly faster than using the matrix directly because the shader compiler knows it can omit some instructions
+	// see GodotCon - rendering talk 2024: https://www.youtube.com/watch?v=6ak1pmQXJbg
+	mat4 modelMat  = mat4(_modelMatrix[0] ,_modelMatrix[1] ,_modelMatrix[2] ,vec4(0.0f,0.0f,0.0f,1.0f));
+	mat4 normalMat = mat4(_normalMatrix[0],_normalMatrix[1],_normalMatrix[2],vec4(0.0f,0.0f,0.0f,1.0f));
+	
+	vec4 fragPos = _projectionMatrix * _viewMatrix * modelMat * vec4(aPos.xyz, 1.0);
+	
+	position_WS = vec3(modelMat * vec4(aPos.xyz, 1.0));
+	normal_WS = vec4(normalMat * vec4(aNormal,0.0f)).xyz;
 
 	// outputs to fragment shader
 	vertexAO = aColor.r; // ao is supposed to be baked into vertex color
-	uv = aTexCoord;
-	uv.x = uv.x * _uvTiling.x;
-	uv.y = uv.y * _uvTiling.y;
-	position_WS = vec3(_modelMatrix * vec4(aPos.xyz, 1.0));
-	normal_WS = vec4(_normalMatrix * vec4(aNormal,0.0f)).xyz;
-
-	vec2 fragCoords = (fragPos.xy/ fragPos.w);
-	screenUV = fragCoords * 0.5f + 0.5f;
-
+	uv.xy = aTexCoord.xy * _uvTiling.xy;
+	
+	screenUV = fragPos.xy / fragPos.w * 0.5f + 0.5f;
 	pixelSize = vec2(_pixelWidth,_pixelHeight);
-
-
+	
+	
 	vec3 biTangent = cross(aNormal,aTangent);
 
-	vec3 T = normalize(vec3(_normalMatrix * vec4(aTangent,   0.0)));
-  	vec3 B = normalize(vec3(_normalMatrix * vec4(biTangent,  0.0)));
-  	vec3 N = normalize(vec3(_normalMatrix * vec4(aNormal,    0.0)));
+	vec3 T = normalize(vec3(normalMat * vec4(aTangent,   0.0)));
+  	vec3 B = normalize(vec3(normalMat * vec4(biTangent,  0.0)));
+  	vec3 N = normalize(vec3(normalMat * vec4(aNormal,    0.0)));
   	
   	tangentToWorldMatrix = mat3(T, B, N);
 	TBN = transpose(tangentToWorldMatrix);
+	
 
 
-	//vec3 T1 = normalize(vec3(_modelMatrix * vec4(aTangent,   0.0)));
-  	//vec3 B1 = normalize(vec3(_modelMatrix * vec4(aBitangent, 0.0)));
-  	//vec3 N1 = normalize(vec3(_modelMatrix * vec4(aNormal,    0.0)));
+	gl_Position = fragPos;
 }

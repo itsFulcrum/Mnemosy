@@ -37,14 +37,16 @@ namespace mnemosy {
 		m_mnemosyEngine.Initialize(windowTitle.c_str());
 
 
-		m_pCameraController = (input::CameraInputController*)malloc(sizeof(input::CameraInputController)); // ccccccccceee styyyyyle
+		m_pCameraController = arena_placement_new(input::CameraInputController);
 		m_pCameraController->Init();
 
-		m_pGuiPanelManager = (gui::GuiPanelManager*)malloc(sizeof(gui::GuiPanelManager));
+		m_pGuiPanelManager = arena_placement_new(gui::GuiPanelManager);
 		m_pGuiPanelManager->Init();
 
 
 		MNEMOSY_INFO("Mnemosy Application Initialized: {} Seconds", m_mnemosyEngine.GetClock().GetTimeSinceLaunch());
+
+
 	}
 
 	void Application::Run() {
@@ -53,11 +55,8 @@ namespace mnemosy {
 	}
 
 	void Application::Shutdown() {
-
-		free(m_pCameraController);
 		
 		m_pGuiPanelManager->Shutdown();
-		free(m_pGuiPanelManager);
 		
 		// shutdown engine last
 		m_mnemosyEngine.Shutdown();

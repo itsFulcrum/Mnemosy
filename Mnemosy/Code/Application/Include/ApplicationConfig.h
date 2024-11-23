@@ -13,7 +13,7 @@
 
 //#define mnemosy_gui_showImGuiDemoWindow
 //#define mnemosy_gui_showDebugInfo
-
+//#define mnemosy_gui_showFps
 
 #endif // MNEMOSY_CONFIG_DEBUG
 

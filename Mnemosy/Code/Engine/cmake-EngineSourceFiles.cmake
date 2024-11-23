@@ -18,7 +18,8 @@ ${ENGINE_SOURCE_PATH}/Src/Core/Clock.cpp
 ${ENGINE_SOURCE_PATH}/Include/Core/FileDirectories.h
 ${ENGINE_SOURCE_PATH}/Src/Core/FileDirectories.cpp
 
-
+${ENGINE_SOURCE_PATH}/Include/Core/flcrm_arena_alloc.h
+${ENGINE_SOURCE_PATH}/Src/Core/flcrm_arena_alloc.cpp
 
 #Systems
 ${ENGINE_SOURCE_PATH}/Include/Systems/Input/InputSystem.h

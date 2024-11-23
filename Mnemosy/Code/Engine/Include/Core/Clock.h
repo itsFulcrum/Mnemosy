@@ -10,6 +10,7 @@ namespace mnemosy::core
 		Clock() = default;
 		~Clock() = default;
 
+		void Init();
 		void Update();
 
 		const double GetTimeSeconds() { return m_currentTime; }
@@ -33,14 +34,9 @@ namespace mnemosy::core
 		double m_timeLastFrame = 0.0;
 		double m_deltaSeconds = 0.0;
 		double m_uncappedDeltaSeconds = 0.0;
-		//double m_currentTimeMili = 0.0f;
-		//double m_timeLastFrameMili = 0.0f;
-		//double m_deltaMili = 0.0f;
 
-
-
+		float m_fpsCounter = 0.0f;
 		int m_frameCount = 0;
-		float m_fpsCounter = 0.f;
 		int m_frameCountAtLastSecondStep = 0;
 		int m_currentFPS = 0;
 

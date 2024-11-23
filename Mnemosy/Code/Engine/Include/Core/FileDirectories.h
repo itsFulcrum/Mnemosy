@@ -12,8 +12,11 @@ namespace mnemosy::core
 
 
 	public:
-		FileDirectories();
-		~FileDirectories();
+		FileDirectories() = default;
+		~FileDirectories() = default;
+
+		void Init();
+
 
 		const std::filesystem::path GetResourcesPath();
 		const std::filesystem::path GetMeshesPath();

@@ -29,8 +29,12 @@ namespace mnemosy::systems
 	class SkyboxAssetRegistry
 	{
 	public:
-		SkyboxAssetRegistry();
-		~SkyboxAssetRegistry();
+		SkyboxAssetRegistry()  = default;
+		~SkyboxAssetRegistry() = default;
+
+		void Init();
+		void Shutdown();
+
 
 		bool CheckIfExists(const std::string& name);
 

@@ -354,11 +354,7 @@ namespace mnemosy::gui
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetAlbedoTexture().GetWidth()) + "x" + std::to_string(activeMat.GetAlbedoTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-#ifdef mnemosy_gui_showDebugInfo
-				// DEBUG
-				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ALBEDO));
-				ImGui::Text(TextureID.c_str());
-#endif // mnemosy_gui_showDebugInfo
+
 			}
 
 			// Disabled widgets if texture is assigned 
@@ -419,11 +415,6 @@ namespace mnemosy::gui
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetRoughnessTexture().GetWidth()) + "x" + std::to_string(activeMat.GetRoughnessTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-#ifdef mnemosy_gui_showDebugInfo
-				// DEBUG
-				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::ROUGHNESS));
-				ImGui::Text(TextureID.c_str());
-#endif // mnemosy_gui_showDebugInfo
 
 
 			}
@@ -545,11 +536,6 @@ namespace mnemosy::gui
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetNormalTexture().GetWidth()) + "x" + std::to_string(activeMat.GetNormalTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-				// DEBUG INFO
-#ifdef mnemosy_gui_showDebugInfo
-				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::NORMAL));
-				ImGui::Text(TextureID.c_str());
-#endif // mnemosy_gui_showDebugInfo
 			}
 
 			// Disabled widgets if texture is NOT assigned 
@@ -656,12 +642,6 @@ namespace mnemosy::gui
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetMetallicTexture().GetWidth()) + "x" + std::to_string(activeMat.GetMetallicTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-				// DEBUG
-#ifdef mnemosy_gui_showDebugInfo
-				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::METALLIC));
-				ImGui::Text(TextureID.c_str());
-#endif // mnemosy_gui_showDebugInfo
-
 			}
 
 			// Disabled widgets if texture is assigned 
@@ -716,12 +696,6 @@ namespace mnemosy::gui
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetAOTexture().GetWidth()) + "x" + std::to_string(activeMat.GetAOTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
 
-				// DEBUG
-#ifdef mnemosy_gui_showDebugInfo
-				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::AMBIENTOCCLUSION));
-				ImGui::Text(TextureID.c_str());
-#endif // mnemosy_gui_showDebugInfo
-
 			}
 
 			ImGui::TreePop();
@@ -762,14 +736,6 @@ namespace mnemosy::gui
 
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetEmissiveTexture().GetWidth()) + "x" + std::to_string(activeMat.GetEmissiveTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
-
-				// DEBUG
-#ifdef mnemosy_gui_showDebugInfo
-				std::string TextureID = "Debug: GL TexID: " + std::to_string(activeMat.DebugGetTextureID(graphics::EMISSION));
-				ImGui::Text(TextureID.c_str());
-#endif // mnemosy_gui_showDebugInfo
-
-
 			}
 
 

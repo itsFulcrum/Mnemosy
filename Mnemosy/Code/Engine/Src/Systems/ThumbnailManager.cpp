@@ -18,11 +18,11 @@
 
 namespace mnemosy::systems {
 
-	ThumbnailManager::ThumbnailManager() {
-
+	void ThumbnailManager::Init() {
+		m_activeMaterialsFullyLoaded = false;
 	}
 
-	ThumbnailManager::~ThumbnailManager() {
+	void ThumbnailManager::Shutdown() {
 		if (!m_thumbnailsQuedForRefresh.empty()) {
 
 			m_thumbnailsQuedForRefresh.clear();

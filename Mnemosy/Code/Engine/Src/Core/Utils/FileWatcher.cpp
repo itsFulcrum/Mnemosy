@@ -5,7 +5,8 @@
 namespace mnemosy::core {
 
 	FileWatcher::FileWatcher() {
-
+		m_paths = std::vector<fs::path>();
+		m_fileTimeTypes = std::vector<fs::file_time_type>();
 	}
 	FileWatcher::~FileWatcher() {
 

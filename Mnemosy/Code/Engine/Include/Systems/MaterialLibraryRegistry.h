@@ -28,8 +28,11 @@ namespace mnemosy::systems
 	class MaterialLibraryRegistry
 	{
 	public:
-		MaterialLibraryRegistry();
-		~MaterialLibraryRegistry();
+		MaterialLibraryRegistry() = default;
+		~MaterialLibraryRegistry() = default;
+
+		void Init();
+		void Shutdown();
 
 		void LoadUserDirectoriesFromFile();
 		void SaveUserDirectoriesData();
@@ -107,7 +110,9 @@ namespace mnemosy::systems
 		// accessed by library gui panel and contents gui panel
 		bool inSearchMode = false;
 	private:
-		core::FileDirectories& m_fileDirectories;
+		
+		core::FileDirectories* m_fileDirectories = nullptr;
+
 		FolderNode* m_selectedFolderNode = nullptr;
 
 		//std::filesystem::directory_entry m_userDirectoriesDataFile;

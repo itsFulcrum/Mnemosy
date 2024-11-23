@@ -6,11 +6,12 @@
 #include <json.hpp>
 #include <fstream>
 
-namespace mnemosy::core
-{
-	FileDirectories::FileDirectories() {
+namespace mnemosy::core {
+
+	void FileDirectories::Init() {
 		namespace fs = std::filesystem;
 
+		prettyPrintDataFile = false;
 
 		m_mnemosyInternalResourcesDirectory = fs::directory_entry(R"(../Resources)");
 
@@ -28,10 +29,8 @@ namespace mnemosy::core
 		m_mnemosyLibraryDataFile = fs::directory_entry(R"(../Resources/Data/LibraryDirectory.mnsydata)");
 
 		LoadUserLibraryDirectoryFromDataFile();
-	}
 
-	FileDirectories::~FileDirectories() 
-	{ }
+	}
 
 
 	const std::filesystem::path FileDirectories::GetResourcesPath() {

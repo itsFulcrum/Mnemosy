@@ -2,6 +2,7 @@
 #define MNEMOSY_ENGINE_H
 
 #include <memory>
+#include "Include/Core/flcrm_arena_alloc.h"
 
 namespace mnemosy::core
 {
@@ -37,6 +38,9 @@ namespace mnemosy::gui
 {
 	class UserInterface;
 }
+
+#define arena_malloc(type)	MnemosyEngine::GetInstance().arena_persistent_malloc(sizeof(type),alignof(type))
+#define arena_placement_new(type)		new (MnemosyEngine::GetInstance().arena_persistent_malloc(sizeof(type),alignof(type))) type 
 
 namespace mnemosy 
 {
@@ -78,33 +82,43 @@ namespace mnemosy
 
 		gui::UserInterface& GetUserInterface() { return *m_pUserInterface; }
 
+		void* arena_persistent_malloc(size_t size, size_t align);
+
 	private:
+
 		bool m_isInitialized = false;
 		
+
+
 		core::Window* m_pWindow = nullptr;
 		
 		std::unique_ptr<core::Logger> m_pLogger;
-		std::unique_ptr<core::Clock> m_pClock;
-		std::unique_ptr<core::FileDirectories> m_pFileDirectories;
-		std::unique_ptr<core::DropHandler> m_pDropHandler;
+		core::Clock* m_pClock;
+		core::FileDirectories* m_pFileDirectories;
+
+		core::DropHandler* m_pDropHandler;
 		
 
 
-		std::unique_ptr<systems::InputSystem> m_pInputSystem;
-		std::unique_ptr<systems::SkyboxAssetRegistry> m_pSkyboxAssetRegistry;		
-		std::unique_ptr<systems::MaterialLibraryRegistry> m_pMaterialLibraryRegistry;
-		std::unique_ptr<systems::MeshRegistry> m_pMeshRegistry;
-		std::unique_ptr<systems::ThumbnailManager> m_pThumbnailManger;
-		std::unique_ptr<systems::TextureGenerationManager> m_pTextureGenerationManager;
-		std::unique_ptr<systems::ExportManager> m_pExportManager;
+		systems::InputSystem* m_pInputSystem;
+		systems::SkyboxAssetRegistry* m_pSkyboxAssetRegistry;
+		systems::MaterialLibraryRegistry* m_pMaterialLibraryRegistry;
+		systems::MeshRegistry* m_pMeshRegistry;
+
+		systems::ThumbnailManager* m_pThumbnailManger;
+		systems::TextureGenerationManager* m_pTextureGenerationManager;
+		systems::ExportManager* m_pExportManager;
 		
 
-		std::unique_ptr<graphics::ImageBasedLightingRenderer> m_pIbl_renderer;
-		std::unique_ptr<graphics::Renderer> m_pRenderer;
-		std::unique_ptr<graphics::Scene> m_pScene;
-		std::unique_ptr<graphics::ThumbnailScene> m_pThumbnailScene;
+		graphics::ImageBasedLightingRenderer* m_pIbl_renderer;
+		graphics::Renderer* m_pRenderer;
 
-		std::unique_ptr<gui::UserInterface> m_pUserInterface;
+		graphics::Scene* m_pScene;
+		graphics::ThumbnailScene* m_pThumbnailScene;
+
+		gui::UserInterface* m_pUserInterface;
+	
+		flcrm::Arena m_arena_persistent;
 	};
 
 

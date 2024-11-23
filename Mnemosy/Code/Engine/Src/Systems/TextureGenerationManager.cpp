@@ -18,12 +18,45 @@ namespace mnemosy::systems
 {	
 	// public methods
 
-	TextureGenerationManager::TextureGenerationManager() {
+
+	void TextureGenerationManager::Init() {
+		m_pTextureGenShader = nullptr;
+
+		m_VBO = 0;
+		m_VAO = 0;
+
+		m_FBO = 0;
+		m_renderTexture_ID = 0;
+
+		m_screenQuadVertices[0] = -1.0f;
+		m_screenQuadVertices[1] = -1.0f;
+		m_screenQuadVertices[2] =  0.0f;
+		m_screenQuadVertices[3] =  0.0f;
+		m_screenQuadVertices[4] =  1.0f;
+		m_screenQuadVertices[5] =  1.0f;
+		m_screenQuadVertices[6] =  1.0f;
+		m_screenQuadVertices[7] =  1.0f;
+		m_screenQuadVertices[8] = -1.0f;
+		m_screenQuadVertices[9] =  1.0f;
+		m_screenQuadVertices[10] =  0.0f;
+		m_screenQuadVertices[11] =  1.0f;
+		m_screenQuadVertices[12] = -1.0f;
+		m_screenQuadVertices[13] = -1.0f;
+		m_screenQuadVertices[14] =  0.0f;
+		m_screenQuadVertices[15] =  0.0f;
+		m_screenQuadVertices[16] =  1.0f;
+		m_screenQuadVertices[17] = -1.0f;
+		m_screenQuadVertices[18] =  1.0f;
+		m_screenQuadVertices[19] =  0.0f;
+		m_screenQuadVertices[20] =  1.0f;
+		m_screenQuadVertices[21] =  1.0f;
+		m_screenQuadVertices[22] =  1.0f;
+		m_screenQuadVertices[23] = 1.0f;
 
 	}
 
-	TextureGenerationManager::~TextureGenerationManager() {
-		
+	void TextureGenerationManager::Shutdown()
+	{
 		if (m_pTextureGenShader == nullptr) {
 			delete m_pTextureGenShader;
 			m_pTextureGenShader = nullptr;
@@ -40,7 +73,7 @@ namespace mnemosy::systems
 		}
 
 		if (m_FBO != 0) {
-			glDeleteFramebuffers(1,&m_FBO);
+			glDeleteFramebuffers(1, &m_FBO);
 			m_FBO = 0;
 		}
 
@@ -48,6 +81,7 @@ namespace mnemosy::systems
 			glDeleteTextures(1, &m_renderTexture_ID);
 			m_renderTexture_ID = 0;
 		}
+
 	}
 	
 	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::Material& material, bool exportTexture) {

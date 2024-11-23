@@ -17,9 +17,11 @@ namespace mnemosy::systems {
 	class MeshRegistry {
 
 	public:
-		MeshRegistry();
-		~MeshRegistry();
+		MeshRegistry()  = default;
+		~MeshRegistry() = default;
 
+		void Init();
+		void Shutdown();
 
 		uint16_t LoadMesh(const std::string& filepath);
 		graphics::ModelData& GetMeshByID(uint16_t id);

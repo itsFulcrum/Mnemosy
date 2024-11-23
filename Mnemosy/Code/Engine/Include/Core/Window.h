@@ -20,9 +20,11 @@ namespace mnemosy::core
 	class Window
 	{
 	public:
-		Window(const char* WindowTitle);
-		~Window();
+		Window()  = default;
+		~Window() = default;
 
+
+		void Init(const char* WindowTitle);
 		void Shutdown();
 
 
@@ -37,7 +39,6 @@ namespace mnemosy::core
 		const unsigned int GetViewportHeight()	const { return m_viewportData.height; }
 		const unsigned int GetViewportPosX()	const { return m_viewportData.posX; }
 		const unsigned int GetViewportPosY()	const { return m_viewportData.posY; }
-		const bool IsVsyncEnabled() { return m_vsyncEnabled; }
 		
 		void SetViewportData(const unsigned int viewWidth,const unsigned int viewHeight,const int viewStartPosX,const int viewStartPosY);
 		void SetWindowSize_InternalByIntputSystem(const unsigned int width,const unsigned int height);
@@ -47,13 +48,9 @@ namespace mnemosy::core
 		unsigned int m_currentWindowWidth = 0;
 		unsigned int m_currentWindowHeight = 0;
 
-
 		ViewportData m_viewportData;
 
 		GLFWwindow* m_pWindow = nullptr;
-
-		bool m_vsyncEnabled = true;
-
 	};
 
 } // mnemosy::core

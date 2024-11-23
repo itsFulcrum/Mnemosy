@@ -1,7 +1,6 @@
 #include "Include/MnemosyConfig.h"
 #include "Include/MnemosyEngine.h"
 
-#include <GLFW/glfw3.h>
 
 #include "Include/Core/Window.h"
 #include "Include/Core/Logger.h"
@@ -29,6 +28,8 @@
 #include "Include/Graphics/ThumbnailScene.h"
 
 #include "Include/Gui/UserInterface.h"
+
+#include <GLFW/glfw3.h>
 
 namespace mnemosy
 {
@@ -74,74 +75,82 @@ namespace mnemosy
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
 		
+		m_arena_persistent.arena_init_allocate_buffer(2048); //1024000 = 1 mb memory block
+
+
 		//MNEMOSY_TRACE("Initializing Subsystems");
 		//  === !!!  order of initialization here matters !!!! ===
 
-		m_pFileDirectories = std::make_unique<core::FileDirectories>(); // need to come before scene and image base lighting renderer
-		//MNEMOSY_TRACE("FileDirectories Initialized");
-		
+		m_pFileDirectories = arena_placement_new(core::FileDirectories);// need to come before scene and image base lighting renderer
+		m_pFileDirectories->Init();
 
-		m_pWindow = new core::Window(WindowTitle);
+		m_pWindow = arena_placement_new(core::Window);
+		m_pWindow->Init(WindowTitle);
+
+		#ifdef MNEMOSY_CONFIG_DISABLE_VSYNC
+		m_pWindow->EnableVsync(false);
+		#endif
+
 		MNEMOSY_DEBUG("Window created");
 		
 		// subsystems
 		// Mnemosy::core
-		m_pClock = std::make_unique<core::Clock>();
-		m_pClock->capDeltaTime = true;
-		//MNEMOSY_TRACE("Clock Initialized");
+		m_pClock = arena_placement_new(core::Clock);
+		m_pClock->Init();
+
 		
-		
-		m_pDropHandler = std::make_unique<core::DropHandler>();
-		m_pDropHandler->Initialize(m_pWindow->GetWindow());
-		//MNEMOSY_TRACE("DropHandler Initialized");
+		m_pDropHandler = arena_placement_new(core::DropHandler);
+		m_pDropHandler->Init(m_pWindow->GetWindow());
 
 		// mnemosy::systems
-		m_pInputSystem = std::make_unique<systems::InputSystem>();
-		//MNEMOSY_TRACE("InputSystem Initialized");
-		m_pSkyboxAssetRegistry = std::make_unique<systems::SkyboxAssetRegistry>();
-		//MNEMOSY_TRACE("SkyboxAssetsRegistry Initialized");
+		m_pInputSystem = arena_placement_new(systems::InputSystem);
+		m_pInputSystem->Init();
 
-		m_pMaterialLibraryRegistry = std::make_unique<systems::MaterialLibraryRegistry>();
-		//MNEMOSY_TRACE("MaterialRegistry Initialized");
-		m_pThumbnailManger = std::make_unique<systems::ThumbnailManager>();
-		//MNEMOSY_TRACE("ThumbnailManager Initialized");
-		m_pTextureGenerationManager = std::make_unique<systems::TextureGenerationManager>();
-		//MNEMOSY_TRACE("TextureGenManager Initialized");
-		m_pExportManager = std::make_unique<systems::ExportManager>();
-		//MNEMOSY_TRACE("ExportManager Initialized");
-		m_pMeshRegistry = std::make_unique<systems::MeshRegistry>();
+		m_pSkyboxAssetRegistry = arena_placement_new(systems::SkyboxAssetRegistry);
+		m_pSkyboxAssetRegistry->Init();
+
+		m_pMaterialLibraryRegistry = arena_placement_new(systems::MaterialLibraryRegistry);
+		m_pMaterialLibraryRegistry->Init();
+		
+		m_pThumbnailManger = arena_placement_new(systems::ThumbnailManager);
+		m_pThumbnailManger->Init();
+
+		m_pTextureGenerationManager = arena_placement_new(systems::TextureGenerationManager);
+		m_pTextureGenerationManager->Init();
+
+
+		m_pExportManager = arena_placement_new(systems::ExportManager);
+		m_pExportManager->Init(),
+
+			m_pMeshRegistry = arena_placement_new(systems::MeshRegistry);
+		m_pMeshRegistry->Init();
 
 
 		// menmosy::graphcs
 		MNEMOSY_DEBUG("Initializing Renderer");
-		m_pIbl_renderer = std::make_unique<graphics::ImageBasedLightingRenderer>();
-		m_pRenderer = std::make_unique<graphics::Renderer>();
+		m_pIbl_renderer =  arena_placement_new(graphics::ImageBasedLightingRenderer);
+		m_pIbl_renderer->Init();
 
+		m_pRenderer = arena_placement_new(graphics::Renderer);
+		m_pRenderer->Init();
 
 
 		MNEMOSY_DEBUG("Loading Scenes");
-		m_pScene = std::make_unique<graphics::Scene>();
-		//MNEMOSY_DEBUG("Loading thumbnail scene");
-		m_pThumbnailScene = std::make_unique<graphics::ThumbnailScene>();
+		m_pScene = arena_placement_new(graphics::Scene);
+		m_pScene->Init();
 
+		m_pThumbnailScene = arena_placement_new(graphics::ThumbnailScene);
+		m_pThumbnailScene->Init();
 
-		m_pUserInterface = std::make_unique<gui::UserInterface>();
-		//MNEMOSY_TRACE("UserInterface Initialized");
-
+		m_pUserInterface =  arena_placement_new(gui::UserInterface);
+		m_pUserInterface->Init();
 
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
 		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
 		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->GetSkybox());
 
 
-
-
 		m_isInitialized = true;
-
-
-		//double timeEnd = glfwGetTime();
-		//MNEMOSY_INFO("Mnemosy Engine Initialized {} Seconds", (timeEnd - timeBegin)); 
-
 	}
 
 	void MnemosyEngine::Run() {
@@ -170,7 +179,7 @@ namespace mnemosy
 			m_pUserInterface->Render();
 
 			glfwSwapBuffers(&m_pWindow->GetWindow());
-		
+			
 		} // End of main loop
 
 	}
@@ -179,13 +188,46 @@ namespace mnemosy
 		
 		m_pMaterialLibraryRegistry->SaveActiveMaterialToFile();
 
+		m_pUserInterface->Shutdown();
+
+		m_pThumbnailScene->Shutdown();
+		m_pScene->Shutdown();
+
+
+		m_pRenderer->Shutdown();
+		m_pIbl_renderer->Shutdown();
+		
+
+		m_pExportManager->Shutdown();
+		m_pTextureGenerationManager->Shutdown();
+		m_pThumbnailManger->Shutdown();
+
+
+		m_pMeshRegistry->Shutdown();
+		m_pMaterialLibraryRegistry->Shutdown();
+		m_pSkyboxAssetRegistry->Shutdown();
+
+
+		m_pInputSystem->Shutdown();
+		m_pDropHandler->Shutdown();
+
 		m_pWindow->Shutdown();
-		delete m_pWindow;
-		m_pWindow = nullptr;
+
+
+		m_arena_persistent.arena_free_all();
 
 		MNEMOSY_INFO("Mnemosy Application Closed");
 
 		delete m_sInstance;
+	}
+
+	void* MnemosyEngine::arena_persistent_malloc(size_t size, size_t align)
+	{
+		MNEMOSY_ASSERT(m_arena_persistent.has_enough_memory(size),"Temporary Storage is out of memory");
+
+		void* ptr = m_arena_persistent.arena_allocate(size, align);
+		MNEMOSY_TRACE("Arena_Allocated {} bytes, Align {} , {} bytes left ", (int)size,(int)align, (int)m_arena_persistent.bytes_left());
+		return ptr;
 	}
 
 } // !mnemosy

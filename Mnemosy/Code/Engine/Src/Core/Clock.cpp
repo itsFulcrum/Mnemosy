@@ -4,7 +4,25 @@
 
 namespace mnemosy::core
 {
-	
+	void Clock::Init() {
+
+		capDeltaTime = true;
+		
+		m_deltaLowLimit = 0.006f;	// Keep Below 165fps // 1/165
+		m_deltaHighLimit = 0.1;		// Keep Above 10fps // 1/10
+
+		// time is all handled in seconds
+
+		m_currentTime = 0.0;
+		m_timeLastFrame = 0.0;
+		m_deltaSeconds = 0.0;
+		m_uncappedDeltaSeconds = 0.0;
+
+		m_fpsCounter = 0.0f;
+		m_frameCount = 0;
+		m_frameCountAtLastSecondStep = 0;
+		m_currentFPS = 0;
+	}
 	void Clock::Update()
 	{
 		m_currentTime = static_cast<double>(glfwGetTime());
@@ -21,27 +39,6 @@ namespace mnemosy::core
 		}
 
 		m_timeLastFrame = m_currentTime;
-
-
-		//m_currentTimeMili = static_cast<double>(glfwGetTime()) / 1000;
-		//m_deltaMili = m_currentTimeMili - m_timeLastFrameMili;
-
-		//double m_deltaLowLimit = 0.006f;	// Keep Below 165fps // 0/165
-		//double m_deltaHighLimit = 0.1;		// Keep Above 10fps // 1/10
-
-		//double deltaLow = 0.006;
-		//double deltaHigh = 0.1;
-
-		//if (capDeltaTime)
-		//{
-		//	if (m_deltaMili < deltaLow)
-		//		m_deltaMili = deltaLow;
-		//	else if (m_deltaMili > deltaHigh)
-		//		m_deltaMili = deltaHigh;
-		//}
-		//m_timeLastFrameMili = m_currentTimeMili;
-
-
 
 		m_fpsCounter += (float)m_uncappedDeltaSeconds;
 		if (m_fpsCounter >= 1.f)

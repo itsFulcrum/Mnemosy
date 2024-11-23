@@ -4,12 +4,11 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
-#include <json.hpp>
 
 
+#include "Include/Graphics/Shader.h"
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Camera.h"
-#include "Include/Graphics/Shader.h"
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/ModelData.h"
 #include "Include/Graphics/RenderMesh.h"
@@ -20,6 +19,7 @@
 #include "Include/Graphics/ThumbnailScene.h"
 
 
+#include <json.hpp>
 #include <filesystem>
 #include <glad/glad.h>
 
@@ -27,50 +27,99 @@ namespace mnemosy::graphics
 {
 	// public
 
-	Renderer::Renderer()  {
+	void Renderer::Init() {
+		// init members
+
+		m_MSAA_FBO = 0;
+		m_MSAA_RBO = 0;
+		m_MSAA_renderTexture_ID = 0;
+
+		m_standard_FBO = 0;
+		m_standard_RBO = 0;
+		m_standard_renderTexture_ID = 0;
+
+		m_blitFBO = 0;
+		m_blitRenderTexture_ID = 0;
+
+		m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
+		m_viewMatrix = glm::mat4(1.0f);
+		m_projectionMatrix = glm::mat4(1.0f);
+		
+		m_pPbrShader = nullptr;
+		m_pUnlitTexturesShader = nullptr;
+		m_pLightShader = nullptr;
+		m_pSkyboxShader = nullptr;
+
+#ifdef MNEMOSY_RENDER_GIZMO
+		m_pGizmoShader = nullptr;
+#endif // MNEMOSY_RENDER_GIZMO
+
+		m_msaaSamplesSettings = MSAA4X;
+		m_msaaOff = false;
+
+		// Thumbnails
+		m_thumbnailResolution = ThumbnailResolution::MNSY_THUMBNAILRES_128;
+
+
+		m_thumb_MSAA_Value = 16;
+		m_thumb_MSAA_FBO = 0;
+		m_thumb_MSAA_RBO = 0;
+		m_thumb_MSAA_renderTexture_ID = 0;
+		
+		m_thumb_blitFBO = 0;
+		m_thumb_blitTexture_ID = 0;
+
+		m_renderMode = MNSY_RENDERMODE_SHADED;
+
+		m_fileWatchTimeDelta = 0.0f;
+
+		// load shaders
 
 		MnemosyEngine& engine = MnemosyEngine::GetInstance();
 
 		std::filesystem::path shaders = engine.GetFileDirectories().GetShadersPath();
 		std::string shadersPath = shaders.generic_string() + "/";
-		std::string pbrVert		= shadersPath + "pbrVertex.vert";
-		std::string pbrFrag		= shadersPath + "pbrFragment.frag";
-		std::string unlitFrag		= shadersPath + "unlitTexView.frag";
+		std::string pbrVert = shadersPath + "pbrVertex.vert";
+		std::string pbrFrag = shadersPath + "pbrFragment.frag";
+		std::string unlitFrag = shadersPath + "unlitTexView.frag";
 
 
 		//std::string pbrMesh		= shadersPath + "pbrVert_MESH.glsl";
 		//std::string pbrMeshFrag	= shadersPath + "pbrMeshFragment.frag";
-		std::string lightVert	= shadersPath + "light.vert";
-		std::string lightFrag	= shadersPath + "light.frag";
-		std::string skyboxVert	= shadersPath + "skybox.vert";
-		std::string skyboxFrag	= shadersPath + "skybox.frag";
+		std::string lightVert = shadersPath + "light.vert";
+		std::string lightFrag = shadersPath + "light.frag";
+		std::string skyboxVert = shadersPath + "skybox.vert";
+		std::string skyboxFrag = shadersPath + "skybox.frag";
 
 
 		MNEMOSY_DEBUG("Compiling Shaders");
-		m_pPbrShader	= new Shader(pbrVert.c_str(), pbrFrag.c_str());
+		m_pPbrShader = new Shader(pbrVert.c_str(), pbrFrag.c_str());
 		m_pUnlitTexturesShader = new Shader(pbrVert.c_str(), unlitFrag.c_str());
 
-		m_pLightShader	= new Shader(lightVert.c_str(), lightFrag.c_str());
+		m_pLightShader = new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
 
 #ifdef MNEMOSY_RENDER_GIZMO
-		std::string gizmoVert	= shadersPath + "gizmo.vert";
-		std::string gizmoFrag	= shadersPath + "gizmo.frag";
-		m_pGizmoShader	= new Shader(gizmoVert.c_str(),gizmoFrag.c_str());
+		std::string gizmoVert = shadersPath + "gizmo.vert";
+		std::string gizmoFrag = shadersPath + "gizmo.frag";
+		m_pGizmoShader = new Shader(gizmoVert.c_str(), gizmoFrag.c_str());
 #endif // MNEMOSY_RENDER_GIZMO
 
 
 		unsigned int w = engine.GetWindow().GetWindowWidth();
 		unsigned int h = engine.GetWindow().GetWindowHeight();
-		CreateRenderingFramebuffer(w,h);
-		CreateBlitFramebuffer(w,h);
+		CreateRenderingFramebuffer(w, h);
+		CreateBlitFramebuffer(w, h);
 		CreateThumbnailFramebuffers();
+
+		m_shaderFileWatcher = core::FileWatcher();
+		m_shaderSkyboxFileWatcher = core::FileWatcher();
 
 		// init FileWatcher
 		{
 			fs::path _includes = shaders / fs::path("includes");
 
-			m_shaderFileWatcher.RegisterFile(shaders /fs::path("pbrVertex.vert"));
+			m_shaderFileWatcher.RegisterFile(shaders / fs::path("pbrVertex.vert"));
 			m_shaderFileWatcher.RegisterFile(fs::path(pbrFrag));
 			m_shaderFileWatcher.RegisterFile(shaders / fs::path("unlitTexView.frag"));
 
@@ -79,7 +128,7 @@ namespace mnemosy::graphics
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("mathFunctions.glsl"));
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("pbrLightingTerms.glsl"));
 			m_shaderFileWatcher.RegisterFile(_includes / fs::path("samplePbrMaps.glsl"));
-			
+
 			m_shaderSkyboxFileWatcher.RegisterFile(shaders / fs::path("skybox.vert"));
 			m_shaderSkyboxFileWatcher.RegisterFile(shaders / fs::path("skybox.frag"));
 		}
@@ -87,8 +136,8 @@ namespace mnemosy::graphics
 		LoadUserSettings();
 	}
 
-	Renderer::~Renderer()
-	{
+	void Renderer::Shutdown() {
+
 		SaveUserSettings();
 
 		delete m_pPbrShader;
@@ -118,7 +167,7 @@ namespace mnemosy::graphics
 		glDeleteFramebuffers(1, &m_standard_FBO);
 		glDeleteRenderbuffers(1, &m_standard_RBO);
 		glDeleteTextures(1, &m_standard_renderTexture_ID);
-		
+
 		// Delete thumbnail textures and framebuffers
 		glDeleteFramebuffers(1, &m_thumb_MSAA_FBO);
 		glDeleteRenderbuffers(1, &m_thumb_MSAA_RBO);
@@ -126,6 +175,8 @@ namespace mnemosy::graphics
 		glDeleteTextures(1, &m_thumb_MSAA_renderTexture_ID);
 		glDeleteFramebuffers(1, &m_thumb_blitFBO);
 		glDeleteTextures(1, &m_thumb_blitTexture_ID);
+
+
 	}
 
 	// bind renderFrameBuffer
@@ -340,20 +391,6 @@ namespace mnemosy::graphics
 		}
 		glBindVertexArray(0);
 
-		// Mesh Shader Experiment
-		/*
-		glCullFace(GL_BACK);
-		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
-
-			for (unsigned int a = 0; a < renderMesh.GetModelData().meshes[i].vertecies.size(); a++) {
-
-				m_pPbrShader->SetUniformFloat3("_VertPos",renderMesh.GetModelData().meshes[i].vertecies[a].position.x, renderMesh.GetModelData().meshes[i].vertecies[a].position.y, renderMesh.GetModelData().meshes[i].vertecies[a].position.z);
-				glDrawMeshTasksNV(0,1);
-			}
-		}
-		glCullFace(GL_FRONT);
-		*/	
-
 	}
 
 	void Renderer::RenderGizmo(RenderMesh& renderMesh)
@@ -456,9 +493,6 @@ namespace mnemosy::graphics
 			
 			scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
 		}
-
-
-
 
 		RenderMeshes(scene.GetMesh());
 
