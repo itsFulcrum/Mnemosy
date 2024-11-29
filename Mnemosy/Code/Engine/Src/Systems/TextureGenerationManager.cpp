@@ -84,7 +84,7 @@ namespace mnemosy::systems
 
 	}
 	
-	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::Material& material, bool exportTexture) {
+	void TextureGenerationManager::FlipNormalMap(const char* exportPath,graphics::PbrMaterial& material, bool exportTexture) {
 		
 		if (!material.isNormalAssigned()) // should never happen but lets be save
 			return;
@@ -158,7 +158,7 @@ namespace mnemosy::systems
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void TextureGenerationManager::InvertRoughness(graphics::Material& material, const char* exportPath, bool exportTexture) {		
+	void TextureGenerationManager::InvertRoughness(graphics::PbrMaterial& material, const char* exportPath, bool exportTexture) {		
 		
 		MNEMOSY_ASSERT(material.isRoughnessAssigned(), "Check before calling this function if material has a roughness map");
 
@@ -224,7 +224,7 @@ namespace mnemosy::systems
 
 	}
 
-	void TextureGenerationManager::GenerateOpacityFromAlbedoAlpha(graphics::Material& material, const char* exportPath, bool exportTexture)
+	void TextureGenerationManager::GenerateOpacityFromAlbedoAlpha(graphics::PbrMaterial& material, const char* exportPath, bool exportTexture)
 	{
 		MNEMOSY_ASSERT(material.isAlbedoAssigned(), "Check before calling this function if material has a albedo map");
 
@@ -282,7 +282,7 @@ namespace mnemosy::systems
 
 	}
 
-	bool TextureGenerationManager::GenerateChannelPackedTexture(graphics::Material& material, const char* exportPath, bool exportTexture, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height, uint8_t bitDepth)
+	bool TextureGenerationManager::GenerateChannelPackedTexture(graphics::PbrMaterial& material, const char* exportPath, bool exportTexture, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G, graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height, uint8_t bitDepth)
 	{
 
 		if (!IsInitialized()) {

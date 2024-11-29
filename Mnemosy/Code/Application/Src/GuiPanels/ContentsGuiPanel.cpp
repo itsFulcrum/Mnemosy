@@ -81,16 +81,16 @@ namespace mnemosy::gui {
 			float window_visible_x2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
 
 			ImVec2 button_size(m_imgButtonSize, m_imgButtonSize);
-			int materialCount = selectedNode->subMaterials.size();
+			int materialCount = selectedNode->subEntries.size();
 			for (int i = 0; i < materialCount; i++) {
 
 				ImGui::BeginGroup();
-				std::string& matName = selectedNode->subMaterials[i]->name;
+				std::string& matName = selectedNode->subEntries[i]->name;
 
 				// first casting to a uint64 is neccesary to get rid of waring for casting to void* in next line
 				
-				uint64_t textureId = (uint64_t)selectedNode->subMaterials[i]->thumbnailTexure_ID;
-				if (!selectedNode->subMaterials[i]->thumbnailLoaded) {
+				uint64_t textureId = (uint64_t)selectedNode->subEntries[i]->thumbnailTexure_ID;
+				if (!selectedNode->subEntries[i]->thumbnailLoaded) {
 					textureId = 0;
 				}
 
@@ -101,10 +101,11 @@ namespace mnemosy::gui {
 				if (pressed) {
 
 					// check if its already the active material
-					if (m_materialRegistry.GetActiveMaterialID() != selectedNode->subMaterials[i]->runtime_ID) {
+					if (!m_materialRegistry.IsActiveEntry(selectedNode->subEntries[i]->runtime_ID)) {
 
 						//fs::path matDir = selectedNode->pathFromRoot / fs::path(matName);
-						m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(selectedNode->subMaterials[i]);
+						//m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded(selectedNode->subEntries[i]);
+						m_materialRegistry.LibEntry_Load(selectedNode->subEntries[i]);
 					}
 				}
 				// Calculate size of the name and shorten it if its longer then the button size
@@ -152,7 +153,7 @@ namespace mnemosy::gui {
 		ImGui::Spacing();
 
 
-		std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
+		std::vector<systems::LibEntry*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
 
 		if (!searchResultsList.empty()) {
 
@@ -167,22 +168,23 @@ namespace mnemosy::gui {
 
 				ImGui::BeginGroup();
 
-				systems::MaterialInfo* matInfo = searchResultsList[i];
-				std::string& matName = matInfo->name;
+				systems::LibEntry* libEntry = searchResultsList[i];
+				std::string& matName = libEntry->name;
 
 
 				// first casting to a uint64 is neccesary to get rid of waring for casting to void* in next line
-				uint64_t textureId = (uint64_t)matInfo->thumbnailTexure_ID;
+				uint64_t textureId = (uint64_t)libEntry->thumbnailTexure_ID;
 				bool pressed = ImGui::ImageButton((void*)textureId, button_size, ImVec2(0, 1), ImVec2(1, 0));
 
 
 				if (pressed) {
 
 					// check if its already the active material
-					if (m_materialRegistry.GetActiveMaterialID() != matInfo->runtime_ID) {
+					if (!m_materialRegistry.IsActiveEntry(libEntry->runtime_ID)) {
 
 						//::path matDir = matInfo->parent->pathFromRoot / fs::path(matName);
-						m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded( matInfo);
+						//m_materialRegistry.LoadActiveMaterialFromFile_Multithreaded( matInfo);
+						m_materialRegistry.LibEntry_Load(libEntry);
 					}
 				}
 

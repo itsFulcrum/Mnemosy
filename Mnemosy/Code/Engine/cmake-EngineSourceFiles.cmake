@@ -42,6 +42,9 @@ ${ENGINE_SOURCE_PATH}/Include/Systems/JsonKeys.h
 ${ENGINE_SOURCE_PATH}/Include/Systems/MeshRegistry.h
 ${ENGINE_SOURCE_PATH}/Src/Systems/MeshRegistry.cpp
 
+${ENGINE_SOURCE_PATH}/Include/Systems/LibraryProcedures.h
+${ENGINE_SOURCE_PATH}/Src/Systems/LibraryProcedures.cpp
+
 #Utils
 ${ENGINE_SOURCE_PATH}/Include/Core/Utils/PlatfromUtils_Windows.h
 ${ENGINE_SOURCE_PATH}/Src/Core/Utils/PlatfromUtils_Windows.cpp

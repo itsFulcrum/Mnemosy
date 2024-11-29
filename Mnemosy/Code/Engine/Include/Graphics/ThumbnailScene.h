@@ -7,7 +7,7 @@ namespace mnemosy::graphics
 {
 	class Camera;
 	class RenderMesh;
-	class Material;
+	class PbrMaterial;
 	class Skybox;
 	class Light;
 }

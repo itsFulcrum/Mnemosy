@@ -19,11 +19,33 @@ namespace mnemosy::graphics {
 namespace mnemosy::graphics
 {
 
-	class Material
+	class UnlitMaterial {
+	public:
+		UnlitMaterial() = default;
+		~UnlitMaterial();
+
+		void AssignTexture(Texture* tex);
+		Texture& GetTexture() { return *m_unlitTexture; }
+		bool TextureIsAssigned() { return m_unlitTexture; }
+		void SetUniforms(Shader* shader);
+
+		float UVTilingX = 1.0f;
+		float UVTilingY = 1.0f;
+
+		bool useAlpha = false;
+		bool useDitheredAlpha = false;
+		float alphaThreshold = 0.5f;
+
+	private:
+		Texture* m_unlitTexture = nullptr;
+	};
+
+
+	class PbrMaterial
 	{
 	public:
-		Material();
-		~Material();
+		PbrMaterial();
+		~PbrMaterial();
 
 		std::string Name = "Mnemosy Default";
 

@@ -169,7 +169,7 @@ namespace mnemosy::gui
 				MnemosyEngine& engineInstance = MnemosyEngine::GetInstance();
 
 
-				engineInstance.GetMaterialLibraryRegistry().SaveActiveMaterialToFile();
+				engineInstance.GetMaterialLibraryRegistry().ActiveLibEntry_SaveToFile();
 				engineInstance.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
 
 				Application::GetInstance().GetGuiPanelManager().UserSettingsSave();

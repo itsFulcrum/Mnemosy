@@ -3,6 +3,7 @@
 #include "Include/Core/Log.h"
 #include "Include/MnemosyEngine.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
+#include "Include/Systems/LibraryProcedures.h"
 #include "Include/Graphics/Renderer.h"
 #include "Include/Core/FileDirectories.h"
 #include "Include/Graphics/Scene.h"
@@ -19,7 +20,7 @@
 namespace mnemosy::systems {
 
 	void ThumbnailManager::Init() {
-		m_activeMaterialsFullyLoaded = false;
+		m_activeEntriesFullyLoaded = false;
 	}
 
 	void ThumbnailManager::Shutdown() {
@@ -37,8 +38,6 @@ namespace mnemosy::systems {
 		// But we cant delete it emediatly because we already gave its texture id to im gui for rendering at the end of the frame. 
 		// so we have to delay the refresh to the next frame and update before we set up the next imGuiFrame
 
-
-
 		if (!m_thumbnailsQuedForRefresh.empty()) {
 
 			for (int i = 0; i < m_thumbnailsQuedForRefresh.size(); i++) {
@@ -47,58 +46,81 @@ namespace mnemosy::systems {
 			}
 
 			m_thumbnailsQuedForRefresh.clear();
-			m_activeMaterialsFullyLoaded = false;
+			m_activeEntriesFullyLoaded = false;
 		}
 		
 		//  Loading thumbnails
-		if (m_activeMaterials.empty())
+		if (m_activeEntries.empty())
 			return;
 
-		if (m_activeMaterialsFullyLoaded)
+		if (m_activeEntriesFullyLoaded)
 			return;
 
 		
-		for (int i = 0; i < m_activeMaterials.size(); i++) {
+		for (int i = 0; i < m_activeEntries.size(); i++) {
 
-			if (!m_activeMaterials[i]->thumbnailLoaded) {
+			if (!m_activeEntries[i]->thumbnailLoaded) {
 
-				LoadThumbnailForMaterial_Internal(m_activeMaterials[i]);
-				m_activeMaterialsFullyLoaded = false;
+				LoadThumbnailForMaterial_Internal(m_activeEntries[i]);
+				m_activeEntriesFullyLoaded = false;
 				return;
 			}
 		}
 
 		// if we reach this code it means all thumbnails in the list where loaded
 		
-		m_activeMaterialsFullyLoaded = true;
+		m_activeEntriesFullyLoaded = true;
 
 	}
 
-	void ThumbnailManager::RenderThumbnailOfActiveMaterial(std::filesystem::path& pathToThumbnail, FolderNode* selectedFolder,unsigned int activeMaterialID) {
+	// TODO: handle entry types
+	void ThumbnailManager::RenderThumbnailForActiveLibEntry(LibEntry* libEntry) {
 
 		namespace fs = std::filesystem;
 
-		graphics::Material& activeMat = MnemosyEngine::GetInstance().GetScene().GetActiveMaterial();
+		fs::path thumbnailAbsolutePath = systems::LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::path(libEntry->name + "_thumbnail.ktx2");
 
-		//fs::path thumbnailPath = fs::path(activeMat.Name + "_thumbnail.ktx2");
-		fs::path thumbnailAbsolutePath = pathToThumbnail;
 
 		graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();
-		renderer.RenderThumbnail(activeMat);
+
+
+
+		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+
+			graphics::PbrMaterial& activePbrMat = MnemosyEngine::GetInstance().GetScene().GetPbrMaterial();
+
+			renderer.RenderThumbnail_PbrMaterial(activePbrMat);
+			
+		}
+		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+
+			graphics::UnlitMaterial* unlitMat = MnemosyEngine::GetInstance().GetScene().GetUnlitMaterial();
+
+			renderer.RenderThumbnail_UnlitMaterial(unlitMat);
+		}
+		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+			graphics::Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
+			
+			renderer.RenderThumbnail_SkyboxMaterial(skybox);
+		}
+
+		// export rendered thumbnail
 
 		graphics::KtxImage thumbnailKtx;
 
 		int thumbnailRes = renderer.GetThumbnailResolutionValue(renderer.GetThumbnailResolutionEnum());
 		thumbnailKtx.ExportGlTexture(thumbnailAbsolutePath.generic_string().c_str(), renderer.GetThumbnailRenderTextureID(), 3, thumbnailRes, thumbnailRes, graphics::ktxImgFormat::MNSY_COLOR, false);
 
-		// check if the active material is part of the active materials
-		if (!m_activeMaterials.empty()) {
 
-			for (int i = 0; i < m_activeMaterials.size(); i++) {
+		// check if the thumbnail is currently loaded and then que it for refresh
+		if (!m_activeEntries.empty()) {
+
+			for (int i = 0; i < m_activeEntries.size(); i++) {
 				
-				if (m_activeMaterials[i]->runtime_ID == activeMaterialID) {
+				if (m_activeEntries[i]->runtime_ID == libEntry->runtime_ID) {
 					
-					m_thumbnailsQuedForRefresh.push_back(m_activeMaterials[i]);
+					m_thumbnailsQuedForRefresh.push_back(m_activeEntries[i]);
 					break;
 				}
 			}
@@ -106,78 +128,97 @@ namespace mnemosy::systems {
 
 	}
 
-	void ThumbnailManager::RenderThumbnailOfMaterial(MaterialInfo* materialInfo) {
+	// TODO: Handle entry types
+	void ThumbnailManager::RenderThumbnailForAnyLibEntry_Slow(LibEntry* libEntry) {
 
-		fs::path libPath = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-		fs::path matPath = libPath /  materialInfo->parent->pathFromRoot / fs::path(materialInfo->name);
+		MNEMOSY_ASSERT(libEntry != nullptr, "This should not happen");
 
-		graphics::Material* mat = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadMaterialFromFile_Multithreaded(materialInfo);
+		fs::path entryFolder  = systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
 
-		MNEMOSY_ASSERT(materialInfo != nullptr, "This should not happen");
 
-		fs::path thumbnailPath = matPath  / fs::path(materialInfo->name + "_thumbnail.ktx2");
 
+		fs::path thumbnailPath = entryFolder / fs::path(libEntry->name + "_thumbnail.ktx2");
 		graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();
-		renderer.RenderThumbnail(*mat);
 
+		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+
+
+			graphics::PbrMaterial* pbrMat = systems::LibProcedures::LoadPbrMaterialFromFile_Multithreaded(libEntry,true);
+
+			renderer.RenderThumbnail_PbrMaterial(*pbrMat);
+			delete pbrMat;
+		}
+		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+
+			graphics::UnlitMaterial* unlitMat = systems::LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(libEntry,true);
+
+			renderer.RenderThumbnail_UnlitMaterial(unlitMat);
+
+			delete unlitMat;
+		}
+		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+			// TODO: implement
+
+			//renderer.RenderThumbnail_SkyboxMaterial(skybox);
+		}
+
+		// export ktx image
 		graphics::KtxImage thumbnailKtx;
-
 		int thumbnailRes = renderer.GetThumbnailResolutionValue(renderer.GetThumbnailResolutionEnum());
 		thumbnailKtx.ExportGlTexture(thumbnailPath.generic_string().c_str(), renderer.GetThumbnailRenderTextureID(), 3, thumbnailRes, thumbnailRes, graphics::ktxImgFormat::MNSY_COLOR, false);
 
 
-		delete mat;
+		// check if the thumbnail is currently loaded and then que it for refresh
+		if (!m_activeEntries.empty()) {
 
-		// check if the active material is part of the active materials
-		if (!m_activeMaterials.empty()) {
+			for (int i = 0; i < m_activeEntries.size(); i++) {
 
-			for (int i = 0; i < m_activeMaterials.size(); i++) {
+				if (m_activeEntries[i]->runtime_ID == libEntry->runtime_ID) {
 
-				if (m_activeMaterials[i]->runtime_ID == materialInfo->runtime_ID) {
-
-					m_thumbnailsQuedForRefresh.push_back(m_activeMaterials[i]);
+					m_thumbnailsQuedForRefresh.push_back(m_activeEntries[i]);
 					break;
 				}
 			}
 		}
 	}
 
-	void ThumbnailManager::AddMaterialForThumbnailing(MaterialInfo* material) {
+	void ThumbnailManager::AddLibEntryToActiveThumbnails(LibEntry* libEntry) {
 
-		MNEMOSY_ASSERT(material != nullptr, "NO!");
+		MNEMOSY_ASSERT(libEntry != nullptr, "NO!");
 		
 
 		// check if its already in the list
-		if (!m_activeMaterials.empty()) {
+		if (!m_activeEntries.empty()) {
 
-			for (int i = 0; i < m_activeMaterials.size(); i++) {
+			for (int i = 0; i < m_activeEntries.size(); i++) {
 
-				if (m_activeMaterials[i]->runtime_ID == material->runtime_ID) {
-					MNEMOSY_ERROR("ThumbnailManager::AddMaterialForThumbnailing: Material is already in the thumbnail list");
+				if (m_activeEntries[i]->runtime_ID == libEntry->runtime_ID) {
+					MNEMOSY_ERROR("ThumbnailManager::AddMaterialForThumbnailing: Entry is already in the thumbnail list");
 					return;
 				}
 			}
 		}
 
-		m_activeMaterials.push_back(material);
+		m_activeEntries.push_back(libEntry);
 
-		m_activeMaterialsFullyLoaded = false;
+		m_activeEntriesFullyLoaded = false;
 	}
 
-	void ThumbnailManager::RemoveMaterialFromThumbnailing(MaterialInfo* material) {
+	void ThumbnailManager::RemoveLibEntryFromActiveThumbnails(LibEntry* libEntry) {
 
-		if (m_activeMaterials.empty())
+		if (m_activeEntries.empty())
 			return;
 
 
-		MNEMOSY_ASSERT(material != nullptr, "Should not happen");
+		MNEMOSY_ASSERT(libEntry != nullptr, "Should not happen");
 
-		for (int i = 0; i < m_activeMaterials.size(); i++) {
+		for (int i = 0; i < m_activeEntries.size(); i++) {
 
-			if (m_activeMaterials[i]->runtime_ID == material->runtime_ID) {
+			if (m_activeEntries[i]->runtime_ID == libEntry->runtime_ID) {
 
-				DeleteThumbnailGLTexture_Internal(material);
-				m_activeMaterials.erase(m_activeMaterials.begin() + i);
+				DeleteThumbnailGLTexture_Internal(libEntry);
+				m_activeEntries.erase(m_activeEntries.begin() + i);
 				return;
 			}
 		}
@@ -188,49 +229,48 @@ namespace mnemosy::systems {
 	void ThumbnailManager::UnloadAllThumbnails() {
 
 
-		if (m_activeMaterials.empty())
+		if (m_activeEntries.empty())
 			return;
 
-		for (int i = 0; i < m_activeMaterials.size(); i++) {
+		for (int i = 0; i < m_activeEntries.size(); i++) {
 
-			DeleteThumbnailGLTexture_Internal(m_activeMaterials[i]);
+			DeleteThumbnailGLTexture_Internal(m_activeEntries[i]);
 		}
 
-		m_activeMaterials.clear();
-		m_activeMaterialsFullyLoaded = true;
+		m_activeEntries.clear();
+		m_activeEntriesFullyLoaded = true;
 	}
 
 	// Delete the gl texture of the thumbnail
-	void ThumbnailManager::DeleteThumbnailGLTexture_Internal(MaterialInfo* material) {
+	void ThumbnailManager::DeleteThumbnailGLTexture_Internal(LibEntry* libEntry) {
 
-		MNEMOSY_ASSERT(material != nullptr, "We should make sure to unload all thumbnails first");
+		MNEMOSY_ASSERT(libEntry != nullptr, "We should make sure to unload all thumbnails first");
 
-		glDeleteTextures(1, &material->thumbnailTexure_ID);
-		material->thumbnailLoaded = false;
-		material->thumbnailTexure_ID = 0;
+		glDeleteTextures(1, &libEntry->thumbnailTexure_ID);
+		libEntry->thumbnailLoaded = false;
+		libEntry->thumbnailTexure_ID = 0;
 	}
 
-	void ThumbnailManager::LoadThumbnailForMaterial_Internal(MaterialInfo* material) {
+	void ThumbnailManager::LoadThumbnailForMaterial_Internal(LibEntry* libEntry) {
 
 		namespace fs = std::filesystem;
 
 		fs::path libPath = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
 
-		fs::path materialFolderPath = libPath /  material->parent->pathFromRoot / fs::path(material->name);
+		fs::path materialFolderPath = libPath /  libEntry->parent->pathFromRoot / fs::path(libEntry->name);
 
-		fs::path thumbnailPath = materialFolderPath / fs::path(material->name + "_thumbnail.ktx2");
+		fs::path thumbnailPath = materialFolderPath / fs::path(libEntry->name + "_thumbnail.ktx2");
 
-		fs::directory_entry thumbnailFile = fs::directory_entry(thumbnailPath);
-		if (thumbnailFile.exists()) {
+		if (fs::exists(thumbnailPath)) {
 
 			graphics::KtxImage ktxThumbnail;
-			bool success = ktxThumbnail.LoadKtx(thumbnailPath.generic_string().c_str(), material->thumbnailTexure_ID);
+			bool success = ktxThumbnail.LoadKtx(thumbnailPath.generic_string().c_str(), libEntry->thumbnailTexure_ID);
 			if (success) {
-				material->thumbnailLoaded = true;
+				libEntry->thumbnailLoaded = true;
 			}
 			else {
-				MNEMOSY_WARN("Failed to load thumbnail for material: {}", material->name);
-				glDeleteTextures(1, &material->thumbnailTexure_ID);
+				MNEMOSY_WARN("Failed to load thumbnail for material: {}", libEntry->name);
+				glDeleteTextures(1, &libEntry->thumbnailTexure_ID);
 				return;
 
 			}
@@ -238,8 +278,8 @@ namespace mnemosy::systems {
 		else {
 			MNEMOSY_WARN("Failed to load thumbnail, Generating new: {}",  thumbnailPath.generic_string());
 
-			// this is potentially super slow but should work and generate a new thumbnail
-			RenderThumbnailOfMaterial(material);
+			// this is potentially super slow because we have to load all textures and stuff of the material but should work and generate a new thumbnail
+			RenderThumbnailForAnyLibEntry_Slow(libEntry);
 		}
 
 	}

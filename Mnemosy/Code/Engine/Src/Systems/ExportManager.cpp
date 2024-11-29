@@ -94,7 +94,7 @@ namespace mnemosy::systems
 	}
 
 	// Export selected textures of a material. Which textures to export should be specified in the std::vector<bool> exportTypesOrdered which need an entry for each texture type in the same order as the enum types defined in PBRTextureType in TextureDefinitions.h
-	bool ExportManager::ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {
+	bool ExportManager::ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::PbrMaterial& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {
 
 		namespace fs = std::filesystem;
 

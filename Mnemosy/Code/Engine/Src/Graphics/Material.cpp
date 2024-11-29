@@ -10,12 +10,12 @@
 
 namespace mnemosy::graphics
 {
-	Material::Material()
+	PbrMaterial::PbrMaterial()
 	{
 		setDefaults();
 	}
 
-	Material::~Material() {
+	PbrMaterial::~PbrMaterial() {
 
 		if (m_pAlbedoTexture) {
 			delete m_pAlbedoTexture;
@@ -62,7 +62,7 @@ namespace mnemosy::graphics
 		}
 	}
 
-	void Material::setDefaults() {
+	void PbrMaterial::setDefaults() {
 
 		Name = "Mnemosy Default";
 		Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -82,12 +82,12 @@ namespace mnemosy::graphics
 		HasPackedTextures = false;
 	}
 
-	void Material::SetNormalMapFormat(const NormalMapFormat& format) {
+	void PbrMaterial::SetNormalMapFormat(const NormalMapFormat& format) {
 
 		NormalTextureFormat = format;
 	}
 
-	void Material::assignTexture(const PBRTextureType& pbrTextureType,Texture* tex) {
+	void PbrMaterial::assignTexture(const PBRTextureType& pbrTextureType,Texture* tex) {
 
 		MNEMOSY_ASSERT(pbrTextureType != MNSY_TEXTURE_COUNT, "Do not use this function to add custom packed textures");
 
@@ -163,7 +163,7 @@ namespace mnemosy::graphics
 
 	}
 
-	void Material::removeTexture(const PBRTextureType& pbrTextureType) {
+	void PbrMaterial::removeTexture(const PBRTextureType& pbrTextureType) {
 		
 		switch (pbrTextureType)
 		{
@@ -229,7 +229,7 @@ namespace mnemosy::graphics
 
 	}
 
-	void Material::setMaterialUniforms(Shader& shader) {
+	void PbrMaterial::setMaterialUniforms(Shader& shader) {
 
 		
 		shader.Use();
@@ -343,7 +343,7 @@ namespace mnemosy::graphics
 
 	}
 
-	bool Material::SuffixExistsInPackedTexturesList(std::string& suffix) {
+	bool PbrMaterial::SuffixExistsInPackedTexturesList(std::string& suffix) {
 
 		if (!HasPackedTextures)
 			return false;
@@ -362,7 +362,7 @@ namespace mnemosy::graphics
 		return false;
 	}
 
-	bool Material::IsTextureTypeAssigned(const PBRTextureType& pbrType) {
+	bool PbrMaterial::IsTextureTypeAssigned(const PBRTextureType& pbrType) {
 
 		switch (pbrType)
 		{
@@ -404,7 +404,7 @@ namespace mnemosy::graphics
 
 
 	// returns nullptr if texture is not assigned
-	Texture* Material::GetTextureFromPackComponent(ChannelPackComponent packComponent) {
+	Texture* PbrMaterial::GetTextureFromPackComponent(ChannelPackComponent packComponent) {
 
 		switch (packComponent)
 		{
@@ -473,7 +473,7 @@ namespace mnemosy::graphics
 		return nullptr;
 	}
 
-	float Material::GetDefaultValueFromPackComponent(ChannelPackComponent packComponent)
+	float PbrMaterial::GetDefaultValueFromPackComponent(ChannelPackComponent packComponent)
 	{
 		switch (packComponent)
 		{
@@ -542,7 +542,7 @@ namespace mnemosy::graphics
 		return 0.0f;
 	}
 
-	unsigned int Material::DebugGetTextureID(const PBRTextureType& pbrTextureType)
+	unsigned int PbrMaterial::DebugGetTextureID(const PBRTextureType& pbrTextureType)
 	{
 		if (pbrTextureType == MNSY_TEXTURE_ALBEDO)
 		{
@@ -584,6 +584,43 @@ namespace mnemosy::graphics
 		}
 
 		return 0;
+	}
+
+	UnlitMaterial::~UnlitMaterial()
+	{
+		if (m_unlitTexture) {
+			delete m_unlitTexture;
+		}
+	}
+
+	void UnlitMaterial::AssignTexture(Texture* tex) {
+
+		if (m_unlitTexture) {
+			delete m_unlitTexture;
+		}
+		m_unlitTexture = tex;
+	}
+
+	void UnlitMaterial::SetUniforms(Shader* shader)
+	{
+		shader->Use();
+
+		shader->SetUniformFloat2("_uvTiling", UVTilingX, UVTilingY);
+
+		shader->SetUniformFloat("_alphaThreshold", alphaThreshold);
+		shader->SetUniformBool("_useAlpha", useAlpha);
+		shader->SetUniformBool("_useDitheredAlpha", useDitheredAlpha);
+
+		if (m_unlitTexture) {
+
+			m_unlitTexture->BindToLocation(0);
+			shader->SetUniformFloat("_textureAssigned", 1.0f);
+		}
+		else {
+			shader->SetUniformFloat("_textureAssigned", 0.0f);
+		}
+
+		shader->SetUniformInt("_textureSampler", 0);
 	}
 
 } // !mnemosy::graphics

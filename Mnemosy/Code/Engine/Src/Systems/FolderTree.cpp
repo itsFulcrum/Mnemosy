@@ -13,6 +13,7 @@ namespace mnemosy::systems {
 		m_rootNodeName = std::string(rootName);
 
 		m_rootNode = CreateNewFolder_Internal(nullptr, m_rootNodeName);
+
 	}
 
 	void FolderTree::Shutdown() {
@@ -42,7 +43,7 @@ namespace mnemosy::systems {
 
 		std::string keyword = searchKeyword;
 
-		MakeStringLowerCase(keyword);
+		core::StringUtils::MakeStringLowerCase(keyword);
 
 		RecursivCollectMaterialSearch(m_rootNode, keyword);
 
@@ -94,37 +95,70 @@ namespace mnemosy::systems {
 		RecursivDeleteHierarchy(node);
 	}
 
-	MaterialInfo* FolderTree::CreateNewMaterial(FolderNode* node, const std::string& name){
+	LibEntry* FolderTree::CreateNewLibEntry(FolderNode* node, const LibEntryType type,const std::string& name){
 
-		return CreateMaterial_Internal(node,  MakeNameUnique( name));
+		return CreateMaterial_Internal(node, type, MakeNameUnique( name));
 	}
 
-	void FolderTree::RenameMaterial(MaterialInfo* materialInfo, const std::string& name) {
+	void FolderTree::RenameLibEntry(LibEntry* libEntry, const std::string& name) {
 
-		materialInfo->name = MakeNameUnique( name);
+		libEntry->name = MakeNameUnique( name);
 	}
 
-	void FolderTree::MoveMaterial(MaterialInfo* materialInfo, FolderNode* sourceNode, FolderNode* targetParentNode) {
+	void FolderTree::MoveLibEntry(LibEntry* libEntry, FolderNode* sourceNode, FolderNode* targetParentNode) {
 
-		targetParentNode->subMaterials.push_back(materialInfo);
-		materialInfo->parent = targetParentNode;
+		targetParentNode->subEntries.push_back(libEntry);
+		libEntry->parent = targetParentNode;
 
-		for (size_t i = 0; i < sourceNode->subMaterials.size(); i++) {
+		for (size_t i = 0; i < sourceNode->subEntries.size(); i++) {
 
-			if (sourceNode->subMaterials[i]->runtime_ID == materialInfo->runtime_ID) {
+			if (sourceNode->subEntries[i]->runtime_ID == libEntry->runtime_ID) {
 
-				sourceNode->subMaterials.erase(sourceNode->subMaterials.begin() + i);
+				sourceNode->subEntries.erase(sourceNode->subEntries.begin() + i);
 				break;
 			}
 		}
 	}
 
-	void FolderTree::DeleteMaterial(FolderNode* parentNode, unsigned int posInVector) {
+	void FolderTree::DeleteLibEntry(FolderNode* parentNode, unsigned int posInVector) {
 
-		MaterialInfo* mat = parentNode->subMaterials[posInVector];
-		parentNode->subMaterials.erase(parentNode->subMaterials.begin() + posInVector);
+		LibEntry* mat = parentNode->subEntries[posInVector];
+		parentNode->subEntries.erase(parentNode->subEntries.begin() + posInVector);
 
 		delete mat;
+	}
+
+	bool FolderTree::IsLibEntryWithinHierarchy(FolderNode* hierarchyRoot, LibEntry* libEnry) {
+		MNEMOSY_ASSERT(hierarchyRoot && libEnry, "They cannot be null!");
+
+		// walk up parents of libEntry until root node is reached and check if parent is equal to the hierarchy root
+		FolderNode* curr = libEnry->parent;
+		while (!curr->IsRoot()) {
+
+			if (curr->runtime_ID == hierarchyRoot->runtime_ID) {
+				return true;
+			}
+
+			curr = curr->parent;
+		}
+
+		return false;
+	}
+
+	bool FolderTree::IsNodeWithinHierarchy(FolderNode* hierarchyRoot, FolderNode* node) {
+		MNEMOSY_ASSERT(hierarchyRoot && node, "They cannot be null!");
+		
+		// walk up parents of node until root node is reached and check if parent is equal to the hierarchy root		
+		FolderNode* curr = node;
+		while (!curr->IsRoot()) {
+
+			if (curr->runtime_ID == hierarchyRoot->runtime_ID) {
+				return true;
+			}
+			curr = curr->parent;
+		}
+
+		return false;
 	}
 
 	void FolderTree::MoveFolder(FolderNode* sourceNode, FolderNode* targetParentNode) {
@@ -159,36 +193,35 @@ namespace mnemosy::systems {
 			}
 			m_rootNode->subNodes.clear();
 		}
+
 		if (m_rootNode->HasMaterials()) {
 
-			for (int i = 0; i < m_rootNode->subMaterials.size(); i++) {
+			for (int i = 0; i < m_rootNode->subEntries.size(); i++) {
 
-				delete m_rootNode->subMaterials[i];
+				delete m_rootNode->subEntries[i];
 			}
 
-			m_rootNode->subMaterials.clear();
+			m_rootNode->subEntries.clear();
 		}
 	}
 
 	std::string FolderTree::MakeNameUnique(const std::string& name) {
 
 		// ensure that the name is completely unique across all folders and materials
-
-
+		std::string baseName = name;
+		std::string lowerBaseName = core::StringUtils::ToLowerCase(name);
 		unsigned int suffixNbr = 0;
 
+		std::string uniqueName = baseName;
+		std::string lowerUniqueName = lowerBaseName;
 
-		std::string capsUnchanged = name;
-		std::string newName = name;
-		MakeStringLowerCase(newName);
-
-		while (RecursivDoesNameExist(m_rootNode, newName)) {
+		while (RecursivDoesNameExist(m_rootNode, lowerUniqueName)) {
 			suffixNbr++;
-			newName = name + "_" + std::to_string(suffixNbr);
-			capsUnchanged = name + "_" + std::to_string(suffixNbr);
+			uniqueName = baseName + "_" + std::to_string(suffixNbr);
+			lowerUniqueName = core::StringUtils::ToLowerCase(uniqueName);
 		}
 
-		return capsUnchanged;
+		return uniqueName;
 	}
 
 	void FolderTree::LoadFromJson(nlohmann::json& rootJson) {
@@ -226,7 +259,7 @@ namespace mnemosy::systems {
 		unsigned int value = startValue;
 
 		if (node->HasMaterials()) {
-			value += node->subMaterials.size();
+			value += node->subEntries.size();
 		}
 
 		if (!node->IsLeafNode()) {
@@ -240,10 +273,11 @@ namespace mnemosy::systems {
 		return value;
 	}
 
-	MaterialInfo* FolderTree::CreateMaterial_Internal(FolderNode* node, const std::string name) {
+	LibEntry* FolderTree::CreateMaterial_Internal(FolderNode* node, const LibEntryType type, const std::string name) {
 
-		//// adding entry to list of directory node;
-		MaterialInfo* matInfo = new MaterialInfo();
+		// adding entry to list of directory node;
+		LibEntry* matInfo = new LibEntry();
+		matInfo->type = type;
 		matInfo->name = name;
 		matInfo->parent = node;
 		matInfo->runtime_ID = m_runtimeMaterialIDCounter;
@@ -252,7 +286,7 @@ namespace mnemosy::systems {
 		matInfo->thumbnailTexure_ID = 0;
 		matInfo->thumbnailLoaded = false;
 
-		node->subMaterials.push_back(matInfo);
+		node->subEntries.push_back(matInfo);
 
 		return matInfo;
 	}
@@ -290,10 +324,10 @@ namespace mnemosy::systems {
 
 		if (node->HasMaterials()) {
 
-			for (int i = 0; i < node->subMaterials.size(); i++) {
-				delete node->subMaterials[i];
+			for (int i = 0; i < node->subEntries.size(); i++) {
+				delete node->subEntries[i];
 			}
-			node->subMaterials.clear();
+			node->subEntries.clear();
 		}
 
 		delete node;
@@ -322,44 +356,34 @@ namespace mnemosy::systems {
 		// returns true if the name exists
 		// input name is assumed to be lower case to avoid doing this computation multiple times
 
-		std::string nodeName = node->name;
-		MakeStringLowerCase(nodeName);
+		std::string lowerName = name; //core::StringUtils::ToLowerCase(name); // we pass always a lower case already
+		std::string currentNodeName = core::StringUtils::ToLowerCase(node->name);
 
-		if (nodeName == name) {
-
+		// Check current node
+		if (currentNodeName == lowerName) {
 			return true;
 		}
 
 
+		// check sub entries names
 		if (node->HasMaterials()) {
 
+			for (int i = 0; i < node->subEntries.size(); i++) {
 
-			for (size_t i = 0; i < node->subMaterials.size(); i++) {
-
-				std::string matName = node->subMaterials[i]->name;
-				MakeStringLowerCase(matName);
-
-				if (matName == name) {
+				if (core::StringUtils::ToLowerCase(node->subEntries[i]->name) == lowerName) {
 					return true;
 				}
 			}
 		}
 
+		// check sub folders
 		if (!node->IsLeafNode()) {
 
-			std::string n = name;
-			if (node->SubnodeExistsAlready(n)) {
+			for (FolderNode* subnode : node->subNodes) {
 
-				return true;
-			}
-
-			for (size_t i = 0; i < node->subNodes.size(); i++) {
-
-				if (RecursivDoesNameExist(node->subNodes[i], name)) {
-
+				if (RecursivDoesNameExist(subnode, lowerName)) {
 					return true;
 				}
-
 			}
 		}
 
@@ -373,16 +397,16 @@ namespace mnemosy::systems {
 
 			// collect suitable materials
 
-			for (int i = 0; i < node->subMaterials.size(); i++) {
+			for (int i = 0; i < node->subEntries.size(); i++) {
 
-				std::string matName = node->subMaterials[i]->name;
-				MakeStringLowerCase(matName);
+				std::string matName = node->subEntries[i]->name;
+				core::StringUtils::MakeStringLowerCase(matName);
 
 				if (matName.find(searchKeyword) != std::string::npos) {
 
 					// Found a material that contains the keyword in its name
 
-					m_searchResults.push_back(node->subMaterials[i]);
+					m_searchResults.push_back(node->subEntries[i]);
 
 				}
 			}
@@ -426,18 +450,23 @@ namespace mnemosy::systems {
 
 		nodeJson[jsonLibKey_pathFromRoot] = pathFromRoot;
 
-		bool hasMaterials = !node->subMaterials.empty();
+		bool hasMaterials = !node->subEntries.empty();
 
 		nodeJson[jsonLibKey_hasMaterials] = hasMaterials;
 		if (hasMaterials) {
 
-			std::vector<std::string> matNames;
-			for (size_t i = 0; i < node->subMaterials.size(); i++) {
-				matNames.push_back(node->subMaterials[i]->name);
+			std::vector<std::string> entryNames;
+			std::vector<int> entryTypes;
+
+			for (size_t i = 0; i < node->subEntries.size(); i++) {
+				entryNames.push_back(node->subEntries[i]->name);
+				entryTypes.push_back((int)node->subEntries[i]->type);
 			}
 
-			nodeJson[jsonLibKey_materialEntries] = matNames;
-			matNames.clear();
+			nodeJson[jsonLibKey_materialEntries] = entryNames;
+			nodeJson[jsonLibKey_entryTypes] = entryTypes;
+
+			entryNames.clear();
 		}
 
 		if (!isLeafNode) {
@@ -468,13 +497,24 @@ namespace mnemosy::systems {
 		bool hasMaterials = jsonNode[jsonLibKey_hasMaterials].get<bool>();
 		if (hasMaterials) {
 			std::vector<std::string> subMatNames = jsonNode[jsonLibKey_materialEntries].get<std::vector<std::string>>();
-
-			mnemosy::core::StringUtils::SortVectorListAlphabetcially(subMatNames);
+			
+			std::vector<int> subEntryTypes;
+			if (jsonNode.contains(jsonLibKey_entryTypes)) {
+				subEntryTypes = jsonNode[jsonLibKey_entryTypes].get<std::vector<int>>();
+			}
+			else {
+				MNEMOSY_WARN("Could not find entryTypes - maybe older version of mnemosy file. initializing all types as pbr materials");
+				subEntryTypes = std::vector<int>(subMatNames.size(), (int)systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT);
+			}
+			
+			MNEMOSY_ASSERT(subEntryTypes.size() == subMatNames.size(), "Something broke in the saved data file. Names and entryType lists must have equal size");
 
 			for (size_t i = 0; i < subMatNames.size(); i++) {
 
-				CreateMaterial_Internal(node, subMatNames[i]);
+				CreateMaterial_Internal(node, (systems::LibEntryType)subEntryTypes[i] , subMatNames[i]);
 			}
+
+			node->SortLibEntries();
 		}
 
 		if (!isLeafNode) {
@@ -491,11 +531,6 @@ namespace mnemosy::systems {
 			}
 		}
 
-	}
-
-	void FolderTree::MakeStringLowerCase(std::string& str) {
-
-		std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
 	}
 
 } // namespace mnemosy::systems

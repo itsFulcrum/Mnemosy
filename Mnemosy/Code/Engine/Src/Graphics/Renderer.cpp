@@ -4,7 +4,7 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
-
+#include "Include/Systems/FolderTreeNode.h"
 
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
@@ -82,10 +82,10 @@ namespace mnemosy::graphics
 		std::string pbrVert = shadersPath + "pbrVertex.vert";
 		std::string pbrFrag = shadersPath + "pbrFragment.frag";
 		std::string unlitFrag = shadersPath + "unlitTexView.frag";
+		std::string unlitMatFrag = shadersPath + "unlitMaterial.frag";
+		std::string unlitMatVert = shadersPath + "unlitMaterial.vert";
 
 
-		//std::string pbrMesh		= shadersPath + "pbrVert_MESH.glsl";
-		//std::string pbrMeshFrag	= shadersPath + "pbrMeshFragment.frag";
 		std::string lightVert = shadersPath + "light.vert";
 		std::string lightFrag = shadersPath + "light.frag";
 		std::string skyboxVert = shadersPath + "skybox.vert";
@@ -96,14 +96,11 @@ namespace mnemosy::graphics
 		m_pPbrShader = new Shader(pbrVert.c_str(), pbrFrag.c_str());
 		m_pUnlitTexturesShader = new Shader(pbrVert.c_str(), unlitFrag.c_str());
 
+		m_pUnlitMaterialShader = new Shader(unlitMatVert.c_str(), unlitMatFrag.c_str());
+
+
 		m_pLightShader = new Shader(lightVert.c_str(), lightFrag.c_str());
 		m_pSkyboxShader = new Shader(skyboxVert.c_str(), skyboxFrag.c_str());
-
-#ifdef MNEMOSY_RENDER_GIZMO
-		std::string gizmoVert = shadersPath + "gizmo.vert";
-		std::string gizmoFrag = shadersPath + "gizmo.frag";
-		m_pGizmoShader = new Shader(gizmoVert.c_str(), gizmoFrag.c_str());
-#endif // MNEMOSY_RENDER_GIZMO
 
 
 		unsigned int w = engine.GetWindow().GetWindowWidth();
@@ -144,6 +141,7 @@ namespace mnemosy::graphics
 		delete m_pLightShader;
 		delete m_pSkyboxShader;
 		delete m_pUnlitTexturesShader;
+		delete m_pUnlitMaterialShader;
 		m_pPbrShader = nullptr;
 		m_pLightShader = nullptr;
 		m_pSkyboxShader = nullptr;
@@ -175,8 +173,6 @@ namespace mnemosy::graphics
 		glDeleteTextures(1, &m_thumb_MSAA_renderTexture_ID);
 		glDeleteFramebuffers(1, &m_thumb_blitFBO);
 		glDeleteTextures(1, &m_thumb_blitTexture_ID);
-
-
 	}
 
 	// bind renderFrameBuffer
@@ -365,24 +361,16 @@ namespace mnemosy::graphics
 		UnbindFramebuffer();
 	}
 
-	void Renderer::RenderMeshes(RenderMesh& renderMesh) {
+	void Renderer::RenderMeshes(RenderMesh& renderMesh, Shader* shader) {
 
 		glm::mat4 modelMatrix = renderMesh.transform.GetTransformMatrix();
 
-		if (m_renderMode != MNSY_RENDERMODE_SHADED) {
-			m_pUnlitTexturesShader->Use();
-			m_pUnlitTexturesShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
-			m_pUnlitTexturesShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
-			m_pUnlitTexturesShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
-			m_pUnlitTexturesShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
-		}
-		else {
-			m_pPbrShader->Use();
-			m_pPbrShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
-			m_pPbrShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
-			m_pPbrShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
-			m_pPbrShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
-		}
+		shader->Use();
+		shader->SetUniformMatrix4("_modelMatrix", modelMatrix);
+		shader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
+		shader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
+		shader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
+		
 
 
 		for (unsigned int i = 0; i < renderMesh.GetModelData().meshes.size(); i++) {
@@ -463,49 +451,65 @@ namespace mnemosy::graphics
 		glCullFace(GL_FRONT);
 	}
 
-	void Renderer::RenderScene(Scene& scene) {
+	void Renderer::RenderScene(Scene& scene, systems::LibEntryType materialType) {
 
+		MNEMOSY_ASSERT(materialType != systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX, "Renderer needs to know the material type to use for rendering not the skybox type");
 
 		unsigned int width = MnemosyEngine::GetInstance().GetWindow().GetViewportWidth();
 		unsigned int height = MnemosyEngine::GetInstance().GetWindow().GetViewportHeight();
+		
+		scene.GetCamera().SetScreenSize(width,height);
+
+		SetViewMatrix(scene.GetCamera().GetViewMatrix());
+		SetProjectionMatrix(scene.GetCamera().GetProjectionMatrix());
 
 		StartFrame(width, height);
 
 		glm::vec3 cameraPosition = scene.GetCamera().transform.GetPosition();
 		
-		if (m_renderMode != MNSY_RENDERMODE_SHADED) {
+		graphics::Shader* shaderToUse = m_pPbrShader;
 
-			m_pUnlitTexturesShader->Use();
-			m_pUnlitTexturesShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-			m_pUnlitTexturesShader->SetUniformInt("_pixelWidth", width);
-			m_pUnlitTexturesShader->SetUniformInt("_pixelHeight", height);
-			
-			m_pUnlitTexturesShader->SetUniformInt("_mode", (int)m_renderMode);
+		if (materialType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
-			scene.GetActiveMaterial().setMaterialUniforms(*m_pUnlitTexturesShader);
+
+			if (m_renderMode != MNSY_RENDERMODE_SHADED) {
+
+				shaderToUse = m_pUnlitTexturesShader;
+
+				m_pUnlitTexturesShader->Use();
+				m_pUnlitTexturesShader->SetUniformInt("_mode", (int)m_renderMode);
+
+				scene.GetPbrMaterial().setMaterialUniforms(*m_pUnlitTexturesShader);
+			}
+			else {		
+				shaderToUse = m_pPbrShader;
+				scene.GetPbrMaterial().setMaterialUniforms(*m_pPbrShader);
+			}
 		}
-		else {
-			m_pPbrShader->Use();
-			m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-			m_pPbrShader->SetUniformInt("_pixelWidth", width);
-			m_pPbrShader->SetUniformInt("_pixelHeight", height);
+		else if (materialType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+		
+			shaderToUse = m_pUnlitMaterialShader;
+
+			scene.GetUnlitMaterial()->SetUniforms(m_pUnlitMaterialShader);
 			
-			
-			scene.GetActiveMaterial().setMaterialUniforms(*m_pPbrShader);
 		}
 
-		RenderMeshes(scene.GetMesh());
+		// set common uniforms
+		shaderToUse->Use();
+		shaderToUse->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		shaderToUse->SetUniformInt("_pixelWidth", width);
+		shaderToUse->SetUniformInt("_pixelHeight", height);
 
-#ifdef MNEMOSY_RENDER_GIZMO
-		RenderGizmo(scene.GetGizmoMesh());
-#endif // MNEMOSY_RENDER_GIZMO
+		RenderMeshes(scene.GetMesh(), shaderToUse);
 		RenderLightMesh(scene.GetLight());
 		RenderSkybox(scene.GetSkybox());
 
 		EndFrame(width,height);
 	}
 
-	void Renderer::RenderThumbnail(Material& activeMaterial) {
+
+	// TODO: Adapt to handle entry types
+	void Renderer::RenderThumbnail_PbrMaterial(PbrMaterial& activeMaterial) {
 
 		unsigned int thumbRes = GetThumbnailResolutionValue(m_thumbnailResolution);
 		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
@@ -555,7 +559,7 @@ namespace mnemosy::graphics
 
 		activeMaterial.setMaterialUniforms(*m_pPbrShader);
 
-		RenderMeshes(thumbScene.GetMesh());
+		RenderMeshes(thumbScene.GetMesh(), m_pPbrShader);
 		RenderSkybox(thumbScene.GetSkybox());
 
 		// End Frame
@@ -572,6 +576,93 @@ namespace mnemosy::graphics
 		Scene& scene = MnemosyEngine::GetInstance().GetScene();
 		SetPbrShaderLightUniforms(scene.GetLight());
 		SetShaderSkyboxUniforms(scene.GetSkybox());
+	}
+
+	// TODO: implement
+	void Renderer::RenderThumbnail_UnlitMaterial(UnlitMaterial* unlitMaterial)
+	{
+		unsigned int thumbRes = GetThumbnailResolutionValue(m_thumbnailResolution);
+		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
+
+		RenderModes userRenderMode = m_renderMode;
+		m_renderMode = MNSY_RENDERMODE_SHADED;
+
+
+		// Setup Shaders with thumbnail Scene settings
+		//SetPbrShaderLightUniforms(thumbScene.GetLight());
+		//SetShaderSkyboxUniforms(thumbScene.GetSkybox());
+
+		thumbScene.GetCamera().SetScreenSize(thumbRes, thumbRes); // we should really only need to do this once..
+
+		m_projectionMatrix = thumbScene.GetCamera().GetProjectionMatrix();
+		m_viewMatrix = thumbScene.GetCamera().GetViewMatrix();
+
+		// Start Frame
+		glViewport(0, 0, thumbRes, thumbRes);
+
+		// resize thumbnail render texture
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_Value, GL_RGB, thumbRes, thumbRes, GL_TRUE);
+
+		// rezie thumbnail renderbuffer
+		glBindRenderbuffer(GL_RENDERBUFFER, m_thumb_MSAA_RBO);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_thumb_MSAA_Value, GL_DEPTH24_STENCIL8, thumbRes, thumbRes);
+
+		// resize thumbnail blit fbo
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_blitFBO);
+
+		glBindTexture(GL_TEXTURE_2D, m_thumb_blitTexture_ID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, thumbRes, thumbRes, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// ====
+		glBindFramebuffer(GL_FRAMEBUFFER, m_thumb_MSAA_FBO);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		m_pUnlitMaterialShader->Use();
+
+		//m_pPbrShader->Use();
+
+		glm::vec3 cameraPosition = thumbScene.GetCamera().transform.GetPosition();
+		
+		unlitMaterial->SetUniforms(m_pUnlitMaterialShader);
+
+		m_pUnlitMaterialShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		//m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+
+		//activeMaterial.setMaterialUniforms(*m_pPbrShader);
+
+		RenderMeshes(thumbScene.GetMesh(), m_pUnlitMaterialShader);
+
+
+		RenderSkybox(thumbScene.GetSkybox());
+
+		// End Frame
+		// blit msaa framebuffer to normal framebuffer
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_thumb_blitFBO);
+		glBlitFramebuffer(0, 0, thumbRes, thumbRes, 0, 0, thumbRes, thumbRes, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		// unbind frambuffers
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+		// Restore user pbr shader settings
+		m_renderMode = userRenderMode;
+		Scene& scene = MnemosyEngine::GetInstance().GetScene();
+		SetPbrShaderLightUniforms(scene.GetLight());
+		SetShaderSkyboxUniforms(scene.GetSkybox());
+
+
+	}
+
+	// TODO: implement
+	void Renderer::RenderThumbnail_SkyboxMaterial(Skybox& unlitMaterial)
+	{
 	}
 
 	void Renderer::SetMSAASamples(const MSAAsamples& samples)

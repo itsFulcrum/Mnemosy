@@ -1,15 +1,20 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "Include/MnemosyConfig.h"
-
 #include <memory>
+
+namespace mnemosy::systems
+{
+	enum LibEntryType;
+	struct LibEntry;
+}
 
 namespace mnemosy::graphics
 {
 	class Camera;
 	class RenderMesh;
-	class Material;
+	class PbrMaterial;
+	class UnlitMaterial;
 	class Skybox;
 	class Light;
 }
@@ -20,13 +25,13 @@ namespace mnemosy::graphics
 	{
 		Custom		= 0,
 		Default		= 1,
-		Cube			= 2,
-		Plane			= 3,
+		Cube		= 2,
+		Plane		= 3,
 		Sphere		= 4,
 		Cylinder	= 5,
 		Suzanne		= 6,
 		Fabric 		= 7,
-		Count			= 8,
+		Count		= 8,
 	};
 
 	class Scene
@@ -38,23 +43,25 @@ namespace mnemosy::graphics
 		void Init();
 		void Shutdown();
 
-		void Update();
-
 		// getters
 		Camera& GetCamera()	{ return *m_camera; }
 		RenderMesh& GetMesh() { return *m_mesh; }
 
-#ifdef MNEMOSY_RENDER_GIZMO
-		RenderMesh& GetGizmoMesh() { return *m_gizmoMesh; }
-#endif // MNEMOSY_RENDER_GIZMO
-
 		Light& GetLight() {	return *m_light;}
-		Skybox& GetSkybox() { return *m_skybox; }
-		Material& GetActiveMaterial() { return *m_activeMaterial; }
 		const PreviewMesh& GetCurrentPreviewMesh() { return m_currentPreviewMesh; }
-
 		void SetPreviewMesh(const PreviewMesh& previewMeshType);
-		void SetMaterial(Material* material);
+
+
+		PbrMaterial& GetPbrMaterial() { return *m_pbrMaterial; }
+		void SetPbrMaterial(PbrMaterial* material);
+
+
+		UnlitMaterial* GetUnlitMaterial() { return m_unlitMaterial; }
+		void SetUnlitMaterial(UnlitMaterial* unlitMaterial);
+
+		Skybox& GetSkybox() { return *m_skybox; }
+		void SetSkybox(graphics::Skybox* skybox);
+
 
 	private:
 		void Setup();
@@ -62,17 +69,13 @@ namespace mnemosy::graphics
 		PreviewMesh m_currentPreviewMesh = PreviewMesh::Default;
 
 		std::unique_ptr<Camera> m_camera;
-
 		std::unique_ptr<RenderMesh> m_mesh;
-
-#ifdef MNEMOSY_RENDER_GIZMO
-		std::unique_ptr<RenderMesh> m_gizmoMesh;
-#endif // MNEMOSY_RENDER_GIZMO
-
 		std::unique_ptr<Light> m_light;
-		std::unique_ptr<Skybox> m_skybox;
 
-		Material* m_activeMaterial = nullptr;
+		PbrMaterial* m_pbrMaterial = nullptr;
+		UnlitMaterial* m_unlitMaterial = nullptr;
+		Skybox* m_skybox = nullptr;
+
 	};
 
 } // mnemosy::graphics

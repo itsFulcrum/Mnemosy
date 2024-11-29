@@ -6,29 +6,22 @@
 
 namespace mnemosy::graphics
 {
-	struct CameraSettings
-	{
-		float fov = 45.0f;
-		float nearClip = 0.1f;
-		float farClip = 500.0f;
-	};
 
 	class Camera
 	{
 	public:
-		Camera(const unsigned int renderScreenWidth, const unsigned int renderScreenHeight);
+		Camera(const uint16_t renderScreenWidth, const uint16_t renderScreenHeight);
 		~Camera() = default;
 
-		void SetScreenSize(const unsigned int width,const unsigned int height);
+		void SetScreenSize(const uint16_t width,const uint16_t height);
 
 		const glm::mat4 GetViewMatrix();
 		const glm::mat4 GetProjectionMatrix();
 	
-		CameraSettings settings;
 		Transform transform;
 	private:
-		unsigned int m_screenWidth = 0;
-		unsigned int m_screenHeight = 0;
+		uint16_t m_screenWidth = 0;
+		uint16_t m_screenHeight = 0;
 	};
 
 } // mnemosy::graphics

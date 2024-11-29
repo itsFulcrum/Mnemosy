@@ -12,7 +12,8 @@
 
 namespace mnemosy::systems
 {
-	struct MaterialInfo;
+	enum LibEntryType;
+	struct LibEntry;
 	struct FolderNode;
 	class MaterialLibraryRegistry;
 }
@@ -50,9 +51,9 @@ namespace mnemosy::gui
 		
 
 
-		void AddMaterial(systems::FolderNode* node);
-		void RenameMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector);
-		void DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, int positionInVector);
+		void AddMaterialEntry(systems::FolderNode* parent, std::string name , systems::LibEntryType type );
+		void RenameMaterial(systems::FolderNode* node, systems::LibEntry* materialInfo, std::string& newName, int positionInVector);
+		void DeleteMaterial(systems::FolderNode* node, systems::LibEntry* materialInfo, int positionInVector);
 
 
 		void HandleDeleteHierarchyModal();
@@ -69,7 +70,7 @@ namespace mnemosy::gui
 
 
 		//systems::FolderNode* m_selectedNode = nullptr;
-		const char* m_rightClickFolderOptions[5] = {"Add Subfolder", "Add Material", "Delete", "Delete Hierarchy", "Open in FileExplorer"};
+		const char* m_rightClickFolderOptions[7] = {"Add Subfolder", "Add Pbr Material", "Add Texture", "Add Skybox" , "Delete", "Delete Hierarchy", "Open in FileExplorer"};
 		const char* m_rightClickMaterialOptions[2] = { "Delete Selection", "Open in FileExplorer" };
 		
 		ImGuiInputTextFlags m_textInputFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;

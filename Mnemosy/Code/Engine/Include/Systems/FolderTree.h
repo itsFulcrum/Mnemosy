@@ -7,7 +7,8 @@
 #include <json.hpp>
 
 namespace mnemosy::systems {
-	struct MaterialInfo;
+	enum LibEntryType;
+	struct LibEntry;
 	struct FolderNode;
 }
 
@@ -32,11 +33,15 @@ namespace mnemosy::systems {
 		void DeleteFolderHierarchy(FolderNode* node);
 
 
-		MaterialInfo* CreateNewMaterial(FolderNode* node,const std::string& name);
-		void RenameMaterial(MaterialInfo* materialInfo, const std::string& name);
-		void MoveMaterial(MaterialInfo* materialInfo, FolderNode* sourceNode, FolderNode* targetParentNode);
-		void DeleteMaterial(FolderNode* parentNode, unsigned int posInVector);
+		LibEntry* CreateNewLibEntry(FolderNode* node,const LibEntryType type,const std::string& name);
 
+		void RenameLibEntry(LibEntry* libEntry, const std::string& name);
+		void MoveLibEntry(LibEntry* libEntry, FolderNode* sourceNode, FolderNode* targetParentNode);
+		void DeleteLibEntry(FolderNode* parentNode, unsigned int posInVector);
+
+
+		bool IsLibEntryWithinHierarchy(FolderNode* hierarchyRoot, LibEntry* libEnry);
+		bool IsNodeWithinHierarchy(FolderNode* hierarchyRoot, FolderNode* node);
 
 		bool CollectMaterialsFromSearchKeyword(const std::string& searchKeyword);
 
@@ -49,13 +54,15 @@ namespace mnemosy::systems {
 		nlohmann::json* WriteToJson();
 		void Clear();
 
-		std::vector<systems::MaterialInfo*>& GetSearchResultsList() { return m_searchResults; }
+		std::vector<systems::LibEntry*>& GetSearchResultsList() { return m_searchResults; }
 
 
 		unsigned int RecursiveCountMaterials(FolderNode* node, const unsigned int startValue);
 	private:
-		MaterialInfo* CreateMaterial_Internal(FolderNode* node,const std::string name);
+
+		LibEntry* CreateMaterial_Internal(FolderNode* node, LibEntryType type,const std::string name);
 		FolderNode* CreateNewFolder_Internal(FolderNode* parentNode, const std::string& name);
+
 
 		void RecursivDeleteHierarchy(FolderNode* node);
 		void RecursivUpdatePathFromRoot(FolderNode* node);
@@ -68,10 +75,6 @@ namespace mnemosy::systems {
 		void RecursivLoadFromJson(FolderNode* node, const nlohmann::json& jsonNode);
 
 
-		void MakeStringLowerCase(std::string& str);
-
-
-
 	private:
 		unsigned int m_runtimeIDCounter;
 		unsigned int m_runtimeMaterialIDCounter;
@@ -79,7 +82,7 @@ namespace mnemosy::systems {
 		std::string m_rootNodeName;
 		FolderNode* m_rootNode = nullptr;
 
-		std::vector<MaterialInfo*> m_searchResults;
+		std::vector<LibEntry*> m_searchResults;
 
 	}; 
 

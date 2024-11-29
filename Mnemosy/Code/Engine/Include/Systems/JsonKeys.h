@@ -20,16 +20,20 @@ namespace mnemosy::systems {
 #define jsonLibKey_pathFromRoot		"3_pathFromRoot"		// std::string - path to this folder from root folder
 #define jsonLibKey_subFolderNames	"4_subFolderNames"		// std::vector<std::string> - list of names of the sub folders contained
 #define jsonLibKey_subFolders		"5_subFolders"			// Json Object - Sub Tree of folders
+
 #define jsonLibKey_hasMaterials		"6_hasMaterials"		// bool - does the folder contain materials
 #define jsonLibKey_materialEntries	"6_materialEntries"		// std::vector<std::string> - list of names of the materials contained
+#define jsonLibKey_entryTypes		"6_entryTypes"			// std::vector<int> - list of enum type LibEntryType stored as integers
 
 
-// json identifiers for material data file
-#define jsonMatKey_MnemosyDataFile	"1_Mnemosy_Data_File"	// std::string - header
-#define jsonMatKey_MnemosyDataFileTxt "Mnemosy Data File"	// text description of header
+//#define jsonKey_MnemosyDataFile	"1_Mnemosy_Data_File"	// std::string - header
+//#define jsonKey_MnemosyDataFileTxt "Mnemosy Data File"	// text description of header
 
-#define jsonMatKey_header			"Mnemosy Data File"		// text description of header
-#define jsonMatKey_description		"Contains material meta data" // text description
+#define jsonKey_header			"Mnemosy Data File"		// text description of header
+
+// json identifiers for pbr material data file
+
+#define jsonMatKey_description		"Contains pbr material meta data" // text description
 #define jsonMatKey_name				"name"					// std:.string - name of the material
 
 #define jsonMatKey_hasChannelPacked "hasChannelPacked"		// bool - if a texture has channelpacked textures
@@ -83,6 +87,18 @@ namespace mnemosy::systems {
 
 #define jsonMatKey_thumbnailPath	"thumbnailPath"			// std::string - filename of the texture in the same folder
 
+
+// jsonkeys for unlit material files
+
+#define jsonKey_unlit_description		"Contains Unlit Material meta data"
+#define jsonKey_unlit_name				"name"
+#define jsonKey_unlit_useAlpha			"useAlpha"
+#define jsonKey_unlit_useDitheredAlpha	"useDitheredAlpha"
+#define jsonKey_unlit_alphaThreshold	"alphaThreshhold"
+#define jsonKey_unlit_textureIsAssigned "textureAssigned"
+#define jsonKey_unlit_texturePath		"texturePath"
+#define jsonKey_unlit_uvTilingX			"uvTilingX"
+#define jsonKey_unlit_uvTilingY			"uvTilingY"
 
 } // namespace mnemosy::systems
 

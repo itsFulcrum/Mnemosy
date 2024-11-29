@@ -9,18 +9,30 @@
 
 namespace mnemosy::systems
 {
+	enum LibEntryType
+	{
+		MNSY_ENTRY_TYPE_PBRMAT		= 0,
+		MNSY_ENTRY_TYPE_UNLITMAT	= 1,
+		MNSY_ENTRY_TYPE_SKYBOX		= 2,
+		MNSY_ETRY_TYPE_COUNT
+	};
+
+
 	// Runtime id  is assigned at runtime when material gets created and never changes until the app closes
 
 	struct FolderNode;
 
-	struct MaterialInfo {
+	struct LibEntry {
 	public:
-		unsigned int runtime_ID;
+		LibEntryType type;
+		uint16_t runtime_ID;
 		unsigned int thumbnailTexure_ID = 0;
 		FolderNode* parent = nullptr;
 		std::string name;
 		bool selected = false;
 		bool thumbnailLoaded = false;
+
+		std::filesystem::path GetPathFromRoot();
 	};
 
 
@@ -28,7 +40,7 @@ namespace mnemosy::systems
 	public:
 
 		std::vector<FolderNode*> subNodes;
-		std::vector<MaterialInfo*> subMaterials;
+		std::vector<LibEntry*> subEntries;
 
 		std::filesystem::path pathFromRoot;
 		std::string name;
@@ -36,22 +48,12 @@ namespace mnemosy::systems
 		FolderNode* parent;
 		unsigned int runtime_ID;
 		
-		bool SubMaterialExistsAlready(std::string& name);
 		bool HasMaterials();
+		void SortLibEntries();
 
-		FolderNode* GetSubNodeByName(std::string& name);
 		bool IsLeafNode();
 		bool IsRoot();
-		bool SubnodeExistsAlready(std::string& name);
-
-		std::string MakeStringLowerCase(std::string& str) {
-
-
-			std::string strLower = str;
-			std::transform(strLower.begin(), strLower.end(), strLower.begin(), [](unsigned char c) { return std::tolower(c); });
 		
-			return strLower;
-		}
 	};
 
 } // !mnemosy::systems

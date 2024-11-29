@@ -171,11 +171,11 @@ namespace mnemosy
 			m_pInputSystem->Update(m_pClock->GetDeltaSeconds());
 
 			m_pThumbnailManger->Update();
-			m_pScene->Update();
+			//m_pScene->Update();
 
 			// Rendering
 			m_pRenderer->HotReloadPbrShader(m_pClock->GetDeltaSeconds());
-			m_pRenderer->RenderScene(*m_pScene);
+			m_pRenderer->RenderScene(*m_pScene, m_pMaterialLibraryRegistry->GetEntryTypeToRenderWith());
 			m_pUserInterface->Render();
 
 			glfwSwapBuffers(&m_pWindow->GetWindow());
@@ -186,7 +186,7 @@ namespace mnemosy
 
 	void MnemosyEngine::Shutdown() {	
 		
-		m_pMaterialLibraryRegistry->SaveActiveMaterialToFile();
+		m_pMaterialLibraryRegistry->ActiveLibEntry_SaveToFile();
 
 		m_pUserInterface->Shutdown();
 

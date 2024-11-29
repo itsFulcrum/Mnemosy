@@ -59,7 +59,7 @@ namespace mnemosy::gui
 				else {
 					
 
-					bool searchResultsFound = m_materialRegistry.SearchMaterialsForKeyword(m_searchInput);
+					bool searchResultsFound = m_materialRegistry.SearchLibEntriesForKeyword(m_searchInput);
 					m_materialRegistry.inSearchMode = true;
 
 
@@ -69,12 +69,12 @@ namespace mnemosy::gui
 
 					if (searchResultsFound) {
 						
-						std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
+						std::vector<systems::LibEntry*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
 
 
 						for (int i = 0; i < searchResultsList.size(); i++) {
 							
-							thumbManager.AddMaterialForThumbnailing(searchResultsList[i]);							
+							thumbManager.AddLibEntryToActiveThumbnails(searchResultsList[i]);							
 						}						
 					}
 
@@ -93,7 +93,7 @@ namespace mnemosy::gui
 			else {
 
 				// draw search results as bullet points
-				std::vector<systems::MaterialInfo*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
+				std::vector<systems::LibEntry*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
 
 				if (!searchResultsList.empty()) {
 
@@ -185,19 +185,32 @@ namespace mnemosy::gui
 						AddSubfolder(node);
 					}
 					else if (i == 1) { // Add material 
-						AddMaterial(node);
+						//AddPbrMaterial(node);
+						AddMaterialEntry(node, "New Material", systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT);
 					}
-					else if (i == 2) { // delete but keep children
+					else if (i == 2) { // add texture
+					
+						AddMaterialEntry(node, "New Texture", systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT);
+
+						//MNEMOSY_INFO("Textures are not yet supported");
+						
+					}
+					else if (i == 3) { // add skybox
+						//AddMaterialEntry(node, "New Texture", systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX);
+					
+						MNEMOSY_INFO("Skyboxs are not yet supported");
+					}
+					else if (i == 4) { // delete but keep children
 						DeleteButKeepChildren(node);
 					}
-					else if (i == 3) { // delete hierarchy
+					else if (i == 5) { // delete hierarchy
 						
 						m_nodeDeleteHierarchy = node;
 						showDeleteHierarchyModel = true;
 					}
-					else if (i == 4) { // open in explorer
+					else if (i == 6) { // open in explorer
 						
-						fs::path pathToFolder = m_materialRegistry.GetFolderPath(node);
+						fs::path pathToFolder = m_materialRegistry.Folder_GetFullPath(node);
 						mnemosy::core::FileDialogs::OpenFolderAt(pathToFolder.generic_string().c_str());
 					}
 
@@ -263,14 +276,14 @@ namespace mnemosy::gui
 						MNEMOSY_ASSERT(sourceNode != nullptr, "A nullpointer folder node should never be passed into a drag and drop payload");
 
 						// need to make a copy of node.submaterials because it changed during the loop
-						std::vector<systems::MaterialInfo*> subMatsCopy = sourceNode->subMaterials;
+						std::vector<systems::LibEntry*> subMatsCopy = sourceNode->subEntries;
 
 						for (unsigned int b = 0; b < materialPayload.matList->materialListIndexes.size(); b++) {
 
 							unsigned int index = materialPayload.matList->materialListIndexes[b];
 							//MNEMOSY_TRACE("Material index: {}", index);
-							systems::MaterialInfo* matInfoTemp = subMatsCopy[index];
-							m_materialRegistry.MoveMaterial(sourceNode, node, matInfoTemp);
+							systems::LibEntry* matInfoTemp = subMatsCopy[index];
+							m_materialRegistry.LibEntry_Move(sourceNode, node, matInfoTemp);
 						}
 						
 						subMatsCopy.clear();
@@ -304,15 +317,15 @@ namespace mnemosy::gui
 
 	void MaterialLibraryGuiPanel::DrawMaterialEntries(systems::FolderNode* node) {
 
-		if (node->subMaterials.empty())
+		if (node->subEntries.empty())
 			return;
 
-		for (size_t i = 0; i < node->subMaterials.size(); i++) {
+		for (size_t i = 0; i < node->subEntries.size(); i++) {
 				
 #ifdef mnemosy_gui_showDebugInfo
 			std::string materialText = node->subMaterials[i]->name + " -MatID: " + std::to_string(node->subMaterials[i]->runtime_ID);
 #else
-			std::string materialText = node->subMaterials[i]->name;
+			std::string materialText = node->subEntries[i]->name;
 #endif // !mnemosy_gui_showDebugInfo
 
 
@@ -320,7 +333,7 @@ namespace mnemosy::gui
 			bool matIsOpen = true;
 
 
-			bool selected = ImGui::Selectable(materialText.c_str(), node->subMaterials[i]->selected);
+			bool selected = ImGui::Selectable(materialText.c_str(), node->subEntries[i]->selected);
 
 
 			if (ImGui::IsItemClicked()) {
@@ -333,13 +346,13 @@ namespace mnemosy::gui
 
 				if (!ImGui::GetIO().KeyCtrl) {
 					// clear selection 
-					for (size_t a = 0; a < node->subMaterials.size(); a++) {
+					for (size_t a = 0; a < node->subEntries.size(); a++) {
 
-						node->subMaterials[a]->selected = false;
+						node->subEntries[a]->selected = false;
 					}
 				}
 
-				node->subMaterials[i]->selected = true;	
+				node->subEntries[i]->selected = true;	
 
 			}
 
@@ -351,16 +364,16 @@ namespace mnemosy::gui
 					m_matDragDropBegin = true;
 
 					// current mat will be selected
-					node->subMaterials[i]->selected = true;
+					node->subEntries[i]->selected = true;
 
 					MaterialDragDropPayload matPayload = MaterialDragDropPayload();
 					matPayload.sourceNode = node;
 					matPayload.matList = std::make_shared<PointerList>();
 
 
-					for (unsigned int a = 0; a < node->subMaterials.size(); a++) {
+					for (unsigned int a = 0; a < node->subEntries.size(); a++) {
 
-						if (node->subMaterials[a]->selected) {
+						if (node->subEntries[a]->selected) {
 
 							matPayload.matList.get()->materialListIndexes.push_back(a);
 
@@ -401,14 +414,14 @@ namespace mnemosy::gui
 				// right click on open folder to open options
 				if (ImGui::BeginPopupContextItem()) {
 
-					m_renameMaterialText = node->subMaterials[i]->name;
+					m_renameMaterialText = node->subEntries[i]->name;
 
 					ImGui::Text("Rename: ");
 					ImGui::SameLine();
 
 					bool renamed = ImGui::InputText("##RenameMaterialInputField", &m_renameMaterialText,m_textInputFlags);
 					if (renamed) {
-						RenameMaterial(node, node->subMaterials[i], m_renameMaterialText, i);
+						RenameMaterial(node, node->subEntries[i], m_renameMaterialText, i);
 					}
 
 					for (size_t option = 0; option < IM_ARRAYSIZE(m_rightClickMaterialOptions); option++) {
@@ -418,7 +431,7 @@ namespace mnemosy::gui
 							if (option == 0) { // delete
 								
 
-								std::vector<systems::MaterialInfo*> subMatsCopy = node->subMaterials;
+								std::vector<systems::LibEntry*> subMatsCopy = node->subEntries;
 
 								for (size_t a = 0; a < subMatsCopy.size(); a++) {
 
@@ -428,9 +441,9 @@ namespace mnemosy::gui
 										int posInList = -1;
 										// find posiiton in the original list which is changing as we delete materials
 										int runtimeID = subMatsCopy[a]->runtime_ID;
-										for (size_t b = 0; b < node->subMaterials.size(); b++) {
+										for (size_t b = 0; b < node->subEntries.size(); b++) {
 
-											if (runtimeID == node->subMaterials[b]->runtime_ID) {
+											if (runtimeID == node->subEntries[b]->runtime_ID) {
 
 												posInList = b;
 											}
@@ -450,7 +463,7 @@ namespace mnemosy::gui
 							
 							else if (option == 1) { // open in FileExplorer
 
-								fs::path pathToMaterialFolder = m_materialRegistry.GetMaterialPath(node, node->subMaterials[i]);
+								fs::path pathToMaterialFolder = m_materialRegistry.LibEntry_GetFolderPath(node->subEntries[i]);
 								mnemosy::core::FileDialogs::OpenFolderAt(pathToMaterialFolder.generic_string().c_str());
 							}
 						}
@@ -541,28 +554,27 @@ namespace mnemosy::gui
 	}
 	
 	
-	void MaterialLibraryGuiPanel::AddMaterial(systems::FolderNode* node) {
+	void MaterialLibraryGuiPanel::AddMaterialEntry(systems::FolderNode* parent, std::string name, systems::LibEntryType type) {
 
-		std::string matName = "New Material";
+		std::string matName = name;
 
+		m_materialRegistry.LibEntry_CreateNew(parent, type, matName);
 
-		
-		m_materialRegistry.AddNewMaterial(node, matName);
-
-		m_materialRegistry.OpenFolderNode(node);
+		m_materialRegistry.OpenFolderNode(parent);
 		m_setFolderOpenNextFrame = true;
-		m_folderIdToOpenNextFrame = node->runtime_ID;
+		m_folderIdToOpenNextFrame = parent->runtime_ID;
 
 	}
 
-	void MaterialLibraryGuiPanel::RenameMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector) {
+	void MaterialLibraryGuiPanel::RenameMaterial(systems::FolderNode* node, systems::LibEntry* libEntry, std::string& newName, int positionInVector) {
 
-		if (newName != materialInfo->name) {
-			m_materialRegistry.RenameMaterial(node, materialInfo, newName,positionInVector);
+		if (newName != libEntry->name) {
+			m_materialRegistry.LibEntry_Rename(libEntry, newName);
 		}
 	}
 
-	void MaterialLibraryGuiPanel::DeleteMaterial(systems::FolderNode* node, systems::MaterialInfo* materialInfo, int positionInVector) {
-		m_materialRegistry.DeleteMaterial(node, materialInfo, positionInVector);
+	void MaterialLibraryGuiPanel::DeleteMaterial(systems::FolderNode* node, systems::LibEntry* libEntry, int positionInVector) {
+
+		m_materialRegistry.LibEntry_Delete(libEntry, positionInVector);
 	}
 } // !mnemosy::gui

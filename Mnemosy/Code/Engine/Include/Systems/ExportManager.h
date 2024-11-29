@@ -13,7 +13,7 @@
 
 namespace mnemosy::graphics
 {
-	class Material;
+	class PbrMaterial;
 	class Texture;
 	enum NormalMapFormat;
 }
@@ -51,7 +51,7 @@ namespace mnemosy::systems
 		void Init();
 		void Shutdown();
 
-		bool ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::Material& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
+		bool ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::PbrMaterial& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
 
 		void GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo, graphics::PBRTextureType PBRTypeHint);
 		

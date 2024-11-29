@@ -6,7 +6,8 @@
 #include <filesystem>
 
 namespace mnemosy::systems {
-	struct MaterialInfo;
+	enum LibEntryType;
+	struct LibEntry;
 	struct FolderNode;
 	class FolderTree;
 }
@@ -18,13 +19,14 @@ namespace mnemosy::graphics {
 	enum NormapMapFormat;
 	enum ChannelPackType;
 	enum ChannelPackComponent;
-	class Material;
+	class UnlitMaterial;
+	class PbrMaterial;
 	class Texture;
 }
 
 namespace mnemosy::systems
 {
-
+	// TODO: make seperate file with file directory procedures that can be handle outside of this class so that it gets less crowded
 	class MaterialLibraryRegistry
 	{
 	public:
@@ -44,29 +46,35 @@ namespace mnemosy::systems
 		void DeleteFolderHierarchy(FolderNode* node);
 
 
-		void AddNewMaterial(FolderNode* node, std::string& name);
-		void RenameMaterial(FolderNode* node, systems::MaterialInfo* materialInfo, std::string& newName, int positionInVector);
-		void DeleteMaterial(FolderNode* node, systems::MaterialInfo* materialInfo, int positionInVector);
-		void MoveMaterial(FolderNode* sourceNode, FolderNode* targetNode, systems::MaterialInfo* materialInfo);
+		void LibEntry_CreateNew(FolderNode* node,  LibEntryType type, std::string& name);
+		void LibEntry_Rename(systems::LibEntry* libEntry, std::string& newName);
+		void LibEntry_Delete(systems::LibEntry* libEntry, int positionInVector);
+		void LibEntry_Move(FolderNode* sourceNode, FolderNode* targetNode, systems::LibEntry* libEntry);
+
+		std::filesystem::path LibEntry_GetDataFilePath(LibEntry* libEntry);
+		std::filesystem::path LibEntry_GetFolderPath(LibEntry* libEntry);
+		
+		void LibEntry_Load(systems::LibEntry* libEntry);
+
+		bool IsActiveEntry(uint16_t runtimeID);
+		systems::LibEntry* ActiveLibEntry_Get() { return m_activeLibEntry; }
+		void ActiveLibEntry_SaveToFile();
+
+		// TODO: Handle skybox entry type
+		std::vector<std::string> ActiveLibEntry_GetTexturePaths();
 
 
-		void GenereateOpacityFromAlbedoAlpha(graphics::Material& activeMat);
+		// For Pbr Material Only
+		void GenereateOpacityFromAlbedoAlpha(graphics::PbrMaterial& activeMat);
+		void GenerateChannelPackedTexture(graphics::PbrMaterial& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height,uint8_t bitDepth);
+		void DeleteChannelPackedTexture(graphics::PbrMaterial& activeMat, std::string suffix);
 
-		void GenerateChannelPackedTexture(graphics::Material& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height,uint8_t bitDepth);
-
-		void DeleteChannelPackedTexture(graphics::Material& activeMat, std::string suffix);
-
-		void LoadActiveMaterialFromFile_Multithreaded(systems::MaterialInfo* materialInfo);
-		graphics::Material* LoadMaterialFromFile_Multithreaded( systems::MaterialInfo* materialInfo);
-
-
-		void SaveActiveMaterialToFile();
 		void SetDefaultMaterial();
 
-		bool UserMaterialBound() { return m_userMaterialBound; }
+		bool UserEntrySelected() { return m_activeLibEntry != nullptr; }
 
-		void LoadTextureForActiveMaterial(graphics::PBRTextureType textureType, std::filesystem::path& filepath);
-		void DeleteTextureOfActiveMaterial(graphics::PBRTextureType textureType);
+		void LoadTextureOfActivePbrMaterial(graphics::PBRTextureType textureType, std::filesystem::path& filepath);
+		void DeleteTextureOfActivePbrMaterial(graphics::PBRTextureType textureType);
 		
 
 		void OpenFolderNode(FolderNode* node);
@@ -79,52 +87,32 @@ namespace mnemosy::systems
 		// Getters
 		FolderNode* GetRootFolder();
 		FolderNode* GetFolderByID(FolderNode* node, const unsigned int id);
-
-		int GetActiveMaterialID() { return m_activeMaterialID; }
 		FolderNode* GetSelectedNode() { return m_selectedFolderNode; }
-		std::filesystem::path& GetActiveMaterialDataFilePath() { return m_activeMaterialDataFilePath; }
-		std::filesystem::path GetActiveMaterialFolderPath();
-
+		
 
 		std::filesystem::path GetLibraryPath();
-		std::filesystem::path GetFolderPath(FolderNode* node);
-		std::filesystem::path GetMaterialPath(FolderNode* folderNode, MaterialInfo* matInfo);
+		std::filesystem::path Folder_GetFullPath(FolderNode* node);
 
-		std::vector<std::string> GetFilepathsOfActiveMat(graphics::Material& activeMat);
+		bool SearchLibEntriesForKeyword(const std::string& keyword);
+		std::vector<systems::LibEntry*>& GetSearchResultsList();
 
-
-		bool SearchMaterialsForKeyword(const std::string& keyword);
-		std::vector<systems::MaterialInfo*>& GetSearchResultsList();
-
+		systems::LibEntryType GetEntryTypeToRenderWith();
 
 
 	private:
-		bool CheckDataFile(const std::filesystem::path& dataFilePath);
-		void CreateNewMaterialDataFile(std::filesystem::path& folderPath,std::string& name);
-		void CreateDirectoryForNode(FolderNode* node);
-		
-	public:
 		FolderTree* m_folderTree = nullptr;
-		FolderNode* m_folderNodeOfActiveMaterial = nullptr;
-
-		// accessed by library gui panel and contents gui panel
-		bool inSearchMode = false;
-	private:
-		
 		core::FileDirectories* m_fileDirectories = nullptr;
-
 		FolderNode* m_selectedFolderNode = nullptr;
 
-		//std::filesystem::directory_entry m_userDirectoriesDataFile;
-		
-		// active Material;
-		std::filesystem::path m_activeMaterialDataFilePath;
-		unsigned int m_activeMaterialID = 0; // 0 means non selected // at startup and if selected gets deleted
-		bool m_userMaterialBound = false;
+		systems::LibEntry* m_activeLibEntry = nullptr;
+		systems::LibEntryType m_lastActiveMaterialLibEntry;
 		
 		// data file 
 		bool prettyPrintDataFile = false;
 		bool prettyPrintMaterialFiles = false;
+	public:
+
+		bool inSearchMode = false; // accessed by library gui panel and contents gui panel
 	};
 
 

@@ -6,11 +6,11 @@
 
 
 namespace mnemosy::systems {
-	struct MaterialInfo;
+	struct LibEntry;
 	struct FolderNode;
 }
 namespace mnemosy::graphics {
-	class Material;
+	class PbrMaterial;
 }
 
 namespace mnemosy::systems {
@@ -27,24 +27,26 @@ namespace mnemosy::systems {
 
 		void Update();
 				
-		void RenderThumbnailOfActiveMaterial(std::filesystem::path& pathToThumbnail,FolderNode* selectedFolder,unsigned int activeMaterialID);
-		void RenderThumbnailOfMaterial(MaterialInfo* materialInfo);
+		void RenderThumbnailForActiveLibEntry(LibEntry* activeLibEntry);
 
 
-		void AddMaterialForThumbnailing(MaterialInfo* material);
-		void RemoveMaterialFromThumbnailing(MaterialInfo* material);
+		void AddLibEntryToActiveThumbnails(LibEntry* libEntry);
+		void RemoveLibEntryFromActiveThumbnails(LibEntry* libEntry);
 
 		void UnloadAllThumbnails();
 
 	private:
-		void DeleteThumbnailGLTexture_Internal(MaterialInfo* material);
-		void LoadThumbnailForMaterial_Internal(MaterialInfo* material);
+		void RenderThumbnailForAnyLibEntry_Slow(LibEntry* libEntry);
 
-		bool m_activeMaterialsFullyLoaded = false;
 
-		std::vector<systems::MaterialInfo*> m_thumbnailsQuedForRefresh;
+		void DeleteThumbnailGLTexture_Internal(LibEntry* libEntry);
+		void LoadThumbnailForMaterial_Internal(LibEntry* libEntry);
+
+		bool m_activeEntriesFullyLoaded = false;
+
+		std::vector<systems::LibEntry*> m_thumbnailsQuedForRefresh;
 		
-		std::vector<systems::MaterialInfo*> m_activeMaterials;
+		std::vector<systems::LibEntry*> m_activeEntries;
 	
 	};
 } // ! mnemosy::systems

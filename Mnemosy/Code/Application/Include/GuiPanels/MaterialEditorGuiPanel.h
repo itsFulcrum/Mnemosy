@@ -20,7 +20,9 @@ namespace mnemosy::systems {
 }
 
 namespace mnemosy::graphics {
-	class Material;
+	class UnlitMaterial;
+	class PbrMaterial;
+	class Skybox;
 }
 
 namespace mnemosy::gui
@@ -36,9 +38,14 @@ namespace mnemosy::gui
 
 
 	private:
-		void DrawTextureSettings(graphics::Material& activeMat,std::filesystem::path& libraryDirectory);
-		void DrawChannelPackUI(graphics::Material& activeMat);
 
+		void DrawPbrMaterial(graphics::PbrMaterial& activeMat);
+		void DrawPbrMatTextureSettings(graphics::PbrMaterial& activeMat,std::filesystem::path& libraryDirectory);
+		void DrawPbrMatChannelPackUI(graphics::PbrMaterial& activeMat);
+
+		void DrawEntryUnlitMat(graphics::UnlitMaterial* unlitMat);
+
+		void DrawEntrySkybox(graphics::Skybox* skybox);
 
 
 		void CheckToSaveMaterial(float deltaSeconds);
@@ -46,6 +53,8 @@ namespace mnemosy::gui
 
 		void OnFileDropInput(int count,std::vector<std::string>& dropedFilePaths);
 	private:
+
+		
 
 		ImVec2 m_buttonSize = ImVec2(120, 0);
 		ImVec2 m_buttonSizeLoad = ImVec2(120, 0);

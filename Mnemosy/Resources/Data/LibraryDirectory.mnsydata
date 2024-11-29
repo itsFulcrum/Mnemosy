@@ -1,5 +1,5 @@
 {
     "1_Header": "Mnemosy Data File",
     "2_Description": "This Stores the path to the current library directory",
-    "libraryDirectory": "D:/MyMnemosyLib/MnemosyMaterialLibrary"
+    "libraryDirectory": "D:/MnemosyLib/MnemosyMaterialLibrary"
 }

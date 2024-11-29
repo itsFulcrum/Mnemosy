@@ -7,14 +7,17 @@
 
 #include <filesystem>
 
-
+namespace mnemosy::systems {
+	enum LibEntryType;
+}
 
 namespace mnemosy::graphics
 {
 	class Shader;
 	class RenderMesh;
 	class Skybox;
-	class Material;
+	class UnlitMaterial;
+	class PbrMaterial;
 	class Light;
 	class Scene;
 }
@@ -83,13 +86,18 @@ namespace mnemosy::graphics
 		void StartFrame(unsigned int width, unsigned int height);
 		void EndFrame(unsigned int width, unsigned int height);
 
-		void RenderMeshes(RenderMesh& renderMesh);
+		void RenderMeshes(RenderMesh& renderMesh, Shader* shader);
 		void RenderGizmo(RenderMesh& renderMesh);
 		void RenderLightMesh(Light& light);
 		void RenderSkybox(Skybox& skybox);
 
-		void RenderScene(Scene& scene);
-		void RenderThumbnail(Material& activeMaterial);
+		void RenderScene(Scene& scene, systems::LibEntryType materialType);
+
+		void RenderThumbnail_PbrMaterial(PbrMaterial& activeMaterial);
+		void RenderThumbnail_UnlitMaterial(UnlitMaterial* unlitMaterial);
+		void RenderThumbnail_SkyboxMaterial(Skybox& unlitMaterial);
+
+
 		unsigned int GetThumbnailRenderTextureID() { return m_thumb_blitTexture_ID; }
 
 
@@ -138,12 +146,10 @@ namespace mnemosy::graphics
 
 		Shader* m_pPbrShader = nullptr;
 		Shader* m_pUnlitTexturesShader = nullptr;
+		Shader* m_pUnlitMaterialShader = nullptr;
+
 		Shader* m_pLightShader = nullptr;
 		Shader* m_pSkyboxShader = nullptr;
-
-#ifdef MNEMOSY_RENDER_GIZMO
-		Shader* m_pGizmoShader = nullptr;
-#endif // MNEMOSY_RENDER_GIZMO
 
 		//int m_msaaSamples = 4;
 		MSAAsamples m_msaaSamplesSettings = MSAA4X;

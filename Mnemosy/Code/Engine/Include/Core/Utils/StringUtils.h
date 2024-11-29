@@ -11,6 +11,14 @@ namespace mnemosy::core
 	{
 	public:
 
+
+		static std::string ToLowerCase(const std::string& str) {
+
+			std::string lowerStr = str;
+			std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), [](unsigned char c) { return std::tolower(c); });
+			return lowerStr;
+		}
+
 		static void MakeStringLowerCase(std::string& str) {
 			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
 		}

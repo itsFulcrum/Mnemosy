@@ -16,68 +16,23 @@ namespace mnemosy::systems
 		return false;
 	}
 
-
-	bool FolderNode::SubMaterialExistsAlready(std::string& name) {
-
-		if (subMaterials.empty())
-			return false;
-
-
-		std::string nameLower = MakeStringLowerCase(name);
-
-
-		for (size_t i = 0; i < subMaterials.size(); i++) {
-
-			if (MakeStringLowerCase(subMaterials[i]->name) == nameLower) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	bool FolderNode::HasMaterials() {
-		return !subMaterials.empty();
+		return !subEntries.empty();
 	}
 
-	FolderNode* FolderNode::GetSubNodeByName(std::string& name) {
-		
-		if (!subNodes.empty()) {
+	void FolderNode::SortLibEntries()
+	{
+		// sort alphabetically
+		if (!subEntries.empty()) {
 
-			for (FolderNode* node : subNodes) {
-
-				if (node->name == name) {
-					return node;
-				}
-			}
+			std::sort(subEntries.begin(), subEntries.end(), [](const LibEntry* a, const LibEntry* b) {
+				return a->name < b->name;
+			});
 		}
-
-		return nullptr;
 	}
-
-	bool FolderNode::SubnodeExistsAlready(std::string& name) {
-
-		// only searches curent and subnodes not reqursivly the entire subtree
-
-		std::string nameLower = MakeStringLowerCase(name);
-
-
-		if (MakeStringLowerCase(this->name) == nameLower) {
-			return true;
-		}
-
-		if (!subNodes.empty()) {
-
-			for (FolderNode* subnode : subNodes) {
-
-				if (MakeStringLowerCase(subnode->name) == nameLower) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+	std::filesystem::path LibEntry::GetPathFromRoot()
+	{
+		return parent->pathFromRoot / std::filesystem::path(name);
 	}
-
 
 } // !mnemosy::systems

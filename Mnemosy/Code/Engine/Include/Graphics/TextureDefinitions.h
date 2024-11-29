@@ -123,6 +123,10 @@ namespace mnemosy::graphics {
 
 #define texture_fileSuffix_thumbnail		"_thumbnail.ktx2"	// file name of the thumbnail texture (in ktx2 format)
 
+// unlit material
+
+#define texture_unlit_fileSuffix "_tex" + texture_textureFileType
+
 
 	namespace TexDefinitions {
 		const static char* ImageFileFormats_string[6]	= { ".tif",".png",".jpg",".hdr",".exr",".ktx2" }; // must be ordered the same as enum 'ImageFileFormat'

@@ -4,6 +4,8 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Systems/FolderTreeNode.h"
+
 
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/Camera.h"
@@ -19,7 +21,8 @@ namespace mnemosy::graphics
 
 	void Scene::Init() {
 		m_currentPreviewMesh = PreviewMesh::Default;	
-		m_activeMaterial = nullptr;
+		m_pbrMaterial = nullptr;
+
 
 		//MNEMOSY_TRACE("Start Init Scene");
 		mnemosy::core::Window& window = MnemosyEngine::GetInstance().GetWindow();
@@ -34,17 +37,13 @@ namespace mnemosy::graphics
 
 		m_mesh = std::make_unique<RenderMesh>(previewMesh.generic_string().c_str());
 
-#ifdef MNEMOSY_RENDER_GIZMO
-		std::filesystem::path gizmoMesh = fd.GetMeshesPath() / std::filesystem::path("mnemosy_gizmo_mesh.fbx");
-		m_gizmoMesh = std::make_unique<RenderMesh>(gizmoMesh.generic_string().c_str());
-#endif // MNEMOSY_RENDER_GIZMO
-
 		//MNEMOSY_TRACE("Scene - light Init");
 		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("market.hdr");
-		m_skybox = std::make_unique<Skybox>(standardSkybox.generic_string().c_str(), 1024);
+
+		m_skybox = new Skybox(standardSkybox.generic_string().c_str(), 1024);
 		//MNEMOSY_TRACE("Scene - Skybox Init");
 
-		m_activeMaterial = new Material();
+		m_pbrMaterial = new PbrMaterial();
 
 		Setup();
 
@@ -52,30 +51,24 @@ namespace mnemosy::graphics
 
 	void Scene::Shutdown() {
 
-		if (m_activeMaterial) {
+		if (m_pbrMaterial) {
 
-			delete m_activeMaterial;
-			m_activeMaterial = nullptr;
+			delete m_pbrMaterial;
+			m_pbrMaterial = nullptr;
 		}
-	}
 
-	void Scene::Update()
-	{
-		MnemosyEngine& instance = MnemosyEngine::GetInstance();
+		if (m_skybox) {
+			delete m_skybox;
+		}
 
+		if (m_unlitMaterial) {
+			delete m_unlitMaterial;
+		}
 
-		m_camera->SetScreenSize(instance.GetWindow().GetViewportWidth(), instance.GetWindow().GetViewportHeight());
-		//m_scene->GetCamera().SetScreenSize(m_pWindow->GetWindowWidth(), m_pWindow->GetWindowHeight());
-
-		instance.GetRenderer().SetViewMatrix(m_camera->GetViewMatrix());
-		instance.GetRenderer().SetProjectionMatrix(m_camera->GetProjectionMatrix());
-
-		//m_pRenderer->SetViewMatrix(m_scene->GetCamera().GetViewMatrix());
-		//m_pRenderer->SetProjectionMatrix(m_scene->GetCamera().GetProjectionMatrix());
 	}
 
 
-void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
+	void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
 {
 		namespace fs = std::filesystem;
 
@@ -122,14 +115,34 @@ void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
 
 }
 
-	void Scene::SetMaterial(Material* material) {
-		if (m_activeMaterial) {
-			delete m_activeMaterial;
-			m_activeMaterial = nullptr;
+	void Scene::SetPbrMaterial(PbrMaterial* pbrMaterial) {
+		MNEMOSY_ASSERT(pbrMaterial != nullptr, "pbrMaterial has to be initialized");
+
+		if (m_pbrMaterial) {
+			delete m_pbrMaterial;
 		}
 
-		m_activeMaterial = material;
+		m_pbrMaterial = pbrMaterial;
+	}
 
+	void Scene::SetUnlitMaterial(UnlitMaterial* unlitMaterial) {
+		MNEMOSY_ASSERT(unlitMaterial != nullptr, "Unlit Material has to be initialized");
+
+		if (m_unlitMaterial) {
+			delete m_unlitMaterial;
+		}
+
+		m_unlitMaterial = unlitMaterial;
+	}
+
+	void Scene::SetSkybox(graphics::Skybox* skybox) {
+		MNEMOSY_ASSERT(skybox != nullptr, "skybox has to be initialized");
+
+		if (m_skybox) {
+			delete m_skybox;
+		}
+
+		m_skybox = skybox;
 	}
 
 	void Scene::Setup()
@@ -145,16 +158,6 @@ void Scene::SetPreviewMesh(const PreviewMesh& previewMeshType)
 		m_mesh->transform.SetRotationEulerAngles(glm::vec3(0.0f, 0.0f, 0.0f));
 		//m_mesh->GetMaterial().Albedo = glm::vec3(0.2f, 0.2f, 0.2f);
 		//m_mesh->GetMaterial().Roughness = 0.15f;
-
-
-#ifdef MNEMOSY_RENDER_GIZMO
-		// gizmo mesh setup
-		// gizmo Mesh could just be a modelData object directly. it doesnt need a material instance but it die
-		//m_gizmoMesh->transform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_gizmoMesh->transform.SetRotationEulerAngles(glm::vec3(0.0f, 0.0f, 0.0f));
-		m_gizmoMesh->transform.SetScale(glm::vec3(0.03f, 0.03f, 0.03f));
-#endif // MNEMOSY_RENDER_GIZMO
-
 
 		// skybox setup
 		//MNEMOSY_TRACE("StartGenerateSkyboxes");
