@@ -115,6 +115,15 @@ namespace mnemosy::graphics
 		registry.SetNewCurrent(name);
 	}
 
+	void Skybox::RemoveCubemap()
+	{
+		if (m_pCubemap) {
+			delete m_pCubemap;
+			m_pCubemap = nullptr;
+		}
+	}
+
+	// scary - cubemap could be null
 	Cubemap& Skybox::GetCubemap()
 	{
 		return *m_pCubemap;
@@ -123,7 +132,6 @@ namespace mnemosy::graphics
 	ModelData& Skybox::GetModelData() {
 
 		return MnemosyEngine::GetInstance().GetMeshRegistry().GetMeshByID(m_modelData_id);
-		//return *m_pModelData;
 	}
 
 }

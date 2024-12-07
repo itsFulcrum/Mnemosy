@@ -13,6 +13,7 @@ namespace mnemosy::systems {
 
 namespace mnemosy::graphics
 {
+	struct SceneSettings;
 	class Shader;
 	class RenderMesh;
 	class Skybox;
@@ -73,7 +74,7 @@ namespace mnemosy::graphics
 
 		void SetPbrShaderBrdfLutUniforms();
 		void SetPbrShaderLightUniforms(Light& light);
-		void SetShaderSkyboxUniforms(Skybox& skybox);
+		void SetShaderSkyboxUniforms(SceneSettings& sceneSettings, Skybox& skybox);
 
 
 		void SetProjectionMatrix(const glm::mat4& projectionMatrix);
@@ -170,8 +171,12 @@ namespace mnemosy::graphics
 		RenderModes m_renderMode = MNSY_RENDERMODE_SHADED;
 
 	private:
+		//BackgroundSettings m_userBackgroundSettings;
+		//BackgroundSettings m_thumbnailBackgroundSettings;
+
 
 		core::FileWatcher m_shaderFileWatcher;
+		core::FileWatcher m_shaderUnlitFileWatcher;
 		core::FileWatcher m_shaderSkyboxFileWatcher;
 		float m_fileWatchTimeDelta = 0.0f;
 

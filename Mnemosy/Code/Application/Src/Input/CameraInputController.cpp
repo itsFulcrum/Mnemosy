@@ -154,9 +154,9 @@ namespace mnemosy::input {
 
 		MnemosyEngine& engine = MnemosyEngine::GetInstance();
 
-		engine.GetScene().GetSkybox().rotation += (float)(xOffset * m_skyboxRotSpeed * deltaSeconds);
+		engine.GetScene().userSceneSettings.background_rotation += (float)(xOffset * m_skyboxRotSpeed * deltaSeconds);
 
-		engine.GetRenderer().SetShaderSkyboxUniforms(engine.GetScene().GetSkybox());
+		engine.GetRenderer().SetShaderSkyboxUniforms(engine.GetScene().userSceneSettings, engine.GetScene().GetSkybox());
 
 	}
 

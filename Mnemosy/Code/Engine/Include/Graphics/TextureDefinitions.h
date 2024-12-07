@@ -100,7 +100,9 @@ namespace mnemosy::graphics {
 // used for opening an windows explorer
 #define readable_textureFormats_DialogFilter "All Files\0 * .*\0 TIF (*.tif)\0*.tif\0 PNG (*.png)\0*.png\0 JPG (*.jpg)\0*.jpg\0 TIFF (*.tiff)\0*.tiff\0 EXR (*.exr)\0*.exr\0 HDR (*.hdr)\0*.hdr\0,KTX2 (*.ktx2)\0*.ktx2\0"
 
-#define texture_textureFileType ".tif"					// file type of textures stored on disk
+#define texture_fileExtentionTiff	".tif"					// file type of textures stored on disk
+#define texture_fileExtentionHdr	".hdr"					// file type of textures stored on disk
+#define texture_fileExtentionKtx2	".ktx2"					// file type of textures stored on disk
 
 #define fileSuffix_albedo			"_albedo"
 #define fileSuffix_normal			"_normal"
@@ -112,20 +114,28 @@ namespace mnemosy::graphics {
 #define fileSuffix_opacity			"_opacity"
 
 
-#define texture_fileSuffix_albedo			"_albedo"			+ texture_textureFileType
-#define texture_fileSuffix_normal			"_normal"			+ texture_textureFileType
-#define texture_fileSuffix_roughness		"_roughness"		+ texture_textureFileType
-#define texture_fileSuffix_metallic			"_metallic"			+ texture_textureFileType
-#define texture_fileSuffix_ambientOcclusion	"_ambientOcclusion" + texture_textureFileType
-#define texture_fileSuffix_emissive			"_emissive"			+ texture_textureFileType
-#define texture_fileSuffix_height			"_height"			+ texture_textureFileType
-#define texture_fileSuffix_opacity			"_opacity"			+ texture_textureFileType
+#define texture_fileSuffix_albedo			"_albedo"			+ texture_fileExtentionTiff
+#define texture_fileSuffix_normal			"_normal"			+ texture_fileExtentionTiff
+#define texture_fileSuffix_roughness		"_roughness"		+ texture_fileExtentionTiff
+#define texture_fileSuffix_metallic			"_metallic"			+ texture_fileExtentionTiff
+#define texture_fileSuffix_ambientOcclusion	"_ambientOcclusion" + texture_fileExtentionTiff
+#define texture_fileSuffix_emissive			"_emissive"			+ texture_fileExtentionTiff
+#define texture_fileSuffix_height			"_height"			+ texture_fileExtentionTiff
+#define texture_fileSuffix_opacity			"_opacity"			+ texture_fileExtentionTiff
 
 #define texture_fileSuffix_thumbnail		"_thumbnail.ktx2"	// file name of the thumbnail texture (in ktx2 format)
 
 // unlit material
 
-#define texture_unlit_fileSuffix "_tex" + texture_textureFileType
+#define texture_unlit_fileSuffix "_tex" + texture_fileExtentionTiff
+
+// skybox material
+
+#define texture_skybox_fileSuffix_equirectangular	"_equirectangular" + texture_fileExtentionHdr
+#define texture_skybox_fileSuffix_cubeColor			"_cubeColor"		+ texture_fileExtentionKtx2
+#define texture_skybox_fileSuffix_cubePrefilter		"_cubePrefilter"	+ texture_fileExtentionKtx2
+#define texture_skybox_fileSuffix_cubeIrradiance	"_cubeIrradiance"	+ texture_fileExtentionKtx2
+
 
 
 	namespace TexDefinitions {

@@ -118,7 +118,7 @@ namespace mnemosy::gui
 					if (current != previousSelected)  // Selection has happend
 					{
 						skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[current]);
-						engine.GetRenderer().SetShaderSkyboxUniforms(skybox);
+						engine.GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings,skybox);
 					}
 				}
 

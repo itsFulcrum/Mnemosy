@@ -6,6 +6,8 @@
 #include "Include/Core/FileDirectories.h"
 #include "Include/Systems/FolderTreeNode.h"
 
+#include "Include/Systems/MeshRegistry.h"
+#include "Include/Graphics/SceneSettings.h"
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Camera.h"
@@ -112,9 +114,15 @@ namespace mnemosy::graphics
 		m_shaderFileWatcher = core::FileWatcher();
 		m_shaderSkyboxFileWatcher = core::FileWatcher();
 
+		m_shaderUnlitFileWatcher = core::FileWatcher();
+
 		// init FileWatcher
 		{
+
 			fs::path _includes = shaders / fs::path("includes");
+
+			m_shaderUnlitFileWatcher.RegisterFile(fs::path(unlitMatVert));
+			m_shaderUnlitFileWatcher.RegisterFile(fs::path(unlitMatFrag));
 
 			m_shaderFileWatcher.RegisterFile(shaders / fs::path("pbrVertex.vert"));
 			m_shaderFileWatcher.RegisterFile(fs::path(pbrFrag));
@@ -272,7 +280,8 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformFloat("_lightAttentuation", light.falloff);
 	}
 
-	void Renderer::SetShaderSkyboxUniforms(Skybox& skybox) {
+	// TODO: split this into two methods
+	void Renderer::SetShaderSkyboxUniforms(SceneSettings& sceneSettings, Skybox& skybox) {
 		
 		m_pPbrShader->Use();
 		
@@ -283,7 +292,10 @@ namespace mnemosy::graphics
 		m_pPbrShader->SetUniformInt("_prefilterMap", 9);
 		
 		m_pPbrShader->SetUniformFloat("_skyboxExposure", skybox.exposure);
-		m_pPbrShader->SetUniformFloat("_skyboxRotation", skybox.rotation);
+
+		m_pPbrShader->SetUniformFloat("_skyboxRotation", sceneSettings.background_rotation);
+
+
 
 
 		m_pSkyboxShader->Use();
@@ -296,15 +308,15 @@ namespace mnemosy::graphics
 		m_pSkyboxShader->SetUniformInt("_prefilterMap", 2);
 
 
-		m_pSkyboxShader->SetUniformFloat("_rotation", skybox.rotation);
-		m_pSkyboxShader->SetUniformFloat3("_colorTint", skybox.colorTint.r, skybox.colorTint.g, skybox.colorTint.b);
+		m_pSkyboxShader->SetUniformFloat3("_colorTint",skybox.color.r, skybox.color.g, skybox.color.b);
 		m_pSkyboxShader->SetUniformFloat("_exposure", skybox.exposure);
 
-		m_pSkyboxShader->SetUniformFloat("_blurRadius", skybox.blurRadius);
-		m_pSkyboxShader->SetUniformFloat3("_backgroundColor", skybox.backgroundColor.r, skybox.backgroundColor.g, skybox.backgroundColor.b);
-		m_pSkyboxShader->SetUniformFloat("_gradientOpacity", skybox.gradientOpacity);
-		m_pSkyboxShader->SetUniformFloat("_opacity", skybox.opacity);
-		m_pSkyboxShader->SetUniformInt("_blurSteps", skybox.blurSteps);
+		m_pSkyboxShader->SetUniformFloat("_rotation", sceneSettings.background_rotation);
+		m_pSkyboxShader->SetUniformFloat("_blurRadius", sceneSettings.background_blurRadius);
+		m_pSkyboxShader->SetUniformFloat3("_backgroundColor", sceneSettings.background_color_r, sceneSettings.background_color_g, sceneSettings.background_color_b);
+		m_pSkyboxShader->SetUniformFloat("_gradientOpacity", sceneSettings.background_gradientOpacity);
+		m_pSkyboxShader->SetUniformFloat("_opacity", sceneSettings.background_opacity);
+		m_pSkyboxShader->SetUniformInt("_blurSteps", sceneSettings.background_blurSteps);
 
 	}
 
@@ -411,11 +423,7 @@ namespace mnemosy::graphics
 		//m_pPbrShader->SetUniformInt("_lightType", light.GetLightTypeAsInt());
 		//m_pPbrShader->SetUniformFloat("_lightAttentuation", light.falloff);
 
-
-
-		glm::mat4 modelMatrix = light.transform.GetTransformMatrix();
-		m_pLightShader->SetUniformMatrix4("_modelMatrix", modelMatrix);
-		//m_pPbrShader->SetUniformMatrix4("_normalMatrix", renderMesh.transform.GetNormalMatrix(modelMatrix));
+		m_pLightShader->SetUniformMatrix4("_modelMatrix", light.transform.GetTransformMatrix());
 		m_pLightShader->SetUniformMatrix4("_viewMatrix", m_viewMatrix);
 		m_pLightShader->SetUniformMatrix4("_projectionMatrix", m_projectionMatrix);
 
@@ -508,7 +516,7 @@ namespace mnemosy::graphics
 	}
 
 
-	// TODO: Adapt to handle entry types
+	
 	void Renderer::RenderThumbnail_PbrMaterial(PbrMaterial& activeMaterial) {
 
 		unsigned int thumbRes = GetThumbnailResolutionValue(m_thumbnailResolution);
@@ -520,7 +528,7 @@ namespace mnemosy::graphics
 
 		// Setup Shaders with thumbnail Scene settings
 		SetPbrShaderLightUniforms(thumbScene.GetLight());
-		SetShaderSkyboxUniforms(thumbScene.GetSkybox());
+		SetShaderSkyboxUniforms(thumbScene.GetSceneSettings(),thumbScene.GetSkybox());
 
 		thumbScene.GetCamera().SetScreenSize(thumbRes, thumbRes); // we should really only need to do this once..
 
@@ -559,7 +567,10 @@ namespace mnemosy::graphics
 
 		activeMaterial.setMaterialUniforms(*m_pPbrShader);
 
+
 		RenderMeshes(thumbScene.GetMesh(), m_pPbrShader);
+
+		// render skybox normally
 		RenderSkybox(thumbScene.GetSkybox());
 
 		// End Frame
@@ -575,36 +586,31 @@ namespace mnemosy::graphics
 		m_renderMode = userRenderMode;
 		Scene& scene = MnemosyEngine::GetInstance().GetScene();
 		SetPbrShaderLightUniforms(scene.GetLight());
-		SetShaderSkyboxUniforms(scene.GetSkybox());
+		SetShaderSkyboxUniforms(scene.userSceneSettings, scene.GetSkybox());
 	}
 
-	// TODO: implement
+	// TODO: cleanup
 	void Renderer::RenderThumbnail_UnlitMaterial(UnlitMaterial* unlitMaterial)
 	{
 		unsigned int thumbRes = GetThumbnailResolutionValue(m_thumbnailResolution);
 		ThumbnailScene& thumbScene = MnemosyEngine::GetInstance().GetThumbnailScene();
 
-		RenderModes userRenderMode = m_renderMode;
-		m_renderMode = MNSY_RENDERMODE_SHADED;
+		// Setup Shaders with thumbnail Scene settings		
+
+		// we need this bc we want to render skybox in the background if texture has alpha test
+		SetShaderSkyboxUniforms(thumbScene.GetSceneSettings(), thumbScene.GetSkybox());
+
+		thumbScene.GetCamera().SetScreenSize(thumbRes, thumbRes);
 
 
-		// Setup Shaders with thumbnail Scene settings
-		//SetPbrShaderLightUniforms(thumbScene.GetLight());
-		//SetShaderSkyboxUniforms(thumbScene.GetSkybox());
-
-		thumbScene.GetCamera().SetScreenSize(thumbRes, thumbRes); // we should really only need to do this once..
-
-		m_projectionMatrix = thumbScene.GetCamera().GetProjectionMatrix();
-		m_viewMatrix = thumbScene.GetCamera().GetViewMatrix();
-
-		// Start Frame
+		// Start Frame And setup framebuffers
 		glViewport(0, 0, thumbRes, thumbRes);
 
 		// resize thumbnail render texture
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_renderTexture_ID);
 		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_thumb_MSAA_Value, GL_RGB, thumbRes, thumbRes, GL_TRUE);
 
-		// rezie thumbnail renderbuffer
+		// resize thumbnail renderbuffer
 		glBindRenderbuffer(GL_RENDERBUFFER, m_thumb_MSAA_RBO);
 		glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_thumb_MSAA_Value, GL_DEPTH24_STENCIL8, thumbRes, thumbRes);
 
@@ -622,24 +628,34 @@ namespace mnemosy::graphics
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+		// setup uniforms for the shader
 		m_pUnlitMaterialShader->Use();
-
-		//m_pPbrShader->Use();
 
 		glm::vec3 cameraPosition = thumbScene.GetCamera().transform.GetPosition();
 		
 		unlitMaterial->SetUniforms(m_pUnlitMaterialShader);
 
 		m_pUnlitMaterialShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-		//m_pPbrShader->SetUniformFloat3("_cameraPositionWS", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+
+		// we use this matrix here for model, projection and view matrices because we want 
+		// to render a quad in screen space without any camera or model projections and this way we dont need a sperate shader
+		glm::mat4 mat = glm::mat4(1);
+		m_pUnlitMaterialShader->SetUniformMatrix4("_modelMatrix", mat);
+		m_pUnlitMaterialShader->SetUniformMatrix4("_normalMatrix", glm::transpose(glm::inverse(mat)));
+
+		m_pUnlitMaterialShader->SetUniformMatrix4("_projectionMatrix", mat);
+		m_pUnlitMaterialShader->SetUniformMatrix4("_viewMatrix",mat);
+
+		m_pUnlitMaterialShader->SetUniformInt("_pixelWidth", thumbRes);
+		m_pUnlitMaterialShader->SetUniformInt("_pixelHeight", thumbRes);
 
 
-		//activeMaterial.setMaterialUniforms(*m_pPbrShader);
+		// Draw call with screen quad
+		glBindVertexArray(MnemosyEngine::GetInstance().GetMeshRegistry().GetScreenQuadVAO());
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertecies
+		glBindVertexArray(0);
 
-		RenderMeshes(thumbScene.GetMesh(), m_pUnlitMaterialShader);
-
-
+		// render skybox normally for the background
 		RenderSkybox(thumbScene.GetSkybox());
 
 		// End Frame
@@ -652,12 +668,9 @@ namespace mnemosy::graphics
 
 
 		// Restore user pbr shader settings
-		m_renderMode = userRenderMode;
 		Scene& scene = MnemosyEngine::GetInstance().GetScene();
-		SetPbrShaderLightUniforms(scene.GetLight());
-		SetShaderSkyboxUniforms(scene.GetSkybox());
-
-
+		//SetPbrShaderLightUniforms(scene.GetLight());
+		SetShaderSkyboxUniforms(scene.userSceneSettings, scene.GetSkybox());
 	}
 
 	// TODO: implement
@@ -866,6 +879,33 @@ namespace mnemosy::graphics
 		}
 
 
+		// check unlit shader
+
+
+
+		if (m_shaderUnlitFileWatcher.DidAnyFileChange()) {
+
+			MNEMOSY_INFO("Recompiling Unlit Material Shader.");
+			
+			std::filesystem::path shaders = MnemosyEngine::GetInstance().GetFileDirectories().GetShadersPath();
+
+			fs::path vertPath = shaders / fs::path("unlitMaterial.vert");
+			fs::path fragPath = shaders / fs::path("unlitMaterial.frag");
+
+			bool success = m_pUnlitMaterialShader->CreateShaderProgram(vertPath.generic_string().c_str(),fragPath.generic_string().c_str());
+			if (!success) {
+			
+				MNEMOSY_WARN("Shader Recompilation failed. Switching to fallback shader.");
+
+				fs::path fallbackVertPath = shaders / fs::path("fallback.vert");
+				fs::path fallbackFragPath = shaders / fs::path("fallback.frag");
+				m_pUnlitMaterialShader->CreateShaderProgram(fallbackVertPath.generic_string().c_str(), fallbackFragPath.generic_string().c_str());
+
+			}
+
+		}
+
+
 		// checking pbr shader
 		if (m_shaderFileWatcher.DidAnyFileChange()) {
 			
@@ -884,11 +924,11 @@ namespace mnemosy::graphics
 				// reassign uniforms
 				SetPbrShaderBrdfLutUniforms();
 				SetPbrShaderLightUniforms(MnemosyEngine::GetInstance().GetScene().GetLight());
-				SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().GetSkybox());
+				SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().userSceneSettings,MnemosyEngine::GetInstance().GetScene().GetSkybox());
 			}
 			else {
 				// compilation failed assign fallback shader;
-				MNEMOSY_WARN("Renderer::HotRealoadPbrShader: Compilationfailed. Switching to fallback shader.");
+				MNEMOSY_WARN("Shader Recompilation failed. Switching to fallback shader.");
 
 				fs::path fallbackVertPath = shaders / fs::path("fallback.vert");
 				fs::path fallbackFragPath = shaders / fs::path("fallback.frag");
@@ -913,7 +953,9 @@ namespace mnemosy::graphics
 			bool success = m_pSkyboxShader->CreateShaderProgram(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
 			if (success) {
 
-				SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().GetSkybox());
+
+
+				SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().userSceneSettings, MnemosyEngine::GetInstance().GetScene().GetSkybox());
 			}
 			else {
 				MNEMOSY_WARN("Renderer::HotRealoadPbrShader: Compilationfailed. Switching to fallback shader.");

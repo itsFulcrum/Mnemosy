@@ -45,7 +45,7 @@ namespace mnemosy::systems
 		void DeleteAndKeepChildren(FolderNode* node);
 		void DeleteFolderHierarchy(FolderNode* node);
 
-
+		// TODO: make sure thumbnails get directly created for the different entry types
 		void LibEntry_CreateNew(FolderNode* node,  LibEntryType type, std::string& name);
 		void LibEntry_Rename(systems::LibEntry* libEntry, std::string& newName);
 		void LibEntry_Delete(systems::LibEntry* libEntry, int positionInVector);
@@ -54,28 +54,34 @@ namespace mnemosy::systems
 		std::filesystem::path LibEntry_GetDataFilePath(LibEntry* libEntry);
 		std::filesystem::path LibEntry_GetFolderPath(LibEntry* libEntry);
 		
+		// TODO: handle skybox Entry type
 		void LibEntry_Load(systems::LibEntry* libEntry);
 
 		bool IsActiveEntry(uint16_t runtimeID);
 		systems::LibEntry* ActiveLibEntry_Get() { return m_activeLibEntry; }
 		void ActiveLibEntry_SaveToFile();
 
-		// TODO: Handle skybox entry type
 		std::vector<std::string> ActiveLibEntry_GetTexturePaths();
 
 
 		// For Pbr Material Only
-		void GenereateOpacityFromAlbedoAlpha(graphics::PbrMaterial& activeMat);
-		void GenerateChannelPackedTexture(graphics::PbrMaterial& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height,uint8_t bitDepth);
-		void DeleteChannelPackedTexture(graphics::PbrMaterial& activeMat, std::string suffix);
+		void ActiveLibEntry_PbrMat_GenerateOpacityFromAlbedoAlpha(LibEntry* libEntry, graphics::PbrMaterial& activeMat);
+		void ActiveLibEntry_PbrMat_GenerateChannelPackedTexture(LibEntry* libEntry, graphics::PbrMaterial& activeMat,std::string& suffix, graphics::ChannelPackType packType, graphics::ChannelPackComponent packComponent_R, graphics::ChannelPackComponent packComponent_G,graphics::ChannelPackComponent packComponent_B, graphics::ChannelPackComponent packComponent_A, unsigned int width, unsigned int height,uint8_t bitDepth);
+		void ActiveLibEntry_PbrMat_DeleteChannelPackedTexture(LibEntry* libEntry, graphics::PbrMaterial& activeMat, std::string suffix);
+
+		void ActiveLibEntry_PbrMat_LoadTexture(graphics::PBRTextureType textureType, std::filesystem::path& filepath);
+		void ActiveLibEntry_PbrMat_DeleteTexture(graphics::PBRTextureType textureType);
+
+		void ActiveLibEntry_UnlitMat_LoadTexture(std::filesystem::path& filepath);
+		void ActiveLibEntry_UnlitMat_DeleteTexture();
+
+		// TODO: implement
+		void ActiveLibEntry_Skybox_LoadTexture(std::filesystem::path& filepath);
+		void ActiveLibEntry_Skybox_DeleteTexture();
+
 
 		void SetDefaultMaterial();
-
-		bool UserEntrySelected() { return m_activeLibEntry != nullptr; }
-
-		void LoadTextureOfActivePbrMaterial(graphics::PBRTextureType textureType, std::filesystem::path& filepath);
-		void DeleteTextureOfActivePbrMaterial(graphics::PBRTextureType textureType);
-		
+		bool UserEntrySelected() { return m_activeLibEntry != nullptr; }		
 
 		void OpenFolderNode(FolderNode* node);
 		void ClearUserMaterialsAndFolders();

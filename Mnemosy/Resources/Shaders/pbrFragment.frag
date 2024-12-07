@@ -164,6 +164,8 @@ void main()
 
 		SurfaceData surfaceData;
 		vec4 albedoAlpha = sampleAlbedoAlphaMap(_albedoMap,UVCorrds,_albedoColorValue);
+		// apply premultiplied alpha if alpha map is present
+		albedoAlpha.rgb = lerp(albedoAlpha.rgb * albedoAlpha.a ,albedoAlpha.rgb , _opacityValue.y); 
 
 		surfaceData.albedo = albedoAlpha.rgb;
 		surfaceData.normal = sampleNormalMap(_normalMap,UVCorrds,_normalValue.x,tangentToWorldMatrix,_normalValue.y);

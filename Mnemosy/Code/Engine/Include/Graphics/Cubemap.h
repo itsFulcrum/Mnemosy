@@ -33,6 +33,7 @@ namespace mnemosy::graphics
 		unsigned int m_irradianceMapID = 0;
 		unsigned int m_prefilterMapID = 0;
 
+		// these are global settings and shouldn't be part off each cubemap instance
 		const uint16_t m_irradianceMapResolution = 64;
 		const uint16_t m_prefilteredMapResolution = 512;
 

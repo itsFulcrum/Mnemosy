@@ -1,6 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
+#include "Include/Graphics/SceneSettings.h"
 #include <memory>
 
 namespace mnemosy::systems
@@ -62,9 +63,12 @@ namespace mnemosy::graphics
 		Skybox& GetSkybox() { return *m_skybox; }
 		void SetSkybox(graphics::Skybox* skybox);
 
+		SceneSettings userSceneSettings;
 
 	private:
 		void Setup();
+		void LoadSceneSettingsFromFile();
+		void SaveSceneSettingsToFile();
 
 		PreviewMesh m_currentPreviewMesh = PreviewMesh::Default;
 

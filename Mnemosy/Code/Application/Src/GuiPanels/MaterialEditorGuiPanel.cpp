@@ -41,16 +41,13 @@ namespace mnemosy::gui
 	
 		m_textureTreeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen;
 		
-
-		for (int i = 0; i < (int)graphics::MNSY_TEXTURE_COUNT; i++) {
-			m_exportTexturesBools.push_back(true);
-		}
+		m_pbrMat_exportTextureBools = std::vector<bool>((int)graphics::PBRTextureType::MNSY_TEXTURE_COUNT,true);
 	}
 
 	MaterialEditorGuiPanel::~MaterialEditorGuiPanel() {
 
 		MnemosyEngine::GetInstance().GetInputSystem().UnregisterDropInput(m_onFileDropInput_callback_id);
-		m_exportTexturesBools.clear();
+		m_pbrMat_exportTextureBools.clear();
 	}
 
 	void MaterialEditorGuiPanel::Draw() {
@@ -62,25 +59,21 @@ namespace mnemosy::gui
 		// TODO: 
 		// adapt to work with different libEntry types if no type then dont show anything and behind the scenes it will be handled to fallback to default pbr material
 
-		// return early if no material is selcted yet
-		if (!m_materialRegistry.UserEntrySelected()) {
+
+		systems::LibEntry* libEntry = m_materialRegistry.ActiveLibEntry_Get();
+
+		// return early if no entry is selcted yet
+		if (libEntry == nullptr) {
 		
 			ImGui::Spacing();
 
 			ImGui::Text("No material selected yet");
 			ImGui::End();
 
-			m_currentActiveMaterialID = -1;
+			m_lastActiveLibEntry_ID = -1;
 
 			return;
 		}
-
-		systems::LibEntry* libEntry = m_materialRegistry.ActiveLibEntry_Get();
-
-		if (libEntry == nullptr) {
-			return;
-		}
-
 
 		std::string displayText = "Entry: " + libEntry->name;
 		ImGui::SeparatorText(displayText.c_str());
@@ -106,7 +99,7 @@ namespace mnemosy::gui
 		ImGui::Spacing();
 			
 
-		// === Drag Textures to other applications
+		// === Drag Lib Entry Textures to other applications
 		ImGui::Button("Drag Me", m_buttonDrag);
 
 		if (ImGui::IsItemClicked()) {
@@ -130,25 +123,28 @@ namespace mnemosy::gui
 
 		// TODO maybe generalize the export settings ui to work for all entry types
 
+		DrawExportSettings(libEntry);
+
+
+
 		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
 			graphics::PbrMaterial& pbrMat = m_engineInstance.GetScene().GetPbrMaterial();
 
-			DrawPbrMaterial(pbrMat);
+			DrawPbrMaterial(libEntry,pbrMat);
 		}
 		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT)
 		{
 			graphics::UnlitMaterial* unlit = m_engineInstance.GetScene().GetUnlitMaterial();
 
-			DrawEntryUnlitMat(unlit);
+			DrawEntryUnlitMat(libEntry, unlit);
 		}
 		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX)
 		{
 
 			graphics::Skybox* skybox = &m_engineInstance.GetScene().GetSkybox();
 
-			DrawEntrySkybox(skybox);
-
+			DrawEntrySkybox(libEntry, skybox);
 		}
 
 
@@ -158,26 +154,32 @@ namespace mnemosy::gui
 
 	} // End Draw()
 
-	void MaterialEditorGuiPanel::DrawPbrMaterial(graphics::PbrMaterial& activeMat)
+	void MaterialEditorGuiPanel::DrawExportSettings(systems::LibEntry* activeLibEntry)
 	{
-
-		fs::path libraryDirectory = m_engineInstance.GetFileDirectories().GetLibraryDirectoryPath();
-		// Export Settings
-		
-		
 		// Check if the active material changed			
-		uint16_t nowActiveMaterialID = m_materialRegistry.ActiveLibEntry_Get()->runtime_ID;
+		int currentActiveMaterialID = activeLibEntry->runtime_ID;
 
-		if (m_currentActiveMaterialID != nowActiveMaterialID) {
-			// Active material Changed
-			m_currentActiveMaterialID = nowActiveMaterialID;
+		systems::LibEntryType entryType = activeLibEntry->type;
 
-			m_exportChannelPackedTexture = true;
+		// check if entry selection changed from last frame
+		if (m_lastActiveLibEntry_ID != currentActiveMaterialID) {
+			
+			// selected entry Changed
+			m_lastActiveLibEntry_ID = currentActiveMaterialID;
 
-			for (int i = 0; i < m_exportTexturesBools.size(); i++) {
-				m_exportTexturesBools[i] = true;
+
+			// reevaluate entry type specific export settings
+			if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+
+				m_pbrMat_exportChannelPackedTexture = true;
+
+				for (int i = 0; i < m_pbrMat_exportTextureBools.size(); i++) {
+					m_pbrMat_exportTextureBools[i] = true;
+				}
 			}
+
 		}
+
 
 
 		if (ImGui::TreeNode("Export ##Settings")) {
@@ -188,98 +190,115 @@ namespace mnemosy::gui
 
 			ImGui::SetItemTooltip("Specify the image format used for exporting");
 
-			// if format changed
+			// if export img format changed
 			if ((int)m_exportManager.GetExportImageFormat() != exportImageFormat_current) {
 
 				m_exportManager.SetExportImageFormat((graphics::ImageFileFormat)exportImageFormat_current);
 			}
 
 
-			// Normal Map Format
-			int exportNormalFormat_current = (int)m_exportManager.GetNormalMapExportFormat();
-			ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, graphics::TexDefinitions::NormalMapFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::NormalMapFormats_string));
-			ImGui::SetItemTooltip("Specify the normal map format to export normal maps with");
-
-			// if format changed
-			if ((int)m_exportManager.GetNormalMapExportFormat() != exportNormalFormat_current) {
-				m_exportManager.SetNormalMapExportFormat((graphics::NormalMapFormat)exportNormalFormat_current);
-			}
-
-			bool exportRoughAsSmooth = m_exportManager.GetExportRoughnessAsSmoothness();
-			ImGui::Checkbox("Roughness as Smoothness", &exportRoughAsSmooth);
+			graphics::Scene& scene = MnemosyEngine::GetInstance().GetScene();
 
 
-			if (exportRoughAsSmooth != m_exportManager.GetExportRoughnessAsSmoothness()) {
-				m_exportManager.SetExportRoughnessAsSmoothness(exportRoughAsSmooth);
-			}
+			// Pbr Material specific settings
+			if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+
+				// Normal Map Format
+				int exportNormalFormat_current = (int)m_exportManager.GetNormalMapExportFormat();
+				ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, graphics::TexDefinitions::NormalMapFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::NormalMapFormats_string));
+				ImGui::SetItemTooltip("Specify the normal map format to export normal maps with");
+
+				// if normal format changed
+				if ((int)m_exportManager.GetNormalMapExportFormat() != exportNormalFormat_current) {
+					m_exportManager.SetNormalMapExportFormat((graphics::NormalMapFormat)exportNormalFormat_current);
+				}
+
+				bool exportRoughAsSmooth = m_exportManager.GetExportRoughnessAsSmoothness();
+				ImGui::Checkbox("Roughness as Smoothness", &exportRoughAsSmooth);
 
 
-			ImGui::Spacing();
-			ImGui::Spacing();
-			ImGui::Spacing();
+				if (exportRoughAsSmooth != m_exportManager.GetExportRoughnessAsSmoothness()) {
+					m_exportManager.SetExportRoughnessAsSmoothness(exportRoughAsSmooth);
+				}
 
-			// make a export checkbox for each standart texture type
-			for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_COUNT; i++) {
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Spacing();
+
+				graphics::PbrMaterial& pbrMat = scene.GetPbrMaterial();
+
+				// make a export checkbox for each pbr texture type
+				for (int i = 0; i < (int)graphics::PBRTextureType::MNSY_TEXTURE_COUNT; i++) {
 
 
-				graphics::PBRTextureType texType = (graphics::PBRTextureType)i;
+					graphics::PBRTextureType texType = (graphics::PBRTextureType)i;
 
-				std::string textureTypeName = graphics::TexUtil::get_string_from_PBRTextureType(texType);
-				std::string label = "Export " + textureTypeName;
+					std::string textureTypeName = graphics::TexUtil::get_string_from_PBRTextureType(texType);
+					std::string label = "Export " + textureTypeName;
+
+					bool isAssigned = pbrMat.IsTextureTypeAssigned(texType);
+					if (!isAssigned) {
+
+						if (m_pbrMat_exportTextureBools[i] == true) {
+							m_pbrMat_exportTextureBools[i] = false;
+						}
+
+						ImGui::BeginDisabled();
+					}
+
+					bool exportTexture = m_pbrMat_exportTextureBools[i];
 
 
+					ImGui::Checkbox(label.c_str(), &exportTexture);
 
-				bool isAssigned = activeMat.IsTextureTypeAssigned(texType);
+					if (exportTexture != m_pbrMat_exportTextureBools[i]) {
 
-				if (!isAssigned) {
+						m_pbrMat_exportTextureBools[i] = exportTexture;
+					}
 
-					if (m_exportTexturesBools[i] == true) {
-						m_exportTexturesBools[i] = false;
+
+					if (!isAssigned)
+						ImGui::EndDisabled();
+
+				}
+
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Spacing();
+
+
+				if (!pbrMat.HasPackedTextures) {
+
+					if (m_pbrMat_exportChannelPackedTexture == true) {
+						m_pbrMat_exportChannelPackedTexture = false;
 					}
 
 					ImGui::BeginDisabled();
 				}
 
-				bool exportTexture = m_exportTexturesBools[i];
+				ImGui::Checkbox("Export Channel Packed Textures", &m_pbrMat_exportChannelPackedTexture);
 
 
-				ImGui::Checkbox(label.c_str(), &exportTexture);
 
-				if (exportTexture != m_exportTexturesBools[i]) {
+				if (!pbrMat.HasPackedTextures) {
 
-					m_exportTexturesBools[i] = exportTexture;
-				}
-
-
-				if (!isAssigned)
 					ImGui::EndDisabled();
-
-			}
-
-			ImGui::Spacing();
-			ImGui::Spacing();
-			ImGui::Spacing();
-
-
-			if (!activeMat.HasPackedTextures) {
-
-				if (m_exportChannelPackedTexture == true) {
-					m_exportChannelPackedTexture = false;
 				}
 
-
-				ImGui::BeginDisabled();
 			}
 
-			ImGui::Checkbox("Export Channel Packed Textures", &m_exportChannelPackedTexture);
-
-
-
-			if (!activeMat.HasPackedTextures) {
-
-				ImGui::EndDisabled();
+			else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+			
+				// no specific settings yet
 			}
 
+			else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+				// no specific settings yet
+			}
+
+
+			// === Export Button
 
 			if (ImGui::Button("Export To...", m_buttonSize)) {
 
@@ -287,27 +306,58 @@ namespace mnemosy::gui
 				if (!exportFolder.empty()) {
 
 					m_materialRegistry.ActiveLibEntry_SaveToFile();
-					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(m_materialRegistry.ActiveLibEntry_Get());
+					
 					fs::path exportPath = fs::path(exportFolder);
-					m_exportManager.ExportMaterialTextures(exportPath, materialFolderPath, activeMat, m_exportTexturesBools, m_exportChannelPackedTexture);
+					
+					if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+						
+						m_exportManager.PbrMat_ExportTextures(exportPath, activeLibEntry , scene.GetPbrMaterial() , m_pbrMat_exportTextureBools, m_pbrMat_exportChannelPackedTexture);					
+					}
+					else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+
+
+						graphics::UnlitMaterial* unlitMat = scene.GetUnlitMaterial();
+
+						MNEMOSY_ASSERT(unlitMat != nullptr, "This should not happen!");
+
+						m_exportManager.UnlitMat_ExportTextures(exportPath,activeLibEntry, *unlitMat);
+					}
+					else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+						// metthod is not yet implemented
+						m_exportManager.SkyboxMat_ExportTextures(exportPath,activeLibEntry, scene.GetSkybox());
+					}
 				}
 			}
+
 
 			ImGui::TreePop();
 		}
 
-
-
+		
 		ImGui::Spacing();
 		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
 
-		DrawPbrMatTextureSettings(activeMat, libraryDirectory);
-
-		DrawPbrMatChannelPackUI(activeMat);
 
 	}
 
-	void MaterialEditorGuiPanel::DrawPbrMatTextureSettings(graphics::PbrMaterial& activeMat, std::filesystem::path& libDir) {
+	void MaterialEditorGuiPanel::DrawPbrMaterial(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat)
+	{
+
+		fs::path libraryDirectory = m_engineInstance.GetFileDirectories().GetLibraryDirectoryPath();
+		
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		DrawPbrMatTextureSettings(activeLibEntry,activeMat, libraryDirectory);
+
+		DrawPbrMatChannelPackUI(activeLibEntry,activeMat);
+
+	}
+
+	void MaterialEditorGuiPanel::DrawPbrMatTextureSettings(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat, std::filesystem::path& libDir) {
 
 		ImGui::SeparatorText("Settings");
 
@@ -343,7 +393,7 @@ namespace mnemosy::gui
 				if (!filepath.empty()) {
 
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_ALBEDO, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ALBEDO, p);
 					SaveMaterial();
 				}
 			}
@@ -358,7 +408,7 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Albedo", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_ALBEDO);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_ALBEDO);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -406,7 +456,7 @@ namespace mnemosy::gui
 
 					activeMat.IsSmoothnessTexture = false;
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ROUGHNESS, p);
 					SaveMaterial();
 				}
 			}
@@ -418,7 +468,7 @@ namespace mnemosy::gui
 
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Roughness", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_ROUGHNESS);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_ROUGHNESS);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -465,9 +515,11 @@ namespace mnemosy::gui
 
 					//MNEMOSY_TRACE("Changed isSmoothneess to: {}", activeMat.IsSmoothnessTexture);
 
-					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(m_materialRegistry.ActiveLibEntry_Get());
+					systems::LibEntry* entry = m_materialRegistry.ActiveLibEntry_Get();
 
-					fs::path roughnessPath = materialFolderPath / fs::path(std::string(activeMat.Name + texture_fileSuffix_roughness));
+					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(entry);
+
+					fs::path roughnessPath = materialFolderPath / fs::path(std::string(entry->name + texture_fileSuffix_roughness));
 
 
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().InvertRoughness(activeMat, roughnessPath.generic_string().c_str(), true);
@@ -476,7 +528,7 @@ namespace mnemosy::gui
 					// Load newly created texture as new roughness texture 
 
 					graphics::PictureError picErrorCheck;
-					graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErrorCheck,roughnessPath.generic_string().c_str(),true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+					graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErrorCheck,roughnessPath.generic_string().c_str(),true,false,true);
 
 					if (!picErrorCheck.wasSuccessfull) {
 
@@ -527,7 +579,7 @@ namespace mnemosy::gui
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_NORMAL, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_NORMAL, p);
 					SaveMaterial();
 				}
 			}
@@ -537,7 +589,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Normal", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_NORMAL);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_NORMAL);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -571,9 +623,8 @@ namespace mnemosy::gui
 				// if format changed
 				if (activeMat.GetNormalFormatAsInt() != format_current) {
 
-
-					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(m_materialRegistry.ActiveLibEntry_Get());
-					fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeMat.Name + texture_fileSuffix_normal));
+					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(activeLibEntry);
+					fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeLibEntry->name + texture_fileSuffix_normal));
 
 					// Generate inverted normal Texture.
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat, true);
@@ -592,7 +643,7 @@ namespace mnemosy::gui
 					// Load newly created texture as new normal map 
 
 					graphics::PictureError picErrorCheck;
-					graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErrorCheck, normalMapPath.generic_string().c_str(), true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+					graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErrorCheck, normalMapPath.generic_string().c_str(), true, true,true);
 
 					if (!picErrorCheck.wasSuccessfull) {
 
@@ -634,7 +685,7 @@ namespace mnemosy::gui
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_METALLIC, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_METALLIC, p);
 					SaveMaterial();
 				}
 			}
@@ -644,7 +695,7 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Metallic", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_METALLIC);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_METALLIC);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -688,7 +739,7 @@ namespace mnemosy::gui
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, p);
 					SaveMaterial();
 				}
 			}
@@ -698,7 +749,7 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##AO", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -728,7 +779,7 @@ namespace mnemosy::gui
 				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_EMISSION, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_EMISSION, p);
 					SaveMaterial();
 
 				}
@@ -740,7 +791,7 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Emissive", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_EMISSION);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_EMISSION);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -815,7 +866,7 @@ namespace mnemosy::gui
 
 				if (!filepath.empty()) {
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_HEIGHT, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_HEIGHT, p);
 					SaveMaterial();
 				}
 			}
@@ -826,7 +877,7 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Height", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_HEIGHT);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_HEIGHT);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -891,7 +942,7 @@ namespace mnemosy::gui
 
 				if (!filepath.empty()) {
 					std::filesystem::path p = { filepath };
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_OPACITY, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_OPACITY, p);
 					SaveMaterial();
 				}
 			}
@@ -904,7 +955,7 @@ namespace mnemosy::gui
 				if (ImGui::Button("Generate from albedo alpha", ImVec2(230, 0))) {
 
 
-					m_materialRegistry.GenereateOpacityFromAlbedoAlpha(activeMat);
+					m_materialRegistry.ActiveLibEntry_PbrMat_GenerateOpacityFromAlbedoAlpha(activeLibEntry, activeMat);
 				}
 
 			}
@@ -916,7 +967,7 @@ namespace mnemosy::gui
 				// Remove Texture
 				ImGui::SameLine();
 				if (ImGui::Button("Remove ##Opacity", m_buttonSizeDelete)) {
-					m_materialRegistry.DeleteTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_OPACITY);
+					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_OPACITY);
 					textureAssigned = false;
 					SaveMaterial();
 				}
@@ -975,7 +1026,7 @@ namespace mnemosy::gui
 
 	}
 
-	void MaterialEditorGuiPanel::DrawPbrMatChannelPackUI(graphics::PbrMaterial& activeMat) {
+	void MaterialEditorGuiPanel::DrawPbrMatChannelPackUI(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat) {
 		ImGui::Spacing();
 		ImGui::Spacing();
 
@@ -996,7 +1047,7 @@ namespace mnemosy::gui
 
 					for (int i = 0; i < activeMat.PackedTexturesSuffixes.size(); i++) {
 
-						std::string name = " - " + activeMat.Name + activeMat.PackedTexturesSuffixes[i];
+						std::string name = " - " + activeLibEntry->name + activeMat.PackedTexturesSuffixes[i];
 						ImGui::Selectable(name.c_str());
 
 						// delete packed texture right click menu
@@ -1004,7 +1055,7 @@ namespace mnemosy::gui
 						
 							if (ImGui::Selectable("Delete packed texture")) {
 
-								m_materialRegistry.DeleteChannelPackedTexture(activeMat, activeMat.PackedTexturesSuffixes[i]);
+								m_materialRegistry.ActiveLibEntry_PbrMat_DeleteChannelPackedTexture(activeLibEntry,activeMat, activeMat.PackedTexturesSuffixes[i]);
 							}
 
 							ImGui::EndPopup();
@@ -1034,7 +1085,7 @@ namespace mnemosy::gui
 				ImGui::InputText("##RenameMaterialInputField", &fileSuffix, m_textInputFlags);
 			
 
-				std::string fileNamePreview = "Filename: " + activeMat.Name + fileSuffix;
+				std::string fileNamePreview = "Filename: " + activeLibEntry->name + fileSuffix;
 
 				ImGui::Text(fileNamePreview.c_str());
 			}
@@ -1125,7 +1176,7 @@ namespace mnemosy::gui
 					bitDepth = 32;
 				}
 
-				m_materialRegistry.GenerateChannelPackedTexture(activeMat,fileSuffix, packType,R,G,B,A,resolutionX,resolutionY,bitDepth);
+				m_materialRegistry.ActiveLibEntry_PbrMat_GenerateChannelPackedTexture(activeLibEntry,activeMat,fileSuffix, packType,R,G,B,A,resolutionX,resolutionY,bitDepth);
 			}
 
 
@@ -1133,35 +1184,109 @@ namespace mnemosy::gui
 		}
 	}
 
-	void MaterialEditorGuiPanel::DrawEntryUnlitMat(graphics::UnlitMaterial* unlitMat)
-	{
-
-		ImGui::Text("Unlit ui is not yet immplemented");
+	void MaterialEditorGuiPanel::DrawEntryUnlitMat(systems::LibEntry* activeLibEntry, graphics::UnlitMaterial* unlitMat) {
 		
-		
-		// export settings
+		MNEMOSY_ASSERT(unlitMat != nullptr, "This should never happen!");
 
 
 		// import & material settings
 
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		// Load Texture
+		if (ImGui::Button("Load Texture...##UnlitMat", m_buttonSizeLoad)) {
+
+			std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+			if (!filepath.empty()) {
+
+				std::filesystem::path p = { filepath };
+				m_materialRegistry.ActiveLibEntry_UnlitMat_LoadTexture(p);
+				SaveMaterial();
+			}
+		}
+		m_isUnlitLoadButtonHovered = ImGui::IsItemHovered();
+
+
+		bool textureAssigned = unlitMat->TextureIsAssigned();
+
+		// we cant merge this with the below if statement because the button can change the state of the texture assigned bool
+		if (textureAssigned) {
+			// Remove Texture
+			ImGui::SameLine();
+			if (ImGui::Button("Remove ##UnlitTex", m_buttonSizeDelete)) {
+
+				m_materialRegistry.ActiveLibEntry_UnlitMat_DeleteTexture();
+				textureAssigned = false;
+				SaveMaterial();
+			}
+		}
+
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+
+		float uvTiling[2] = {unlitMat->UVTilingX,unlitMat->UVTilingY};
+		if (ImGui::DragFloat2("UV Tiling", (float*)uvTiling, 0.1f, 0.0, 1000, "%0.4f")) {
+
+			unlitMat->UVTilingX = uvTiling[0];
+			unlitMat->UVTilingY = uvTiling[1];
+
+			m_valuesChanged = true;
+		}
+
+
+		// write info
+		if (textureAssigned) {
+
+			std::string resolution = "Resolution: " + std::to_string(unlitMat->GetTexture().GetWidth()) + "x" + std::to_string(unlitMat->GetTexture().GetHeight() ) + "px";
+			ImGui::Text(resolution.c_str());
+		}
+
+
+		bool useAlpha = unlitMat->useAlpha;
+		ImGui::Checkbox("Use Alpha Clip", &useAlpha);
+
+		if (useAlpha != unlitMat->useAlpha) {
+			unlitMat->useAlpha = useAlpha;
+			m_valuesChanged = true;
+		}
+
+
+		// if not using alpha clip disable these widgets
+		if (!useAlpha)
+			ImGui::BeginDisabled();
+		{
+
+
+			bool useDitheredAlpha = unlitMat->useDitheredAlpha;
+			ImGui::Checkbox("Use Dithered Alpha Clip", &useDitheredAlpha);
+
+			if (useDitheredAlpha != unlitMat->useDitheredAlpha) {
+				unlitMat->useDitheredAlpha = useDitheredAlpha;
+				m_valuesChanged = true;
+			}
+
+			if (ImGui::SliderFloat("Alpha Threshold", & unlitMat->alphaThreshold, 0.0f, 1.0f, "%.4f")) {
+				m_valuesChanged = true;
+			}
+
+		}
+		if(!useAlpha)
+			ImGui::EndDisabled();
 
 	}
 
-	void MaterialEditorGuiPanel::DrawEntrySkybox(graphics::Skybox* skybox)
-	{
-
+	void MaterialEditorGuiPanel::DrawEntrySkybox(systems::LibEntry* activeLibEntry, graphics::Skybox* skybox) {
 
 		ImGui::Text("Skybox ui is not yet implemented");
 
-
-		// export settings
-
-
 		// import & material settings
 	}
 
 
-	//TODO: hanlde different entry types
+	//TODO: hanlde skybox entry type
 	// Callback when files are droped into mnemosy
 	void MaterialEditorGuiPanel::OnFileDropInput(int count, std::vector<std::string>& dropedFilePaths) {
 
@@ -1182,6 +1307,10 @@ namespace mnemosy::gui
 			return;
 
 
+		systems::LibEntryType activeEntryType = m_materialRegistry.ActiveLibEntry_Get()->type;
+		
+
+
 		// try handle only first one an check if it is above a specific button
 		{
 			std::filesystem::path firstPath = { dropedFilePaths[0] };
@@ -1196,64 +1325,82 @@ namespace mnemosy::gui
 				return;
 
 			std::string extention = firstFile.path().extension().generic_string();
-			if (graphics::TexUtil::is_image_file_extention_supported(extention)) {
-				//MNEMOSY_DEBUG("MaterialEditorGuiPanel::OnFileDropInput: FirstFile is Valid File. Filetype: {}",extention);
-				// Valid texture file
+			if (!graphics::TexUtil::is_image_file_extention_supported(extention)) {
+				return;
+			}
 
+			if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+
+				if (m_isUnlitLoadButtonHovered) {
+
+					m_materialRegistry.ActiveLibEntry_UnlitMat_LoadTexture(firstPath);
+					SaveMaterial();
+					return;
+				}
+			}
+			else if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
 				// albedo 
 				if (m_isAbedoButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_ALBEDO, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ALBEDO, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// roughness
 				else if (m_isRoughnessButtonHovered) {
 					
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_ROUGHNESS, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ROUGHNESS, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// normal
 				else if (m_isNormalButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_NORMAL, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_NORMAL, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// metallic
 				else if (m_isMetallicButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_METALLIC, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_METALLIC, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// ao
 				else if (m_isAmbientOcclusionButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// emission
 				else if (m_isEmissionButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_EMISSION, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_EMISSION, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// height
 				else if (m_isHeightButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_HEIGHT, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_HEIGHT, firstPath);
 					SaveMaterial();
 					return;
 				}
 				// opacity
 				else if (m_isOpacityButtonHovered) {
-					m_materialRegistry.LoadTextureOfActivePbrMaterial(graphics::MNSY_TEXTURE_OPACITY, firstPath);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_OPACITY, firstPath);
 					SaveMaterial();
 					return;
 				}
 			}
+			else if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+			}
+			
 
 		}
-			
+
+		// the rest does only apply to pbr materal for now
+		if (activeEntryType != systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+			return;
+		}
 
 		// now see if we can match all filepath into some texture slot
 		graphics::PbrMaterial& activeMat = m_engineInstance.GetScene().GetPbrMaterial();
@@ -1288,7 +1435,7 @@ namespace mnemosy::gui
 						//std::string typeString = graphics::TextureDefinitions::GetTextureNameFromEnumType(type);
 						//MNEMOSY_TRACE("FileDrop: {}, Matches Type: {} Path: {}", filenameString,typeString, filepath.generic_string());
 
-						m_materialRegistry.LoadTextureOfActivePbrMaterial(type, filepath);
+						m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(type, filepath);
 					}
 					else {
 						MNEMOSY_WARN("Could not determine pbr type for texture with name: {}, {}", filename.generic_string(), filepath.generic_string());
@@ -1320,8 +1467,6 @@ namespace mnemosy::gui
 	void MaterialEditorGuiPanel::SaveMaterial()
 	{
 		m_materialRegistry.ActiveLibEntry_SaveToFile();
-		
-		//m_materialRegistry.SaveActivePbrMaterialToFile();
 		m_valuesChanged = false;
 	}
 

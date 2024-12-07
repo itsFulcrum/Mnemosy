@@ -17,6 +17,7 @@ namespace mnemosy {
 namespace mnemosy::systems {
 	class MaterialLibraryRegistry;
 	class ExportManager;
+	struct LibEntry;
 }
 
 namespace mnemosy::graphics {
@@ -39,13 +40,15 @@ namespace mnemosy::gui
 
 	private:
 
-		void DrawPbrMaterial(graphics::PbrMaterial& activeMat);
-		void DrawPbrMatTextureSettings(graphics::PbrMaterial& activeMat,std::filesystem::path& libraryDirectory);
-		void DrawPbrMatChannelPackUI(graphics::PbrMaterial& activeMat);
+		void DrawExportSettings(systems::LibEntry* activeLibEntry);
 
-		void DrawEntryUnlitMat(graphics::UnlitMaterial* unlitMat);
+		void DrawPbrMaterial(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat);
+		void DrawPbrMatTextureSettings(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat,std::filesystem::path& libraryDirectory);
+		void DrawPbrMatChannelPackUI(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat);
 
-		void DrawEntrySkybox(graphics::Skybox* skybox);
+		void DrawEntryUnlitMat(systems::LibEntry* activeLibEntry, graphics::UnlitMaterial* unlitMat);
+
+		void DrawEntrySkybox(systems::LibEntry* activeLibEntry, graphics::Skybox* skybox);
 
 
 		void CheckToSaveMaterial(float deltaSeconds);
@@ -67,14 +70,14 @@ namespace mnemosy::gui
 		systems::MaterialLibraryRegistry& m_materialRegistry;
 		systems::ExportManager& m_exportManager;
 
-		std::vector<bool> m_exportTexturesBools;
-		bool m_exportChannelPackedTexture = true;
+		std::vector<bool> m_pbrMat_exportTextureBools;
+		bool m_pbrMat_exportChannelPackedTexture = true;
 		
 		ImGuiTreeNodeFlags m_textureTreeNodeFlags;
 
 		int m_onFileDropInput_callback_id = -1;
 
-		int m_currentActiveMaterialID = -1;
+		int m_lastActiveLibEntry_ID = -1;
 		
 		bool m_isPanelHovered = false;
 		bool m_isAbedoButtonHovered = false;
@@ -85,6 +88,8 @@ namespace mnemosy::gui
 		bool m_isAmbientOcclusionButtonHovered = false;
 		bool m_isHeightButtonHovered = false;
 		bool m_isOpacityButtonHovered = false;
+
+		bool m_isUnlitLoadButtonHovered = false;
 
 		bool m_valuesChanged = false;
 		float m_TimeToSaveMaterial = 0.5f;

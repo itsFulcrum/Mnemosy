@@ -5,10 +5,14 @@
 #include "Include/Core/FileDirectories.h"
 #include "json.hpp"
 
+#include "Include/Systems/FolderTreeNode.h"
+#include "Include/Systems/LibraryProcedures.h"
+
 #include "Include/Systems/TextureGenerationManager.h"
 
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Material.h"
+#include "Include/Graphics/Skybox.h"
 
 #include "Include/Graphics/Utils/Picture.h"
 
@@ -94,27 +98,28 @@ namespace mnemosy::systems
 	}
 
 	// Export selected textures of a material. Which textures to export should be specified in the std::vector<bool> exportTypesOrdered which need an entry for each texture type in the same order as the enum types defined in PBRTextureType in TextureDefinitions.h
-	bool ExportManager::ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::PbrMaterial& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {
+	bool ExportManager::PbrMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::PbrMaterial& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked) {
 
 		namespace fs = std::filesystem;
 
-		MNEMOSY_INFO("Exporting Material: {}, as {} using {} normal map format \nExport Path: {}", material.Name, graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat),  graphics::TexUtil::get_string_from_normalMapFormat(m_exportNormalFormat), exportPath.generic_string());
+		MNEMOSY_INFO("Exporting Material: {}, as {} using {} normal map format \nExport Path: {}", libEntry->name, graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat),  graphics::TexUtil::get_string_from_normalMapFormat(m_exportNormalFormat), exportFolderPath.generic_string());
 
 
 		std::string fileExtention = graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat);
 
-		// TODO: store in what format a texture was saved and use that to determine how to export it. at the moment all albedo are just always exported as Rgba8
+		std::string entryName = libEntry->name;
+		
 		// Export Albedo
 		if (exportTypesOrdered[0]) {
 
 			if (material.isAlbedoAssigned()) {
 
-				fs::path to = exportPath / fs::path(material.Name + "_albedo_sRGB" + fileExtention);
+				fs::path to = exportFolderPath / fs::path(entryName + "_albedo_sRGB" + fileExtention);
 				graphics::Texture& tex = material.GetAlbedoTexture();
 
 				TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(),tex.GetTextureFormat(),tex.IsHalfFloat());
 				
-				GLTextureExport(tex.GetID(),info,graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
+				GLTextureExport(tex.GetID(),info);
 			}
 		}
 
@@ -125,7 +130,7 @@ namespace mnemosy::systems
 
 				if (m_exportRoughnessAsSmoothness) {
 
-					fs::path to = exportPath / fs::path(material.Name + "_smoothness_raw" + fileExtention);
+					fs::path to = exportFolderPath / fs::path(entryName + "_smoothness_raw" + fileExtention);
 
 					TextureGenerationManager& texGenerator = MnemosyEngine::GetInstance().GetTextureGenerationManager();
 
@@ -134,14 +139,14 @@ namespace mnemosy::systems
 				}
 				else {
 
-					fs::path to = exportPath / fs::path(material.Name + "_roughness_raw" + fileExtention);
+					fs::path to = exportFolderPath / fs::path(entryName + "_roughness_raw" + fileExtention);
 					graphics::Texture& tex = material.GetRoughnessTexture();
 
 					graphics::TextureFormat f = graphics::TexUtil::get_channel_textureFormat(tex.GetTextureFormat());
 
 					TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), f, tex.IsHalfFloat());
 					
-					GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+					GLTextureExport(tex.GetID(), info);
 				}
 			}
 		}
@@ -150,14 +155,14 @@ namespace mnemosy::systems
 		if (exportTypesOrdered[2]) {
 
 			if (material.isMetallicAssigned()) {
-				fs::path to = exportPath / fs::path(material.Name + "_metallic_raw" + fileExtention);
+				fs::path to = exportFolderPath / fs::path(entryName + "_metallic_raw" + fileExtention);
 				graphics::Texture& tex = material.GetMetallicTexture();
 
 				graphics::TextureFormat f = graphics::TexUtil::get_channel_textureFormat(tex.GetTextureFormat());
 				TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), f, tex.IsHalfFloat());
 				
 
-				GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
+				GLTextureExport(tex.GetID(), info);
 			}
 		}
 
@@ -166,7 +171,7 @@ namespace mnemosy::systems
 			if (material.isNormalAssigned()) {
 
 				if (m_exportNormalFormat == graphics::MNSY_NORMAL_FORMAT_OPENGL) {
-					fs::path to = exportPath / fs::path(material.Name + "_normal_gl_raw" + fileExtention);
+					fs::path to = exportFolderPath / fs::path(entryName + "_normal_gl_raw" + fileExtention);
 					graphics::Texture& tex = material.GetNormalTexture();
 
 					// normal maps should always have RGB channels
@@ -182,13 +187,13 @@ namespace mnemosy::systems
 
 					TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), format, tex.IsHalfFloat());
 					
-					GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+					GLTextureExport(tex.GetID(), info);
 				}
 				else if (m_exportNormalFormat == graphics::MNSY_NORMAL_FORMAT_DIRECTX) {
 					// Convert and then export
 					TextureGenerationManager& texGenerator = MnemosyEngine::GetInstance().GetTextureGenerationManager();
 
-					fs::path to = exportPath / fs::path(material.Name + "_normal_dx_raw" + fileExtention);
+					fs::path to = exportFolderPath / fs::path(entryName + "_normal_dx_raw" + fileExtention);
 					texGenerator.FlipNormalMap(to.generic_string().c_str(), material, true);
 
 				}
@@ -198,12 +203,12 @@ namespace mnemosy::systems
 		// Export AO
 		if (exportTypesOrdered[4]) {
 			if (material.isAoAssigned()) {
-				fs::path to = exportPath / fs::path(material.Name + "_ambientOcclusion_raw" + fileExtention);
+				fs::path to = exportFolderPath / fs::path(entryName + "_ambientOcclusion_raw" + fileExtention);
 				graphics::Texture& tex = material.GetAOTexture();
 
 				graphics::TextureFormat f = graphics::TexUtil::get_channel_textureFormat(tex.GetTextureFormat());
 				TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), f, tex.IsHalfFloat());
-				GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
+				GLTextureExport(tex.GetID(), info);
 			}
 		}
 
@@ -211,38 +216,38 @@ namespace mnemosy::systems
 		if (exportTypesOrdered[5]) {
 			if (material.isEmissiveAssigned()) {
 
-				fs::path to = exportPath / fs::path(material.Name + "_emissive_sRGB" + fileExtention);
+				fs::path to = exportFolderPath / fs::path(entryName + "_emissive_sRGB" + fileExtention);
 				graphics::Texture& tex = material.GetEmissiveTexture();
 
 				TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), tex.GetTextureFormat(), tex.IsHalfFloat());
 				
-				GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
+				GLTextureExport(tex.GetID(), info);
 			}
 		}
 
 		// Export Height
 		if (exportTypesOrdered[6]) {
 			if (material.isHeightAssigned()) {
-				fs::path to = exportPath / fs::path(material.Name + "_height_raw" + fileExtention);
+				fs::path to = exportFolderPath / fs::path(entryName + "_height_raw" + fileExtention);
 				graphics::Texture& tex = material.GetHeightTexture();
 
 				graphics::TextureFormat f = graphics::TexUtil::get_channel_textureFormat(tex.GetTextureFormat());
 				TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), f, tex.IsHalfFloat());
 				
-				GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
+				GLTextureExport(tex.GetID(), info);
 			}
 		}
 
 		// Export Opacity
 		if (exportTypesOrdered[7]) {
 			if (material.isOpacityAssigned()) {
-				fs::path to = exportPath / fs::path(material.Name + "_opacity_raw" + fileExtention);
+				fs::path to = exportFolderPath / fs::path(entryName + "_opacity_raw" + fileExtention);
 				graphics::Texture& tex = material.GetOpacityTexture();
 
 				graphics::TextureFormat f = graphics::TexUtil::get_channel_textureFormat(tex.GetTextureFormat());
 				TextureExportInfo info = TextureExportInfo(to, tex.GetWidth(), tex.GetHeight(), f, tex.IsHalfFloat());
 				
-				GLTextureExport(tex.GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
+				GLTextureExport(tex.GetID(), info);
 			}
 		}
 		
@@ -253,16 +258,16 @@ namespace mnemosy::systems
 
 			if (material.HasPackedTextures && !material.PackedTexturesSuffixes.empty()) {
 
-
+				fs::path folderPath = systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
 
 				for (int i = 0; i < material.PackedTexturesSuffixes.size();i++) {
 
-					std::string filnameOnDisk = material.Name + material.PackedTexturesSuffixes[i] + texture_textureFileType;
-					fs::path pathOnDisk = materialFolderPath / fs::path(filnameOnDisk);
+					std::string filnameOnDisk = entryName + material.PackedTexturesSuffixes[i] + texture_fileExtentionTiff;
+					fs::path pathOnDisk = folderPath / fs::path(filnameOnDisk);
 
 
-					std::string filename = material.Name + material.PackedTexturesSuffixes[i] + fileExtention;
-					fs::path to = exportPath / fs::path(filename);
+					std::string filename = entryName + material.PackedTexturesSuffixes[i] + fileExtention;
+					fs::path to = exportFolderPath / fs::path(filename);
 
 					// Since we store images as tiff files if we export as tiff we can just copy the files
 					if (m_exportFileFormat == graphics::ImageFileFormat::MNSY_FILE_FORMAT_TIF) {								
@@ -280,7 +285,7 @@ namespace mnemosy::systems
 					{
 
 						graphics::PictureError err;
-						graphics::PictureInfo picInfo =  graphics::Picture::ReadPicture(err,pathOnDisk.generic_string().c_str(),true,graphics::PBRTextureType::MNSY_TEXTURE_NONE);
+						graphics::PictureInfo picInfo =  graphics::Picture::ReadPicture(err,pathOnDisk.generic_string().c_str(),true,false,false);
 
 
 						graphics::Texture* packedTexture = new graphics::Texture();
@@ -288,7 +293,7 @@ namespace mnemosy::systems
 
 						TextureExportInfo info = TextureExportInfo(to.generic_string(), packedTexture->GetWidth(), packedTexture->GetHeight(), packedTexture->GetTextureFormat(),packedTexture->IsHalfFloat());
 						
-						GLTextureExport(packedTexture->GetID(), info, graphics::PBRTextureType::MNSY_TEXTURE_NONE);						
+						GLTextureExport(packedTexture->GetID(), info);						
 
 						delete packedTexture;
 						packedTexture = nullptr;
@@ -301,7 +306,39 @@ namespace mnemosy::systems
 		return true;
 	}
 
-	void ExportManager::GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo, graphics::PBRTextureType PBRTypeHint) {
+	void ExportManager::UnlitMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::UnlitMaterial& unlitMat) {
+
+		namespace fs = std::filesystem;
+
+		if (unlitMat.TextureIsAssigned()) {
+			MNEMOSY_INFO("Exporting Unlit Material: {}, as {} \nExport Path: {}", libEntry->name, graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat), exportFolderPath.generic_string());
+
+			std::string fileExtention = graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat);
+
+
+			std::string filename = libEntry->name + "_tex" + fileExtention;
+
+			fs::path finalExportPath = exportFolderPath / fs::path(filename);
+
+			graphics::Texture& tex = unlitMat.GetTexture();
+
+			TextureExportInfo info = TextureExportInfo(finalExportPath, tex.GetWidth(), tex.GetHeight(), tex.GetTextureFormat(), tex.IsHalfFloat());
+
+			GLTextureExport(tex.GetID(), info);
+		}
+		else {
+
+			MNEMOSY_WARN("Export Failed, no texture is assigned for Unlit Material: {}", libEntry->name);
+		}
+	}
+
+	// TODO: implement
+	void ExportManager::SkyboxMat_ExportTextures(std::filesystem::path& exportPath, systems::LibEntry* libEntry, graphics::Skybox& skyboxMat) {
+		namespace fs = std::filesystem;
+
+	}
+
+	void ExportManager::GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo) {
 
 		graphics::TextureFormat format = exportInfo.textureFormat;
 
@@ -341,9 +378,7 @@ namespace mnemosy::systems
 		uint8_t bitsPerChannel;
 		uint8_t bytesPerPixel;
 		graphics::TexUtil::get_information_from_textureFormat(format, numChannels, bitsPerChannel, bytesPerPixel);
-
 		
-
 		
 		bool isHalfFloat = false;
 
@@ -422,7 +457,7 @@ namespace mnemosy::systems
 		std::string exportPath = exportInfo.path.generic_string();
 
 		graphics::PictureError errorCheck;
-		graphics::Picture::WritePicture(errorCheck, exportPath.c_str(), info,true, PBRTypeHint);
+		graphics::Picture::WritePicture(errorCheck, exportPath.c_str(), info,true);
 		if (!errorCheck.wasSuccessfull) {
 			MNEMOSY_ERROR("An error occured while exporting. Format: {} {}x{}  to: {} \n Error Message: {}", exportFormatTxt, width, height, exportPath, errorCheck.what);
 		}

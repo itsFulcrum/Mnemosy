@@ -1,7 +1,7 @@
 {
     "1_Header": "Mnemosy Settings File",
     "2_Description": "This file stores user settings",
-    "guiPanel_contents_buttonSize": 160.0,
+    "guiPanel_contents_buttonSize": 140.0,
     "guiPanel_contents_isOpen": true,
     "guiPanel_documentation_isOpen": true,
     "guiPanel_materialEditor_isOpen": true,

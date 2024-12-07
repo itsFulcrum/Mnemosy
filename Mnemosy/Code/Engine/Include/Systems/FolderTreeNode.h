@@ -9,6 +9,7 @@
 
 namespace mnemosy::systems
 {
+
 	enum LibEntryType
 	{
 		MNSY_ENTRY_TYPE_PBRMAT		= 0,
@@ -24,29 +25,36 @@ namespace mnemosy::systems
 
 	struct LibEntry {
 	public:
-		LibEntryType type;
-		uint16_t runtime_ID;
-		unsigned int thumbnailTexure_ID = 0;
-		FolderNode* parent = nullptr;
-		std::string name;
-		bool selected = false;
-		bool thumbnailLoaded = false;
+		FolderNode* parent = nullptr; // 8
+		LibEntryType type; // 4
+		
+		uint16_t runtime_ID; // 2
+		bool selected = false; // 1
+		bool thumbnailLoaded = false; // 1
+		unsigned int thumbnailTexure_ID = 0; // 4
+		std::string name; // 40
+
 
 		std::filesystem::path GetPathFromRoot();
 	};
 
 
+	// this struct wastes a lot of padding space
 	struct FolderNode {
 	public:
 
-		std::vector<FolderNode*> subNodes;
-		std::vector<LibEntry*> subEntries;
+		std::vector<LibEntry*> subEntries; 
+		std::vector<FolderNode*> subNodes; 
 
-		std::filesystem::path pathFromRoot;
 		std::string name;
+		std::filesystem::path pathFromRoot;
 		
 		FolderNode* parent;
-		unsigned int runtime_ID;
+		uint16_t runtime_ID;
+
+
+
+		
 		
 		bool HasMaterials();
 		void SortLibEntries();

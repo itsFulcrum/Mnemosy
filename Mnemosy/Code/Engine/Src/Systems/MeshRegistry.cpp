@@ -6,12 +6,39 @@
 #include "Include/Graphics/ModelLoader.h"
 #include "Include/Graphics/ModelData.h"
 
+#include <glad/glad.h>
+
 
 namespace mnemosy::systems {
 
-	void MeshRegistry::Init()
-	{
+	void MeshRegistry::Init() {
 
+		
+		// Init screen quad Mesh buffers
+		
+		m_ScreenQuad_VBO = 0;
+		m_ScreenQuad_VAO = 0;
+		
+		if (m_ScreenQuad_VBO == 0) {
+			glGenBuffers(1, &m_ScreenQuad_VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuad_VBO);
+		}
+
+		if (m_ScreenQuad_VAO == 0) {
+			glGenVertexArrays(1, &m_ScreenQuad_VAO);
+			glBindVertexArray(m_ScreenQuad_VAO);
+
+			glBindBuffer(GL_ARRAY_BUFFER, m_ScreenQuad_VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(m_screenQuadVertices), m_screenQuadVertices, GL_STATIC_DRAW);
+
+			// Setup Attributes
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		}
+
+		MNEMOSY_TRACE("VAO_ ID: {}", m_ScreenQuad_VAO);
 
 	}
 
@@ -40,6 +67,17 @@ namespace mnemosy::systems {
 
 		m_loadedMeshes.clear();
 		m_loadedMeshesPaths.clear();
+
+		// delete screen quad
+		if (m_ScreenQuad_VBO != 0) {
+			glDeleteBuffers(1, &m_ScreenQuad_VBO);
+			m_ScreenQuad_VBO = 0;
+		}
+
+		if (m_ScreenQuad_VAO != 0) {
+			glDeleteVertexArrays(1, &m_ScreenQuad_VAO);
+			m_ScreenQuad_VAO = 0;
+		}
 	}
 
 	// returns unique ID of the mesh
@@ -82,6 +120,13 @@ namespace mnemosy::systems {
 		MNEMOSY_ASSERT(id < m_loadedMeshes.size(), "Mesh Id does not exists ");
 
 		return *m_loadedMeshes[id];
+	}
+
+
+
+	unsigned int& MeshRegistry::GetScreenQuadVAO() {
+
+		return m_ScreenQuad_VAO;
 	}
 
 	

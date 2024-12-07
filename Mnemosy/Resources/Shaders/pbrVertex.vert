@@ -35,13 +35,14 @@ void main()
 
 	// apparently this is slightly faster than using the matrix directly because the shader compiler knows it can omit some instructions
 	// see GodotCon - rendering talk 2024: https://www.youtube.com/watch?v=6ak1pmQXJbg
-	mat4 modelMat  = mat4(_modelMatrix[0] ,_modelMatrix[1] ,_modelMatrix[2] ,vec4(0.0f,0.0f,0.0f,1.0f));
-	mat4 normalMat = mat4(_normalMatrix[0],_normalMatrix[1],_normalMatrix[2],vec4(0.0f,0.0f,0.0f,1.0f));
+	// um is stupid because we are zeroing out the position
+	//mat4 modelMat  = mat4(_modelMatrix[0] ,_modelMatrix[1] ,_modelMatrix[2] ,vec4(0.0f,0.0f,0.0f,1.0f));
+	//mat4 normalMat = mat4(_normalMatrix[0],_normalMatrix[1],_normalMatrix[2],vec4(0.0f,0.0f,0.0f,1.0f));
 	
-	vec4 fragPos = _projectionMatrix * _viewMatrix * modelMat * vec4(aPos.xyz, 1.0);
+	vec4 fragPos = _projectionMatrix * _viewMatrix * _modelMatrix * vec4(aPos.xyz, 1.0);
 	
-	position_WS = vec3(modelMat * vec4(aPos.xyz, 1.0));
-	normal_WS = vec4(normalMat * vec4(aNormal,0.0f)).xyz;
+	position_WS = vec3(_modelMatrix * vec4(aPos.xyz, 1.0));
+	normal_WS = vec4(_normalMatrix * vec4(aNormal,0.0f)).xyz;
 
 	// outputs to fragment shader
 	vertexAO = aColor.r; // ao is supposed to be baked into vertex color
@@ -53,9 +54,9 @@ void main()
 	
 	vec3 biTangent = cross(aNormal,aTangent);
 
-	vec3 T = normalize(vec3(normalMat * vec4(aTangent,   0.0)));
-  	vec3 B = normalize(vec3(normalMat * vec4(biTangent,  0.0)));
-  	vec3 N = normalize(vec3(normalMat * vec4(aNormal,    0.0)));
+	vec3 T = normalize(vec3(_normalMatrix * vec4(aTangent,   0.0)));
+  	vec3 B = normalize(vec3(_normalMatrix * vec4(biTangent,  0.0)));
+  	vec3 N = normalize(vec3(_normalMatrix * vec4(aNormal,    0.0)));
   	
   	tangentToWorldMatrix = mat3(T, B, N);
 	TBN = transpose(tangentToWorldMatrix);

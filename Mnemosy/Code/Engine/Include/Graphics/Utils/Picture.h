@@ -50,16 +50,15 @@ namespace mnemosy::graphics
 		
 
 		// General interface to read image files. 
-		// for exr and hdr files data is often returned in linear Color space. by default data is converted to sRGB to turn this off PBRTypeHint must be set to MNSY_TEXTURE_NONE
-		static PictureInfo ReadPicture(PictureError& outPictureError, const char* filepath, const bool flipVertically, const graphics::PBRTextureType PBRTypeHint);
+		static PictureInfo ReadPicture(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertGrayToRGB, const bool convertEXRandHDRToSrgb);
 
 		// Same as ReadPicture() but instead of returning PictureInfo struct, it is passed as second parameter so we can use this procedure for multithreading when loading several images simulaniously
-		static void ReadPicture_thread(PictureError& outPictureError, PictureInfo& outPicInfo, const std::string filepath, const bool flipVertically, const graphics::PBRTextureType PBRTypeHint);
+		static void ReadPicture_PbrThreaded(PictureError& outPictureError, PictureInfo& outPicInfo, const std::string filepath, const bool flipVertically, graphics::PBRTextureType PBRTypeHint);
 
 		// general interface for writing images so it supports multiple formats
 		// Formats Exr and Hdr are assumed to be passes values in sRBG color space and will always convert to linear as this is the standard for these formats.
 		// for now, if data is already in linear space the respective write methods for exr and hdr must be called directly to specify wheather to convert to linear or not
-		static void WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically, const graphics::PBRTextureType PBRTypeHint);
+		static void WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically);
 
 
 		// Read .tif images. Supports full RGBA channels with up to 32 bit.

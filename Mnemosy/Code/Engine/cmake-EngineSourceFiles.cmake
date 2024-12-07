@@ -64,7 +64,7 @@ ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/KtxImage.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Utils/KtxImage.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Utils/Picture.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Utils/Picture.cpp
-
+${ENGINE_SOURCE_PATH}/Include/Graphics/SceneSettings.h
 
 
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Shader.h

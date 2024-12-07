@@ -47,21 +47,28 @@
 
 namespace mnemosy::graphics {
 
-	PictureInfo Picture::ReadPicture(PictureError& outPictureError, const char* filepath,const bool flipVertically, const graphics::PBRTextureType PBRTypeHint) {
+	PictureInfo Picture::ReadPicture(PictureError& outPictureError, const char* filepath,const bool flipVertically, const bool convertGrayToRGB, const bool convertEXRandHDRToSrgb) {
 		outPictureError.wasSuccessfull = true;
 		outPictureError.what = "";
 
 		std::filesystem::path p = { filepath };
+
+		if (!std::filesystem::exists(p)) {
+			outPictureError.wasSuccessfull = true;
+			outPictureError.what = "Read: filepath does exist.";
+			return PictureInfo();
+		}
+
 		ImageFileFormat fileFormat = TexUtil::get_imageFileFormat_from_fileExtentionString(p.extension().generic_string());
 
 		if (fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_NONE) {
 			outPictureError.wasSuccessfull = false;
-			outPictureError.what = "Write: Image File Extention '" + p.extension().generic_string() + "' is not supported.";
+			outPictureError.what = "Read: Image File Extention '" + p.extension().generic_string() + "' is not supported.";
 			return PictureInfo();
 		}
 
 		
-		bool convertGrayToRGB = PBRTypeHint == PBRTextureType::MNSY_TEXTURE_ALBEDO || PBRTypeHint == PBRTextureType::MNSY_TEXTURE_EMISSION;	
+		//bool convertGrayToRGB = PBRTypeHint == PBRTextureType::MNSY_TEXTURE_ALBEDO || PBRTypeHint == PBRTextureType::MNSY_TEXTURE_EMISSION;	
 
 
 		// load the texture
@@ -79,14 +86,11 @@ namespace mnemosy::graphics {
 		}
 		else if (fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_HDR) {
 			
-			bool convertToSrgb = PBRTypeHint != PBRTextureType::MNSY_TEXTURE_NONE;
-
-			return Picture::ReadHdr(outPictureError,filepath, flipVertically,convertToSrgb);
+			return Picture::ReadHdr(outPictureError,filepath, flipVertically, convertEXRandHDRToSrgb);
 		}
 		else if (fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_EXR) {
-			
-			bool convertToSrgb = PBRTypeHint != PBRTextureType::MNSY_TEXTURE_NONE;			
-			return Picture::ReadExr(outPictureError, filepath, flipVertically, convertToSrgb, convertGrayToRGB);
+					
+			return Picture::ReadExr(outPictureError, filepath, flipVertically, convertEXRandHDRToSrgb, convertGrayToRGB);
 
 		}
 		else if (fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_KTX2) {
@@ -101,12 +105,14 @@ namespace mnemosy::graphics {
 	}
 
 	// same as ReadPicture but instead of returning picture info it is passed as second parameter so we can used it for multithreading when loading several images simulaniously
-	void Picture::ReadPicture_thread(PictureError& outPictureError, PictureInfo& outPicInfo, const std::string filepath, const bool flipVertically, const graphics::PBRTextureType PBRTypeHint)
-	{
-		outPicInfo = Picture::ReadPicture(outPictureError,filepath.c_str(), flipVertically, PBRTypeHint);
+	void Picture::ReadPicture_PbrThreaded(PictureError& outPictureError, PictureInfo& outPicInfo, const std::string filepath, const bool flipVertically, graphics::PBRTextureType PBRTypeHint) {
+
+		bool convertGrayToRGB = PBRTypeHint == PBRTextureType::MNSY_TEXTURE_ALBEDO || PBRTypeHint == PBRTextureType::MNSY_TEXTURE_EMISSION;
+
+		outPicInfo = Picture::ReadPicture(outPictureError,filepath.c_str(), flipVertically,convertGrayToRGB,false);
 	}
 	
-	void Picture::WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically, const graphics::PBRTextureType PBRTypeHint){
+	void Picture::WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically){
 
 		outPictureError.wasSuccessfull = true;
 		outPictureError.what = "";

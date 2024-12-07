@@ -25,6 +25,7 @@ namespace mnemosy::graphics
 		~UnlitMaterial();
 
 		void AssignTexture(Texture* tex);
+		void RemoveTexture();
 		Texture& GetTexture() { return *m_unlitTexture; }
 		bool TextureIsAssigned() { return m_unlitTexture; }
 		void SetUniforms(Shader* shader);
@@ -47,7 +48,7 @@ namespace mnemosy::graphics
 		PbrMaterial();
 		~PbrMaterial();
 
-		std::string Name = "Mnemosy Default";
+		//std::string Name = "Mnemosy Default";
 
 		glm::vec3 Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
 		glm::vec3 Emission = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -66,7 +67,7 @@ namespace mnemosy::graphics
 		bool IsSmoothnessTexture 	= false;
 		bool UseEmissiveAsMask 		= false;
 		bool UseDitheredAlpha 		= false;
-		bool HasPackedTextures 		= false;
+		bool HasPackedTextures 		= false; // this is more or less redundant
 		std::vector<std::string> PackedTexturesSuffixes;
 
 

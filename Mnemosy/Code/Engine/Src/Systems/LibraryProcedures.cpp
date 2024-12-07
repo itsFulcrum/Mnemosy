@@ -118,14 +118,14 @@ void LibProcedures::LibEntry_PbrMaterial_CreateNewDataFile( systems::LibEntry* l
 	matFile.WriteBool(success, jsonMatKey_heightAssigned, false);
 	matFile.WriteBool(success, jsonMatKey_opacityAssigned, false);
 
-	matFile.WriteString(success, jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_roughPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_metalPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_emissionPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_normalPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_aoPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_heightPath, jsonMatKey_pathNotAssigned);
-	matFile.WriteString(success, jsonMatKey_opacityPath, jsonMatKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_albedoPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_roughPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_metalPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_emissionPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_normalPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_aoPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_heightPath, jsonKey_pathNotAssigned);
+	matFile.WriteString(success, jsonMatKey_opacityPath, jsonKey_pathNotAssigned);
 
 	matFile.WriteString(success, jsonMatKey_thumbnailPath, std::string(libEntry->name + texture_fileSuffix_thumbnail));
 
@@ -137,7 +137,7 @@ void LibProcedures::LibEntry_PbrMaterial_CreateNewDataFile( systems::LibEntry* l
 
 
 void LibProcedures::LibEntry_UnlitMaterial_CreateNewDataFile( systems::LibEntry* libEntry,bool prettyPrint) {
-	MNEMOSY_ASSERT(libEntry != nullptr, "libEntry cannot be null")
+	MNEMOSY_ASSERT(libEntry != nullptr, "libEntry cannot be null");
 
 	std::filesystem::path dataFilePath = LibProcedures::LibEntry_GetDataFilePath(libEntry);
 
@@ -161,32 +161,42 @@ void LibProcedures::LibEntry_UnlitMaterial_CreateNewDataFile( systems::LibEntry*
 	file.FileClose(success, dataFilePath);
 }
 
-// TODO: Implement
-void LibProcedures::LibEntry_Skybox_CreateNewDataFile( systems::LibEntry* libEntry, bool prettyPrint)
+void LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile( systems::LibEntry* libEntry, bool prettyPrint)
 {
-	//MNEMOSY_ASSERT(libEntry != nullptr, "libEntry cannot be null")
+	MNEMOSY_ASSERT(libEntry != nullptr, "libEntry cannot be null");
 
-	//	std::filesystem::path dataFilePath = folderPath / std::filesystem::path(libEntry->name + ".mnsydata");
+	std::filesystem::path dataFilePath = LibProcedures::LibEntry_GetDataFilePath(libEntry);
 
-	//bool success = false;
+	bool success = false;
 
-	//flcrm::JsonSettings file;
+	flcrm::JsonSettings file;
 
-	//file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_unlit_description);
+	file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_skybox_description);
 
-	//file.WriteString(success, jsonKey_unlit_name, libEntry->name);
-	//file.WriteString(success, jsonKey_unlit_texturePath, "not assigned");
-	//file.WriteBool(success, jsonKey_unlit_textureIsAssigned, false);
-	//file.WriteBool(success, jsonKey_unlit_useAlpha, false);
-	//file.WriteBool(success, jsonKey_unlit_useDitheredAlpha, false);
-	//file.WriteFloat(success, jsonKey_unlit_alphaThreshold, 0.5f);
-	//file.WriteFloat(success, jsonKey_unlit_uvTilingX, 1.0f);
-	//file.WriteFloat(success, jsonKey_unlit_uvTilingY, 1.0f);
+	file.WriteString(success, jsonKey_skybox_name, libEntry->name);
 
+	file.WriteFloat(success, jsonKey_skybox_exposure, 0.0f);
 
-	//file.FilePrettyPrintSet(prettyPrint);
-	//file.FileClose(success, dataFilePath);
+	file.WriteBool(success,  jsonKey_skybox_textureIsAssigned, false);
+	file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
 
+	
+	file.WriteFloat(success, jsonKey_skybox_color_r, 1.0f);
+	file.WriteFloat(success, jsonKey_skybox_color_g, 1.0f);
+	file.WriteFloat(success, jsonKey_skybox_color_b, 1.0f);
+
+	file.WriteFloat(success, jsonKey_skybox_sunColor_r, 1.0f);
+	file.WriteFloat(success, jsonKey_skybox_sunColor_g, 1.0f);
+	file.WriteFloat(success, jsonKey_skybox_sunColor_b, 1.0f);
+
+	file.WriteFloat(success, jsonKey_skybox_sunDir_x, 0.0f);
+	file.WriteFloat(success, jsonKey_skybox_sunDir_y, 1.0f);
+	file.WriteFloat(success, jsonKey_skybox_sunDir_z, 0.0f);
+
+	file.WriteFloat(success, jsonKey_skybox_sunStrength, 1.0f);
+
+	file.FilePrettyPrintSet(prettyPrint);
+	file.FileClose(success, dataFilePath);
 }
 
 void LibProcedures::LibEntry_PbrMaterial_SaveToFile( systems::LibEntry* libEntry, graphics::PbrMaterial* pbrMat, bool prettyPrint)
@@ -216,7 +226,7 @@ void LibProcedures::LibEntry_PbrMaterial_SaveToFile( systems::LibEntry* libEntry
 
 	matFile.EntryErase(success, "1_Mnemosy_Data_File"); // keep this here for now but this key is not longer needed and depricated
 
-	matFile.WriteString(success, jsonMatKey_name, pbrMat->Name);
+	matFile.WriteString(success, jsonMatKey_name, libEntry->name);
 
 	matFile.WriteFloat(success, jsonMatKey_albedo_r, pbrMat->Albedo.r);
 	matFile.WriteFloat(success, jsonMatKey_albedo_g, pbrMat->Albedo.g);
@@ -256,10 +266,10 @@ void LibProcedures::LibEntry_PbrMaterial_SaveToFile( systems::LibEntry* libEntry
 		std::string jsonMatKey_path_ofTextureType = graphics::TexUtil::get_JsonMatKey_path_from_PBRTextureType(currentTextureType);
 		std::string jsonMatKey_assigned_ofTextureType = graphics::TexUtil::get_JsonMatKey_assigned_from_PBRTextureType(currentTextureType);
 
-		std::string textureFilePath = jsonMatKey_pathNotAssigned;
+		std::string textureFilePath = jsonKey_pathNotAssigned;
 
 		if (textureTypeIsAssigned) {
-			textureFilePath = graphics::TexUtil::get_filename_from_PBRTextureType(pbrMat->Name, currentTextureType);
+			textureFilePath = graphics::TexUtil::get_filename_from_PBRTextureType(libEntry->name, currentTextureType);
 		}
 
 		matFile.WriteBool(success, jsonMatKey_assigned_ofTextureType, textureTypeIsAssigned);
@@ -284,7 +294,7 @@ void LibProcedures::LibEntry_UnlitMaterial_SaveToFile(systems::LibEntry* libEntr
 
 	file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_unlit_description);
 	if (!success) {
-		MNEMOSY_WARN("MaterialLibraryRegistry::SaveUnlitMaterialToFile: Failed to open unlit material data file. msg: {}", file.ErrorStringLastGet());
+		MNEMOSY_WARN("Failed to open unlit material data file. msg: {}", file.ErrorStringLastGet());
 	}
 
 	file.WriteString(success, jsonKey_unlit_name, libEntry->name);
@@ -306,25 +316,83 @@ void LibProcedures::LibEntry_UnlitMaterial_SaveToFile(systems::LibEntry* libEntr
 			file.WriteString(success, jsonKey_unlit_texturePath, textureFilename);
 		}
 		else {
-
-
 			file.WriteBool(success, jsonKey_unlit_textureIsAssigned, false);
-			file.WriteString(success, jsonKey_unlit_texturePath, "not assigned");
+			file.WriteString(success, jsonKey_unlit_texturePath, jsonKey_pathNotAssigned);
 		}
+	}
+	else {
+		file.WriteBool(success, jsonKey_unlit_textureIsAssigned, false);
+		file.WriteString(success, jsonKey_unlit_texturePath, jsonKey_pathNotAssigned);
 	}
 
 
 	file.FilePrettyPrintSet(prettyPrint);
 
 	file.FileClose(success, dataFilePath);
-
-
 }
 
-// TODO: implement
 void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEntry, graphics::Skybox* skybox, bool prettyPrint)
 {
+	namespace fs = std::filesystem;
 
+	MNEMOSY_ASSERT(libEntry != nullptr && skybox != nullptr, "They cannot be null");
+
+
+	std::filesystem::path dataFilePath = LibProcedures::LibEntry_GetDataFilePath(libEntry);
+
+	bool success = false;
+
+	flcrm::JsonSettings file;
+
+	file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_skybox_description);
+	if (!success) {
+		MNEMOSY_WARN("Failed to open skybox material data file. msg: {}", file.ErrorStringLastGet());
+	}
+
+	file.WriteString(success, jsonKey_skybox_name, libEntry->name);
+
+	file.WriteFloat(success, jsonKey_skybox_exposure, skybox->exposure);
+
+	file.WriteFloat(success, jsonKey_skybox_color_r, skybox->color.r);
+	file.WriteFloat(success, jsonKey_skybox_color_g, skybox->color.g);
+	file.WriteFloat(success, jsonKey_skybox_color_b, skybox->color.b);
+
+	file.WriteFloat(success, jsonKey_skybox_sunColor_r, skybox->sunColor.r);
+	file.WriteFloat(success, jsonKey_skybox_sunColor_g, skybox->sunColor.g);
+	file.WriteFloat(success, jsonKey_skybox_sunColor_b, skybox->sunColor.b);
+
+	file.WriteFloat(success, jsonKey_skybox_sunDir_x, skybox->sunDir.x);
+	file.WriteFloat(success, jsonKey_skybox_sunDir_y, skybox->sunDir.y);
+	file.WriteFloat(success, jsonKey_skybox_sunDir_z, skybox->sunDir.z);
+
+	file.WriteFloat(success, jsonKey_skybox_sunStrength, skybox->sunStrength);
+
+
+	if (skybox->IsTextureAssigned()) {
+
+		// check if the img really exists
+
+		std::string textureFilename = libEntry->name + texture_skybox_fileSuffix_equirectangular;
+		fs::path texPath = LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::path(textureFilename);
+
+		if (fs::exists(texPath)) {
+
+			file.WriteBool(success, jsonKey_skybox_textureIsAssigned, true);
+			file.WriteString(success, jsonKey_skybox_texturePath, textureFilename);
+		}
+		else {
+			file.WriteBool(success, jsonKey_skybox_textureIsAssigned, false);
+			file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
+		}
+	}
+	else {
+
+		file.WriteBool(success, jsonKey_skybox_textureIsAssigned, false);
+		file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
+	}
+
+	file.FilePrettyPrintSet(prettyPrint);
+	file.FileClose(success, dataFilePath);
 }
 
 
@@ -368,7 +436,7 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 
 				std::string pathJsonKey = graphics::TexUtil::get_JsonMatKey_path_from_PBRTextureType((graphics::PBRTextureType)i);
 
-				std::string oldFileName = matFile.ReadString(success, pathJsonKey, jsonMatKey_pathNotAssigned, false);
+				std::string oldFileName = matFile.ReadString(success, pathJsonKey, jsonKey_pathNotAssigned, false);
 				fs::path oldTextureFile = entryFolder / fs::path(oldFileName);
 
 				if (fs::exists(oldTextureFile)) { // check if the texture exists
@@ -391,7 +459,7 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 				else {
 
 					matFile.WriteBool(success, assignedKey, false);
-					matFile.WriteString(success, pathJsonKey, jsonMatKey_pathNotAssigned);
+					matFile.WriteString(success, pathJsonKey, jsonKey_pathNotAssigned);
 				}
 
 			}
@@ -412,8 +480,8 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 				// rename channel packed textures
 				for (int i = 0; i < suffixes.size(); i++) {
 
-					std::string oldFileName = oldName + suffixes[i] + texture_textureFileType;
-					std::string newFileName = finalName + suffixes[i] + texture_textureFileType;
+					std::string oldFileName = oldName + suffixes[i] + texture_fileExtentionTiff;
+					std::string newFileName = finalName + suffixes[i] + texture_fileExtentionTiff;
 
 					fs::path oldFilePath = entryFolder / fs::path(oldFileName);
 					fs::path newFilePath = entryFolder / fs::path(newFileName);
@@ -429,7 +497,7 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 		}
 
 		// change name of thumbnail file
-		std::string oldFileName = matFile.ReadString(success, jsonMatKey_thumbnailPath, jsonMatKey_pathNotAssigned, false);
+		std::string oldFileName = matFile.ReadString(success, jsonMatKey_thumbnailPath, jsonKey_pathNotAssigned, false);
 		std::string newFileName = finalName + texture_fileSuffix_thumbnail;
 		fs::path oldTextureFile = entryFolder / fs::path(oldFileName);
 		fs::path newTextureFile = entryFolder / fs::path(newFileName);
@@ -459,7 +527,8 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::filesystem::path& entryFolderOldNamePath, std::string& oldName, bool prettyPrint)
 {
 
-	// libEntry->name is already reanme to the new name but the folder has not been renamed yet
+	// libEntry->name is already renamed to the new name but the folder has not been renamed yet
+	// this method renames all files stored within the folder and the data file plus values within the data file.
 
 	namespace fs = std::filesystem;
 
@@ -478,11 +547,10 @@ void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::
 	if (!success)
 	{
 		MNEMOSY_ERROR("Error opening material file {} file. Message: {}", oldDataFilePath.generic_string(), dataFile.ErrorStringLastGet());
-		return;
 	}
 
 
-	dataFile.WriteString(success, jsonMatKey_name, newName);
+	dataFile.WriteString(success, jsonKey_unlit_name, newName);
 
 	// change name of texture if one is assigned
 	bool textureAssigend = dataFile.ReadBool(success, jsonKey_unlit_textureIsAssigned,false,false);
@@ -506,7 +574,7 @@ void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::
 		}
 		else {
 			dataFile.WriteBool(success, jsonKey_unlit_textureIsAssigned,false);
-			dataFile.WriteString(success, jsonKey_unlit_texturePath, "not Assigned");
+			dataFile.WriteString(success, jsonKey_unlit_texturePath, jsonKey_pathNotAssigned);
 		}
 	}
 
@@ -544,14 +612,145 @@ void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::
 }
 
 
+void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std::filesystem::path& entryFolderOldNamePath, std::string& oldName, bool prettyPrint) {
+	// libEntry->name is already renamed to the new name but the folder has not been renamed yet
+	// this method renames all files stored within the folder and the data file plus values within the data file.
 
-// TODO: implement
-void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std::filesystem::path& entryFolderOldNamePath, std::string& oldName, bool prettyPrint)
-{
+	namespace fs = std::filesystem;
+
+	std::string newName = libEntry->name;
+
+	fs::path entryFolder = entryFolderOldNamePath;
+
+
+	fs::path newDataFilePath = entryFolder / fs::path(newName + ".mnsydata");
+	fs::path oldDataFilePath = entryFolder / fs::path(oldName + ".mnsydata");
+
+	bool success = false;
+	flcrm::JsonSettings dataFile;
+
+	dataFile.FileOpen(success, oldDataFilePath, jsonKey_header, jsonKey_skybox_description);
+	if (!success) {
+		MNEMOSY_ERROR("Error opening material file {} file. Message: {}", oldDataFilePath.generic_string(), dataFile.ErrorStringLastGet());
+	}
+
+	dataFile.WriteString(success, jsonKey_skybox_name, newName);
+
+	
+	// change name of textures if they exist
+	bool textureAssigend = dataFile.ReadBool(success, jsonKey_skybox_textureIsAssigned, false, true);
+
+	if (textureAssigend) {
+
+		fs::path oldTextureFile = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_equirectangular);
+
+		// rename hdr equirectangular img
+		if (fs::exists(oldTextureFile)) { // check that the file exists
+
+			fs::path newTextureFile = entryFolder / fs::path(newName + texture_skybox_fileSuffix_equirectangular);
+
+			try {
+				fs::rename(oldTextureFile, newTextureFile);
+			}
+			catch (fs::filesystem_error e) {
+				MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
+			}
+		}
+		else {
+			dataFile.WriteBool(success, jsonKey_skybox_textureIsAssigned, false);
+			dataFile.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
+		}
+
+
+			// rename cubeColor file
+		{
+			fs::path cubeColorFile_old = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_cubeColor);
+
+			if (fs::exists(cubeColorFile_old)) {
+
+				fs::path cubeColorFile_new = entryFolder / fs::path(newName + texture_skybox_fileSuffix_cubeColor);
+				try {
+					fs::rename(cubeColorFile_old, cubeColorFile_new);
+				}
+				catch (fs::filesystem_error e) {
+					MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
+				}
+			}
+		}
+
+		// rename cubePrefilter file
+		{
+			fs::path cubePrefilterFile_old = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_cubePrefilter);
+
+			if (fs::exists(cubePrefilterFile_old)) {
+
+				fs::path cubePrefilterFile_new = entryFolder / fs::path(newName + texture_skybox_fileSuffix_cubePrefilter);
+				try {
+					fs::rename(cubePrefilterFile_old, cubePrefilterFile_new);
+				}
+				catch (fs::filesystem_error e) {
+					MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
+				}
+			}
+		}
+
+		// rename cubeIrradiance file
+		{
+			fs::path cubeIrradianceFile_old = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_cubeIrradiance);
+
+			if (fs::exists(cubeIrradianceFile_old)) {
+
+				fs::path cubeIrradianceFile_new = entryFolder / fs::path(newName + texture_skybox_fileSuffix_cubeIrradiance);
+				try {
+					fs::rename(cubeIrradianceFile_old, cubeIrradianceFile_new);
+				}
+				catch (fs::filesystem_error e) {
+					MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
+				}
+			}
+		}
+
+
+	}
+
+
+	// todo thumbnail rename
+
+	// change name of thumbnail file
+	{
+		fs::path oldThumbFile = entryFolder / fs::path(oldName + texture_fileSuffix_thumbnail);
+
+		if (fs::exists(oldThumbFile)) {
+
+			fs::path newThumbFile = entryFolder / fs::path(newName + texture_fileSuffix_thumbnail);
+
+
+			try {
+				fs::rename(oldThumbFile, newThumbFile);
+			}
+			catch (fs::filesystem_error e) {
+				MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
+			}
+		}
+	}
+
+	// save data file
+	dataFile.FilePrettyPrintSet(prettyPrint);
+
+	dataFile.FileClose(success, oldDataFilePath);
+
+	// rename data file 
+	try {
+		fs::rename(oldDataFilePath, newDataFilePath);
+	}
+	catch (fs::filesystem_error error) {
+		MNEMOSY_ERROR("System error renaming dataFile. \nError message: {}", error.what());
+	}
+
 }
 
 
-graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(systems::LibEntry* libEntry, bool prettyPrint)
+graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithreaded(systems::LibEntry* libEntry, bool prettyPrint)
 {
 	namespace fs = std::filesystem;
 
@@ -623,15 +822,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 	graphics::PictureInfo albedo_picInfo;
 	if (albedoAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_albedoPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_albedoPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_albedoPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_albedoAssigned, false);
 			albedoAssigned = false;
 		}
 		else {
-			thread_load_albedo = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(albedo_picErr), std::ref(albedo_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
+			thread_load_albedo = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(albedo_picErr), std::ref(albedo_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
 		}
 	}
 
@@ -644,15 +843,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 
 	if (roughnessAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_roughPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_roughPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_roughPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_roughPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_roughAssigned, false);
 			roughnessAssigned = false;
 		}
 		else {
-			thread_load_roughness = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(roughness_picErr), std::ref(roughness_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+			thread_load_roughness = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(roughness_picErr), std::ref(roughness_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
 		}
 	}
 
@@ -662,15 +861,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 	graphics::PictureInfo  metallic_picInfo;
 	std::thread thread_load_metallic;
 	if (metallicAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_metalPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_metalPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_metalPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_metalPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_metalAssigned, false);
 			metallicAssigned = false;
 		}
 		else {
-			thread_load_metallic = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(metallic_picErr), std::ref(metallic_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
+			thread_load_metallic = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(metallic_picErr), std::ref(metallic_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
 		}
 	}
 
@@ -681,15 +880,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 	std::thread thread_load_emissive;
 	if (emissiveAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_emissionPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_emissionPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_emissionPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_emissionPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_emissionAssigned, false);
 			emissiveAssigned = false;
 		}
 		else {
-			thread_load_emissive = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(emissive_picErr), std::ref(emissive_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
+			thread_load_emissive = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(emissive_picErr), std::ref(emissive_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
 		}
 
 	}
@@ -701,15 +900,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 
 	std::thread thread_load_normal;
 	if (normalAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_normalPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_normalPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_normalPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_normalPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_normalAssigned, false);
 			normalAssigned = false;
 		}
 		else {
-			thread_load_normal = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(normal_picErr), std::ref(normal_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+			thread_load_normal = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(normal_picErr), std::ref(normal_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
 		}
 
 	}
@@ -721,15 +920,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 	std::thread thread_load_ao;
 	if (aoAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_aoPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_aoPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_aoPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_aoPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_aoAssigned, false);
 			aoAssigned = false;
 		}
 		else {
-			thread_load_ao = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(ao_picErr), std::ref(ao_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
+			thread_load_ao = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(ao_picErr), std::ref(ao_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
 		}
 	}
 
@@ -739,15 +938,15 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 	graphics::PictureInfo  height_picInfo;
 	std::thread thread_load_height;
 	if (heightAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_heightPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_heightPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_heightPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_heightPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_heightAssigned, false);
 			heightAssigned = false;
 		}
 		else {
-			thread_load_height = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(height_picErr), std::ref(height_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
+			thread_load_height = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(height_picErr), std::ref(height_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
 		}
 	}
 
@@ -757,22 +956,22 @@ graphics::PbrMaterial* LibProcedures::LoadPbrMaterialFromFile_Multithreaded(syst
 	graphics::PictureInfo  opacity_picInfo;
 	std::thread thread_load_opacity;
 	if (opacityAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_opacityPath, jsonMatKey_pathNotAssigned, false);
+		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_opacityPath, jsonKey_pathNotAssigned, false);
 
 		if (!fs::exists(path)) {
-			matFile.WriteString(success, jsonMatKey_opacityPath, jsonMatKey_pathNotAssigned);
+			matFile.WriteString(success, jsonMatKey_opacityPath, jsonKey_pathNotAssigned);
 			matFile.WriteBool(success, jsonMatKey_opacityAssigned, false);
 			opacityAssigned = false;
 		}
 		else {
-			thread_load_opacity = std::thread(&graphics::Picture::ReadPicture_thread, std::ref(opacity_picErr), std::ref(opacity_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
+			thread_load_opacity = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(opacity_picErr), std::ref(opacity_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
 		}
 	}
 
 	graphics::PbrMaterial* mat = new graphics::PbrMaterial();
 	// Once all threads are going we let the main thread do the rest of the work
 	{
-		mat->Name = matFile.ReadString(success, jsonMatKey_name, libEntry->name, true);
+		//mat->Name = matFile.ReadString(success, jsonMatKey_name, libEntry->name, true);
 
 		mat->HasPackedTextures = matFile.ReadBool(success, jsonMatKey_hasChannelPacked, false, true);
 
@@ -947,12 +1146,12 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 		MNEMOSY_WARN("MaterialLibraryRegistry::LoadUnlitMaterialFromFile: Error opening data file: {} \nMessage: {}", dataFilePath.generic_string(), file.ErrorStringLastGet());
 	}
 
-	std::string name = file.ReadString(success, jsonKey_unlit_name, libEntry->name, true);
+	//std::string name = file.ReadString(success, jsonKey_unlit_name, libEntry->name, true);
 
-	bool textureIsAssiged = file.ReadBool(success, jsonKey_unlit_textureIsAssigned, false, true);
 	bool useAlpha = file.ReadBool(success, jsonKey_unlit_useAlpha, false, true);
 	bool useDitheredAlpha = file.ReadBool(success, jsonKey_unlit_useDitheredAlpha, false, true);
 	float alphaThreshold = file.ReadFloat(success, jsonKey_unlit_alphaThreshold, 0.5f, true);
+	bool textureIsAssiged = file.ReadBool(success, jsonKey_unlit_textureIsAssigned, false, true);
 	std::string textureFilename = file.ReadString(success, jsonKey_unlit_texturePath, "not assigned", false);
 
 	graphics::UnlitMaterial* unlitMat = new graphics::UnlitMaterial();
@@ -978,7 +1177,7 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 
 		if (fs::exists(texturePath)) {
 
-			picInfo = graphics::Picture::ReadPicture(picError, texturePath.generic_string().c_str(), true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
+			picInfo = graphics::Picture::ReadPicture(picError, texturePath.generic_string().c_str(), true,true,true);
 			if (!picError.wasSuccessfull) {
 
 				MNEMOSY_WARN("Error reading texture file of unlit material {} \nMessage {}", libEntry->name, picError.what);
@@ -1009,6 +1208,13 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 	file.FileClose(success, dataFilePath);
 
 	return unlitMat;
+}
+
+
+// TODO: implement
+graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(systems::LibEntry* libEntry, bool prettyPrint)
+{
+	return nullptr;
 }
 
 

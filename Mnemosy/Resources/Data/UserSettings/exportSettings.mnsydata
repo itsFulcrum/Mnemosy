@@ -1,7 +1,7 @@
 {
     "1_Header": "Mnemosy_Settings",
     "2_Description": "Contains user settings for exporting images",
-    "export_ImageFormat": ".png",
+    "export_ImageFormat": ".tif",
     "export_NormalAsOpenGl": true,
     "export_RoughnessAsSmoothness": false
 }

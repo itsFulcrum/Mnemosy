@@ -75,7 +75,7 @@ namespace mnemosy
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
 		
-		m_arena_persistent.arena_init_allocate_buffer(2048); //1024000 = 1 mb memory block
+		m_arena_persistent.arena_init_allocate_buffer(2248); //1024000 = 1 mb memory block
 
 
 		//MNEMOSY_TRACE("Initializing Subsystems");
@@ -147,7 +147,7 @@ namespace mnemosy
 
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
 		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
-		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->GetSkybox());
+		m_pRenderer->SetShaderSkyboxUniforms(m_pScene->userSceneSettings, m_pScene->GetSkybox());
 
 
 		m_isInitialized = true;

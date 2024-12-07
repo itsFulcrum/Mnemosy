@@ -1,0 +1,13 @@
+{
+    "1_Header": "Mnemosy Data File",
+    "2_Description": "This file stores user scene settings.",
+    "background_blurRadius": 0.0,
+    "background_blurSteps": 0,
+    "background_color_b": 0.23131674528121948,
+    "background_color_g": 0.23131674528121948,
+    "background_color_r": 0.23131674528121948,
+    "background_gradientopacity": 0.941100001335144,
+    "background_opacity": 0.0,
+    "background_rotation": 6.28000020980835,
+    "globalExposure": -8.0
+}

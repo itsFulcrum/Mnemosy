@@ -64,7 +64,7 @@ namespace mnemosy::graphics
 
 	void PbrMaterial::setDefaults() {
 
-		Name = "Mnemosy Default";
+		//Name = "Mnemosy Default";
 		Albedo = glm::vec3(0.8f, 0.8f, 0.8f);
 		Roughness = 0.1f;
 		IsSmoothnessTexture = false;
@@ -599,6 +599,14 @@ namespace mnemosy::graphics
 			delete m_unlitTexture;
 		}
 		m_unlitTexture = tex;
+	}
+
+	void UnlitMaterial::RemoveTexture()
+	{
+		if (m_unlitTexture) {
+			delete m_unlitTexture;
+			m_unlitTexture = nullptr;
+		}
 	}
 
 	void UnlitMaterial::SetUniforms(Shader* shader)

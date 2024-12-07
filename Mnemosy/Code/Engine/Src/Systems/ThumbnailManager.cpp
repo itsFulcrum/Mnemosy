@@ -143,7 +143,7 @@ namespace mnemosy::systems {
 		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
 
-			graphics::PbrMaterial* pbrMat = systems::LibProcedures::LoadPbrMaterialFromFile_Multithreaded(libEntry,true);
+			graphics::PbrMaterial* pbrMat = systems::LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithreaded(libEntry,true);
 
 			renderer.RenderThumbnail_PbrMaterial(*pbrMat);
 			delete pbrMat;

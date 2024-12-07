@@ -4,6 +4,8 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+#include <json.hpp>
+
 #include "Include/Systems/FolderTreeNode.h"
 
 
@@ -45,16 +47,18 @@ namespace mnemosy::graphics
 
 		m_pbrMaterial = new PbrMaterial();
 
+		LoadSceneSettingsFromFile();
+
 		Setup();
 
 	}
 
 	void Scene::Shutdown() {
 
-		if (m_pbrMaterial) {
+		SaveSceneSettingsToFile();
 
+		if (m_pbrMaterial) {
 			delete m_pbrMaterial;
-			m_pbrMaterial = nullptr;
 		}
 
 		if (m_skybox) {
@@ -174,6 +178,62 @@ namespace mnemosy::graphics
 		m_light->falloff = 0.5f;
 
 
+	}
+
+	void Scene::LoadSceneSettingsFromFile()
+	{
+		namespace fs = std::filesystem;
+
+		fs::path filepath = MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / fs::path("sceneSettings.mnsydata");
+
+		flcrm::JsonSettings file;
+		bool success = false;
+		file.FileOpen(success,filepath,"Mnemosy Data File", "This file stores user scene settings.");
+		if (!success) {
+			MNEMOSY_WARN("Failed to load user scene settings file - using defaults: Message: {}", file.ErrorStringLastGet());
+		}
+
+		 userSceneSettings.globalExposure	= file.ReadFloat(success, "globalExposure", 0.0f, true);
+		 userSceneSettings.background_color_r			= file.ReadFloat(success, "background_color_r", 0.2f, true);
+		 userSceneSettings.background_color_g			= file.ReadFloat(success, "background_color_g", 0.2f, true);
+		 userSceneSettings.background_color_b			= file.ReadFloat(success, "background_color_b", 0.2f, true);
+		 userSceneSettings.background_rotation			= file.ReadFloat(success, "background_rotation", 0.0f, true);
+		 userSceneSettings.background_opacity			= file.ReadFloat(success, "background_opacity", 0.0f, true);
+		 userSceneSettings.background_gradientOpacity	= file.ReadFloat(success, "background_gradientopacity", 1.0f, true);
+		 userSceneSettings.background_blurRadius		= file.ReadFloat(success, "background_blurRadius", 0.0f, true);
+		 userSceneSettings.background_blurSteps		= file.ReadInt(success, "background_blurSteps", 0, true);
+
+		 file.FilePrettyPrintSet(true);
+
+		 file.FileClose(success,filepath);
+	}
+
+	void Scene::SaveSceneSettingsToFile() {
+
+		namespace fs = std::filesystem;
+
+		fs::path filepath = MnemosyEngine::GetInstance().GetFileDirectories().GetUserSettingsPath() / fs::path("sceneSettings.mnsydata");
+
+		flcrm::JsonSettings file;
+		bool success = false;
+		file.FileOpen(success, filepath, "Mnemosy Data File", "This file stores user scene settings.");
+		if (!success) {
+			MNEMOSY_WARN("Failed to load user scene settings file: Message: {}", file.ErrorStringLastGet());
+		}
+
+		file.WriteFloat(success, "globalExposure", userSceneSettings.globalExposure);
+		file.WriteFloat(success, "background_color_r", userSceneSettings.background_color_r);
+		file.WriteFloat(success, "background_color_g", userSceneSettings.background_color_g);
+		file.WriteFloat(success, "background_color_b", userSceneSettings.background_color_b);
+		file.WriteFloat(success, "background_rotation", userSceneSettings.background_rotation);
+		file.WriteFloat(success, "background_opacity", userSceneSettings.background_opacity);
+		file.WriteFloat(success, "background_gradientopacity", userSceneSettings.background_gradientOpacity);
+		file.WriteFloat(success, "background_blurRadius", userSceneSettings.background_blurRadius);
+		file.WriteInt(success,   "background_blurSteps", userSceneSettings.background_blurSteps);
+
+		file.FilePrettyPrintSet(true);
+
+		file.FileClose(success, filepath);
 	}
 
 } // !mnemosy::graphics

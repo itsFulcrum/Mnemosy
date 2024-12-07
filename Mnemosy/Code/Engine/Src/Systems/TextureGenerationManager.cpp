@@ -6,6 +6,7 @@
 
 #include "Include/Systems/ExportManager.h"
 
+#include "Include/Systems/MeshRegistry.h"
 #include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 #include "Include/Graphics/Texture.h"
@@ -13,6 +14,7 @@
 #include "Include/Graphics/Shader.h"
 
 #include <glad/glad.h>
+
 
 namespace mnemosy::systems
 {	
@@ -22,37 +24,11 @@ namespace mnemosy::systems
 	void TextureGenerationManager::Init() {
 		m_pTextureGenShader = nullptr;
 
-		m_VBO = 0;
-		m_VAO = 0;
+		//m_VBO = 0;
+		//m_VAO = 0;
 
 		m_FBO = 0;
 		m_renderTexture_ID = 0;
-
-		m_screenQuadVertices[0] = -1.0f;
-		m_screenQuadVertices[1] = -1.0f;
-		m_screenQuadVertices[2] =  0.0f;
-		m_screenQuadVertices[3] =  0.0f;
-		m_screenQuadVertices[4] =  1.0f;
-		m_screenQuadVertices[5] =  1.0f;
-		m_screenQuadVertices[6] =  1.0f;
-		m_screenQuadVertices[7] =  1.0f;
-		m_screenQuadVertices[8] = -1.0f;
-		m_screenQuadVertices[9] =  1.0f;
-		m_screenQuadVertices[10] =  0.0f;
-		m_screenQuadVertices[11] =  1.0f;
-		m_screenQuadVertices[12] = -1.0f;
-		m_screenQuadVertices[13] = -1.0f;
-		m_screenQuadVertices[14] =  0.0f;
-		m_screenQuadVertices[15] =  0.0f;
-		m_screenQuadVertices[16] =  1.0f;
-		m_screenQuadVertices[17] = -1.0f;
-		m_screenQuadVertices[18] =  1.0f;
-		m_screenQuadVertices[19] =  0.0f;
-		m_screenQuadVertices[20] =  1.0f;
-		m_screenQuadVertices[21] =  1.0f;
-		m_screenQuadVertices[22] =  1.0f;
-		m_screenQuadVertices[23] = 1.0f;
-
 	}
 
 	void TextureGenerationManager::Shutdown()
@@ -60,16 +36,6 @@ namespace mnemosy::systems
 		if (m_pTextureGenShader == nullptr) {
 			delete m_pTextureGenShader;
 			m_pTextureGenShader = nullptr;
-		}
-
-		if (m_VBO != 0) {
-			glDeleteBuffers(1, &m_VBO);
-			m_VBO = 0;
-		}
-
-		if (m_VAO != 0) {
-			glDeleteVertexArrays(1, &m_VAO);
-			m_VAO = 0;
 		}
 
 		if (m_FBO != 0) {
@@ -121,7 +87,7 @@ namespace mnemosy::systems
 
 		// DRAW CALL
 		// render screen quad with shader into render texture
-		glBindVertexArray(m_VAO);		
+		glBindVertexArray(MnemosyEngine::GetInstance().GetMeshRegistry().GetScreenQuadVAO());	
 		glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertecies
 		glBindVertexArray(0);
 
@@ -132,7 +98,7 @@ namespace mnemosy::systems
 
 
 		
-		// Export to png or tiff file
+		// Export 
 		if (exportTexture) {
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
@@ -150,7 +116,7 @@ namespace mnemosy::systems
 
 
 			TextureExportInfo info = TextureExportInfo(p, width, height, format,false);
-			exporter.GLTextureExport(m_renderTexture_ID, info,graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+			exporter.GLTextureExport(m_renderTexture_ID, info);
 		}
 
 		// === END FRAME
@@ -195,7 +161,7 @@ namespace mnemosy::systems
 
 		// DRAW CALL
 		// render screen quad with shader into render texture
-		glBindVertexArray(m_VAO);
+		glBindVertexArray(MnemosyEngine::GetInstance().GetMeshRegistry().GetScreenQuadVAO());
 		glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertecies
 		glBindVertexArray(0);
 
@@ -205,7 +171,7 @@ namespace mnemosy::systems
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 
-		// Export to png or tiff file
+		// Export
 		if (exportTexture) {
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
@@ -215,7 +181,7 @@ namespace mnemosy::systems
 			std::filesystem::path p = { exportPath };
 			TextureExportInfo info = TextureExportInfo(p,width,height,format,false);
 
-			exporter.GLTextureExport(m_renderTexture_ID,info,graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+			exporter.GLTextureExport(m_renderTexture_ID,info);
 		}
 
 		// === END FRAME
@@ -273,7 +239,7 @@ namespace mnemosy::systems
 
 			std::filesystem::path p = { exportPath };
 			TextureExportInfo info = TextureExportInfo(p, width, height, channelFormat,false);
-			exporter.GLTextureExport(m_renderTexture_ID,info,graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
+			exporter.GLTextureExport(m_renderTexture_ID,info);
 		}
 
 		// === END FRAME
@@ -506,7 +472,7 @@ namespace mnemosy::systems
 			std::filesystem::path p = { exportPath };
 			TextureExportInfo info = TextureExportInfo(p, width, height, Format,false);
 
-			exporter.GLTextureExport(m_renderTexture_ID,info,graphics::PBRTextureType::MNSY_TEXTURE_NONE);
+			exporter.GLTextureExport(m_renderTexture_ID,info);
 		}
 
 
@@ -522,11 +488,11 @@ namespace mnemosy::systems
 		if (m_pTextureGenShader == nullptr)
 			return false;
 
-		if (m_VBO == 0)
+		/*if (m_VBO == 0)
 			return false;
 
 		if (m_VAO == 0)
-			return false;
+			return false;*/
 
 		if (m_FBO == 0)
 			return false;
@@ -548,26 +514,26 @@ namespace mnemosy::systems
 			m_pTextureGenShader = new graphics::Shader(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
 		}
 
-		// Init Mesh buffers
-		if (m_VBO == 0) {
-			glGenBuffers(1, &m_VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		}
+		//// Init Mesh buffers
+		//if (m_VBO == 0) {
+		//	glGenBuffers(1, &m_VBO);
+		//	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		//}
 
-		if (m_VAO == 0) {
-			glGenVertexArrays(1, &m_VAO);
-			glBindVertexArray(m_VAO);
+		//if (m_VAO == 0) {
+		//	glGenVertexArrays(1, &m_VAO);
+		//	glBindVertexArray(m_VAO);
 
-			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(m_screenQuadVertices), m_screenQuadVertices, GL_STATIC_DRAW);
+		//	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		//	glBufferData(GL_ARRAY_BUFFER, sizeof(m_screenQuadVertices), m_screenQuadVertices, GL_STATIC_DRAW);
 
-			// Setup Attributes
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-			
-		}
+		//	// Setup Attributes
+		//	glEnableVertexAttribArray(0);
+		//	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		//	glEnableVertexAttribArray(1);
+		//	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		//	
+		//}
 
 		// Gen Framebuffer
 		if (m_FBO == 0) {
@@ -598,7 +564,7 @@ namespace mnemosy::systems
 
 		// DRAW CALL
 		// render screen quad with shader into render texture
-		glBindVertexArray(m_VAO);
+		glBindVertexArray(MnemosyEngine::GetInstance().GetMeshRegistry().GetScreenQuadVAO());
 		glDrawArrays(GL_TRIANGLES, 0, 6); // 6 vertecies
 		glBindVertexArray(0);
 

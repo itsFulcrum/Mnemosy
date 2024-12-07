@@ -5,7 +5,7 @@
 
 
 // Vertex shader inputs
-in vec3 position_WS;
+//in vec3 position_WS;
 
 // inputs
 uniform vec3 _lightColor;

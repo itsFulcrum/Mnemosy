@@ -26,14 +26,14 @@ namespace mnemosy::systems {
 #define jsonLibKey_entryTypes		"6_entryTypes"			// std::vector<int> - list of enum type LibEntryType stored as integers
 
 
-//#define jsonKey_MnemosyDataFile	"1_Mnemosy_Data_File"	// std::string - header
-//#define jsonKey_MnemosyDataFileTxt "Mnemosy Data File"	// text description of header
+// global keys
 
 #define jsonKey_header			"Mnemosy Data File"		// text description of header
+#define jsonKey_pathNotAssigned  "notAssigned"			// string to use when path has not been assigned yet
 
 // json identifiers for pbr material data file
 
-#define jsonMatKey_description		"Contains pbr material meta data" // text description
+#define jsonMatKey_description		"Contains PBR Material Meta data" // text description
 #define jsonMatKey_name				"name"					// std:.string - name of the material
 
 #define jsonMatKey_hasChannelPacked "hasChannelPacked"		// bool - if a texture has channelpacked textures
@@ -74,7 +74,6 @@ namespace mnemosy::systems {
 #define jsonMatKey_opacityAssigned	"opacityAssigned"		// bool - if a texture has been assinged
 
 
-#define jsonMatKey_pathNotAssigned  "notAssigned"			// string to use when path has not been assigned yet
 
 #define jsonMatKey_albedoPath		"albedoPath"			// std::string - filename of the texture in the same folder
 #define jsonMatKey_roughPath		"roughPath"				// std::string - filename of the texture in the same folder
@@ -90,7 +89,7 @@ namespace mnemosy::systems {
 
 // jsonkeys for unlit material files
 
-#define jsonKey_unlit_description		"Contains Unlit Material meta data"
+#define jsonKey_unlit_description		"Contains Unlit Material Meta Data"
 #define jsonKey_unlit_name				"name"
 #define jsonKey_unlit_useAlpha			"useAlpha"
 #define jsonKey_unlit_useDitheredAlpha	"useDitheredAlpha"
@@ -99,6 +98,35 @@ namespace mnemosy::systems {
 #define jsonKey_unlit_texturePath		"texturePath"
 #define jsonKey_unlit_uvTilingX			"uvTilingX"
 #define jsonKey_unlit_uvTilingY			"uvTilingY"
+
+
+// jsonKeys for skybox material files
+
+#define jsonKey_skybox_description		"Contains Skybox Material Meta Data"
+#define jsonKey_skybox_name				"name"
+
+#define jsonKey_skybox_exposure		"exposure"
+
+#define jsonKey_skybox_textureIsAssigned "textureAssigned"
+#define jsonKey_skybox_texturePath		"texturePath"
+
+#define jsonKey_skybox_color_r			"color_r"
+#define jsonKey_skybox_color_g			"color_g"
+#define jsonKey_skybox_color_b			"color_b"
+
+
+#define jsonKey_skybox_sunColor_r		"sunColor_r"
+#define jsonKey_skybox_sunColor_g		"sunColor_g"
+#define jsonKey_skybox_sunColor_b		"sunColor_b"
+
+#define jsonKey_skybox_sunDir_x			"sunDir_x"
+#define jsonKey_skybox_sunDir_y			"sunDir_y"
+#define jsonKey_skybox_sunDir_z			"sunDir_z"
+
+#define jsonKey_skybox_sunStrength		"sunStrength"
+
+
+
 
 } // namespace mnemosy::systems
 

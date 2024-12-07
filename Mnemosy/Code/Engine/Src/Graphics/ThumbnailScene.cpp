@@ -57,7 +57,17 @@ namespace mnemosy::graphics
 	
 
 	void ThumbnailScene::Setup()
-	{
+	{		
+		m_sceneSettings.globalExposure = -0.2f;
+		m_sceneSettings.background_color_r = 0.3f;
+		m_sceneSettings.background_color_g = 0.3f;
+		m_sceneSettings.background_color_b = 0.3f;
+		m_sceneSettings.background_rotation = 5.163f;
+		m_sceneSettings.background_opacity = 0.0f;
+		m_sceneSettings.background_gradientOpacity = 1.0f;
+		m_sceneSettings.background_blurRadius = 0.0f;
+		m_sceneSettings.background_blurSteps = 0;
+
 		// camera setup
 		m_camera->transform.SetPosition(glm::vec3(0.0f, 0.0f, 1.8f));
 		m_camera->transform.SetRotationEulerAngles(glm::vec3(0.0f, 180.0f, 0.0f));
@@ -73,13 +83,13 @@ namespace mnemosy::graphics
 		// skybox setup
 		//MNEMOSY_TRACE("StartGenerateSkyboxes");
 		//m_skybox->AssignSkyboxTexture("../Resources/Textures/spruit_sunrise.hdr", 2048);
-		m_skybox->rotation = 5.163f;
-		m_skybox->colorTint = glm::vec3(0.3f, 0.3f, 0.3f);
-		m_skybox->exposure = -0.2f;
-		m_skybox->blurSteps = 0;
-		m_skybox->backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
-		m_skybox->opacity = 0.0f;
-		m_skybox->gradientOpacity = 1.0f;
+		//m_skybox->rotation = 5.163f;
+		//m_skybox->colorTint = glm::vec3(0.3f, 0.3f, 0.3f);
+		//m_skybox->exposure = -0.2f;
+		//m_skybox->blurSteps = 0;
+		//m_skybox->backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
+		//m_skybox->opacity = 0.0f;
+		//m_skybox->gradientOpacity = 1.0f;
 
 
 

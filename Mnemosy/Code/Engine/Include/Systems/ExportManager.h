@@ -9,11 +9,17 @@
 #include <filesystem>
 //namespace fs = std::filesystem;
 
-
+namespace mnemosy::systems {
+	enum LibEntryType;
+	struct LibEntry;
+	struct FolderNode;
+}
 
 namespace mnemosy::graphics
 {
+	class UnlitMaterial;
 	class PbrMaterial;
+	class Skybox;
 	class Texture;
 	enum NormalMapFormat;
 }
@@ -51,9 +57,14 @@ namespace mnemosy::systems
 		void Init();
 		void Shutdown();
 
-		bool ExportMaterialTextures(std::filesystem::path& exportPath, std::filesystem::path& materialFolderPath, graphics::PbrMaterial& material, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
+		bool PbrMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::PbrMaterial& pbrMat, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
+		
+		void UnlitMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry , graphics::UnlitMaterial& unlitMat);
+		// TODO: implement
+		void SkyboxMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::Skybox& skyboxMat);
 
-		void GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo, graphics::PBRTextureType PBRTypeHint);
+
+		void GLTextureExport(const int glTextureID, TextureExportInfo& exportInfo);
 		
 
 		// Export settings

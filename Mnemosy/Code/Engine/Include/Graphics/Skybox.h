@@ -22,22 +22,24 @@ namespace mnemosy::graphics
 		bool AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently);
 		void LoadPreviewSkybox(const std::string& name);
 
+		// TODO: implement
+		bool IsTextureAssigned() { return false; }
+		void RemoveCubemap();
+
+
 		Cubemap& GetCubemap();
 		ModelData& GetModelData();
 
 	public:
-		glm::vec3 colorTint = glm::vec3(1.0f, 1.0f, 1.0f);
-		glm::vec3 backgroundColor = glm::vec3(0.2f, 0.2f, 0.2f);
-
-		float rotation = 0.0f;
+		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glm::vec3 sunDir = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
+		float sunStrength = 1.0f;
 		float exposure = 0.0f;
-		float opacity = 0.0f;
-		float gradientOpacity = 1.0f;
-		float blurRadius = 0.0f;
-		int blurSteps = 0;
 
 	private:
-		uint16_t m_modelData_id;
+		// there is no need to have this  part of this class
+		uint16_t m_modelData_id; 
 
 
 		Cubemap* m_pCubemap = nullptr;

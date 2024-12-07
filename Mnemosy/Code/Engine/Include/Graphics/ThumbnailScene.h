@@ -1,6 +1,7 @@
 #ifndef THUMBNAIL_SCENE_H
 #define THUMBNAIL_SCENE_H
 
+#include "Include/Graphics/SceneSettings.h"
 #include <memory>
 
 namespace mnemosy::graphics
@@ -32,8 +33,12 @@ namespace mnemosy::graphics
 		Light& GetLight() {	return *m_light;}
 		Skybox& GetSkybox() { return *m_skybox; }
 
+		SceneSettings& GetSceneSettings() { return m_sceneSettings; }
+
 	private:
 		void Setup();
+
+		SceneSettings m_sceneSettings;
 
 		std::unique_ptr<Camera> m_camera;
 		std::unique_ptr<RenderMesh> m_mesh;

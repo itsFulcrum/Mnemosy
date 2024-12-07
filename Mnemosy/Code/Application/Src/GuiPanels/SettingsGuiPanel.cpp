@@ -439,18 +439,20 @@ namespace mnemosy::gui
 			}
 
 
+			//bool skyboxValuesChanges = false;
 
-			ImGui::SliderFloat("Exposure", &skybox.exposure, -5.0f, 5.0f, "%.4f");
-			ImGui::SliderFloat("Rotation", &skybox.rotation, 0.0f, 6.28f, "%.4f");
+			ImGui::SliderFloat("Global Exposure", &scene.userSceneSettings.globalExposure, -8.0f, 8.0f, "%.4f");
+			ImGui::SliderFloat("Rotation", &scene.userSceneSettings.background_rotation, 0.0f, 6.28f, "%.4f");
 
-			ImGui::ColorEdit3("Background Color", (float*)&skybox.backgroundColor);
-			ImGui::SliderFloat("Opacity", &skybox.opacity, 0.0f, 1.0f, "%.4f");
-			ImGui::SliderFloat("Gradient", &skybox.gradientOpacity, 0.0f, 1.0f, "%.4f");
-			ImGui::ColorEdit3("Color Tint", (float*)&skybox.colorTint);
-			ImGui::SliderFloat("Blur Radius", &skybox.blurRadius, 0.0f, 2.0f, "%.5f");
-			ImGui::SliderInt("Blur Steps", &skybox.blurSteps, 0, 50);
+			ImGui::ColorEdit3("Background Color", (float*)&scene.userSceneSettings.background_color_r); // hacky, may fail
+			ImGui::SliderFloat("Opacity", &scene.userSceneSettings.background_opacity, 0.0f, 1.0f, "%.4f");
+			ImGui::SliderFloat("Gradient", &scene.userSceneSettings.background_gradientOpacity, 0.0f, 1.0f, "%.4f");
+			//ImGui::ColorEdit3("Color Tint", (float*)&skybox.color);
+			ImGui::SliderFloat("Blur Radius", &scene.userSceneSettings.background_blurRadius, 0.0f, 2.0f, "%.5f");
+			ImGui::SliderInt("Blur Steps", &scene.userSceneSettings.background_blurSteps, 0, 50);
 
-			renderer.SetShaderSkyboxUniforms(skybox);
+			// we shouldn't do this every frame
+			renderer.SetShaderSkyboxUniforms(scene.userSceneSettings,skybox);
 
 			ImGui::TreePop();
 		}

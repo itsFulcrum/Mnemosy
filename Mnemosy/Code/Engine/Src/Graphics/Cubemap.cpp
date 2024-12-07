@@ -28,7 +28,6 @@ namespace mnemosy::graphics
 		if(m_prefilterMap_isGenerated)
 			glDeleteTextures(1,&m_prefilterMapID);
 
-		GLuint;
 	}
 
 	bool Cubemap::LoadEquirectangularFromFile(const char* imagePath, const char* name,const unsigned int colorCubemapResolution,const bool savePermanently) {
@@ -43,7 +42,7 @@ namespace mnemosy::graphics
 		{
 			graphics::PictureError errorCheck;
 						
-			graphics::PictureInfo info = graphics::Picture::ReadPicture(errorCheck, imagePath, false,PBRTextureType::MNSY_TEXTURE_NONE);
+			graphics::PictureInfo info = graphics::Picture::ReadPicture(errorCheck, imagePath, false,true, false);
 
 			if (!errorCheck.wasSuccessfull) {
 
