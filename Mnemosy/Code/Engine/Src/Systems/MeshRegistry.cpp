@@ -1,6 +1,7 @@
 #include "Include/Systems/MeshRegistry.h"
 
 #include "Include/MnemosyEngine.h"
+#include "Include/Core/FileDirectories.h"
 #include "Include/Core/Clock.h"
 #include "Include/Core/Log.h"
 #include "Include/Graphics/ModelLoader.h"
@@ -8,11 +9,17 @@
 
 #include <glad/glad.h>
 
+#include <filesystem>
 
 namespace mnemosy::systems {
 
 	void MeshRegistry::Init() {
 
+		// Load Skybox Render Mesh
+
+		std::filesystem::path skyboxMeshPath = MnemosyEngine::GetInstance().GetFileDirectories().GetMeshesPath() / std::filesystem::path("mnemosy_skybox_render_mesh.fbx");
+
+		m_skybox_render_ModelData_ID = LoadMesh(skyboxMeshPath.generic_string());
 		
 		// Init screen quad Mesh buffers
 		
@@ -127,6 +134,10 @@ namespace mnemosy::systems {
 	unsigned int& MeshRegistry::GetScreenQuadVAO() {
 
 		return m_ScreenQuad_VAO;
+	}
+
+	graphics::ModelData& MeshRegistry::GetSkyboxRenderMesh() {
+		return GetMeshByID(m_skybox_render_ModelData_ID);
 	}
 
 	

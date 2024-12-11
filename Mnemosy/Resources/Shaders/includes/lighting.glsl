@@ -28,6 +28,7 @@ struct LightingData
   vec3 viewDirection;
   float skyboxRotation;
   float skyboxExposure;
+  vec4 skyboxColor;
   vec3 lightPosition;
   vec3 lightColor;
   int lightType;
@@ -126,7 +127,10 @@ vec4 lightingPBR(SurfaceData sd, LightingData ld,samplerCube irradianceMap,sampl
 
     // INDIRECT DIFFUSE
     vec3 rotatedNormal =  Rotate_About_Axis_Radians_float(sd.normal, vec3(0.0f,1.0f,0.0f), ld.skyboxRotation);
-    vec3 irradiance = textureLod(irradianceMap, rotatedNormal,1).rgb;
+    vec3 irradiance = texture(irradianceMap, rotatedNormal).rgb;
+    irradiance.rgb = lerp(ld.skyboxColor.rgb,irradiance.rgb,ld.skyboxColor.w); // skyboxColor.w indicates if skybox samplers are bound or not
+
+
     irradiance = applyExposure(vec4(irradiance,1.0f), ld.skyboxExposure).rgb;
     vec3 diffuse = irradiance * sd.albedo;
 
@@ -135,6 +139,9 @@ vec4 lightingPBR(SurfaceData sd, LightingData ld,samplerCube irradianceMap,sampl
     vec3 rotatedReflect = Rotate_About_Axis_Radians_float(reflectVec, vec3(0.0f,1.0f,0.0f), ld.skyboxRotation);
 
     vec3 prefilteredColor = textureLod(prefilterMap, rotatedReflect,  sd.roughness * MAX_REFLECTION_LOD).rgb;
+    prefilteredColor.rgb = lerp(ld.skyboxColor.rgb,prefilteredColor.rgb,ld.skyboxColor.w); // same here if skyboxes are not bound just use its color;
+
+
     prefilteredColor = applyExposure(vec4(prefilteredColor,1.0f), ld.skyboxExposure).rgb;
     vec2 envBRDF  = texture(brdfLUT, vec2(NdotV, sd.roughness)).rg;
     vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);

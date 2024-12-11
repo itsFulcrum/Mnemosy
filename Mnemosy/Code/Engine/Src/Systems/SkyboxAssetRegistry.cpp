@@ -4,273 +4,367 @@
 
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Systems/ExportManager.h"
+#include "Include/Systems/FolderTreeNode.h"
+#include "Include/Systems/LibraryProcedures.h"
+#include "Include/Systems/JsonKeys.h"
 
-#include <fstream>
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Cubemap.h"
+#include "Include/Graphics/TextureDefinitions.h"
+#include "Include/Graphics/Texture.h"
+#include "Include/Graphics/Utils/Picture.h"
+#include "Include/Graphics/Utils/KtxImage.h"
 
+#include <filesystem>
+#include <json.hpp>
 
 namespace mnemosy::systems
 {
-	// Public Methods
-
 	void SkyboxAssetRegistry::Init() {
 
-		prettyPrintDataFile = false;
-
-		m_dataFileName = "SkyboxAssetsRegistry.mnsydata";
-		m_pathToDatafile = MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath().generic_string() + "/" + m_dataFileName;
-
-		LoadEntriesFromSavedData();
-
-		m_currentSelected = GetPositionByName("Market");
+		LoadDataFile();
 	}
 
 	void SkyboxAssetRegistry::Shutdown() {
 
-		SaveAllEntriesToDataFile();
-
+		SaveDataFile();
 	}
 
-	bool SkyboxAssetRegistry::CheckIfExists(const std::string& name)
-	{
-		if (m_orderedEntryNames.empty())
-			return false;
+	graphics::Skybox* SkyboxAssetRegistry::LoadPreviewSkybox(const uint16_t id,const bool setAsSelected) {
 
-		for (std::string& entryName : m_orderedEntryNames)
-		{
-			if (entryName == name)
-			{
-				return true;
-			}
+		namespace fs = std::filesystem;
+
+		if (m_entryNames.empty()) {
+			MNEMOSY_ERROR("Skybox Registry faild to load preview skybox, list is empty");
+			return new graphics::Skybox();
 		}
 
-		return false;
+		if (id >= m_entryNames.size()) {
+			MNEMOSY_ERROR("Skybox Registry faild to load preview skybox, Id does not exist");
+			return new graphics::Skybox();
+		}
+
+		if (setAsSelected) {
+			m_currentSelected = id;
+		}
+
+
+		fs::path folder = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
+
+		return systems::LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(folder, m_entryNames[id],true);
 	}
-
-	void SkyboxAssetRegistry::AddEntry(const std::string& name)
+	
+	void SkyboxAssetRegistry::AddLibEntryToPreviewSkyboxes(systems::LibEntry* libEntry)
 	{
-		// check if it already exists
+		namespace fs = std::filesystem;
 
-		if (CheckIfExists(name))
+		if (libEntry == nullptr) {
 			return;
-
-		SkyboxAssetEntry newEntry;
-		newEntry.skyName			= name;
-		newEntry.colorCubeFile		= name + "_cubeColor.ktx2";
-		newEntry.irradianceCubeFile	= name + "_cubeIrradiance.ktx2";
-		newEntry.prefilterCubeFile	= name + "_cubePrefilter.ktx2";
-
-		m_skyboxAssets.push_back(newEntry);
-		m_orderedEntryNames.push_back(name);
-
-
-		// save to file
-		SaveAllEntriesToDataFile();
-	}
-
-	void SkyboxAssetRegistry::RemoveEntry(const std::string& name) {
-
-		// delete the files
-		//mnemosy::core::FileDirectories& FD = MnemosyEngine::GetInstance().GetFileDirectories();
-		std::filesystem::path pathToCubemaps = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
-
-		SkyboxAssetEntry entryToRemove;
-		entryToRemove.skyName				= name;
-		entryToRemove.colorCubeFile			= name + "_cubeColor.ktx2";
-		entryToRemove.irradianceCubeFile	= name + "_cubeIrradiance.ktx2";
-		entryToRemove.prefilterCubeFile		= name + "_cubePrefilter.ktx2";
-
-		std::filesystem::path pathToColor = pathToCubemaps / std::filesystem::path(entryToRemove.colorCubeFile);
-		std::filesystem::path pathToIrradiance = pathToCubemaps / std::filesystem::path(entryToRemove.irradianceCubeFile);
-		std::filesystem::path pathToPrefilter = pathToCubemaps / std::filesystem::path(entryToRemove.prefilterCubeFile);
-
-		std::filesystem::remove(pathToColor);
-		std::filesystem::remove(pathToIrradiance);
-		std::filesystem::remove(pathToPrefilter);
-
-		// removing from saved data
-		for (int i = 0; i < m_skyboxAssets.size(); i++) {
-
-			if (m_skyboxAssets[i].skyName == name) {
-
-				m_skyboxAssets.erase(m_skyboxAssets.begin() + i);
-				m_orderedEntryNames.erase(m_orderedEntryNames.begin() + i);
-				break;
-			}
 		}
 
-		SaveAllEntriesToDataFile();
-	}
+		// check if entry name already exists in the preview skyboxes
+		if (!m_entryNames.empty()) {
+			std::string name = libEntry->name;
+			for (int i = 0; i < m_entryNames.size(); i++) {
 
-	SkyboxAssetEntry SkyboxAssetRegistry::GetEntry(const std::string& name)
-	{
-		SkyboxAssetEntry returnEntry;
-
-		if (!m_skyboxAssets.empty())
-		{
-			for (SkyboxAssetEntry& entry : m_skyboxAssets)
-			{
-				if (entry.skyName == name)
-				{
-
-					returnEntry.skyName				= entry.skyName;
-					returnEntry.colorCubeFile		= entry.colorCubeFile;
-					returnEntry.irradianceCubeFile	= entry.irradianceCubeFile;
-					returnEntry.prefilterCubeFile	= entry.prefilterCubeFile;
-
-					return returnEntry;
+				if (name == m_entryNames[i]) {
+					MNEMOSY_ERROR("Cannot add entry with name {}, to preview skyboxes because the name already exists.", name);
+					return;
 				}
 			}
 		}
 
-		returnEntry.skyName				= "EntryDoesNotExist";
-		returnEntry.colorCubeFile		= "EntryDoesNotExist";
-		returnEntry.irradianceCubeFile	= "EntryDoesNotExist";
-		returnEntry.prefilterCubeFile	= "EntryDoesNotExist";
+		// check that both data file and equirectangular exist otherwise we wont be able to store it to preview skyboxes.
 
-		return returnEntry;
-	}
+		fs::path entryDataFile = systems::LibProcedures::LibEntry_GetDataFilePath(libEntry);
+		if (!fs::exists(entryDataFile)) {
+			MNEMOSY_ERROR("Cannot add entry to preview skyboxes because the data file is missing. Path: {} ", entryDataFile.generic_string());
+			return;
+		}
+				
+		fs::path entryFolder = systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
 
-	std::vector<std::string>& SkyboxAssetRegistry::GetVectorOfNames()
-	{
-		return m_orderedEntryNames;
-	}
+		bool hasTextures = true;
+		{
+			bool success = false;
+			flcrm::JsonSettings entryJsonFile;
+			entryJsonFile.FileOpen(success,entryDataFile,jsonKey_header,jsonKey_skybox_description);
+			hasTextures = entryJsonFile.ReadBool(success, jsonKey_skybox_textureIsAssigned, false, false);
+		}
 
-	int SkyboxAssetRegistry::GetPositionByName(const std::string name) {
+		std::filesystem::path cubemapsPath = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
 
-		for (int i = 0; i < m_orderedEntryNames.size(); i++) {
+		if (hasTextures) {
+			
+			fs::path equirectangularPath = entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_equirectangular);
+			if (!fs::exists(equirectangularPath)) {
+				MNEMOSY_ERROR("Cannot add entry to preview skyboxes because the equirectangular file is missing. Path: {} ", equirectangularPath.generic_string());
+				return;
+			}
 
-			if (name == m_orderedEntryNames[i]) {
-				return i;
+			fs::path cubeColorPath		= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeColor);
+			fs::path cubeIrradiancePath = entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeIrradiance);
+			fs::path cubePrefilterPath	= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubePrefilter);
+			
+
+			graphics::PictureError picError;
+
+			graphics::PictureInfo picInfo = graphics::Picture::ReadHdr(picError, equirectangularPath.generic_string().c_str(), true, false);
+			if (!picError.wasSuccessfull) {
+				MNEMOSY_ERROR("Cannot add entry to preview skyboxes. Failed to load hdr equirectangular image.");
+				return;
+			}
+
+			graphics::Texture* equirectangularTex = new graphics::Texture();
+
+			fs::path newEquirectangularPath = cubemapsPath / equirectangularPath.filename();
+
+			// generate color cube new because we want to downsample it to 1024.
+			{
+				equirectangularTex->GenerateOpenGlTexture(picInfo,true);
+
+				if (picInfo.pixels) {
+					free(picInfo.pixels);
+				}
+
+				fs::path newColorCubePath = cubemapsPath / cubeColorPath.filename();
+
+				graphics::Cubemap cube;
+				cube.GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,true, 1024);
+
+				graphics::KtxImage ktx;
+				ktx.SaveCubemap(newColorCubePath.generic_string().c_str(), cube.GetGlID(), equirectangularTex->GetTextureFormat(), cube.GetResolution(),false);
+			}
+
+			// copy equirectangular file - we keep it there in full resolution bc we dont yet have an easy way to downsample images.
+			try {
+				fs::copy_file(equirectangularPath, newEquirectangularPath);
+			}
+			catch (fs::filesystem_error err) {
+				MNEMOSY_ERROR("System Error, faild to copy file. \nMessage: {}", err.what());
+			}
+
+			// copy irradiance file		
+			if (fs::exists(cubeIrradiancePath)) {
+
+				fs::path newPath = cubemapsPath / cubeIrradiancePath.filename();
+				try {
+					fs::copy_file(cubeIrradiancePath, newPath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_ERROR("System Error, faild to copy file. \nMessage: {}", err.what());
+				}
+			}
+			else { // generate it new
+
+				graphics::Cubemap cube;
+				cube.GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE,false,0);
+
+				fs::path newPath = cubemapsPath / cubeIrradiancePath.filename();
+
+				graphics::KtxImage ktx;
+
+				ktx.SaveCubemap(newPath.generic_string().c_str(), cube.GetGlID(), equirectangularTex->GetTextureFormat(), cube.GetResolution(),false);
+			}
+			
+			// copy prefilter file
+
+			if (fs::exists(cubePrefilterPath)) {
+
+				fs::path newPath = cubemapsPath / cubePrefilterPath.filename();
+				try {
+					fs::copy_file(cubePrefilterPath, newPath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_ERROR("System Error, faild to copy file. \nMessage: {}", err.what());
+				}
+			}
+			else {
+				graphics::Cubemap cube;
+				cube.GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER,false,0);
+
+				fs::path newPath = cubemapsPath / cubePrefilterPath.filename();
+
+				graphics::KtxImage ktx;
+				ktx.SaveCubemap(newPath.generic_string().c_str(), cube.GetGlID(), equirectangularTex->GetTextureFormat(), cube.GetResolution(), true);
+
+			}
+
+			delete equirectangularTex;
+		}
+
+		// copy data file
+		{
+
+			fs::path newPath = cubemapsPath / entryDataFile.filename();
+			try {
+				fs::copy_file(entryDataFile,newPath);
+			}
+			catch (fs::filesystem_error err) {
+				MNEMOSY_ERROR("System Error, faild to copy file. \nMessage: {}", err.what());
 			}
 		}
 
-		return 0;
-	}
-
-	void SkyboxAssetRegistry::SetNewCurrent(const std::string& name)
-	{
-
-		m_currentSelected = GetPositionByName(name);
+		m_entryNames.push_back(libEntry->name);
 	}
 
 
-	// Private Methods
-	void SkyboxAssetRegistry::LoadEntriesFromSavedData() {
+	void SkyboxAssetRegistry::RemoveEntry(const uint16_t id) {
 
-		//MNEMOSY_TRACE("LOADING FILE..")
-		std::filesystem::directory_entry dataFile = std::filesystem::directory_entry(m_pathToDatafile);
-		if (!CheckDataFile(dataFile))
-			return;
-
-		std::ifstream dataFileStream;
-		dataFileStream.open(m_pathToDatafile);
-
-		nlohmann::json readFile;
-		try {
-			readFile = nlohmann::json::parse(dataFileStream);
-		}
-		catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("SkyboxAssetRegistry::LoadEntriesFromSavedData: Error Parsing File. Message: {}", err.what());
+		if (id == 0) {
+			MNEMOSY_ERROR("You may not delete entry 0, this entry is supposed to persist.");
 			return;
 		}
-		dataFileStream.close();
 
-		//int amountOfEntries = readFile["2_Header_Info"]["entriesAmount"].get<int>();
-		std::vector<std::string> entryNames = readFile["2_Header_Info"]["entryNames"].get<std::vector<std::string>>();
-		
-		// just in case we ever want to load from file while app is already running clear vectors first
-		m_skyboxAssets.clear();
-		m_orderedEntryNames.clear();
-		for (int i = 0; i < entryNames.size(); i++)  {
-
-
-			SkyboxAssetEntry newEntry;
-			newEntry.skyName = entryNames[i];
-			newEntry.colorCubeFile = entryNames[i] + "_cubeColor.ktx2";
-			newEntry.irradianceCubeFile = entryNames[i] + "_cubeIrradiance.ktx2";
-			newEntry.prefilterCubeFile = entryNames[i] + "_cubePrefilter.ktx2";
-
-			m_skyboxAssets.push_back(newEntry);
-			m_orderedEntryNames.push_back(entryNames[i]);
-
-			//AddEntry(entryNames[i]);
+		if (id >= m_entryNames.size()) {
+			MNEMOSY_ERROR("Cannot delete skybox entry with id: {}, because it doesn't exsist", id);
+			return;
 		}
-		entryNames.clear();
 
+		if (id == m_currentSelected) {
+			m_currentSelected = 0;
+		}
+
+		// delete files
+		RemoveFilesForEntry(m_entryNames[id]);
+
+		m_entryNames.erase(m_entryNames.begin() + id);
+
+		SaveDataFile();
 	}
 
-	void SkyboxAssetRegistry::SaveAllEntriesToDataFile()
+	// private
+	void SkyboxAssetRegistry::LoadDataFile() {
+
+		namespace fs = std::filesystem;
+
+		fs::path dataFilePath = MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / fs::path("skyboxQuickselectRegistryData.mnsydata");
+
+		bool success = false;
+
+		flcrm::JsonSettings dataFile;
+
+		dataFile.FileOpen(success,dataFilePath,"Mnemosy Data File","This contains list of skyboxes for the quick selection menu");
+		if (!success) {
+			MNEMOSY_WARN("Failed to find skyboxQuickselect registry file. Creating new.");
+		}
+
+
+		m_entryNames =  dataFile.ReadVectorString(success,"entries", std::vector<std::string>(),true);
+
+		m_lastSelectedEntry = dataFile.ReadInt(success, "lastSelectedEntry", 0, true);
+
+		m_currentSelected = m_lastSelectedEntry;
+
+		dataFile.FilePrettyPrintSet(true);
+
+		dataFile.FileClose(success, dataFilePath);
+	}
+
+	void SkyboxAssetRegistry::SaveDataFile()
 	{
-		std::filesystem::directory_entry dataFile = std::filesystem::directory_entry(m_pathToDatafile);
-		CheckDataFile(dataFile);
 
-		std::ofstream dataFileStream;
-		// clear file first // idk this seems kinda stupid and dangerous but also it gets mees up when just overwriting it // maybe do backup copy first?
-		dataFileStream.open(m_pathToDatafile);
-		dataFileStream << "";
-		dataFileStream.close();
-		
-		// start Saving
-		dataFileStream.open(m_pathToDatafile);
-		nlohmann::json SkyboxAssetsJson; // top level json object
-		SkyboxAssetsJson["1_Mnemosy_Data_File"] = "SkyboxRegistryData";
-		
-		nlohmann::json HeaderInfo;
-		HeaderInfo["entriesAmount"] = m_orderedEntryNames.size();
-		HeaderInfo["entryNames"] = m_orderedEntryNames;
-		
-		SkyboxAssetsJson["2_Header_Info"] = HeaderInfo;
-		
-		// add each entry to json object "Asset_Entries"
-		nlohmann::json assetEntries;
-		for (int i = 0; i < m_skyboxAssets.size(); i++)
-		{
-			assetEntries[m_skyboxAssets[i].skyName] = m_skyboxAssets[i];
+		namespace fs = std::filesystem;
+
+		fs::path dataFilePath = MnemosyEngine::GetInstance().GetFileDirectories().GetDataPath() / fs::path("skyboxQuickselectRegistryData.mnsydata");
+
+		bool success = false;
+
+		flcrm::JsonSettings dataFile;
+
+		dataFile.FileOpen(success, dataFilePath, "Mnemosy Data File", "This contains list of skyboxes for the quick selection menu");
+		if (!success) {
+			MNEMOSY_WARN("Failed to find skyboxQuickselect registry file. Creating new.");
 		}
-		SkyboxAssetsJson["Asset_Entries"] = assetEntries;
+
+		dataFile.WriteVectorString(success, "entries",m_entryNames);
+
+		dataFile.WriteInt(success, "lastSelectedEntry", m_currentSelected);
 
 
-		if(prettyPrintDataFile)
-			dataFileStream << SkyboxAssetsJson.dump(2);
-		else
-			dataFileStream << SkyboxAssetsJson.dump(-1);
+		dataFile.FilePrettyPrintSet(true);
 
-		dataFileStream.close();
+		dataFile.FileClose(success, dataFilePath);
 	}
 
-	void SkyboxAssetRegistry::UpdateOrderedEntryNamesVector()
+	void SkyboxAssetRegistry::RemoveFilesForEntry(const std::string& name)
 	{
-		//  curently its optimised to directly do it when also loading and saving but keeping function around for later maybe
-		m_orderedEntryNames.clear();
-		for (int i = 0; i < m_skyboxAssets.size(); i++)
-		{
-			m_orderedEntryNames.push_back(m_skyboxAssets[i].skyName);
-		}
-	}
+		namespace fs = std::filesystem;
 
-	bool SkyboxAssetRegistry::CheckDataFile(std::filesystem::directory_entry dataFile)
-	{
-		if (!dataFile.exists())
+		std::filesystem::path folderPath = MnemosyEngine::GetInstance().GetFileDirectories().GetCubemapsPath();
+
+		// data file
 		{
-			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File did Not Exist: {} \n Creating new file at that location", m_pathToDatafile);
-			std::ofstream file;
-			file.open(m_pathToDatafile);
-			file << "";
-			file.close();
-			return false;
-		}
-		if (!dataFile.is_regular_file())
-		{
-			MNEMOSY_ERROR("SkyboxAssetRegistry::CheckDataFile: File is not a regular file: {}", m_pathToDatafile);
-			// maybe need to delete unregular file first idk should never happen anyhow
-			std::ofstream file;
-			file.open(m_pathToDatafile);
-			file << "";
-			file.close();
-			return false;
+			fs::path filePath = folderPath / fs::path(name + ".mnsydata");
+
+			if (fs::exists(filePath)) {
+				try {
+					fs::remove(filePath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_WARN("System Error removing file: {},  \nMessage: {}", filePath.generic_string(), err.what());
+				}
+			}
 		}
 
-		return true;
+		// equirectangular map
+		{
+			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_equirectangular);
+
+			if (fs::exists(filePath)) {
+				try {
+					fs::remove(filePath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_WARN("System Error removing file: {},  \nMessage: {}", filePath.generic_string(), err.what());
+				}
+			}
+		}
+
+		// color cube map
+		{
+			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_cubeColor);
+
+			if (fs::exists(filePath)) {
+				try {
+					fs::remove(filePath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_WARN("System Error removing file: {},  \nMessage: {}", filePath.generic_string(), err.what());
+				}
+			}
+		}
+		// irradiance cube map
+		{
+			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_cubeIrradiance);
+
+			if (fs::exists(filePath)) {
+				try {
+					fs::remove(filePath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_WARN("System Error removing file: {},  \nMessage: {}", filePath.generic_string(), err.what());
+				}
+			}
+		}
+		// prefilter cube map
+		{
+			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_cubePrefilter);
+
+			if (fs::exists(filePath)) {
+				try {
+					fs::remove(filePath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_WARN("System Error removing file: {},  \nMessage: {}", filePath.generic_string(), err.what());
+				}
+			}
+		}
+
+
 	}
+
+
 
 } // !mnemosy::systems

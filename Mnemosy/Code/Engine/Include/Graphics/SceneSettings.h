@@ -19,7 +19,7 @@ namespace mnemosy::graphics {
 
 		float background_gradientOpacity = 1.0f;
 		float background_blurRadius = 0.0f;
-		int background_blurSteps = 0;
+		//int background_blurSteps = 0;
 	};
 }
 

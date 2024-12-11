@@ -6,45 +6,48 @@ precision highp float;
 #include includes/pbrLightingTerms.glsl
 
 
-const float irradiance_sampleDelta = 0.0125; // subsample detail - default 0.0125;
+const float irradiance_sampleDelta = 0.0110; // subsample detail - default 0.0125;
 
-const uint prefilter_SAMPLE_COUNT = 1000u;
-const float prefilter_RESOLUTION = 1000.0; // improves quality
+const uint prefilter_SAMPLE_COUNT = 1200u;
+const float prefilter_RESOLUTION = 8000.0; // improves quality
 
 in vec2 texCoord;
+in vec2 texCoord_VectorRange;
+
+
 out vec4 fragmentColor;
 
 uniform sampler2D _equirectangularMap;
+
 uniform int _mode = 0;
 uniform int _currentFace;
 uniform float _roughness;
 
 vec3 uvToXYZ(int face, vec2 uv)
 {
+	// the minus is there because oterwise skyboxes are inverted
 	if(face == 0)
-		return vec3(     1.f,   uv.y,    -uv.x);
+		return -vec3(     1.f,   uv.y,    -uv.x);
 
 	else if(face == 1)
-		return vec3(    -1.f,   uv.y,     uv.x);
+		return -vec3(    -1.f,   uv.y,     uv.x);
 
 	else if(face == 2)
-		return vec3(   +uv.x,   -1.f,    +uv.y);
+		return -vec3(   +uv.x,   -1.f,    +uv.y);
 
 	else if(face == 3)
-		return vec3(   +uv.x,    1.f,    -uv.y);
+		return -vec3(   +uv.x,    1.f,    -uv.y);
 
 	else if(face == 4)
-		return vec3(   +uv.x,   uv.y,      1.f);
+		return -vec3(   +uv.x,   uv.y,      1.f);
 
 	else //if(face == 5)
-	{	return vec3(    -uv.x,  +uv.y,     -1.f);}
+	{	return -vec3(    -uv.x,  +uv.y,     -1.f);}
 }
 
 vec2 dirToUV(vec3 dir)
 {
-	return vec2(
-		0.5f + 0.5f * atan(dir.z, dir.x) / PI,
-		1.f - acos(dir.y) / PI);
+	return vec2( 0.5f + 0.5f * atan(dir.z, dir.x) * ONE_OVER_PI, 1.f - acos(dir.y) * ONE_OVER_PI);
 }
 
 
@@ -60,27 +63,32 @@ float brdfLutGeometrySmith(float NdotV, float NdotL, float roughness)
     return ggx1 * ggx2;
 }
 
-vec3 equirectangularToCubeMap(int face, vec2 texCoord)
+vec3 equirectangularToCubeMap(int face, vec2 texCoordVecRange)
 {
-	vec2 texCoordNew = texCoord*2.0-1.0;
-	vec3 scan = uvToXYZ(face, texCoordNew);
-	vec3 direction = normalize(scan);
-	vec2 src = dirToUV(direction);
+	//vec2 texCoordNew = texCoord*2.0-1.0;
+
+	//vec3 scan = uvToXYZ(face, texCoordNew);
+
+
+	//vec3 direction = normalize(scan);
+
+	vec2 src = dirToUV(normalize(uvToXYZ(face, texCoordVecRange)));
 
 	return texture(_equirectangularMap, src).rgb;
 }
 
-vec3 irradianceConvolute(int face, vec2 texCoord)
+
+vec3 irradianceConvolute(int face, vec2 texCoordVecRange)
 {
 
-  vec2 texCoordNew = texCoord*2.0-1.0;
-	vec3 scan = uvToXYZ(face, texCoordNew); // prob just position
-	vec3 direction = normalize(scan);
+  //vec2 texCoordNew = texCoord*2.0-1.0;
+	//vec3 scan = uvToXYZ(face, texCoordVecRange); // prob just position
+	//vec3 direction = normalize(scan);
 	//vec2 src = dirToUV(direction);
 
-
   // the sample direction equals the hemisphere's orientation
-  vec3 normal =  direction;//normalize(scan);
+
+  vec3 normal =  normalize(uvToXYZ(face, texCoordVecRange));
 
   vec3 irradiance = vec3(0.0);
 
@@ -91,21 +99,22 @@ vec3 irradianceConvolute(int face, vec2 texCoord)
   //float sampleDelta = 0.0125; // subsample detail
   float nrSamples = 0.0;
 
-  for(float phi = 0.0; phi < 2.0 * PI; phi += irradiance_sampleDelta)
-  {
+
+	for(float phi = 0.0; phi < 2.0 * PI; phi += irradiance_sampleDelta)
+  	{
       for(float theta = 0.0; theta < 0.5 * PI; theta += irradiance_sampleDelta)
       {
         vec3 tangentSample = vec3(sin(theta)*cos(phi),sin(theta) * sin(phi),cos(theta));
         // tanget space to world
         vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-        vec2 sampleUV = dirToUV(sampleVec);
+        vec2 sampleUV = dirToUV(sampleVec); // we could bind cubemap and sample color not from the quirectangular but from cubemap directly
         irradiance += texture(_equirectangularMap,sampleUV).rgb * cos(theta) * sin(theta);
         nrSamples++;
       }
 
+  	}
 
-  }
   irradiance = PI * irradiance * (1.0/float(nrSamples));
 
   //[...] // convolution code
@@ -114,10 +123,10 @@ vec3 irradianceConvolute(int face, vec2 texCoord)
   return irradiance;
 }
 
-vec3 prefilterConvolute(int face, vec2 texCoord)
+vec3 prefilterConvolute(int face, vec2 texCoordVecRange)
 {
-	vec2 texCoordNew = texCoord*2.0-1.0;
-	vec3 scan = uvToXYZ(face, texCoordNew);
+	//vec2 texCoordNew = texCoord*2.0-1.0;
+	vec3 scan = uvToXYZ(face, texCoordVecRange);
 
 	vec3 N = normalize(scan);
 	vec3 R = N;
@@ -138,26 +147,28 @@ vec3 prefilterConvolute(int face, vec2 texCoord)
 		vec3 L = normalize(2.0 * dot(V,H) * H -V);
 		float NdotL = max(dot(N,L),0.0);
 
-		float NdotH= max(dot(N,H),0.0);
-		float HdotV = max(dot(H,V),0.0);
-
-		// used to determine a mip level to sample the invironment texture with in cases where we get artifacts.
-		float D   = NormalDistributionGGX(NdotH, roughness);
-		float pdf = (D * NdotH / (4.0 * HdotV)) + 0.0001;
-		float saTexel  = 4.0 * PI / (6.0 * prefilter_RESOLUTION * prefilter_RESOLUTION);
-		float saSample = 1.0 / (float(prefilter_SAMPLE_COUNT) * pdf + 0.0001);
-
-
-		float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
-
-
 		if(NdotL > 0.0)
 		{
+			
+			float NdotH= max(dot(N,H),0.0);
+			float HdotV = max(dot(H,V),0.0);
+
+			// used to determine a mip level to sample the invironment texture with in cases where we get artifacts.
+			float D   = NormalDistributionGGX(NdotH, roughness);
+			float pdf = (D * NdotH / (4.0 * HdotV)) + 0.0001;
+			float saTexel  = 4.0 * PI / (6.0 * prefilter_RESOLUTION * prefilter_RESOLUTION);
+			float saSample = 1.0 / (float(prefilter_SAMPLE_COUNT) * pdf + 0.0001);
+
+
+			float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
+
+
 			vec2 uvSample = dirToUV(L);
 			prefilteredColor += textureLod(_equirectangularMap, uvSample,mipLevel).rgb * NdotL;
 			totalWeight += NdotL;
 		}
 	}
+
 	prefilteredColor = prefilteredColor / totalWeight;
 
 	return prefilteredColor;
@@ -215,20 +226,23 @@ void main(void)
 {
     fragmentColor = vec4(0.0, 0.0, 0.0, 0.0);
 
-		if(_mode == 0)
-		{
-			fragmentColor.rgb = equirectangularToCubeMap(_currentFace, texCoord);
-		}
-	    else if (_mode == 1)
-	    {
-	      fragmentColor.rgb = irradianceConvolute(_currentFace, texCoord);
-	    }
-		else if(_mode == 2)
-		{
-			fragmentColor.rgb = prefilterConvolute(_currentFace,texCoord);
-		}
-		else if(_mode == 3)
-		{
-			fragmentColor.rg = IntegrateBRDF(texCoord.x, texCoord.y);
-		}
+    //vec2 uv = texCoord;
+    //uv.y = 1- uv.y;
+
+	if(_mode == 0)
+	{
+		fragmentColor.rgb = equirectangularToCubeMap(_currentFace, texCoord_VectorRange);
+	}
+    else if (_mode == 1)
+    {
+      fragmentColor.rgb = irradianceConvolute(_currentFace, texCoord_VectorRange);
+    }
+	else if(_mode == 2)
+	{
+		fragmentColor.rgb = prefilterConvolute(_currentFace,texCoord_VectorRange);
+	}
+	else if(_mode == 3)
+	{
+		fragmentColor.rg = IntegrateBRDF(texCoord.x, texCoord.y);
+	}
 }

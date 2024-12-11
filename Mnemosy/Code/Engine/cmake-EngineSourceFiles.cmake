@@ -75,6 +75,8 @@ ${ENGINE_SOURCE_PATH}/include/Graphics/ModelData.h
 ${ENGINE_SOURCE_PATH}/include/Graphics/ModelLoader.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/ModelLoader.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/TextureDefinitions.h
+${ENGINE_SOURCE_PATH}/Src/Graphics/TextureDefinitions.cpp
+
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Texture.h
 ${ENGINE_SOURCE_PATH}/Src/Graphics/Texture.cpp
 ${ENGINE_SOURCE_PATH}/Include/Graphics/Material.h

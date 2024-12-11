@@ -4,11 +4,11 @@
 precision highp float;
 
 const float PI      = 3.14159265359;
+const float ONE_OVER_PI = 0.31830988618;
 const float PI_2    = 1.57079632679;
 const float PI_4    = 0.78539816339;
 const float INV_PI  = 0.31830988618;
 float PHI =  1.61803398875; // = (1.0+sqrt(5.0))/2.0
-
 
 // saturate
 float saturate(float value)

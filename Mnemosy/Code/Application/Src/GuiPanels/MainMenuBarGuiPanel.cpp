@@ -22,6 +22,7 @@
 
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
+#include "Include/Systems/FolderTreeNode.h"
 
 #include "Include/Graphics/Skybox.h"
 #include "Include/Graphics/RenderMesh.h"
@@ -82,31 +83,31 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 			ImGui::Spacing();
 
+			// TODO: rewrite this probably
 			// Quick Select Skybox
 			{
 
 				graphics::Skybox& skybox = scene.GetSkybox();
-				mnemosy::systems::SkyboxAssetRegistry& skyboxRegistry = engine.GetSkyboxAssetRegistry();
+				mnemosy::systems::SkyboxAssetRegistry& skyReg = engine.GetSkyboxAssetRegistry();
 
-				// -- Skybox Selection Menu
-				bool assetsInRegistry = !skyboxRegistry.GetVectorOfNames().empty();
-				if (assetsInRegistry) // if there are no assets in the internal vector this will crash
+				// -- Skybox Selection Menu				
+				const std::vector<std::string>& list = skyReg.GetEntryList();
+				
+				if (!list.empty())
 				{
-
-					int current = skyboxRegistry.GetCurrentSelected();
-
-					const char* combo_preview_value = skyboxRegistry.GetVectorOfNames()[current].c_str();
-					int previousSelected = current;
+					uint16_t current_id = skyReg.GetCurrentSelectedID();
+					const char* combo_preview_value = list[current_id].c_str();
 
 					ImGui::Text("Skybox: ");
 					ImGui::SetNextItemWidth(200.0f);
 					if (ImGui::BeginCombo(" ##ViewportSkybox", combo_preview_value, 0))
 					{
-						for (int n = 0; n < skyboxRegistry.GetVectorOfNames().size(); n++)
+						for (uint16_t n = 0; n < list.size(); n++)
 						{
-							const bool is_selected = (current == n);
-							if (ImGui::Selectable(skyboxRegistry.GetVectorOfNames()[n].c_str(), is_selected))
-								current = n;
+							const bool is_selected = (current_id == n);
+							if (ImGui::Selectable(list[n].c_str(), is_selected)) {
+								current_id = n;
+							}
 
 							// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 							if (is_selected)
@@ -115,10 +116,23 @@ namespace mnemosy::gui
 						ImGui::EndCombo();
 					}
 
-					if (current != previousSelected)  // Selection has happend
+					if (current_id != skyReg.GetCurrentSelectedID())  // Selection has happend
 					{
-						skybox.LoadPreviewSkybox(skyboxRegistry.GetVectorOfNames()[current]);
-						engine.GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings,skybox);
+
+						if (MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().UserEntrySelected()) {
+							if (MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().ActiveLibEntry_Get()->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+								// if the active libEntry is of type skybox we must select default material because when switching preview skybox because 
+								// otherwise it messes up thumbnail rendering of the libEntry when switching to a new one and it also overrides material data 
+								// since when saving we grab the data from the aktivly loaded skybox which has changed by choosing a new preview skybox. 
+								 
+								MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().SetDefaultMaterial();
+
+							}
+						}
+						
+						scene.SetSkybox(skyReg.LoadPreviewSkybox(current_id,true));
+						engine.GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings, scene.GetSkybox());
 					}
 				}
 

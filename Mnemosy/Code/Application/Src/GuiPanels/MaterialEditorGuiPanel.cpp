@@ -17,10 +17,14 @@
 #include "Include/Systems/TextureGenerationManager.h"
 #include "Include/Systems/ExportManager.h"
 #include "Include/Systems/FolderTreeNode.h"
+#include "Include/Systems/SkyboxAssetRegistry.h"
 
 #include "Include/Graphics/Scene.h"
+#include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/RenderMesh.h"
 #include "Include/Graphics/Material.h"
+#include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Cubemap.h"
 #include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Utils/Picture.h"
@@ -121,11 +125,7 @@ namespace mnemosy::gui
 		ImGui::Spacing();
 		ImGui::Spacing();
 
-		// TODO maybe generalize the export settings ui to work for all entry types
-
 		DrawExportSettings(libEntry);
-
-
 
 		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
@@ -287,15 +287,16 @@ namespace mnemosy::gui
 
 			}
 
-			else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
-			
-				// no specific settings yet
-			}
+			// no specific settings yet
+			//else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+			//
+			//	// no specific settings yet
+			//}
 
-			else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+			//else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
-				// no specific settings yet
-			}
+			//	// no specific settings yet
+			//}
 
 
 			// === Export Button
@@ -324,11 +325,26 @@ namespace mnemosy::gui
 					}
 					else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
-						// metthod is not yet implemented
 						m_exportManager.SkyboxMat_ExportTextures(exportPath,activeLibEntry, scene.GetSkybox());
 					}
 				}
 			}
+
+
+			if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Spacing();
+		
+				if (ImGui::Button("Add to Quick Selection", ImVec2(180, 0))) {
+
+					m_engineInstance.GetSkyboxAssetRegistry().AddLibEntryToPreviewSkyboxes(activeLibEntry);
+					m_engineInstance.GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings,scene.GetSkybox());
+				}
+			}
+
 
 
 			ImGui::TreePop();
@@ -949,20 +965,6 @@ namespace mnemosy::gui
 
 			m_isOpacityButtonHovered = ImGui::IsItemHovered();
 
-			if (!textureAssigned && activeMat.isAlbedoAssigned()) {
-
-
-				if (ImGui::Button("Generate from albedo alpha", ImVec2(230, 0))) {
-
-
-					m_materialRegistry.ActiveLibEntry_PbrMat_GenerateOpacityFromAlbedoAlpha(activeLibEntry, activeMat);
-				}
-
-			}
-
-
-			m_isOpacityButtonHovered = ImGui::IsItemHovered();
-
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
@@ -973,6 +975,21 @@ namespace mnemosy::gui
 				}
 	
 			}
+
+
+			if (!textureAssigned && activeMat.isAlbedoAssigned()) {
+
+				if (ImGui::Button("Generate from albedo alpha", ImVec2(230, 0))) {
+
+					m_materialRegistry.ActiveLibEntry_PbrMat_GenerateOpacityFromAlbedoAlpha(activeLibEntry, activeMat);
+					SaveMaterial();
+				}
+
+			}
+
+
+			//m_isOpacityButtonHovered = ImGui::IsItemHovered();
+
 
 			if (textureAssigned) {
 				// render info text
@@ -998,9 +1015,9 @@ namespace mnemosy::gui
 			{
 
 				bool useDithered = activeMat.UseDitheredAlpha;
-				ImGui::Checkbox("Dithered Alpha Clip", &activeMat.UseDitheredAlpha);
+				ImGui::Checkbox("Dithered Alpha Clip", &useDithered);
 				
-				if(!useDithered != activeMat.UseDitheredAlpha) {
+				if(useDithered != activeMat.UseDitheredAlpha) {
 					activeMat.UseDitheredAlpha = useDithered;
 					m_valuesChanged = true;
 				}
@@ -1027,6 +1044,7 @@ namespace mnemosy::gui
 	}
 
 	void MaterialEditorGuiPanel::DrawPbrMatChannelPackUI(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat) {
+		
 		ImGui::Spacing();
 		ImGui::Spacing();
 
@@ -1278,15 +1296,87 @@ namespace mnemosy::gui
 
 	}
 
-	void MaterialEditorGuiPanel::DrawEntrySkybox(systems::LibEntry* activeLibEntry, graphics::Skybox* skybox) {
+	void MaterialEditorGuiPanel::DrawEntrySkybox(systems::LibEntry* activeLibEntry, graphics::Skybox* skyboxMat) {
 
-		ImGui::Text("Skybox ui is not yet implemented");
+		//ImGui::Text("Skybox ui is not yet implemented");
+
+		MNEMOSY_ASSERT(skyboxMat != nullptr, "This should never happen!");
+
 
 		// import & material settings
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		// Load Texture
+		if (ImGui::Button("Load Texture...##SkyMat", m_buttonSizeLoad)) {
+
+			std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+			if (!filepath.empty()) {
+
+				std::filesystem::path p = { filepath };
+				m_materialRegistry.ActiveLibEntry_Skybox_LoadTexture(p);
+				SaveMaterial();
+			}
+		}
+		m_isSkyboxLoadButtonHovered = ImGui::IsItemHovered();
+
+
+		bool textureAssigned = skyboxMat->IsColorCubeAssigned();
+
+		// we cant merge this with the below if statement because the button can change the state of the texture assigned bool
+		if (textureAssigned) {
+			// Remove Texture
+			ImGui::SameLine();
+			if (ImGui::Button("Remove ##Skymat", m_buttonSizeDelete)) {
+
+				m_materialRegistry.ActiveLibEntry_Skybox_DeleteTexture();
+				textureAssigned = false;
+				SaveMaterial();
+			}
+		}
+
+		if (textureAssigned) {
+
+			std::string res = std::to_string(skyboxMat->GetColorCube().GetResolution());
+
+			std::string resolution = "Resolution: " + res + "x" + res + "px";
+			ImGui::Text(resolution.c_str());
+
+
+		}
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+		// color,
+		
+
+		if (ImGui::ColorEdit3("Color", (float*)&skyboxMat->color)) {
+			m_valuesChanged = true;
+		}
+		// exposure
+
+		if (ImGui::SliderFloat("Exposure", &skyboxMat->exposure, -10.0f, 10.0f, "%.5f")) {
+			m_valuesChanged = true;
+		}
+
+		ImGui::Spacing();
+		ImGui::Spacing();
+
+
+		if (m_valuesChanged) {
+			MnemosyEngine::GetInstance().GetRenderer().SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().userSceneSettings,*skyboxMat);
+		}
+
+
+
+
 	}
 
+	// 
 
-	//TODO: hanlde skybox entry type
+
 	// Callback when files are droped into mnemosy
 	void MaterialEditorGuiPanel::OnFileDropInput(int count, std::vector<std::string>& dropedFilePaths) {
 
@@ -1309,8 +1399,6 @@ namespace mnemosy::gui
 
 		systems::LibEntryType activeEntryType = m_materialRegistry.ActiveLibEntry_Get()->type;
 		
-
-
 		// try handle only first one an check if it is above a specific button
 		{
 			std::filesystem::path firstPath = { dropedFilePaths[0] };
@@ -1337,6 +1425,18 @@ namespace mnemosy::gui
 					SaveMaterial();
 					return;
 				}
+
+				if (!MnemosyEngine::GetInstance().GetScene().GetUnlitMaterial()->TextureIsAssigned()) {
+					m_materialRegistry.ActiveLibEntry_UnlitMat_LoadTexture(firstPath);
+					SaveMaterial();
+					return;
+				}
+				else {
+					MNEMOSY_WARN("A texture is already loaded in the material, to avoid accidental deletions of textures you should delete the texture from the material slot first or drag it directly over the load button.");
+				}
+
+
+
 			}
 			else if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
@@ -1391,13 +1491,36 @@ namespace mnemosy::gui
 				}
 			}
 			else if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+				
+				if (m_isUnlitLoadButtonHovered) {
+
+					m_materialRegistry.ActiveLibEntry_Skybox_LoadTexture(firstPath);
+					SaveMaterial();
+					return;
+				}
+
+				// we do the same thing but with out the butten but the only if no texture is assigned yet
+
+				if (!MnemosyEngine::GetInstance().GetScene().GetSkybox().IsColorCubeAssigned()) {
+					m_materialRegistry.ActiveLibEntry_Skybox_LoadTexture(firstPath);
+					SaveMaterial();
+					return;
+
+				}
+				else {
+				
+					MNEMOSY_WARN("A texture is already loaded in the material, to avoid accidental deletions of textures you should delete the texture from the material slot first or drag it directly over the load button.");
+				
+				}
+
+
 
 			}
 			
 
 		}
 
-		// the rest does only apply to pbr materal for now
+
 		if (activeEntryType != systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 			return;
 		}
@@ -1464,8 +1587,8 @@ namespace mnemosy::gui
 		}
 	}
 
-	void MaterialEditorGuiPanel::SaveMaterial()
-	{
+	void MaterialEditorGuiPanel::SaveMaterial()	{
+
 		m_materialRegistry.ActiveLibEntry_SaveToFile();
 		m_valuesChanged = false;
 	}

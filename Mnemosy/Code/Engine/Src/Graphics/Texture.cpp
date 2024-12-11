@@ -23,7 +23,7 @@ namespace mnemosy::graphics
 		clear();
 	}
 
-	bool Texture::containsData() const {
+	bool Texture::IsInitialized() const {
 		return m_isInitialized;
 	}
 
@@ -67,17 +67,17 @@ namespace mnemosy::graphics
 		else {
 			glActiveTexture(GL_TEXTURE0 + activeTextureLocation);
 		}
-		glBindTexture(GL_TEXTURE_2D, m_ID);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	unsigned int Texture::GetChannelsAmount(){
 		return (unsigned int)TexUtil::get_channels_amount_from_textureFormat(m_textureFormat);
 	}
 
-	void Texture::GenerateOpenGlTexture(const PictureInfo info, const bool generateMipmaps){
+	void Texture::GenerateOpenGlTexture(const PictureInfo& info, const bool generateMipmaps){
 
-		PictureError err = Picture::pic_util_check_input_pictureInfo(info);
-		MNEMOSY_ASSERT(err.wasSuccessfull,"This method should be provided with a valid picture info");
+		MNEMOSY_ASSERT(Picture::pic_util_check_input_pictureInfo(info).wasSuccessfull,"This method should be provided with a valid picture info");
 
 		// make sure previous texture is cleared if any
 		clear();
@@ -98,16 +98,23 @@ namespace mnemosy::graphics
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
-		// ensure byte alignment
-		unsigned int restWidth = m_width % 4;
-		unsigned int padding = 4;
-		if (restWidth != 0) {
-			padding = 1;
-		}
+		uint8_t numChannels, bitsPerChannel, bytesPerPixel;
+		graphics::TexUtil::get_information_from_textureFormat(m_textureFormat,numChannels,bitsPerChannel,bytesPerPixel);
 
-		glPixelStorei(GL_UNPACK_ALIGNMENT, padding);		
+		uint32_t rowSize = m_width * bytesPerPixel;
+
+		// ensure byte alignment
+		unsigned int unpackAlignment = 4;
+
+		if (rowSize % 4 != 0) {
+			unpackAlignment = 1;
+		}
 		
-		size_t halfFloatType = GL_UNSIGNED_SHORT;
+		glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment);
+
+
+		
+		uint32_t halfFloatType = GL_UNSIGNED_SHORT;
 		if (m_isHalfFloat) {
 			halfFloatType = GL_HALF_FLOAT;
 		}

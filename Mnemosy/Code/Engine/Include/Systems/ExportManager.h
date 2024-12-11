@@ -32,7 +32,7 @@ namespace mnemosy::systems
 		
 		TextureExportInfo() = default;
 
-		TextureExportInfo(std::filesystem::path _exportPath, uint16_t _width, uint16_t _height, graphics::TextureFormat _textureFormat,bool _isHalfFloat)
+		TextureExportInfo(std::filesystem::path& _exportPath, uint16_t _width, uint16_t _height, graphics::TextureFormat _textureFormat,bool _isHalfFloat)
 			: path{ _exportPath }
 			, width{_width}
 			, height{_height}
@@ -40,11 +40,22 @@ namespace mnemosy::systems
 			, isHalfFloat{_isHalfFloat}
 		{}
 
-		std::filesystem::path path;
+		TextureExportInfo(std::filesystem::path& _exportPath, uint16_t _width, uint16_t _height, graphics::TextureFormat _textureFormat, bool _isHalfFloat, bool _converExrAndHdrToLinear)
+			: path{ _exportPath }
+			, width{ _width }
+			, height{ _height }
+			, textureFormat{ _textureFormat }
+			, isHalfFloat{ _isHalfFloat }
+			, converExrAndHdrToLinear{_converExrAndHdrToLinear}
+		{}
+
+
+		std::filesystem::path& path;
 		uint16_t width;
 		uint16_t height;
 		graphics::TextureFormat textureFormat;
 		bool isHalfFloat; // half float here deterimines not the source data but in what data we want to export, important for .exr images
+		bool converExrAndHdrToLinear = true; // hidden flag but usefull for skybox images
 	};
 
 
@@ -60,7 +71,7 @@ namespace mnemosy::systems
 		bool PbrMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::PbrMaterial& pbrMat, std::vector<bool>& exportTypesOrdered, bool exportChannelPacked);
 		
 		void UnlitMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry , graphics::UnlitMaterial& unlitMat);
-		// TODO: implement
+		
 		void SkyboxMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::Skybox& skyboxMat);
 
 
@@ -68,7 +79,6 @@ namespace mnemosy::systems
 		
 
 		// Export settings
-
 		const graphics::ImageFileFormat GetExportImageFormat() { return m_exportFileFormat; }
 		void SetExportImageFormat(graphics::ImageFileFormat format) { m_exportFileFormat = format; }
 

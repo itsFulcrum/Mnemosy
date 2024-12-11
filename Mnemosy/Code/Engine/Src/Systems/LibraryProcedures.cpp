@@ -5,10 +5,12 @@
 #include "Include/Core/FileDirectories.h"
 
 #include "Include/Graphics/Utils/Picture.h"
+#include "Include/Graphics/Utils/KtxImage.h"
 #include "Include/Graphics/TextureDefinitions.h"
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Cubemap.h"
 
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/JsonKeys.h"
@@ -185,7 +187,7 @@ void LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile( systems::LibEntry
 	file.WriteFloat(success, jsonKey_skybox_color_g, 1.0f);
 	file.WriteFloat(success, jsonKey_skybox_color_b, 1.0f);
 
-	file.WriteFloat(success, jsonKey_skybox_sunColor_r, 1.0f);
+	/*file.WriteFloat(success, jsonKey_skybox_sunColor_r, 1.0f);
 	file.WriteFloat(success, jsonKey_skybox_sunColor_g, 1.0f);
 	file.WriteFloat(success, jsonKey_skybox_sunColor_b, 1.0f);
 
@@ -193,7 +195,7 @@ void LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile( systems::LibEntry
 	file.WriteFloat(success, jsonKey_skybox_sunDir_y, 1.0f);
 	file.WriteFloat(success, jsonKey_skybox_sunDir_z, 0.0f);
 
-	file.WriteFloat(success, jsonKey_skybox_sunStrength, 1.0f);
+	file.WriteFloat(success, jsonKey_skybox_sunStrength, 1.0f);*/
 
 	file.FilePrettyPrintSet(prettyPrint);
 	file.FileClose(success, dataFilePath);
@@ -357,7 +359,7 @@ void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEn
 	file.WriteFloat(success, jsonKey_skybox_color_g, skybox->color.g);
 	file.WriteFloat(success, jsonKey_skybox_color_b, skybox->color.b);
 
-	file.WriteFloat(success, jsonKey_skybox_sunColor_r, skybox->sunColor.r);
+	/*file.WriteFloat(success, jsonKey_skybox_sunColor_r, skybox->sunColor.r);
 	file.WriteFloat(success, jsonKey_skybox_sunColor_g, skybox->sunColor.g);
 	file.WriteFloat(success, jsonKey_skybox_sunColor_b, skybox->sunColor.b);
 
@@ -365,10 +367,11 @@ void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEn
 	file.WriteFloat(success, jsonKey_skybox_sunDir_y, skybox->sunDir.y);
 	file.WriteFloat(success, jsonKey_skybox_sunDir_z, skybox->sunDir.z);
 
-	file.WriteFloat(success, jsonKey_skybox_sunStrength, skybox->sunStrength);
+	file.WriteFloat(success, jsonKey_skybox_sunStrength, skybox->sunStrength);*/
 
 
-	if (skybox->IsTextureAssigned()) {
+	if (skybox->IsColorCubeAssigned()) {
+	// we will just assume at this point that irradiance and prefilter are also assigned
 
 		// check if the img really exists
 
@@ -1131,9 +1134,8 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 
 
 graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(systems::LibEntry* libEntry, bool prettyPrint) {
+
 	namespace fs = std::filesystem;
-
-
 	fs::path dataFilePath = LibProcedures::LibEntry_GetDataFilePath(libEntry);
 
 
@@ -1145,8 +1147,6 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 	if (!success) {
 		MNEMOSY_WARN("MaterialLibraryRegistry::LoadUnlitMaterialFromFile: Error opening data file: {} \nMessage: {}", dataFilePath.generic_string(), file.ErrorStringLastGet());
 	}
-
-	//std::string name = file.ReadString(success, jsonKey_unlit_name, libEntry->name, true);
 
 	bool useAlpha = file.ReadBool(success, jsonKey_unlit_useAlpha, false, true);
 	bool useDitheredAlpha = file.ReadBool(success, jsonKey_unlit_useDitheredAlpha, false, true);
@@ -1199,7 +1199,7 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 		if (!textureReadSuccess) {
 
 			file.WriteBool(success, jsonKey_unlit_textureIsAssigned, false);
-			file.WriteString(success, jsonKey_unlit_texturePath, "not Assigned");
+			file.WriteString(success, jsonKey_unlit_texturePath, jsonKey_pathNotAssigned);
 		}
 
 	}
@@ -1210,11 +1210,220 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 	return unlitMat;
 }
 
-
-// TODO: implement
-graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(systems::LibEntry* libEntry, bool prettyPrint)
+// TODO: handle case if main equirectangular .hdr file is missing but for some reason colorCubemap is still present. In theorey it is possible to reconstruct hdr again.
+graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::filesystem::path& folderPath, std::string& name, bool prettyPrint)
 {
-	return nullptr;
+	namespace fs = std::filesystem;
+
+
+	fs::path dataFilePath = folderPath / fs::path(name + ".mnsydata");// LibProcedures::LibEntry_GetDataFilePath(libEntry);
+
+
+	bool success = false;
+
+	flcrm::JsonSettings file;
+
+	file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_skybox_description);
+	if (!success) {
+		MNEMOSY_WARN("Error opening skybox meta data file: {} \nMessage: {}", dataFilePath.generic_string(), file.ErrorStringLastGet());
+	}
+
+	graphics::Skybox* skybox = new graphics::Skybox();
+
+	// load settings
+
+	skybox->exposure = file.ReadFloat(success, jsonKey_skybox_exposure, 0.0f, true);
+	skybox->color.r = file.ReadFloat(success, jsonKey_skybox_color_r, 1.0f, true);
+	skybox->color.g = file.ReadFloat(success, jsonKey_skybox_color_g, 1.0f, true);
+	skybox->color.b = file.ReadFloat(success, jsonKey_skybox_color_b, 1.0f, true);
+
+	//skybox->sunColor.r = file.ReadFloat(success, jsonKey_skybox_sunColor_r, 1.0f, true);
+	//skybox->sunColor.g = file.ReadFloat(success, jsonKey_skybox_sunColor_g, 1.0f, true);
+	//skybox->sunColor.b = file.ReadFloat(success, jsonKey_skybox_sunColor_b, 1.0f, true);
+
+	//skybox->sunDir.x = file.ReadFloat(success, jsonKey_skybox_sunDir_x, 0.0f, true);
+	//skybox->sunDir.y = file.ReadFloat(success, jsonKey_skybox_sunDir_y, 1.0f, true);
+	//skybox->sunDir.z = file.ReadFloat(success, jsonKey_skybox_sunDir_z, 0.0f, true);
+
+	//skybox->sunStrength = file.ReadFloat(success, jsonKey_skybox_sunStrength, 1.0f, true);
+
+
+	bool hasTextures = file.ReadBool(success, jsonKey_skybox_textureIsAssigned, false, true);
+
+
+	if (hasTextures) {
+		// first check if the hdr file still exists.
+
+		fs::path entryFolder = folderPath;// systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
+
+		fs::path equirectangularPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_equirectangular);
+		fs::path cubeColorPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeColor);
+		fs::path cubeIrradiancePath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeIrradiance);
+		fs::path cubePrefilterPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubePrefilter);
+
+		if (!fs::exists(equirectangularPath)) {
+			// handle case if main equirectangular file is missing
+
+			// if the main hdr equirectangular file is missing we look for the color cubemap, 
+			// if that one is also missing we will not be able to reconstructe the main equirecangular ever, 
+			// so we can just delete all other files we may find and reset skybox
+			MNEMOSY_WARN("error loading skybox: {}, skybox hdr file is missing.", name);
+
+			// for now as we dont yet have a way to reconstruct equirectangular from cubemap just delete the other files if they exist
+
+			if (fs::exists(cubeColorPath)) {
+				try {
+					fs::remove(cubeColorPath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
+				}
+			}
+
+			if (fs::exists(cubeIrradiancePath)) {		
+				try {
+					fs::remove(cubeIrradiancePath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
+				}
+			}
+
+			if (fs::exists(cubePrefilterPath)) {
+				try {
+					fs::remove(cubePrefilterPath);
+				}
+				catch (fs::filesystem_error err) {
+					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
+				}
+			}
+
+			file.WriteBool(success, jsonKey_skybox_textureIsAssigned, false);
+			file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
+
+			// handle this separatly in the future if we have a reconstruct method
+			//if (!fs::exists(cubeColorPath)) {
+			//	// now lets just reset it
+
+			//	// delete other files
+			//}
+			//else {
+			//	// TODO:
+			//	// also just reset it for now but in the future we may implement a way to reconstruct it in a shader.
+			//}
+		}
+		else { // hdr equirectangular exists
+
+			// check if ktx file exists if not generate it from equirectangular
+
+
+			bool cubeColorMissing = false;
+			bool cubeIrradianceMissing = false;
+			bool cubePrefilterMissing = false;
+
+
+			if (fs::exists(cubeColorPath)) {
+
+				graphics::Cubemap* cube = new graphics::Cubemap();
+				cube->GenerateOpenGlCubemap_FromKtx2File(cubeColorPath,false);
+				skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
+			}
+			else {
+				cubeColorMissing = true;
+			}
+
+			if (fs::exists(cubeIrradiancePath)) {
+
+				graphics::Cubemap* cube = new graphics::Cubemap();
+				cube->GenerateOpenGlCubemap_FromKtx2File(cubeIrradiancePath, false);
+				skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE);
+			}
+			else {
+				cubeIrradianceMissing = true;
+			}
+
+			if (fs::exists(cubePrefilterPath)) {
+
+				graphics::Cubemap* cube = new graphics::Cubemap();
+				cube->GenerateOpenGlCubemap_FromKtx2File(cubePrefilterPath, true);
+				skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER);
+			}
+			else {
+				cubePrefilterMissing = true;
+			}
+
+
+			// handle case if one or more ktx files are missing
+			// we handle this bundled here because its likely that if one is missing others are too and we dont  want to load new equirectangular texture every time again
+			if (cubeColorMissing || cubeIrradianceMissing || cubePrefilterMissing) {
+
+				graphics::Texture* equirectangular = new graphics::Texture();
+
+				graphics::PictureError picError;
+
+				graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picError, equirectangularPath.generic_string().c_str(), true, true, false);
+				if (!picError.wasSuccessfull) {
+					MNEMOSY_ERROR("LibProcedures:LibEntry_load_skybox: Failed to load hdr equirectangular image.");
+
+				}
+				else {
+
+					equirectangular->GenerateOpenGlTexture(picInfo,true);
+					equirectangular->GetTextureFormat();
+
+					if (picInfo.pixels)
+						free(picInfo.pixels);
+
+					// if anyone of these is missing generate it new and save it
+					if (cubeColorMissing) {
+
+						graphics::Cubemap* cube = new graphics::Cubemap();
+						cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangular,graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,false,0);
+
+						graphics::KtxImage ktx;
+						ktx.SaveCubemap(cubeColorPath.generic_string().c_str(), cube->GetGlID(), equirectangular->GetTextureFormat(), cube->GetResolution(),false);
+
+						skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
+					}
+
+					if (cubeIrradianceMissing) {
+						graphics::Cubemap* cube = new graphics::Cubemap();
+						cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangular, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE,false, 0);
+
+						graphics::KtxImage ktx;
+						ktx.SaveCubemap(cubeIrradiancePath.generic_string().c_str(), cube->GetGlID(), graphics::TextureFormat::MNSY_RGB32, cube->GetResolution(),false);
+
+						skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE);
+
+					}
+
+					if (cubePrefilterMissing) {
+						graphics::Cubemap* cube = new graphics::Cubemap();
+						cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangular, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER,false, 0);
+
+						graphics::KtxImage ktx;
+						ktx.SaveCubemap(cubePrefilterPath.generic_string().c_str(), cube->GetGlID(),graphics::TextureFormat::MNSY_RGB32, cube->GetResolution(),true);
+
+						skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER);
+					}
+				}
+
+				delete equirectangular;
+			}
+
+		} // end - equirectangular path exist
+
+
+		
+	} // end Has textures
+
+
+
+	file.FilePrettyPrintSet(prettyPrint);
+
+	file.FileClose(success, dataFilePath);
+
+	return skybox;
 }
 
 

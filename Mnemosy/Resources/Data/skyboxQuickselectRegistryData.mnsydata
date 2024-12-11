@@ -1,0 +1,11 @@
+{
+    "1_Header": "Mnemosy Data File",
+    "2_Description": "This contains list of skyboxes for the quick selection menu",
+    "entries": [
+        "Indoor Studio",
+        "Evening Field",
+        "Belfast Sunset",
+        "Market"
+    ],
+    "lastSelectedEntry": 0
+}

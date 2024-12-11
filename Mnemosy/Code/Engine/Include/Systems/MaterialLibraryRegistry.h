@@ -75,7 +75,6 @@ namespace mnemosy::systems
 		void ActiveLibEntry_UnlitMat_LoadTexture(std::filesystem::path& filepath);
 		void ActiveLibEntry_UnlitMat_DeleteTexture();
 
-		// TODO: implement
 		void ActiveLibEntry_Skybox_LoadTexture(std::filesystem::path& filepath);
 		void ActiveLibEntry_Skybox_DeleteTexture();
 

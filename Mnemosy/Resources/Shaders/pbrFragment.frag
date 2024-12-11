@@ -34,6 +34,9 @@ uniform float _lightAttentuation;
 uniform vec3 _cameraPositionWS;
 uniform float _skyboxRotation;
 uniform float _skyboxExposure;
+uniform vec4 _skyboxColorValue; // rgb are skybox color, w indicates if samplers are bound where 1 = is bound and 0 = not bound
+uniform float _postExposure;
+
 
 uniform samplerCube _irradianceMap; // sampler 8
 uniform samplerCube _prefilterMap;	// sampler 9
@@ -188,6 +191,7 @@ void main()
 			lightingData.lightColor = _lightColor * _lightStrength;
 			lightingData.lightType = _lightType;
 			lightingData.lightAttentuation = _lightAttentuation;
+			lightingData.skyboxColor = _skyboxColorValue;
 
 	////// SHADING ================================================================================================== ////
 	//// ============================================================================================================ ////
@@ -198,6 +202,6 @@ void main()
 	////// POST PROCCESSING ========================================================================================= ////
 	//// ============================================================================================================ ////
 			fragmentOutputColor	= vec4(0.0,0.0,0.0,1.0);
-			fragmentOutputColor = postProcess(shadedFragmentColorLinear,0.0);
+			fragmentOutputColor = postProcess(shadedFragmentColorLinear,_postExposure);
 
 }

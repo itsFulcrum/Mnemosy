@@ -1,31 +1,20 @@
 #ifndef SKYBOX_ASSET_REGISTRY_H
 #define SKYBOX_ASSET_REGISTRY_H
 
-
-
 #include <string>
 #include <vector>
-#include <filesystem>
 
-#include <json.hpp>
+
+namespace mnemosy::systems {
+	struct LibEntry;
+}
+
+namespace mnemosy::graphics {
+	class Skybox;
+}
 
 namespace mnemosy::systems
 {
-
-	struct SkyboxAssetEntry 
-	{
-		std::string skyName;
-		std::string colorCubeFile;
-		std::string irradianceCubeFile;
-		std::string prefilterCubeFile;
-	};
-	NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SkyboxAssetEntry,
-		skyName,
-		colorCubeFile,
-		irradianceCubeFile,
-		prefilterCubeFile
-		)
-
 	class SkyboxAssetRegistry
 	{
 	public:
@@ -35,39 +24,28 @@ namespace mnemosy::systems
 		void Init();
 		void Shutdown();
 
+		graphics::Skybox* LoadPreviewSkybox(const uint16_t id, const bool setAsSelected);
 
-		bool CheckIfExists(const std::string& name);
+		void AddLibEntryToPreviewSkyboxes(systems::LibEntry* libEntry);
 
-		void AddEntry(const std::string& name);
-		void RemoveEntry(const std::string& name);
+		void RemoveEntry(const uint16_t id);
 
-		SkyboxAssetEntry GetEntry(const std::string& name);
-
-		std::vector<std::string>& GetVectorOfNames();
-		int GetPositionByName(const std::string name);
-
-		int GetCurrentSelected() { return m_currentSelected; }
-		void SetNewCurrent(const std::string& name);
-
+		const std::vector<std::string>& GetEntryList() { return m_entryNames; }
+		uint16_t GetCurrentSelectedID() { return m_currentSelected; }
+		uint16_t GetLastSessionSelectedEntryID() { return m_lastSelectedEntry; }
 
 	private:
-		void LoadEntriesFromSavedData();
-		void SaveAllEntriesToDataFile();
-		void UpdateOrderedEntryNamesVector();
+		void LoadDataFile();
+		void SaveDataFile();
 
-		bool CheckDataFile(std::filesystem::directory_entry dataFile);
+		void RemoveFilesForEntry(const std::string& name);
 
-		std::string m_dataFileName;// = "SkyboxAssetsRegistry.mnsydata";
-		std::string m_pathToDatafile;// = "";
+		std::vector<std::string> m_entryNames;
 
-		std::vector<SkyboxAssetEntry> m_skyboxAssets;
-		std::vector<std::string> m_orderedEntryNames; // ordered just means that they should always be in the same order as the entries are in the m_skyboxAsstes;
+		uint16_t m_currentSelected = 0;
 
-
-		int m_currentSelected = 0;
-
-
-		bool prettyPrintDataFile = false;
+		uint16_t m_lastSelectedEntry = 0; // refers to the last selected that was stored when the program was closed.
+		
 	};
 
 

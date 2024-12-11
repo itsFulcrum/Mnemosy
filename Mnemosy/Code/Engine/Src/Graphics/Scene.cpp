@@ -4,10 +4,9 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
-#include <json.hpp>
 
 #include "Include/Systems/FolderTreeNode.h"
-
+#include "Include/Systems/SkyboxAssetRegistry.h"
 
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/Camera.h"
@@ -16,6 +15,7 @@
 #include "Include/Graphics/Skybox.h"
 #include "Include/Graphics/Material.h"
 
+#include <json.hpp>
 #include <filesystem>
 
 namespace mnemosy::graphics
@@ -40,9 +40,11 @@ namespace mnemosy::graphics
 		m_mesh = std::make_unique<RenderMesh>(previewMesh.generic_string().c_str());
 
 		//MNEMOSY_TRACE("Scene - light Init");
-		std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("market.hdr");
+		//std::filesystem::path standardSkybox = fd.GetTexturesPath() / std::filesystem::path("market.hdr");
 
-		m_skybox = new Skybox(standardSkybox.generic_string().c_str(), 1024);
+		systems::SkyboxAssetRegistry& skyReg = MnemosyEngine::GetInstance().GetSkyboxAssetRegistry();
+
+		m_skybox = skyReg.LoadPreviewSkybox(skyReg.GetLastSessionSelectedEntryID(),true);
 		//MNEMOSY_TRACE("Scene - Skybox Init");
 
 		m_pbrMaterial = new PbrMaterial();
@@ -201,7 +203,7 @@ namespace mnemosy::graphics
 		 userSceneSettings.background_opacity			= file.ReadFloat(success, "background_opacity", 0.0f, true);
 		 userSceneSettings.background_gradientOpacity	= file.ReadFloat(success, "background_gradientopacity", 1.0f, true);
 		 userSceneSettings.background_blurRadius		= file.ReadFloat(success, "background_blurRadius", 0.0f, true);
-		 userSceneSettings.background_blurSteps		= file.ReadInt(success, "background_blurSteps", 0, true);
+		 //userSceneSettings.background_blurSteps		= file.ReadInt(success, "background_blurSteps", 0, true);
 
 		 file.FilePrettyPrintSet(true);
 
@@ -229,7 +231,7 @@ namespace mnemosy::graphics
 		file.WriteFloat(success, "background_opacity", userSceneSettings.background_opacity);
 		file.WriteFloat(success, "background_gradientopacity", userSceneSettings.background_gradientOpacity);
 		file.WriteFloat(success, "background_blurRadius", userSceneSettings.background_blurRadius);
-		file.WriteInt(success,   "background_blurSteps", userSceneSettings.background_blurSteps);
+		//file.WriteInt(success,   "background_blurSteps", userSceneSettings.background_blurSteps);
 
 		file.FilePrettyPrintSet(true);
 

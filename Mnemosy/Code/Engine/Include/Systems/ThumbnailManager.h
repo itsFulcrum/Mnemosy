@@ -24,7 +24,6 @@ namespace mnemosy::systems {
 		void Init();
 		void Shutdown();
 
-
 		void Update();
 				
 		void RenderThumbnailForActiveLibEntry(LibEntry* activeLibEntry);
@@ -36,7 +35,7 @@ namespace mnemosy::systems {
 		void UnloadAllThumbnails();
 
 	private:
-		void RenderThumbnailForAnyLibEntry_Slow(LibEntry* libEntry);
+		void RenderThumbnailForAnyLibEntry_Slow_Fallback(LibEntry* libEntry);
 
 
 		void DeleteThumbnailGLTexture_Internal(LibEntry* libEntry);

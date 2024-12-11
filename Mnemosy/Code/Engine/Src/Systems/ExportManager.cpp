@@ -3,6 +3,9 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+
+#include "Include/Core/Clock.h"
+
 #include "json.hpp"
 
 #include "Include/Systems/FolderTreeNode.h"
@@ -291,7 +294,7 @@ namespace mnemosy::systems
 						graphics::Texture* packedTexture = new graphics::Texture();
 						packedTexture->GenerateOpenGlTexture(picInfo,false);						
 
-						TextureExportInfo info = TextureExportInfo(to.generic_string(), packedTexture->GetWidth(), packedTexture->GetHeight(), packedTexture->GetTextureFormat(),packedTexture->IsHalfFloat());
+						TextureExportInfo info = TextureExportInfo(to, packedTexture->GetWidth(), packedTexture->GetHeight(), packedTexture->GetTextureFormat(),packedTexture->IsHalfFloat());
 						
 						GLTextureExport(packedTexture->GetID(), info);						
 
@@ -333,8 +336,63 @@ namespace mnemosy::systems
 	}
 
 	// TODO: implement
-	void ExportManager::SkyboxMat_ExportTextures(std::filesystem::path& exportPath, systems::LibEntry* libEntry, graphics::Skybox& skyboxMat) {
+	void ExportManager::SkyboxMat_ExportTextures(std::filesystem::path& exportFolderPath, systems::LibEntry* libEntry, graphics::Skybox& skyboxMat) {
 		namespace fs = std::filesystem;
+
+
+		if (skyboxMat.IsColorCubeAssigned()) {
+
+
+			// first load the hdr equirectangular
+
+			fs::path equirectangularPath = systems::LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::path (libEntry->name + texture_skybox_fileSuffix_equirectangular);
+
+			if (!fs::exists(equirectangularPath)) {
+				MNEMOSY_WARN("Export Failed, Equirectangular texture is missing for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
+				return;
+			}
+			
+
+			graphics::PictureError picErr;
+			graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErr,equirectangularPath.generic_string().c_str(),true,true,true);
+			if (!picErr.wasSuccessfull) {
+				MNEMOSY_WARN("Export Failed, Faild to load Equirectangular texture from file for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
+				return;
+			}
+
+			graphics::Texture* tex = new graphics::Texture();
+
+			tex->GenerateOpenGlTexture(picInfo,false);
+			
+			if (picInfo.pixels)
+				free(picInfo.pixels);
+
+			
+
+			std::string fileExtention = graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat);
+
+
+			std::string filename = libEntry->name + "_raw" + fileExtention;
+
+			fs::path finalExportPath = exportFolderPath / fs::path(filename);
+
+
+
+			TextureExportInfo info = TextureExportInfo(finalExportPath, tex->GetWidth(), tex->GetHeight(), tex->GetTextureFormat(), tex->IsHalfFloat());
+
+			info.converExrAndHdrToLinear = true; // it should already be linear.
+
+			GLTextureExport(tex->GetID(), info);
+
+
+			delete tex;
+		}
+		else {
+
+			MNEMOSY_WARN("Export Failed, no texture is assigned for Skybox Material: {}", libEntry->name);
+		}
+
+
 
 	}
 
@@ -351,32 +409,21 @@ namespace mnemosy::systems
 
 
 		// todo this should not be handled here but rather by the specific writer
-		if(format == graphics::MNSY_RG8 ||format == graphics::MNSY_RG16 ||format == graphics::MNSY_RG32 ){
+		/*if(format == graphics::MNSY_RG8 ||format == graphics::MNSY_RG16 ||format == graphics::MNSY_RG32 ){
 			MNEMOSY_ERROR("ExportManager::GLTextureExport: Export of dual channel textures is not supported");
 			return;
-		}
+		}*/
 
-		unsigned int width = exportInfo.width;
-		unsigned int height = exportInfo.height;
+		uint16_t width = exportInfo.width;
+		uint16_t height = exportInfo.height;
+
+
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, glTextureID);
 
 
-		// ensure byte alignment
-		unsigned int restWidth = width % 4;
-		unsigned int padding = 4;
-		if (restWidth != 0) {
-			padding = 1;
-		}
-
-		glPixelStorei(GL_PACK_ALIGNMENT, padding);
-
-
-
-		uint8_t numChannels;
-		uint8_t bitsPerChannel;
-		uint8_t bytesPerPixel;
+		uint8_t numChannels, bitsPerChannel, bytesPerPixel;
 		graphics::TexUtil::get_information_from_textureFormat(format, numChannels, bitsPerChannel, bytesPerPixel);
 		
 		
@@ -401,8 +448,6 @@ namespace mnemosy::systems
 			// for HDR we make sure its 32 bit
 
 			format = (graphics::TextureFormat)((uint8_t)(graphics::TextureFormat::MNSY_R32) + numChannels -1);
-
-
 		}
 		else if (fileFormat == graphics::ImageFileFormat::MNSY_FILE_FORMAT_PNG) {
 
@@ -417,14 +462,16 @@ namespace mnemosy::systems
 		graphics::TexUtil::get_information_from_textureFormat(format, numChannels, bitsPerChannel, bytesPerPixel);
 		
 		// buffer for pixel data
-		size_t bufferSize = width * height * bytesPerPixel;
+		uint64_t bufferSize = width * height * bytesPerPixel;
 		void* pixelBuffer =  malloc(bufferSize);
 
-		size_t glHalfFloatType = GL_UNSIGNED_SHORT;
+		uint32_t glHalfFloatType = GL_UNSIGNED_SHORT;
 		if (isHalfFloat) {
 			glHalfFloatType = GL_HALF_FLOAT;
 		}
 
+		//// ensure 4 byte alignment
+		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
 		switch (format) {
 		// 8 bits per pixel
@@ -444,29 +491,20 @@ namespace mnemosy::systems
 		case (graphics::TextureFormat::MNSY_RGBA32): glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, pixelBuffer); break;
 		}
 
-		graphics::PictureInfo info;
-		info.width = width;
-		info.height = height;
-		info.textureFormat = format;
-		info.isHalfFloat = isHalfFloat;
-		info.pixels = pixelBuffer;
-
-
-		std::string exportFormatTxt = graphics::TexUtil::get_string_from_textureFormat(format);
-		
-		std::string exportPath = exportInfo.path.generic_string();
+		graphics::PictureInfo info{ width,height,format,isHalfFloat,pixelBuffer };
 
 		graphics::PictureError errorCheck;
-		graphics::Picture::WritePicture(errorCheck, exportPath.c_str(), info,true);
+		graphics::Picture::WritePicture(errorCheck, exportInfo.path.generic_string().c_str(), info,true,exportInfo.converExrAndHdrToLinear);
+
 		if (!errorCheck.wasSuccessfull) {
-			MNEMOSY_ERROR("An error occured while exporting. Format: {} {}x{}  to: {} \n Error Message: {}", exportFormatTxt, width, height, exportPath, errorCheck.what);
+
+			std::string exportFormatTxt = graphics::TexUtil::get_string_from_textureFormat(format);
+			MNEMOSY_ERROR("An error occured while exporting. Format: {} {}x{}  to: {} \n Error Message: {}", exportFormatTxt, width, height, exportInfo.path.generic_string(), errorCheck.what);
 		}
 		
 		if (pixelBuffer) {
 			free(pixelBuffer);
 		}
-
-		MNEMOSY_INFO("Exported Texture: {}, {}x{} {}", exportPath, width, height, exportFormatTxt);
 	}
 
 

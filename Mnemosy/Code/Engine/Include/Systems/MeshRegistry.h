@@ -41,6 +41,7 @@ namespace mnemosy::systems {
 
 
 		unsigned int& GetScreenQuadVAO();
+		graphics::ModelData& GetSkyboxRenderMesh();
 
 	private:
 
@@ -48,7 +49,7 @@ namespace mnemosy::systems {
 		std::vector<graphics::ModelData*> m_loadedMeshes;
 		std::vector<std::string> m_loadedMeshesPaths;
 
-
+		uint16_t m_skybox_render_ModelData_ID;
 
 		unsigned int m_ScreenQuad_VBO = 0;
 		unsigned int m_ScreenQuad_VAO = 0;

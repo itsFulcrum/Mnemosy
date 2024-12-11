@@ -22,15 +22,15 @@ namespace mnemosy::graphics
 		Texture();
 		~Texture();
 		
-		void GenerateOpenGlTexture(const PictureInfo info, const bool generateMipmaps);
+		void GenerateOpenGlTexture(const PictureInfo& info, const bool generateMipmaps);
 
 
-		bool containsData() const;
+		bool IsInitialized() const;
 		void clear();
 		void BindToLocation(const uint8_t activeTextureLocation);
 		void UnbindLocation(const uint8_t activeTextureLocation);
 		
-		unsigned int GetID() { return m_ID; }
+		unsigned int& GetID() { return m_ID; }
 		unsigned int GetChannelsAmount();
 
 

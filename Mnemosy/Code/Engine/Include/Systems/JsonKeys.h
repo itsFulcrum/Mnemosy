@@ -115,15 +115,15 @@ namespace mnemosy::systems {
 #define jsonKey_skybox_color_b			"color_b"
 
 
-#define jsonKey_skybox_sunColor_r		"sunColor_r"
-#define jsonKey_skybox_sunColor_g		"sunColor_g"
-#define jsonKey_skybox_sunColor_b		"sunColor_b"
-
-#define jsonKey_skybox_sunDir_x			"sunDir_x"
-#define jsonKey_skybox_sunDir_y			"sunDir_y"
-#define jsonKey_skybox_sunDir_z			"sunDir_z"
-
-#define jsonKey_skybox_sunStrength		"sunStrength"
+//#define jsonKey_skybox_sunColor_r		"sunColor_r"
+//#define jsonKey_skybox_sunColor_g		"sunColor_g"
+//#define jsonKey_skybox_sunColor_b		"sunColor_b"
+//
+//#define jsonKey_skybox_sunDir_x			"sunDir_x"
+//#define jsonKey_skybox_sunDir_y			"sunDir_y"
+//#define jsonKey_skybox_sunDir_z			"sunDir_z"
+//
+//#define jsonKey_skybox_sunStrength		"sunStrength"
 
 
 

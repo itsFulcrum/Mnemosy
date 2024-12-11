@@ -2,50 +2,49 @@
 #define CUBEMAP_H
 
 #include <string>
+#include <filesystem>
+
+namespace mnemosy::graphics {
+	class Texture;
+}
+
 
 namespace mnemosy::graphics
 {
+	enum CubemapType {
+		MNSY_CUBEMAP_TYPE_COLOR = 0,
+		MNSY_CUBEMAP_TYPE_IRRADIANCE = 1,
+		MNSY_CUBEMAP_TYPE_PREFILTER = 2,
+		MNSY_CUBEMAP_TYPE_COUNT,
+		MNSY_CUBEMAP_TYPE_NONE
+	};
+
 	class Cubemap
 	{
 	public:
-		Cubemap();
+		Cubemap() = default;
 		~Cubemap();
 
-		bool LoadEquirectangularFromFile(const char* imagePath,const char* name, const unsigned int colorCubemapResolution,const bool savePermanently);
-		
-		void LoadCubemapsFromKtxFiles(const char* colorCubemapPath, const char* irradianceCubemapPath, const char* prefilterCubemapPath);
+		// if overrideTexResolution is set skyboxes of type Color will use specified resolution otherwise they will use height of the equirectangular texture. other types are not effectd
+		void GenerateOpenGlCubemap_FromEquirecangularTexture(Texture& equirectangularTex, CubemapType cubeType, bool overrideTexResolution, unsigned int _resolution);
 
 
-		void BindColorCubemap(const unsigned int location);
-		void BindIrradianceCubemap(const unsigned int location);
-		void BindPrefilteredCubemap(const unsigned int location);
+		void GenerateOpenGlCubemap_FromKtx2File(std::filesystem::path& path, bool loadStoredMips);
 
+		void Clear();
+
+		void Bind(const unsigned int location);
+		void Unbind();
+
+		unsigned int& GetGlID() { return m_gl_ID; }
+		uint16_t GetResolution() { return m_resolution; }
 
 	private:
-		void equirectangularToCubemap(uint16_t resolution);
-		void equirectangularToIrradianceCubemap(uint16_t resolution);
-		void equirectangularToPrefilteredCubemap(uint16_t resolution);
-		void exportGeneratedCubemapsToKtx(const std::string& name,const unsigned int colorCubemapResolution);
+		unsigned int m_gl_ID = 0;
+		bool m_isInitialized = false;
 
-
-		unsigned int m_equirectangularTextureID = 0;
-		unsigned int m_colorCubemapID = 0;
-		unsigned int m_irradianceMapID = 0;
-		unsigned int m_prefilterMapID = 0;
-
-		// these are global settings and shouldn't be part off each cubemap instance
-		const uint16_t m_irradianceMapResolution = 64;
-		const uint16_t m_prefilteredMapResolution = 512;
-
-
-		bool m_equirectangularTexture_isGenerated = false;
-		bool m_colorCubemap_isGenerated = false;
-		bool m_irradianceMap_isGenerated = false;
-		bool m_prefilterMap_isGenerated = false;
-
-		bool m_exportCubemaps = false;
-		bool m_loadCubemapsFromFile = false;
-
+		uint16_t m_resolution = 0;
+		uint8_t m_lastBoundLocation = 0;
 	};
 
 

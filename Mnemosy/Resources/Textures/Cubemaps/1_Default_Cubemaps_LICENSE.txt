@@ -1,23 +1,18 @@
 
 Default cubemaps/HDRi images are all licensed under the CC0-Creative Commons license.
 
-Brown Photostudio
-Authors: Sergej Majboroda
-https://polyhaven.com/a/brown_photostudio_02
 
-Kloofendal Misty Morning
-Authors: Greg Zaal
-https://polyhaven.com/a/kloofendal_misty_morning
+Evening Field = Evening Field
+Authors: Sergej Majboroda
+https://polyhaven.com/a/evening_field
+
+Indoor Studio = Christmas Photo Studio 07
+Authors: Sergej Majboroda
+https://polyhaven.com/a/christmas_photo_studio_07
 
 Belfast Sunset
 Authors: Dimitrios Savva, Greg Zaal
 https://polyhaven.com/a/belfast_sunset
-
-
-Studio Small
-Authors: Sergej Majboroda
-https://polyhaven.com/a/studio_small_08
-
 
 Market
 Authors: Andreas Mischok

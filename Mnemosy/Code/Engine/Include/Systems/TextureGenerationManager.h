@@ -47,25 +47,10 @@ namespace mnemosy::systems
 		void DrawQuad();
 
 		graphics::Shader* m_pTextureGenShader = nullptr;
-
-		//unsigned int m_VBO = 0;
-		//unsigned int m_VAO = 0;
 		
 		unsigned int m_FBO = 0;
 		unsigned int m_renderTexture_ID = 0;
 
-		
-		//float m_screenQuadVertices[24] = {
-		//	// triangle 1
-		//	// positions xy		uvs
-		//	-1.0f, -1.0f,		0.0f,0.0f,
-		//	 1.0f,  1.0f,		1.0f,1.0f,
-		//	-1.0f,  1.0f,		0.0f,1.0f,
-		//	 // triangle 2
-		//	 -1.0f, -1.0f,		0.0f,0.0f,
-		//	  1.0f, -1.0f,		1.0f,0.0f,
-		//	  1.0f,  1.0f,		1.0f,1.0f
-		//};
 	};
 
 } // !mnemosy::systems

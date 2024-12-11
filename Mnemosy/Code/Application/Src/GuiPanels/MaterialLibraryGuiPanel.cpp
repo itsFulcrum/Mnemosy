@@ -196,9 +196,9 @@ namespace mnemosy::gui
 						
 					}
 					else if (i == 3) { // add skybox
-						//AddMaterialEntry(node, "New Texture", systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX);
+						AddMaterialEntry(node, "New Skybox", systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX);
 					
-						MNEMOSY_INFO("Skyboxs are not yet supported");
+						//MNEMOSY_INFO("Skyboxs are not yet supported");
 					}
 					else if (i == 4) { // delete but keep children
 						DeleteButKeepChildren(node);

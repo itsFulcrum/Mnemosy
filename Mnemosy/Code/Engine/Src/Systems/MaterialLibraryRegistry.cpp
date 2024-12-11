@@ -9,11 +9,12 @@
 
 #include "Include/Graphics/Renderer.h"
 #include "Include/Graphics/TextureDefinitions.h"
-#include "Include/Graphics/Utils/Picture.h"
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Skybox.h"
+#include "Include/Graphics/Cubemap.h"
+#include "Include/Graphics/Utils/Picture.h"
 #include "Include/Graphics/Utils/KtxImage.h"
 
 #include "Include/Systems/LibraryProcedures.h"
@@ -318,11 +319,6 @@ namespace mnemosy::systems {
 	// TODO: make sure thumbnails get directly created for the different entry types
 	void MaterialLibraryRegistry::LibEntry_CreateNew(FolderNode* node, LibEntryType type , std::string& name) {
 
-		if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
-			MNEMOSY_WARN("At the moment on SKYBOX Mat is not supported");
-			return;
-		}
-
 		namespace fs = std::filesystem;
 
 		LibEntry* libEntry = m_folderTree->CreateNewLibEntry(node, type, name);
@@ -379,6 +375,7 @@ namespace mnemosy::systems {
 		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
 			LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile(libEntry, prettyPrintMaterialFiles);
+
 		}
 
 		// check if it was created in the currently opend folder
@@ -524,13 +521,11 @@ namespace mnemosy::systems {
 		SaveUserDirectoriesData();
 	}
 	
-
-	// TODO: handle skybox entry type
 	void MaterialLibraryRegistry::LibEntry_Load(systems::LibEntry* libEntry) {
 
 		double beginTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 
-		ActiveLibEntry_SaveToFile();
+		ActiveLibEntry_SaveToFile(); // save current selected entry first before switching
 
 		systems::LibEntryType type = libEntry->type;
 
@@ -554,7 +549,18 @@ namespace mnemosy::systems {
 			MNEMOSY_DEBUG("MaterialLibrary: Loaded Unlit Material: {}", libEntry->name);
 		}
 		else if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
-			MNEMOSY_DEBUG("MaterialLibrary: Loading Skyboxes is not yet supported: {}", libEntry->name);
+
+			fs::path p = LibEntry_GetFolderPath(libEntry);
+			
+			graphics::Skybox* sky = LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(p,libEntry->name,prettyPrintMaterialFiles);
+
+			graphics::Scene& scene = MnemosyEngine::GetInstance().GetScene();
+			
+			scene.SetSkybox(sky);
+
+			MnemosyEngine::GetInstance().GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings,*sky);
+
+			//MNEMOSY_DEBUG("MaterialLibrary: Loading Skyboxes is not yet supported: {}", libEntry->name);
 		}
 
 
@@ -596,20 +602,19 @@ namespace mnemosy::systems {
 
 		switch (m_activeLibEntry->type)
 		{
-		case mnemosy::systems::MNSY_ENTRY_TYPE_PBRMAT:
-
+		case systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT:
 			LibProcedures::LibEntry_PbrMaterial_SaveToFile(m_activeLibEntry, &MnemosyEngine::GetInstance().GetScene().GetPbrMaterial(), prettyPrintMaterialFiles);
 			break;
-		case mnemosy::systems::MNSY_ENTRY_TYPE_UNLITMAT:
+		case systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT:
 
 			LibProcedures::LibEntry_UnlitMaterial_SaveToFile(m_activeLibEntry, MnemosyEngine::GetInstance().GetScene().GetUnlitMaterial(),prettyPrintMaterialFiles);
 			break;
-		case mnemosy::systems::MNSY_ENTRY_TYPE_SKYBOX:
-			break;
-
+		case systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX:
+						
 			LibProcedures::LibEntry_SkyboxMaterial_SaveToFile(m_activeLibEntry, &MnemosyEngine::GetInstance().GetScene().GetSkybox(),prettyPrintMaterialFiles);
-		default:
 			break;
+		default:
+			return;
 		}
 
 	}
@@ -743,6 +748,8 @@ namespace mnemosy::systems {
 	}
 
 	void MaterialLibraryRegistry::SetDefaultMaterial() {
+
+		ActiveLibEntry_SaveToFile();
 
 		if (m_activeLibEntry) {
 
@@ -917,8 +924,6 @@ namespace mnemosy::systems {
 
 		fs::path materialDir = LibEntry_GetFolderPath(m_activeLibEntry); // m_fileDirectories->GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
-
-
 		// find filename of the texture then remove it form disk and reset the path to "notAssigned" in the material meta data file.
 		{
 
@@ -1069,10 +1074,207 @@ namespace mnemosy::systems {
 
 	}
 
-
-	// TODO: implement
+	// TODO: calculate skybox sun direction and color form newly loaded texture
 	void MaterialLibraryRegistry::ActiveLibEntry_Skybox_LoadTexture(std::filesystem::path& filepath)
 	{
+		MNEMOSY_ASSERT(m_activeLibEntry != nullptr, "This should not happen");
+		MNEMOSY_ASSERT(m_activeLibEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX, "It must be pbr if calling this method!");
+
+		core::Clock& clock = MnemosyEngine::GetInstance().GetClock();
+
+		double timeStart = clock.GetTimeSinceLaunch();
+
+
+		// first load equirectangular from file.
+		graphics::PictureError err;
+		graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(err, filepath.generic_string().c_str(), true, true, false);
+		if (!err.wasSuccessfull) {
+			MNEMOSY_ERROR("Unable to load Texture: {} \nMessage: {}", filepath.generic_string(), err.what);
+			
+			return;
+		}
+
+		if (picInfo.width >= 8 * 1024 + 512) { // over 8k textures are not supported atm because file sizes with RGB 32 bit get super big and libKtx has some limit on large file sizes.
+
+			if (picInfo.pixels)
+				free(picInfo.pixels);
+
+
+			MNEMOSY_ERROR("Too large image sizes are not supported for skyboxes because they are stored in high bit depth (32bit) format and loading becomes unstable.  You may try storing them as non skybox unlit texture materials instead.");
+
+			return;
+		}
+
+		graphics::Texture* equirectangularTex = new graphics::Texture();
+
+		equirectangularTex->GenerateOpenGlTexture(picInfo,true);
+
+		if (picInfo.pixels)
+			free(picInfo.pixels);
+
+		std::string entryName = m_activeLibEntry->name;
+		fs::path entryFolder = LibEntry_GetFolderPath(m_activeLibEntry);
+
+		// export or copy equirectangular to new location as hdr
+		{
+			fs::path equirectangularFilePath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_equirectangular);
+
+			//if its an hdr we are loading we might aswell just copy the file, this is a common case and improves performance significantly for bigger files
+			graphics::ImageFileFormat fileFormat = graphics::TexUtil::get_imageFileFormat_from_fileExtentionString(filepath.extension().generic_string());
+
+			if (fileFormat == graphics::ImageFileFormat::MNSY_FILE_FORMAT_HDR) {
+				try {
+					fs::copy_file(filepath, equirectangularFilePath,fs::copy_options::overwrite_existing);
+				}
+				catch (fs::filesystem_error e) {
+					MNEMOSY_WARN("System error copying file. \nMessage {}", e.what());
+
+					// if copy fails we fallback to generating it manually
+					systems::ExportManager& exportManager = MnemosyEngine::GetInstance().GetExportManager();
+
+					systems::TextureExportInfo exportInfo = systems::TextureExportInfo(equirectangularFilePath, equirectangularTex->GetWidth(), equirectangularTex->GetHeight(), picInfo.textureFormat, picInfo.isHalfFloat, false);
+
+					exportManager.GLTextureExport(equirectangularTex->GetID(), exportInfo);
+				}
+			}
+			else { // otherwise export it from the gl texture
+				systems::ExportManager& exportManager = MnemosyEngine::GetInstance().GetExportManager();
+				systems::TextureExportInfo exportInfo = systems::TextureExportInfo(equirectangularFilePath, equirectangularTex->GetWidth(), equirectangularTex->GetHeight(), picInfo.textureFormat, picInfo.isHalfFloat, false);
+				exportManager.GLTextureExport(equirectangularTex->GetID(), exportInfo);
+			}
+		}
+
+		double timeEquiEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+		MNEMOSY_WARN("Loaded and saved equirectangula in: {} sec", timeEquiEnd - timeStart);
+
+
+		graphics::Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
+
+		// generate cubemaps , assign them to skybox and export them as ktx2 files 
+		{
+			double timeStartColor = clock.GetTimeSinceLaunch();
+
+			// color cube
+			{
+				fs::path cubeColorPath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubeColor);
+
+				double colorGenCubeStart = clock.GetTimeSinceLaunch();
+
+				graphics::Cubemap* colorCube = new graphics::Cubemap();
+				colorCube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,false,0);
+
+				double colorGenCubeEnd = clock.GetTimeSinceLaunch();
+
+				MNEMOSY_TRACE("Color Gen Cube: {} sec", colorGenCubeEnd - colorGenCubeStart);
+				
+				graphics::KtxImage ktx;
+				ktx.SaveCubemap(cubeColorPath.generic_string().c_str(), colorCube->GetGlID(), equirectangularTex->GetTextureFormat(), colorCube->GetResolution(), false);
+
+
+				double colorSaveCubeEnd = clock.GetTimeSinceLaunch();
+
+				MNEMOSY_TRACE("Color Export Cube: {} sec", colorSaveCubeEnd - colorGenCubeEnd);
+
+				skybox.AssignCubemap(colorCube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
+			}
+
+
+			double timeEndColor = clock.GetTimeSinceLaunch();
+
+			MNEMOSY_WARN("Loaded color cube in: {} sec", timeEndColor - timeStartColor);
+
+
+			double timeStartIrradiance = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+			// cube irradiance
+			{
+				fs::path cubeIrradiancePath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubeIrradiance);
+
+				double irradGenCubeStart = clock.GetTimeSinceLaunch();
+
+				graphics::Cubemap* irradCube = new graphics::Cubemap();
+				irradCube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE,false,0);
+
+				double irradGenCubeEnd = clock.GetTimeSinceLaunch();
+
+				MNEMOSY_TRACE("Irradiance Gen Cube: {} sec", irradGenCubeEnd - irradGenCubeStart);
+
+				graphics::KtxImage ktx;
+				ktx.SaveCubemap(cubeIrradiancePath.generic_string().c_str(), irradCube->GetGlID(), equirectangularTex->GetTextureFormat(), irradCube->GetResolution(),false);
+
+				double irradSaveCubeEnd = clock.GetTimeSinceLaunch();
+
+				MNEMOSY_TRACE("Irradiance Save Cube: {} sec", irradSaveCubeEnd  - irradGenCubeEnd);
+
+
+				skybox.AssignCubemap(irradCube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE);
+
+			}
+			double timeEndIrradiance = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+			MNEMOSY_WARN("Loaded Irrad cube in: {} sec", timeEndIrradiance - timeStartIrradiance);
+
+			double timeStartPrefilter = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+			// cube prefilter
+			{
+				fs::path cubePrefilterPath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubePrefilter);
+
+				double preGenCubeStart = clock.GetTimeSinceLaunch();
+
+				graphics::Cubemap* cube = new graphics::Cubemap();
+				cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER,false,0);
+
+				double preGenCubeEnd = clock.GetTimeSinceLaunch();
+
+				MNEMOSY_TRACE("Prefilter Gen Cube: {} sec", preGenCubeEnd - preGenCubeStart);
+
+				graphics::KtxImage ktx;
+				ktx.SaveCubemap(cubePrefilterPath.generic_string().c_str(), cube->GetGlID(), equirectangularTex->GetTextureFormat(),cube->GetResolution(),true);
+
+				double preSaveCubeEnd = clock.GetTimeSinceLaunch();
+
+				MNEMOSY_TRACE("Prefilter Save Cube: {} sec", preSaveCubeEnd- preGenCubeEnd);
+
+				skybox.AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER);
+			}
+			double timeEndPrefilter = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+			MNEMOSY_WARN("Loaded prefilter cube in: {} sec", timeEndPrefilter - timeStartPrefilter);
+
+		}
+
+
+		double timeEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+		MNEMOSY_WARN("Generated Skybox in: {} sec", timeEnd - timeStart);
+
+
+		// TODO: parse irradance map to determine brightes spot for sun direction and color
+		// save that data to the data file and the active skybox
+
+		// update data file
+		{
+			fs::path dataFilePath = LibEntry_GetDataFilePath(m_activeLibEntry);
+
+			flcrm::JsonSettings dataFile;
+
+			bool success = false;
+
+			dataFile.FileOpen(success,dataFilePath,jsonKey_header,jsonKey_skybox_description);
+			if(!success) {
+				MNEMOSY_WARN("Error opening entry data file. Message: {}", dataFile.ErrorStringLastGet());
+			}
+
+			dataFile.WriteBool(success, jsonKey_skybox_textureIsAssigned, true);
+			std::string equirectFilename = entryName + texture_skybox_fileSuffix_equirectangular;
+
+			dataFile.WriteString(success, jsonKey_skybox_texturePath, equirectFilename);
+
+			dataFile.FilePrettyPrintSet(prettyPrintMaterialFiles);
+
+			dataFile.FileClose(success, dataFilePath);
+		}
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_Skybox_DeleteTexture() {
@@ -1083,7 +1285,7 @@ namespace mnemosy::systems {
 		namespace fs = std::filesystem;
 
 		graphics::Skybox& skyboxMat = MnemosyEngine::GetInstance().GetScene().GetSkybox();
-		skyboxMat.RemoveCubemap();
+		skyboxMat.RemoveAllCubemaps();
 
 		// remove files from disk
 		{
@@ -1303,7 +1505,7 @@ namespace mnemosy::systems {
 		return LibProcedures::LibEntry_GetDataFilePath(libEntry);
 	}
 
-	// TODO handle Entry type skybox
+	
 	std::vector<std::string> MaterialLibraryRegistry::ActiveLibEntry_GetTexturePaths() {
 
 		namespace fs = std::filesystem;
@@ -1415,8 +1617,7 @@ namespace mnemosy::systems {
 
 			graphics::Skybox& skyboxMat = MnemosyEngine::GetInstance().GetScene().GetSkybox();
 
-			if (skyboxMat.IsTextureAssigned()) {
-
+			if (skyboxMat.IsColorCubeAssigned()) {
 
 				std::string filename = m_activeLibEntry->name + texture_skybox_fileSuffix_equirectangular;
 

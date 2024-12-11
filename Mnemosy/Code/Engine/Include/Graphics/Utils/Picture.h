@@ -12,7 +12,6 @@
 	Wrapper for loading images using different image libraries under a common interface
 
 	Currently supported formats: tif, png, jpg, exr, hdr
-	ktx2 is not yet supported.
 	using STB_Read() other formats like tga and bmp are also possible but only in RGB8 / RGBA8 format.
 
 	Image Libaries currently used are:
@@ -30,6 +29,16 @@ namespace mnemosy::graphics
 	struct PictureInfo
 	{
 	public:
+		PictureInfo() = default;
+		PictureInfo(uint16_t _width, uint16_t _height, TextureFormat _format, bool _isHalfFloat, void* _pixels) 
+			: width{ _width }
+			, height{ _height }
+			, textureFormat{ _format }
+			, isHalfFloat{ _isHalfFloat }
+			, pixels{_pixels}
+		{
+		}
+
 		uint16_t width = 0;
 		uint16_t height = 0;
 		TextureFormat textureFormat = TextureFormat::MNSY_NONE;
@@ -40,33 +49,37 @@ namespace mnemosy::graphics
 	struct PictureError
 	{
 	public:
+		PictureError() = default;
+		PictureError(bool _wasSuccessFull, std::string _msg) 
+			: wasSuccessfull{_wasSuccessFull}
+			, what{_msg}
+		{
+		}
+
 		bool wasSuccessfull = true;
 		std::string what = "";
 	};
 
 	class Picture {
 
-	public:
-		
+	public:		
 
 		// General interface to read image files. 
 		static PictureInfo ReadPicture(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertGrayToRGB, const bool convertEXRandHDRToSrgb);
 
-		// Same as ReadPicture() but instead of returning PictureInfo struct, it is passed as second parameter so we can use this procedure for multithreading when loading several images simulaniously
+		// Same as ReadPicture() but instead of returning PictureInfo struct, it is passed as second parameter so we can use this procedure for multithreading when loading several images simultaniously
 		static void ReadPicture_PbrThreaded(PictureError& outPictureError, PictureInfo& outPicInfo, const std::string filepath, const bool flipVertically, graphics::PBRTextureType PBRTypeHint);
 
 		// general interface for writing images so it supports multiple formats
 		// Formats Exr and Hdr are assumed to be passes values in sRBG color space and will always convert to linear as this is the standard for these formats.
 		// for now, if data is already in linear space the respective write methods for exr and hdr must be called directly to specify wheather to convert to linear or not
-		static void WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically);
-
+		static void WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically,const bool convertExrAndHdrToLinear);
 
 		// Read .tif images. Supports full RGBA channels with up to 32 bit.
 		static PictureInfo ReadTiff(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertGrayToRGB);
 
 		// Write image data to a tiff file. Using scaline interface
 		static void WriteTiff(PictureError& outPictureError, const char* filepath,const PictureInfo& pictureInfo, const bool flipVertically);
-
 
 		// Reads .exr image files, returns pixel buffer as either half_float (16 bit) or float (32 bit), pictureInfo.isHalfFloat is true for 16bit images
 		// The implementation only supports a subset of possilbe .exr configurations.
@@ -85,7 +98,7 @@ namespace mnemosy::graphics
 		// Read .hdr files.  This will always return RGB32 format.
 		static PictureInfo ReadHdr(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertToSrgb);
 		
-		// Write .hdr files. Expects 32 bit floating point data. 8 and 16 bit data will be cause failure.
+		// Write .hdr files. Expects 32 bit floating point data. 8 and 16 bit data will cause failure.
 		// single channels will be duplicated to RGB and alpha channel will be discarded.
 		static void WriteHdr(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically, const bool convertToLinear);
 
@@ -106,7 +119,8 @@ namespace mnemosy::graphics
 		// 16 bit are automatically converted from little to big endian for png images.
 		static void WritePng(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically);
 
-		
+		static void WriteKtx2(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically);
+
 		// always returns RGB8 or RGBA8
 		// 16 bit get demoted to 8 bit. Usefull when we always want 8 bit (for glfw window icon e.g) other Read methods will always return the highest possilbe bit depth
 		static PictureInfo STB_Read(PictureError& outPictureError, const char* filepath, const bool flipVertically);
@@ -144,36 +158,31 @@ namespace mnemosy::graphics
 	WriteHdr()
 
 	Each method has esentially the same parameters.
-	For High dinamic range format .hdr and .exr and additonal bool for converting srgb and linear is provided.
+	For High dynamic range formats .hdr and .exr and additonal bool for converting srgb and linear is provided.
 
-	There are two general functions
+	There are two general interface functions
 	ReadPicture()
 	WritePicture() 
-	that check the file extention in the provided filepath and delegate to the appropriate method.
+	these check the file extention in the provided filepath and delegate to the appropriate method.
 
-	each method also has a quick explaination on the supported format etc.
+	each method also has a quick explaination on the supported formats etc.
 
 	
 	== reading an image 
 
 	bool flipVertically = true;
-	graphics::PBRTextureType texTypeHint = graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO
-	this interface was developed for the purpose of loading texture for 3D graphics.
-	Using the texType hint we can provide hint how to return the data.
-	esentially if its set to MNSY_TEXTURE_ALBEDO or MNSY_TEXTURE_EMISSION  so a texture with Srgb color then when loading gray scale image will be converted from grayscale (R) to RGB by replicating it to the other channels.
-	also for hdr and exr data is always converted from linear to srgb unless TexTypeHint is set to MNSY_TEXTURE_NONE;
-	because usually we want to use the data in srgb. this is only the case for the General function ReadPicture()  using the dedicated funciton ReadExr() we can specify wheather to convert or not.
-
+	bool convertGrayToRGB = true;
+	bool convertEXRandHDRToSrgb = true;
 
 	PictureError errorCheck;
-	PictureInfo picInfo = ReadPicture(errorCheck, "C:/image.png", flipVertically, texTypeHint)
+	PictureInfo picInfo = ReadPicture(errorCheck, "C:/image.png", flipVertically, convertGrayToRGB,convertEXRandHDRToSrgb)
 	if(!errorCheck.wasSuccesful){
-		printf("error occured. Message: %s", errorCheck.c_str());
+		printf("error occured. Message: %s", errorCheck.what.c_str());
 		
-		if an error occure picInfo will be empty no pixel date will be in memory anymore. so there is nothing to free
+		if an error occures picInfo will be empty no pixel data will be in memory. so there is no need to free anything.
 	}
 
-	// not we can access the pixel data in the PicInfo Struct.
+	// now we can access the pixel data in the PicInfo Struct.
 
 	void* pixels = picInfo.pixels;
 	int width = picInfo.width;
@@ -181,6 +190,16 @@ namespace mnemosy::graphics
 	bool isHalfFloat = picInfo.isHalfFloat // exr returns half float instead of unsigned short , this may be important depending on the use case for example when uploading to the GPU
 	picInfo.textureFormat => this is an enum containing all possilbe formats R8,RG8..RGB16.. to RGBA32
 	
+
+	// .. use your pixel data , upload to gpu or whatever.
+
+	// dont forget to free pixel buffer memory after using it
+
+	if(pixInfo.pixels)
+		free(pixInfo.pixels);
+
+
+
 	==== Write an image
 
 

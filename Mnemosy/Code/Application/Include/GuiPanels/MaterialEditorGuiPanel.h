@@ -91,6 +91,8 @@ namespace mnemosy::gui
 
 		bool m_isUnlitLoadButtonHovered = false;
 
+		bool m_isSkyboxLoadButtonHovered = false;
+
 		bool m_valuesChanged = false;
 		float m_TimeToSaveMaterial = 0.5f;
 		float m_TimeToSaveMaterialDelta = 0.0f;

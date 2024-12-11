@@ -22,8 +22,6 @@ namespace mnemosy::systems {
 
 	class LibProcedures {
 	public:
-
-
 		static void CreateDirectoryForFolderNode(systems::FolderNode* node);
 		static bool CheckDataFile(const std::filesystem::path& dataFilePath);
 
@@ -47,12 +45,11 @@ namespace mnemosy::systems {
 		static void LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::filesystem::path& entryFolderOldNamePath, std::string& oldName, bool prettyPrint);
 		static void LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std::filesystem::path& entryFolderOldNamePath, std::string& oldName, bool prettyPrint);
 
-
-
+		// load libEntry material from file and return it
 		static graphics::PbrMaterial* LibEntry_PbrMaterial_LoadFromFile_Multithreaded(systems::LibEntry* libEntry, bool prettyPrint);
 		static graphics::UnlitMaterial* LibEntry_UnlitMaterial_LoadFromFile(systems::LibEntry* libEntry, bool prettyPrint);
-		// TODO: implement
-		static graphics::Skybox* LibEntry_SkyboxMaterial_LoadFromFile(systems::LibEntry* libEntry, bool prettyPrint);
+		// uses different interface because skybox regestry wants to use the same method essentially for loading preview skyboxes but they are not libEntries
+		static graphics::Skybox* LibEntry_SkyboxMaterial_LoadFromFile(std::filesystem::path& folderPath,std::string& name, bool prettyPrint);
 
 	};
 

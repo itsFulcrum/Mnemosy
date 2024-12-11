@@ -102,6 +102,8 @@ namespace mnemosy::systems {
 
 			graphics::Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
 			
+			
+
 			renderer.RenderThumbnail_SkyboxMaterial(skybox);
 		}
 
@@ -129,7 +131,7 @@ namespace mnemosy::systems {
 	}
 
 	// TODO: Handle entry types
-	void ThumbnailManager::RenderThumbnailForAnyLibEntry_Slow(LibEntry* libEntry) {
+	void ThumbnailManager::RenderThumbnailForAnyLibEntry_Slow_Fallback(LibEntry* libEntry) {
 
 		MNEMOSY_ASSERT(libEntry != nullptr, "This should not happen");
 
@@ -158,9 +160,13 @@ namespace mnemosy::systems {
 		}
 		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
-			// TODO: implement
+			fs::path entryFolder = systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
 
-			//renderer.RenderThumbnail_SkyboxMaterial(skybox);
+			graphics::Skybox* sky = systems::LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(entryFolder,libEntry->name, true);
+
+			renderer.RenderThumbnail_SkyboxMaterial(*sky);
+
+			delete sky;
 		}
 
 		// export ktx image
@@ -279,7 +285,7 @@ namespace mnemosy::systems {
 			MNEMOSY_WARN("Failed to load thumbnail, Generating new: {}",  thumbnailPath.generic_string());
 
 			// this is potentially super slow because we have to load all textures and stuff of the material but should work and generate a new thumbnail
-			RenderThumbnailForAnyLibEntry_Slow(libEntry);
+			RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
 		}
 
 	}

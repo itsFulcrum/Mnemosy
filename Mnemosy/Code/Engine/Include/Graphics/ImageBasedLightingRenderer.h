@@ -23,8 +23,8 @@ namespace mnemosy::graphics
 		void Init();
 		void Shutdown();
 		
-		void RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes);
-		void RenderEquirectangularToIrradianceCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes);
+		void RenderEquirectangularToCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes, bool genMip);
+		void RenderEquirectangularToIrradianceCubemapTexture(unsigned int& cubemapTextureID, unsigned int& equirectangularTextureID, unsigned int textureRes, bool genMips);
 		void RenderEquirectangularToPrefilteredCubemapTexture(unsigned int& cubemapID, unsigned int& equirectangularTextureID, unsigned int resolution);
 		void PrepareCubemapRendering();
 		void EndCubemapRendering();

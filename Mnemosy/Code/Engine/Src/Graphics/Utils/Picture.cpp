@@ -2,6 +2,9 @@
 
 #include "Include/Core/Log.h"
 
+#include "Include/MnemosyEngine.h"
+#include "Include/Core/Clock.h"
+
 // std
 #include <filesystem>
 #include <fstream>
@@ -43,6 +46,12 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
+
+// libktx
+#include "Include/Graphics/Utils/KtxImage.h"
+#include <ktx.h>
+#include <ktxint.h>
+#include <vkformat_enum.h>
 
 
 namespace mnemosy::graphics {
@@ -96,6 +105,7 @@ namespace mnemosy::graphics {
 		else if (fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_KTX2) {
 			outPictureError.wasSuccessfull = false;
 			outPictureError.what = "Read: File format ktx2 is not yet implemented.";
+
 			return PictureInfo();
 		}
 
@@ -112,7 +122,7 @@ namespace mnemosy::graphics {
 		outPicInfo = Picture::ReadPicture(outPictureError,filepath.c_str(), flipVertically,convertGrayToRGB,false);
 	}
 	
-	void Picture::WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically){
+	void Picture::WritePicture(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically,const bool convertExrAndHdrToLinear){
 
 		outPictureError.wasSuccessfull = true;
 		outPictureError.what = "";
@@ -141,20 +151,19 @@ namespace mnemosy::graphics {
 		}
 		else if(fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_HDR){
 			
-			bool convertToLinear = true;
-			WriteHdr(outPictureError, filepath, pictureInfo, flipVertically, convertToLinear);
+			WriteHdr(outPictureError, filepath, pictureInfo, flipVertically, convertExrAndHdrToLinear);
 			return;
 		}
 		else if(fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_EXR){
 
-			bool convertToLinear = true;
-
-			Picture::WriteExr(outPictureError, filepath, pictureInfo, flipVertically, convertToLinear);
+			Picture::WriteExr(outPictureError, filepath, pictureInfo, flipVertically, convertExrAndHdrToLinear);
 			return;
 		}
 		else if(fileFormat == ImageFileFormat::MNSY_FILE_FORMAT_KTX2){
-			outPictureError.wasSuccessfull = false;
-			outPictureError.what = "Write: File format ktx2 is not yet implemented.";
+			//outPictureError.wasSuccessfull = false;
+			//outPictureError.what = "Write: File format ktx2 is not yet implemented.";
+
+			Picture::WriteKtx2(outPictureError,filepath,pictureInfo,flipVertically);
 			return;
 		}
 
@@ -1229,8 +1238,8 @@ namespace mnemosy::graphics {
 
 
 			r_pixels = (void*)r_pixels_half;
-			b_pixels = (void*)g_pixels_half;
-			g_pixels = (void*)b_pixels_half;
+			g_pixels = (void*)g_pixels_half;
+			b_pixels = (void*)b_pixels_half;
 			a_pixels = (void*)a_pixels_half;
 
 
@@ -1291,8 +1300,8 @@ namespace mnemosy::graphics {
 
 
 			r_pixels = (void*)r_pixels_half;
-			b_pixels = (void*)g_pixels_half;
-			g_pixels = (void*)b_pixels_half;
+			g_pixels = (void*)g_pixels_half;
+			b_pixels = (void*)b_pixels_half;
 			a_pixels = (void*)a_pixels_half;
 
 		}
@@ -1358,8 +1367,8 @@ namespace mnemosy::graphics {
 
 
 			r_pixels = (void*)r_pixels_float;
-			b_pixels = (void*)g_pixels_float;
-			g_pixels = (void*)b_pixels_float;
+			g_pixels = (void*)g_pixels_float;
+			b_pixels = (void*)b_pixels_float;
 			a_pixels = (void*)a_pixels_float;
 		} // TextureFormat::MNSY_R32
 
@@ -1429,21 +1438,19 @@ namespace mnemosy::graphics {
 		} // end convertToSrgb
 
 
-		PictureInfo outInfo;
-		outInfo.width = width;
+		return PictureInfo(width,height,graphics::TextureFormat::MNSY_RGB32 ,false,(void*)buffer);
+		/*outInfo.width = width;
 		outInfo.height = height;
 		outInfo.textureFormat = graphics::TextureFormat::MNSY_RGB32;
 		outInfo.isHalfFloat = false;
-		outInfo.pixels = (void*)buffer;
+		outInfo.pixels = (void*)buffer;*/
 
-		return outInfo;
+		//return outInfo;
 	}
 
 	void Picture::WriteHdr(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically, const bool convertToLinear){
 
 		// initialize outputs
-		outPictureError.wasSuccessfull = true;
-		outPictureError.what = "";
 
 		PictureError err = Picture::pic_util_check_input_pictureInfo(pictureInfo);
 		if (!err.wasSuccessfull) {
@@ -1480,7 +1487,6 @@ namespace mnemosy::graphics {
 			for (uint16_t h = 0; h < height; h++) {
 				for (uint16_t w = 0; w < width; w++) {
 
-
 					size_t offset = (h * width + w) * channels;
 
 					
@@ -1511,7 +1517,6 @@ namespace mnemosy::graphics {
 		int stbi_errorCheck = stbi_write_hdr(filepath, pictureInfo.width, pictureInfo.height, channels, buffer);
 
 		if (stbi_errorCheck == 0) {
-
 			outPictureError.wasSuccessfull = false;
 			outPictureError.what = "WriteHdr: stbi_write_hdr() faild to write";
 			return;
@@ -2042,6 +2047,33 @@ namespace mnemosy::graphics {
 
 	}
 
+	void Picture::WriteKtx2(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically)
+	{
+
+		// initialize outputs
+		outPictureError.wasSuccessfull = true;
+		outPictureError.what = "";
+
+		PictureError err = Picture::pic_util_check_input_pictureInfo(pictureInfo);
+		if (!err.wasSuccessfull) {
+			outPictureError.wasSuccessfull = false;
+			outPictureError.what = "WriteKtx2: PictureInfo was not correct or incomplete: " + err.what;
+			return;
+		}
+
+		graphics::KtxImage ktxImage;
+
+		unsigned int errorCode =  ktxImage.Save_WithoutMips(filepath,pictureInfo.pixels,flipVertically,pictureInfo.textureFormat,pictureInfo.width,pictureInfo.height,pictureInfo.isHalfFloat);
+
+		if (errorCode != 0) {
+
+			outPictureError.wasSuccessfull = false;
+			outPictureError.what = "WriteKtx2: Failed " + std::string(ktxErrorString((ktx_error_code_e)errorCode));
+			return;
+		}
+
+	}
+
 	// =========== Util Methods ==============
 
 	PictureInfo Picture::STB_Read(PictureError& outPictureError, const char* filepath, const bool flipVertically) {
@@ -2087,27 +2119,20 @@ namespace mnemosy::graphics {
 	}
 
 	PictureError Picture::pic_util_check_input_pictureInfo(const PictureInfo& pictureInfo) {
-		PictureError err;		
-
+		
 		if (pictureInfo.pixels == nullptr) {
-			err.wasSuccessfull = false;
-			err.what = "pictureInfo does not contain any pixel data";
-			return err;
+			return PictureError(false, "pictureInfo does not contain any pixel data");
 		}
 
 		if (pictureInfo.textureFormat == TextureFormat::MNSY_NONE) {
-			err.wasSuccessfull = false;
-			err.what = "pictureInfo format is not specified.";
-			return err;
+			return PictureError(false, "pictureInfo format is not specified.");
 		}
 
 		if (pictureInfo.height == 0 || pictureInfo.width == 0) {
-			err.wasSuccessfull = false;
-			err.what = "pictureInfo has either width or height set to 0.";
-			return err;
+			return PictureError(false, "pictureInfo has either width or height set to 0.");
 		}
 
-		return err;
+		return PictureError(true, "");
 	}
 
 	float Picture::pic_util_linear2srgb_float(float linearValue) {

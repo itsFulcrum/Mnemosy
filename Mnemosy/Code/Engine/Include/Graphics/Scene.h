@@ -56,7 +56,6 @@ namespace mnemosy::graphics
 		PbrMaterial& GetPbrMaterial() { return *m_pbrMaterial; }
 		void SetPbrMaterial(PbrMaterial* material);
 
-
 		UnlitMaterial* GetUnlitMaterial() { return m_unlitMaterial; }
 		void SetUnlitMaterial(UnlitMaterial* unlitMaterial);
 

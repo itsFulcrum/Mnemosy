@@ -5,7 +5,6 @@
 #include "Include/Systems/JsonKeys.h"
 #include "Include/Core/Log.h"
 
-
 #include <cctype>
 #include <clocale>
 
@@ -48,21 +47,21 @@ namespace mnemosy::graphics {
 
 	// the order here is important dont change it
 	enum TextureFormat {
-		MNSY_NONE		= 0,
-		MNSY_R8			= 1,
-		MNSY_RG8		= 2,
-		MNSY_RGB8		= 3,
-		MNSY_RGBA8		= 4,
+		MNSY_NONE		= 0, // undefined
+		MNSY_R8			= 1, // 1 component 8 bit: unsigned normalized
+		MNSY_RG8		= 2, // 2 component 8 bit: unsigned normalized
+		MNSY_RGB8		= 3, // 3 component 8 bit: unsigned normalized
+		MNSY_RGBA8		= 4, // 4 component 8 bit: unsigned normalized
 
-		MNSY_R16		= 5,
-		MNSY_RG16		= 6,
-		MNSY_RGB16		= 7,
-		MNSY_RGBA16		= 8,
+		MNSY_R16		= 5, // 1 component 16 bit: unsigned normalized
+		MNSY_RG16		= 6, // 2 component 16 bit: unsigned normalized
+		MNSY_RGB16		= 7, // 3 component 16 bit: unsigned normalized
+		MNSY_RGBA16		= 8, // 4 component 16 bit: unsigned normalized
 
-		MNSY_R32		= 9,
-		MNSY_RG32		= 10,
-		MNSY_RGB32		= 11,
-		MNSY_RGBA32		= 12
+		MNSY_R32		=  9, // 1 component 32 bit: signed float
+		MNSY_RG32		= 10, // 2 component 32 bit: signed float
+		MNSY_RGB32		= 11, // 3 component 32 bit: signed float
+		MNSY_RGBA32		= 12  // 4 component 32 bit: signed float
 	};
 
 	enum ChannelPackType
@@ -406,6 +405,8 @@ namespace mnemosy::graphics {
 		}
 
 
+
+
 		// returns given any format returns the corresponding format for a single channel so e.g. RGBA16 will return R16 and RG8 will return R8
 		static TextureFormat get_channel_textureFormat(graphics::TextureFormat format) {
 			
@@ -450,37 +451,118 @@ namespace mnemosy::graphics {
 			return channels;
 		}
 
-		static void get_information_from_textureFormat(const graphics::TextureFormat format, uint8_t& outChannelsAmount, uint8_t& outBitsPerChannel, uint8_t& outBytesPerPixel) {
+		static constexpr void get_information_from_textureFormat(const graphics::TextureFormat format, uint8_t& outChannelsAmount, uint8_t& outBitsPerChannel, uint8_t& outBytesPerPixel) {
 
-			outChannelsAmount = 0;
-			outBitsPerChannel = 0;
-			outBytesPerPixel = 0;
-
-			if (format == graphics::TextureFormat::MNSY_NONE) {
-				return;
-			}
-
-			// amount of color channels
-			uint8_t channels = (uint8_t)format % 4;
-			if (channels == 0) {
-				channels = 4;
-			}
-			outChannelsAmount = channels;
-
-			// asume 8 bits per pixel
-			outBitsPerChannel = 8;
-			outBytesPerPixel = channels * sizeof(uint8_t);
-
-			if (format == graphics::MNSY_R16 || format == graphics::MNSY_RG16 || format == graphics::MNSY_RGB16 || format == graphics::MNSY_RGBA16) {
+			// long switch bc it prob a bit faster
+			switch (format)
+			{
+			case mnemosy::graphics::MNSY_NONE:
+				outChannelsAmount = 0;
+				outBitsPerChannel = 0;
+				outBytesPerPixel = 0;
+				break;
+			case mnemosy::graphics::MNSY_R8:
+				outChannelsAmount = 1;
+				outBitsPerChannel = 8;
+				outBytesPerPixel = 1 * sizeof(uint8_t);
+				break;
+			case mnemosy::graphics::MNSY_RG8:
+				outChannelsAmount = 2;
+				outBitsPerChannel = 8;
+				outBytesPerPixel = 2 * sizeof(uint8_t);
+				break;
+			case mnemosy::graphics::MNSY_RGB8:
+				outChannelsAmount = 3;
+				outBitsPerChannel = 8;
+				outBytesPerPixel = 3 * sizeof(uint8_t);
+				break;
+			case mnemosy::graphics::MNSY_RGBA8:
+				outChannelsAmount = 4;
+				outBitsPerChannel = 8;
+				outBytesPerPixel = 4 * sizeof(uint8_t);
+				break;
+			case mnemosy::graphics::MNSY_R16:
+				outChannelsAmount = 1;
 				outBitsPerChannel = 16;
-				outBytesPerPixel = channels * sizeof(uint16_t);
-			}
-			else if (format == MNSY_R32 || format == MNSY_RG32 || format == MNSY_RGB32 || format == MNSY_RGBA32) {
+				outBytesPerPixel = 1 * sizeof(uint16_t);
+				break;
+			case mnemosy::graphics::MNSY_RG16:
+				outChannelsAmount = 2;
+				outBitsPerChannel = 16;
+				outBytesPerPixel = 2 * sizeof(uint16_t);
+				break;
+			case mnemosy::graphics::MNSY_RGB16:
+				outChannelsAmount = 3;
+				outBitsPerChannel = 16;
+				outBytesPerPixel = 3 * sizeof(uint16_t);
+				break;
+			case mnemosy::graphics::MNSY_RGBA16:
+				outChannelsAmount = 4;
+				outBitsPerChannel = 16;
+				outBytesPerPixel = 4 * sizeof(uint16_t);
+				break;
+			case mnemosy::graphics::MNSY_R32:
+				outChannelsAmount = 1;
 				outBitsPerChannel = 32;
-				outBytesPerPixel = channels * sizeof(uint32_t);
+				outBytesPerPixel = 1 * sizeof(uint32_t);
+				break;
+			case mnemosy::graphics::MNSY_RG32:
+				outChannelsAmount = 2;
+				outBitsPerChannel = 32;
+				outBytesPerPixel = 2 * sizeof(uint32_t);
+				break;
+			case mnemosy::graphics::MNSY_RGB32:
+				outChannelsAmount = 3;
+				outBitsPerChannel = 32;
+				outBytesPerPixel = 3 * sizeof(uint32_t);
+				break;
+			case mnemosy::graphics::MNSY_RGBA32:
+				outChannelsAmount = 4;
+				outBitsPerChannel = 32;
+				outBytesPerPixel = 4 * sizeof(uint32_t);
+
+				break;
+			default:
+				outChannelsAmount = 0;
+				outBitsPerChannel = 0;
+				outBytesPerPixel = 0;
+				break;
 			}
+
+
+			//if (format == graphics::TextureFormat::MNSY_NONE) {
+			//	return;
+			//}
+
+			//// amount of color channels
+			//uint8_t channels = (uint8_t)format % 4;
+			//if (channels == 0) {
+			//	channels = 4;
+			//}
+			//outChannelsAmount = channels;
+
+			//// asume 8 bits per pixel
+			//outBitsPerChannel = 8;
+			//outBytesPerPixel = channels * sizeof(uint8_t);
+
+			//if (format == graphics::MNSY_R16 || format == graphics::MNSY_RG16 || format == graphics::MNSY_RGB16 || format == graphics::MNSY_RGBA16) {
+			//	outBitsPerChannel = 16;
+			//	outBytesPerPixel = channels * sizeof(uint16_t);
+			//}
+			//else if (format == MNSY_R32 || format == MNSY_RG32 || format == MNSY_RGB32 || format == MNSY_RGBA32) {
+			//	outBitsPerChannel = 32;
+			//	outBytesPerPixel = channels * sizeof(uint32_t);
+			//}
 		}
 		
+		static  uint32_t get_glInternalFormat_from_textureFormat(const graphics::TextureFormat format);
+
+		static  uint32_t get_glFormat_from_textureFormat(const graphics::TextureFormat format);
+
+		static  uint32_t get_glDataType_from_textureFormat(const graphics::TextureFormat format, const bool isHalfFloat);
+
+
+
 		// returns string representation of a file format like ImageFileFormat::MNSY_FILE_FORMAT_PNG -> ".png"
 		static std::string get_string_from_imageFileFormat(const graphics::ImageFileFormat fileFormat) {
 			return std::string(graphics::TexDefinitions::ImageFileFormats_string[(int)fileFormat]);
@@ -488,25 +570,26 @@ namespace mnemosy::graphics {
 
 
 		// returns ImageFileFormat::MNSY_FILE_FORMAT_NONE if none is found.
-		static graphics::ImageFileFormat get_imageFileFormat_from_fileExtentionString(const std::string fileExtention) {
+		static graphics::ImageFileFormat get_imageFileFormat_from_fileExtentionString(const std::string& fileExtention) {
 
 			// { ".tif", ".tiff", ".png", ".jpg", ".jpeg", ".exr", ".hdr", ".ktx2" }
 
-			std::string ext = fileExtention;
+			//std::string ext = fileExtention;
 
-			if 		(ext == ".tif" || ext == ".tiff") { return ImageFileFormat::MNSY_FILE_FORMAT_TIF;}
-			else if (ext == ".png") { return ImageFileFormat::MNSY_FILE_FORMAT_PNG; }
-			else if (ext == ".jpg" || ext == ".jpeg") { return ImageFileFormat::MNSY_FILE_FORMAT_JPG; }
-			else if (ext == ".exr") { return ImageFileFormat::MNSY_FILE_FORMAT_EXR; }
-			else if (ext == ".hdr") { return ImageFileFormat::MNSY_FILE_FORMAT_HDR; }
-			else if (ext == ".ktx2") { return ImageFileFormat::MNSY_FILE_FORMAT_KTX2; }
+
+			if 		(fileExtention == ".tif" || fileExtention == ".tiff") { return ImageFileFormat::MNSY_FILE_FORMAT_TIF;}
+			else if (fileExtention == ".png") { return ImageFileFormat::MNSY_FILE_FORMAT_PNG; }
+			else if (fileExtention == ".jpg" || fileExtention == ".jpeg") { return ImageFileFormat::MNSY_FILE_FORMAT_JPG; }
+			else if (fileExtention == ".hdr") { return ImageFileFormat::MNSY_FILE_FORMAT_HDR; }
+			else if (fileExtention == ".exr") { return ImageFileFormat::MNSY_FILE_FORMAT_EXR; }
+			else if (fileExtention == ".ktx2") { return ImageFileFormat::MNSY_FILE_FORMAT_KTX2; }
 
 			return ImageFileFormat::MNSY_FILE_FORMAT_NONE;
 		}
 
 		static bool is_image_file_extention_supported(std::string& extention) {
 
-			for (size_t i = 0; i < graphics::TexDefinitions::ValidFileFormatsExtentions_string.size(); i++) {
+			for (unsigned int i = 0; i < graphics::TexDefinitions::ValidFileFormatsExtentions_string.size(); i++) {
 
 				if (extention == graphics::TexDefinitions::ValidFileFormatsExtentions_string[i]) {
 					return true;

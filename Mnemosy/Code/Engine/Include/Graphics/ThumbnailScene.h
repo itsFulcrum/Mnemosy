@@ -43,7 +43,7 @@ namespace mnemosy::graphics
 		std::unique_ptr<Camera> m_camera;
 		std::unique_ptr<RenderMesh> m_mesh;
 		std::unique_ptr<Light> m_light;
-		std::unique_ptr<Skybox> m_skybox;
+		Skybox* m_skybox;
 	};
 
 } // mnemosy::graphics

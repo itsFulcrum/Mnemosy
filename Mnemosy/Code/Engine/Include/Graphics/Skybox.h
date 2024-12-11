@@ -6,43 +6,43 @@
 
 namespace mnemosy::graphics
 {
+	enum CubemapType;
 	class Cubemap;
 	struct ModelData;
+	class Texture;
 }
 namespace mnemosy::graphics
 {
 	class Skybox
 	{
 	public:
-		Skybox();
-		Skybox(const char* imagePath, unsigned int resolution);
-
+		Skybox() = default;
 		~Skybox();
 
-		bool AssignSkyboxTexture(const char* imagePath, const char* uniqueName, unsigned int resolution, bool savePermanently);
-		void LoadPreviewSkybox(const std::string& name);
+		void AssignCubemap(Cubemap* cubemap, CubemapType type);
+		void RemoveAllCubemaps();
 
-		// TODO: implement
-		bool IsTextureAssigned() { return false; }
-		void RemoveCubemap();
+		bool IsColorCubeAssigned()		{ return m_colorCubemap; }
+		bool IsIrradianceCubeAssigned() { return m_irradianceCubemap; }
+		bool IsPrefilterCubeAssigned()	{ return m_prefilterCubemap; }
 
-
-		Cubemap& GetCubemap();
-		ModelData& GetModelData();
+		Cubemap& GetColorCube()      { return *m_colorCubemap; }
+		Cubemap& GetIrradianceCube() { return *m_irradianceCubemap; }
+		Cubemap& GetPrefilterCube()  { return *m_prefilterCubemap; }
 
 	public:
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-		glm::vec3 sunDir = glm::vec3(0.0f, 1.0f, 0.0f);
+		
+		/*glm::vec3 sunDir = glm::vec3(0.0f, 1.0f, 0.0f);
 		glm::vec3 sunColor = glm::vec3(1.0f, 1.0f, 1.0f);
-		float sunStrength = 1.0f;
+		float sunStrength = 1.0f;*/
+
 		float exposure = 0.0f;
 
 	private:
-		// there is no need to have this  part of this class
-		uint16_t m_modelData_id; 
-
-
-		Cubemap* m_pCubemap = nullptr;
+		Cubemap* m_colorCubemap = nullptr;
+		Cubemap* m_irradianceCubemap = nullptr;
+		Cubemap* m_prefilterCubemap = nullptr;
 
 	};
 
