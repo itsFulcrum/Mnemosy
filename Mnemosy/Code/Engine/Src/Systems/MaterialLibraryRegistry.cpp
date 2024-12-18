@@ -5,6 +5,7 @@
 #include "Include/Core/Log.h"
 #include "Include/Core/Clock.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Core/Utils/StringUtils.h"
 #include <json.hpp>
 
 #include "Include/Graphics/Renderer.h"
@@ -13,6 +14,7 @@
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/Scene.h"
 #include "Include/Graphics/Skybox.h"
+#include "Include/Systems/SkyboxAssetRegistry.h"
 #include "Include/Graphics/Cubemap.h"
 #include "Include/Graphics/Utils/Picture.h"
 #include "Include/Graphics/Utils/KtxImage.h"
@@ -35,6 +37,14 @@ namespace mnemosy::systems {
 
 	void MaterialLibraryRegistry::Init()
 	{
+		namespace fs = std::filesystem;
+
+
+		MNEMOSY_WARN("Sizeof LibEntry:		{}", sizeof(LibEntry));
+		MNEMOSY_WARN("Sizeof FolderNode:	 {}", sizeof(FolderNode));
+
+
+
 		m_folderTree = nullptr;
 		inSearchMode = false;
 
@@ -44,59 +54,54 @@ namespace mnemosy::systems {
 
 		// data file 
 		prettyPrintDataFile = false;
-		prettyPrintMaterialFiles = false;
+		prettyPrintMaterialFiles = true;
+
+		m_fileDirectories = &MnemosyEngine::GetInstance().GetFileDirectories();
 
 		m_lastActiveMaterialLibEntry = systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT;
+
+		// must load lib collection before loading a specific data file.
+		LibCollections_LoadFromFile();
+
+
+		if (m_libCollection_currentSlected_id != -1) {
+
+			LibCollections_SwitchActiveCollection(m_libCollection_currentSlected_id);
+		}
+	}
+
+	void MaterialLibraryRegistry::Shutdown() {
+
+		ActiveLibCollection_SaveToFile();
+
+		if (m_folderTree) {
+			m_folderTree->Shutdown();
+			delete m_folderTree;
+		}
+	}
+
+
+	const bool MaterialLibraryRegistry::LibCollection_LoadIntoActiveTree(std::filesystem::path& folderPath) {
 
 
 		namespace fs = std::filesystem;
 
-#ifdef MNEMOSY_CONFIG_DEBUG
-		prettyPrintMaterialFiles = true;
-#endif
 
-		m_folderTree = arena_placement_new(FolderTree);
-		m_folderTree->Init(jsonLibKey_RootNodeName);
-
-		m_fileDirectories = &MnemosyEngine::GetInstance().GetFileDirectories();
-
-		fs::path pathToUserDirectoriesDataFile = m_fileDirectories->GetUserLibDataFile();
-
-		if (!LibProcedures::CheckDataFile(pathToUserDirectoriesDataFile)) {
-			MNEMOSY_WARN("Failed to read materialLibraryData file: Creating new empty file at {}", pathToUserDirectoriesDataFile.generic_string());
-			SaveUserDirectoriesData();
+		if (!fs::exists(folderPath)) {
+			return false;
 		}
 
-		float timeStart = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-		LoadUserDirectoriesFromFile();
-		float timeEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+		fs::path dataFile = folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
 
+		if (!LibProcedures::CheckDataFile(dataFile)) {
 
-		unsigned int materialCount = m_folderTree->RecursiveCountMaterials(m_folderTree->GetRootPtr(), 0);
+			MNEMOSY_ERROR("LibCollection_LoadFromFile: Data file is invalid or not existing: {}", dataFile.generic_string());
+			return false;
+		}		
 
-		MNEMOSY_DEBUG("Loaded Material Library in {} Seconds, Loaded {} Material Entries", timeEnd - timeStart, materialCount);
-
-
-		m_selectedFolderNode = m_folderTree->GetRootPtr();
-	}
-
-	void MaterialLibraryRegistry::Shutdown() {
-		SaveUserDirectoriesData();
-		m_folderTree->Shutdown();
-	}
-
-
-	void MaterialLibraryRegistry::LoadUserDirectoriesFromFile() {
-
-		std::filesystem::path materialLibraryDataFilePath = m_fileDirectories->GetUserLibDataFile();
-
-		if (!LibProcedures::CheckDataFile(materialLibraryDataFilePath)) {
-
-			return;
-		}
 
 		std::ifstream dataFileStream;
-		dataFileStream.open(materialLibraryDataFilePath);
+		dataFileStream.open(dataFile);
 
 		nlohmann::json readFile;
 		try {
@@ -104,43 +109,44 @@ namespace mnemosy::systems {
 		} catch (nlohmann::json::parse_error err) {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadUserDirectoriesFromFile: Error Parsing File. Message: {}", err.what());
 			dataFileStream.close();
-			return;
+			return false;
 		}
 		dataFileStream.close();
 
 
+		// clear folder tree if neccesary
+		if (m_folderTree) {
+			m_folderTree->Shutdown();
+			delete m_folderTree;
+			m_folderTree = nullptr;
+		}
+
+		m_folderTree = new FolderTree();
+
+		m_folderTree->Init();
 		m_folderTree->LoadFromJson(readFile);
+
+		return true;
 
 	}
 
-  	void MaterialLibraryRegistry::SaveUserDirectoriesData() {
+  	void MaterialLibraryRegistry::ActiveLibCollection_SaveToFile() {
 		namespace fs = std::filesystem;
 
-		// this function throws warnings if we change the library directory.
-		fs::path materialLibraryDataFilePath = m_fileDirectories->GetUserLibDataFile();
 
-		if (LibProcedures::CheckDataFile(materialLibraryDataFilePath)) {
-
-			// if data file exists we first make a backup copy
-			fs::path copyTo = m_fileDirectories->GetDataPath() / fs::path("MnemosyMaterialLibraryData_LAST_BACKUP.mnsydata");
-			try {
-				fs::copy(materialLibraryDataFilePath, copyTo, fs::copy_options::overwrite_existing);
-			}
-			catch(fs::filesystem_error error){
-				MNEMOSY_ERROR("MaterialLibraryRegistry::SaverUserDirectoriesData: System error Copying backup file: \nError Message: {}", error.what());
-			}
-
-			// then we clear the existing file
-			std::ofstream file;
-			file.open(materialLibraryDataFilePath);
-			file << "";
-			file.close();
+		if (!LibCollections_IsAnyActive()) {
+			return;
 		}
+		
+		fs::path dataFile = ActiveLibCollection_GetDataFilePath();
+
+
+		LibProcedures::CheckDataFile(dataFile);
 
 		nlohmann::json* LibraryDirectoriesJson = m_folderTree->WriteToJson();
 
 		std::ofstream dataFileStream;
-		dataFileStream.open(materialLibraryDataFilePath);
+		dataFileStream.open(dataFile);
 
 		if (prettyPrintDataFile)
 			dataFileStream << LibraryDirectoriesJson->dump(4);
@@ -151,6 +157,13 @@ namespace mnemosy::systems {
 
 		delete LibraryDirectoriesJson;
   	}
+
+	void MaterialLibraryRegistry::SaveCurrentSate() {
+
+		ActiveLibEntry_SaveToFile();
+		ActiveLibCollection_SaveToFile();
+		LibCollections_SaveToFile();
+	}
 
 	FolderNode* MaterialLibraryRegistry::AddNewFolder(FolderNode* parentNode, std::string& name) {
 
@@ -168,21 +181,25 @@ namespace mnemosy::systems {
 
 		namespace fs = std::filesystem;
 
+		MNEMOSY_ASSERT(LibCollections_IsAnyActive(), "One must be selected to be able to calls this method");
+
 		if (node->IsRoot()) {
 			MNEMOSY_WARN("You can't change the name of the root directory");
 			return;
 		}
 
 		// store old path because pathFromRoot is upadeted inside RenameFolder() method
-		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
-		fs::path oldPath = libraryDir / fs::path(node->pathFromRoot);
+		fs::path libraryDir = ActiveLibCollection_GetFolderPath();
+
+
+		fs::path oldPath = libraryDir / node->GetPathFromRoot();// fs::path(node->pathFromRoot);
 		std::string oldName = node->name;
 
 		// rename internally
 		m_folderTree->RenameFolder(node, newName);
 
 		// rename files on disk
-		fs::path newPath = libraryDir / fs::path(node->parent->pathFromRoot) / fs::path(node->name);
+		fs::path newPath = libraryDir / node->GetPathFromRoot();// fs::path(node->parent->pathFromRoot) / fs::path(node->name);
 		try {
 			fs::rename(oldPath, newPath);
 		}
@@ -198,9 +215,9 @@ namespace mnemosy::systems {
 
 		namespace fs = std::filesystem;
 
-		fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-		fs::path fromPath = libraryDir / fs::path(dragSource->pathFromRoot);
-		fs::path toPath = libraryDir / fs::path(dragTarget->pathFromRoot);
+		fs::path libraryDir = ActiveLibCollection_GetFolderPath();
+		fs::path fromPath = libraryDir / dragSource->GetPathFromRoot(); //fs::path(dragSource->pathFromRoot);
+		fs::path toPath = libraryDir / dragTarget->GetPathFromRoot(); //fs::path(dragTarget->pathFromRoot);
 
 		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
 			//fs::rename(fromPath, toPath / fromPath.filename());
@@ -234,7 +251,7 @@ namespace mnemosy::systems {
 
 
 		// should prob save to data file here
-		SaveUserDirectoriesData();
+		ActiveLibCollection_SaveToFile();
 	}
 
 	void MaterialLibraryRegistry::DeleteAndKeepChildren(FolderNode* node)
@@ -311,12 +328,11 @@ namespace mnemosy::systems {
 			}
 		}
 
-		//OpenFolderNode(node->parent);
 		m_folderTree->DeleteFolderHierarchy(node);
 	}
 
 
-	// TODO: make sure thumbnails get directly created for the different entry types
+	
 	void MaterialLibraryRegistry::LibEntry_CreateNew(FolderNode* node, LibEntryType type , std::string& name) {
 
 		namespace fs = std::filesystem;
@@ -333,7 +349,7 @@ namespace mnemosy::systems {
 			MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error creating directory. \nError message: {}", error.what());
 
 			int posInVector = -1;
-			for (size_t i = 0; i < node->subEntries.size(); i++) {
+			for (unsigned int i = 0; i < node->subEntries.size(); i++) {
 
 				if (node->subEntries[i]->runtime_ID == libEntry->runtime_ID) {
 					posInVector = i;
@@ -348,34 +364,74 @@ namespace mnemosy::systems {
 		}
 
 
+		fs::path pathToEntryThumbnail = entryDirectory / fs::path(libEntry->name + texture_fileSuffix_thumbnail);
+		
 		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
+
+			// Copy Default thumbnail image and if it doesn't exitst render from scratch
+			fs::path pathToDefaultThumbnail = m_fileDirectories->GetTexturesPath() / fs::path("default_thumbnail_pbr.ktx2");
+
+			if (fs::exists(pathToDefaultThumbnail)) {
+
+				try {
+					fs::copy_file(pathToDefaultThumbnail, pathToEntryThumbnail);
+				}
+				catch (fs::filesystem_error error) {
+					MNEMOSY_ERROR("System error copying file. \nError message: {}", error.what());					
+					MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
+				}
+			}
+			else {
+				MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
+			}
+
 			// create default material data file
-
-			// Copy Default thumbnail image
-			fs::path pathToDefaultThumbnail = m_fileDirectories->GetTexturesPath() / fs::path("default_thumbnail.ktx2");
-			fs::path pathToMaterialThumbnail = entryDirectory / fs::path(libEntry->name + texture_fileSuffix_thumbnail);
-
-			try {
-				fs::copy_file(pathToDefaultThumbnail, pathToMaterialThumbnail);
-			}
-			catch (fs::filesystem_error error) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error copyingFile. \nError message: {}", error.what());
-
-				return;
-			}
-
 			LibProcedures::LibEntry_PbrMaterial_CreateNewDataFile(libEntry,prettyPrintMaterialFiles);
 		}
 		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
 
-			LibProcedures::LibEntry_UnlitMaterial_CreateNewDataFile(libEntry,prettyPrintMaterialFiles);
+			// Copy Default thumbnail image and if it doesn't exitst render from scratch
+			fs::path pathToDefaultThumbnail = m_fileDirectories->GetTexturesPath() / fs::path("default_thumbnail_unlit.ktx2");
 
+			if (fs::exists(pathToDefaultThumbnail)) {
+
+				try {
+					fs::copy_file(pathToDefaultThumbnail, pathToEntryThumbnail);
+				}
+				catch (fs::filesystem_error error) {
+					MNEMOSY_ERROR("System error copying file. \nError message: {}", error.what());
+					MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
+				}
+			}
+			else {
+				MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
+			}
+
+			// create default material data file
+			LibProcedures::LibEntry_UnlitMaterial_CreateNewDataFile(libEntry,prettyPrintMaterialFiles);
 		}
 		else if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
-			LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile(libEntry, prettyPrintMaterialFiles);
+			// Copy Default thumbnail image and if it doesn't exitst render from scratch
+			fs::path pathToDefaultThumbnail = m_fileDirectories->GetTexturesPath() / fs::path("default_thumbnail_skybox.ktx2");
 
+			if (fs::exists(pathToDefaultThumbnail)) {
+
+				try {
+					fs::copy_file(pathToDefaultThumbnail, pathToEntryThumbnail);
+				}
+				catch (fs::filesystem_error error) {
+					MNEMOSY_ERROR("System error copying file. \nError message: {}", error.what());
+					MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
+				}
+			}
+			else {
+				MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForAnyLibEntry_Slow_Fallback(libEntry);
+			}
+
+			// create default material data file
+			LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile(libEntry, prettyPrintMaterialFiles);
 		}
 
 		// check if it was created in the currently opend folder
@@ -385,7 +441,8 @@ namespace mnemosy::systems {
 			MnemosyEngine::GetInstance().GetThumbnailManager().AddLibEntryToActiveThumbnails(libEntry);
 		}
 
-		SaveUserDirectoriesData();
+
+		ActiveLibCollection_SaveToFile();
 	}
 
 	void MaterialLibraryRegistry::LibEntry_Rename(systems::LibEntry* libEntry, std::string& newName) {
@@ -430,7 +487,7 @@ namespace mnemosy::systems {
 		}
 
 		// save library data file;
-		SaveUserDirectoriesData();
+		ActiveLibCollection_SaveToFile();
 	}
 
 	
@@ -469,7 +526,7 @@ namespace mnemosy::systems {
 
 
 		// save
-		SaveUserDirectoriesData();
+		ActiveLibCollection_SaveToFile();
 	}
 
 	void MaterialLibraryRegistry::LibEntry_Move(FolderNode* sourceNode, FolderNode* targetNode, systems::LibEntry* libEntry) {
@@ -478,13 +535,13 @@ namespace mnemosy::systems {
 
 		// move material folder / copy dir and remove dir
 		std::string entryName = libEntry->name; // temporary storing name here
-		fs::path libraryDir = m_fileDirectories->GetLibraryDirectoryPath();
+		fs::path libraryDir = ActiveLibCollection_GetFolderPath();
 
 		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
 			//fs::rename(fromPath, toPath / fromPath.filename());
 
-		fs::path fromPath = libraryDir / fs::path(sourceNode->pathFromRoot) / fs::path(entryName);
-		fs::path toPath = libraryDir / fs::path(targetNode->pathFromRoot) / fs::path(entryName);
+		fs::path fromPath = libraryDir / sourceNode->GetPathFromRoot() / fs::path(entryName);//  fs::path(sourceNode->pathFromRoot) / fs::path(entryName);
+		fs::path toPath = libraryDir / targetNode->GetPathFromRoot() / fs::path(entryName); // fs::path(targetNode->pathFromRoot) / fs::path(entryName);
 	
 		// first copy files to new folder
 		try { 
@@ -518,7 +575,7 @@ namespace mnemosy::systems {
 		}
 
 		// save
-		SaveUserDirectoriesData();
+		ActiveLibCollection_SaveToFile();
 	}
 	
 	void MaterialLibraryRegistry::LibEntry_Load(systems::LibEntry* libEntry) {
@@ -560,7 +617,7 @@ namespace mnemosy::systems {
 
 			MnemosyEngine::GetInstance().GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings,*sky);
 
-			//MNEMOSY_DEBUG("MaterialLibrary: Loading Skyboxes is not yet supported: {}", libEntry->name);
+			MNEMOSY_DEBUG("MaterialLibrary: Loaded Skybox Material: {}", libEntry->name);
 		}
 
 
@@ -586,6 +643,11 @@ namespace mnemosy::systems {
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_SaveToFile() {
+
+		if (!LibCollections_IsAnyActive()) {
+			return;
+		}
+
 
 		if (!UserEntrySelected())
 			return;
@@ -764,6 +826,20 @@ namespace mnemosy::systems {
 
 		graphics::PbrMaterial* defaultMaterial = new graphics::PbrMaterial();
 		MnemosyEngine::GetInstance().GetScene().SetPbrMaterial(defaultMaterial);
+	}
+
+	bool MaterialLibraryRegistry::UserEntrySelected()
+	{
+
+		if (!LibCollections_IsAnyActive()) {
+			return false;
+		}
+
+		if (!m_activeLibEntry) {
+			return false;
+		}
+
+		return true;
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_PbrMat_LoadTexture(graphics::PBRTextureType textureType, std::filesystem::path& filepath) {
@@ -1074,7 +1150,6 @@ namespace mnemosy::systems {
 
 	}
 
-	// TODO: calculate skybox sun direction and color form newly loaded texture
 	void MaterialLibraryRegistry::ActiveLibEntry_Skybox_LoadTexture(std::filesystem::path& filepath)
 	{
 		MNEMOSY_ASSERT(m_activeLibEntry != nullptr, "This should not happen");
@@ -1390,110 +1465,27 @@ namespace mnemosy::systems {
 		}
 	}
 
-	void MaterialLibraryRegistry::ClearUserMaterialsAndFolders() {
-
-		// Clearing all User materials and folders from memory but not deleting any files.
-
-		SetDefaultMaterial();
-		m_selectedFolderNode = m_folderTree->GetRootPtr();
-
-		m_folderTree->Clear();
-
-		SaveUserDirectoriesData();
-	}
-
-	void MaterialLibraryRegistry::ClearInternalTree_OnlyMemory() {
-
-		SetDefaultMaterial();
-		m_selectedFolderNode = m_folderTree->GetRootPtr();
-
-		m_folderTree->Clear();
-	}
-
-	bool MaterialLibraryRegistry::LoadExistingMnemosyLibrary(std::filesystem::path& pathToDataFile, bool savePermanently, bool deleteCurrentLibrary) {
-
-		namespace fs = std::filesystem;
-
-		// first save current
-		SaveUserDirectoriesData();
-
-		// make sure everything is valid
-		fs::directory_entry dataFile = fs::directory_entry(pathToDataFile);
-
-		if (pathToDataFile.filename() != fs::path("MnemosyMaterialLibraryData.mnsydata") )
-		{
-			if ( pathToDataFile.filename() == fs::path("MnemosyMaterialLibraryData_BACKUP_COPY.mnsydata"))
-			{
-				MNEMOSY_WARN("To use the backup file, delete the other corrupted file and rename this backup to MnemosyMaterialLibraryData.mnsydata - loading this renamed file will create a new backup again.");
-			}
-
-			return false;
-		}
-
-
-
-		if (!dataFile.exists() || !dataFile.is_regular_file()) {
-			MNEMOSY_ERROR("The Selected path is not a valid mnemosy data file. Path: {}", pathToDataFile.generic_string());
-			return false;
-		}
-
-		// data file is most likely valid unless a user has messed with it or its corrupted or it doesnt match the folder library it is stored along
-
-
-		fs::path libraryFolderPath =  pathToDataFile.parent_path() / fs::path("MnemosyMaterialLibrary");
-		fs::directory_entry libraryDirectory = fs::directory_entry(libraryFolderPath);
-
-		if (!libraryDirectory.exists() || !libraryDirectory.is_directory()) {
-			MNEMOSY_ERROR("There is no MnemosyMaterialLibrary folder next to the MnemosyMaterialLibraryData.mnsydata data file. Path: {}", pathToDataFile.parent_path().generic_string());
-			return false;
-		}
-
-		if (fs::is_empty(libraryFolderPath)) {
-			MNEMOSY_ERROR("The MnemosyMaterialLibrary folder is empty. Path: {}", libraryFolderPath.generic_string());
-			return false;
-		}
-
-		// make a backup copy of the data file of the new library
-
-
-		fs::path copyPath = pathToDataFile.parent_path() / fs::path("MnemosyMaterialLibraryData_BACKUP_COPY.mnsydata");
-		fs::copy_file(pathToDataFile, copyPath, fs::copy_options::overwrite_existing);
-
-		// now we first clear the current tree in memory
-		ClearInternalTree_OnlyMemory();
-
-
-		MnemosyEngine::GetInstance().GetFileDirectories().LoadExistingMaterialLibrary(libraryFolderPath,deleteCurrentLibrary,savePermanently);
-
-
-
-		// last load the new file data
-
-		LoadUserDirectoriesFromFile();
-
-		return true;
-	}
-
-
 	// ======== Getters ========
 
 	FolderNode* MaterialLibraryRegistry::GetRootFolder() {
+
+		MNEMOSY_ASSERT(m_folderTree != nullptr, "This should not be called if no collection is active");
+
 		return m_folderTree->GetRootPtr();
 	}
 
 	FolderNode* MaterialLibraryRegistry::GetFolderByID(FolderNode* node, const unsigned int id) {
 
+		MNEMOSY_ASSERT(m_folderTree != nullptr, "This should not be called if no collection is active");
 		return m_folderTree->RecursivGetNodeByID(node,id);
-	}
-
-	std::filesystem::path MaterialLibraryRegistry::GetLibraryPath()
-	{
-		return m_fileDirectories->GetLibraryDirectoryPath();
 	}
 
 	std::filesystem::path MaterialLibraryRegistry::Folder_GetFullPath(FolderNode* node)
 	{
-		return m_fileDirectories->GetLibraryDirectoryPath() / node->pathFromRoot;
+		return ActiveLibCollection_GetFolderPath() /  node->GetPathFromRoot();
+
+
+		//return ActiveLibCollection_GetFolderPath() / node->pathFromRoot;
 	}
 
 	std::filesystem::path MaterialLibraryRegistry::LibEntry_GetFolderPath(LibEntry* libEntry) {
@@ -1666,6 +1658,533 @@ namespace mnemosy::systems {
 
 		return false;
 	}
+	
+	
+	
+	void MaterialLibraryRegistry::LibCollections_CreateNewEntry(const std::string& name, const std::filesystem::path& folderPath)
+	{
+		namespace fs = std::filesystem;
+		// Make sure the folder is valid.
+		
+		if (!fs::exists(folderPath)) {
+			MNEMOSY_ERROR("Failed to create new library because path doesn't exsist, Path: {}", folderPath.generic_string());
+			return;
+		}
+
+
+		if (!fs::is_directory(folderPath)) {
+			MNEMOSY_ERROR("Failed to create new library entry because path is not a directory, Path: {}", folderPath.generic_string());
+			return;
+		}
+			
+
+		// folder should be empty and not contain other files.
+		if (!fs::is_empty(folderPath)) {
+			MNEMOSY_ERROR("Failed to create new library entry because folder contains files. Make sure to select an empty folder location. Path: {}", folderPath.generic_string());
+			return;
+		}
+
+
+		// now we should have a valid folder loaction for the new libCollection entry.
+
+		// First Save Current
+		ActiveLibCollection_SaveToFile();
+
+
+		std::string uniqueCollectionName = LibCollections_MakeNameUnique(name);
+
+		// Create lib folder inside
+		fs::path libFolderPath = folderPath / fs::path("MnemosyMaterialLibrary");
+
+		fs::create_directories(libFolderPath);
+
+		fs::path dataFilePath = folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
+
+
+		// Construct a new empty json data file.
+		LibProcedures::LibCollection_CreateNewJsonDataFile(dataFilePath);
+
+
+		// add it to the list.
+		LibCollection collection;
+		collection.folderPath = folderPath;
+		collection.name = uniqueCollectionName;
+
+		m_libCollectionsList.push_back(collection);
+
+		// now select the last added entry.
+		LibCollections_SwitchActiveCollection(m_libCollectionsList.size() -1);
+
+		// save lib collections
+		LibCollections_SaveToFile();
+	}
+
+	void MaterialLibraryRegistry::LibCollections_CreateNewEntryFromExisting(const std::string& name,  const std::filesystem::path& dataFilePath) {
+
+		// first see if the path is valid
+
+		namespace fs = std::filesystem;
+		// Make sure the folder is valid.
+		
+		// first see if the folder alongside the data file also exsists.
+		fs::path libFolderPath = dataFilePath.parent_path() / fs::path("MnemosyMaterialLibrary");
+		if (!fs::exists(libFolderPath)) {
+			MNEMOSY_ERROR("Failed to create new library because next to the data file there exists no LibraryPathFolder called: MnemosyMaterialLibrary.");
+			return;
+		}
+
+		if (!fs::exists(dataFilePath)) {
+			MNEMOSY_ERROR("Failed to create new library because path doesn't exsist, Path: {}", dataFilePath.generic_string());
+			return;
+		}
+
+		if (!fs::is_regular_file(dataFilePath)) {
+			MNEMOSY_ERROR("Failed to create new library entry because path does not point to a mnemosy data file, Path: {}", dataFilePath.generic_string());
+			return;
+		}
+
+		if (dataFilePath.extension() != ".mnsydata") {
+			MNEMOSY_ERROR("Failed to create new library entry because path does not point to a mnemosy data file, Path: {}", dataFilePath.generic_string());
+			return;
+		}
+
+		// lastly we can check if the data file is a LibraryData file.
+		{
+			bool validDataFile = false;
+
+			nlohmann::json readFile;
+		
+			std::ifstream inFileStream;
+			inFileStream.open(dataFilePath);
+			try {
+				readFile = nlohmann::json::parse(inFileStream);
+			}
+			catch (nlohmann::json::parse_error err) {
+
+				MNEMOSY_ERROR("Failed to rename Library - Error Parsing Json Data File. Message: {}", err.what());
+				inFileStream.close();
+				return;
+			}
+			inFileStream.close();
+		
+			if (readFile.contains(jsonLibKey_MnemosyDataFile)) {
+
+				validDataFile = true;
+
+				std::string dataFileIdentifier;
+				try {
+					dataFileIdentifier = readFile[jsonLibKey_MnemosyDataFile].get<std::string>();
+				}
+				catch (nlohmann::json::parse_error err) {
+
+					validDataFile = false;
+				}
+
+				if (validDataFile)
+				{
+					if (dataFileIdentifier != "UserLibraryDirectoriesData") {
+						validDataFile = false;
+					}
+				}
+
+			}
+			else {
+				validDataFile = false;
+			}
+
+
+			if (!validDataFile) {
+			
+				MNEMOSY_ERROR("Failed to create new library entry because path does not point to a mnemosy data file, Path: {}", dataFilePath.generic_string());
+				return;
+			}
+		}
+		
+
+		std::string uniqueCollectionName = LibCollections_MakeNameUnique(name);
+
+		
+		// save active collection.
+		ActiveLibCollection_SaveToFile();
+
+
+		LibCollection  colEntry;
+		colEntry.folderPath = dataFilePath.parent_path();
+		colEntry.name = uniqueCollectionName;
+
+		m_libCollectionsList.push_back(colEntry);
+
+
+		// switch to newly added collection.
+		LibCollections_SwitchActiveCollection(m_libCollectionsList.size() - 1);
+
+		LibCollections_SaveToFile();
+	}
+
+	void MaterialLibraryRegistry::LibCollections_RemoveEntryFromList(const unsigned int index)
+	{
+
+		if (!LibCollections_IsAnyActive()) {
+			return;
+		}
+
+		if (index >= m_libCollectionsList.size()) {
+			return;
+		}
+
+		// if user wants to delete the last entry we can just unload everyting
+		if (index == 0 && m_libCollectionsList.size() == 1) {
+
+
+			ActiveLibCollection_Unload();
+
+			m_libCollection_currentSlected_id = -1;
+			m_libCollectionsList.erase(m_libCollectionsList.begin() + index);
+			m_libCollectionsList.clear();
+			return;
+		}
+
+
+
+		int currSelected = m_libCollection_currentSlected_id;
+		std::string nameOfSelected = m_libCollectionsList[m_libCollection_currentSlected_id].name;
+
+		if (currSelected == index) {
+
+			ActiveLibCollection_Unload();
+
+		}
+
+		m_libCollectionsList.erase(m_libCollectionsList.begin() + index);
+
+
+		// update current selected as it may have changed when removing an entry
+		if (currSelected == index) {
+
+			// if we deleted current selection switch to selection that is now 0. it exsits because we already handled case above when deleting the last entry.
+			LibCollections_SwitchActiveCollection(0);
+		}
+		else if (index < currSelected) {
+			// update curr selected by searching for the name in the remaining list.
+
+
+			for (unsigned int i = 0; i < m_libCollectionsList.size(); i++) {
+
+
+				if (m_libCollectionsList[i].name == nameOfSelected) {
+					m_libCollection_currentSlected_id = i;
+					break;
+				}
+			}
+		}
+	}
+
+	void MaterialLibraryRegistry::LibCollections_RenameEntry(const unsigned int index, const std::string& newName) {
+
+		namespace fs = std::filesystem;
+
+
+		if (index < 0 || index > m_libCollectionsList.size()) {
+			return;
+		}
+
+
+		// first make sure name is unique
+		std::string uniqueName = LibCollections_MakeNameUnique(newName);
+
+		// then we have to update the internal list.
+		m_libCollectionsList[index].name = uniqueName;
+
+	}
+
+	void MaterialLibraryRegistry::LibCollections_SwitchActiveCollection(const unsigned int index) {
+
+		namespace fs = std::filesystem;
+
+		if (index >= m_libCollectionsList.size() || index < 0) {
+			return;
+		}
+
+
+		// check that the path and data file still exsist
+
+		// folder path of the collection
+		fs::path folderPath = m_libCollectionsList[index].folderPath;
+
+		if (!fs::exists(folderPath)) {
+
+			MNEMOSY_ERROR("Faild to load library because path does not exist anymore: {}", folderPath.generic_string());
+			return;
+		}
+
+		fs::path dataFilePath = folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
+
+		if (!fs::exists(dataFilePath)) {
+			MNEMOSY_ERROR("Faild to load library because data file does not exist anymore: {}", dataFilePath.generic_string());
+			return;
+		}
+
+		if (LibCollections_IsAnyActive()) {
+			ActiveLibCollection_Unload();
+		}
+
+
+		bool success = LibCollection_LoadIntoActiveTree(folderPath);
+
+		if (!success) {
+
+			if (m_folderTree) {
+				delete m_folderTree;
+				m_folderTree = nullptr;
+			}
+
+			m_libCollection_currentSlected_id = -1;
+
+			MNEMOSY_ERROR("Failed to switch to a library");
+		}
+		else {
+			m_libCollection_currentSlected_id = index;
+			OpenFolderNode(m_folderTree->GetRootPtr());
+		}
+
+	}
+
+	std::filesystem::path MaterialLibraryRegistry::ActiveLibCollection_GetFolderPath() {
+
+		MNEMOSY_ASSERT(LibCollections_IsAnyActive(), "Do not call this if non are active");
+
+		MNEMOSY_ASSERT(m_libCollection_currentSlected_id < m_libCollectionsList.size(), "Selection must map to an exsiting entry!");
+
+		return m_libCollectionsList[m_libCollection_currentSlected_id].folderPath / std::filesystem::path("MnemosyMaterialLibrary");
+	}
+
+	std::filesystem::path MaterialLibraryRegistry::ActiveLibCollection_GetDataFilePath() {
+
+		namespace fs = std::filesystem;
+
+		MNEMOSY_ASSERT(LibCollections_IsAnyActive(), "Do not call this if non are active");
+
+		MNEMOSY_ASSERT(m_libCollection_currentSlected_id < m_libCollectionsList.size(), "Selection must map to an exsiting entry!");
+
+		fs::path dataFile = m_libCollectionsList[m_libCollection_currentSlected_id].folderPath / std::filesystem::path("MnemosyMaterialLibraryData.mnsydata");
+	
+		if (!fs::exists(dataFile)) {
+			MNEMOSY_CRITICAL("Data File of a library does not exist anymore. Path: {}", dataFile.generic_string());
+			return fs::path();
+		}
+
+		return dataFile;	
+	}
+
+	const std::string MaterialLibraryRegistry::ActiveLibCollection_GetName()
+	{
+		MNEMOSY_ASSERT(m_libCollection_currentSlected_id > -1 , "Should not call this if non is selected");
+
+
+		return m_libCollectionsList[m_libCollection_currentSlected_id].name;
+	}
+
+	void MaterialLibraryRegistry::ActiveLibCollection_Unload()
+	{
+
+		if (!LibCollections_IsAnyActive()) {
+			return;
+		}
+
+		SetDefaultMaterial();
+
+		ActiveLibCollection_SaveToFile();
+
+		if (m_selectedFolderNode != nullptr) {
+			MnemosyEngine::GetInstance().GetThumbnailManager().UnloadAllThumbnails();
+		}
+
+		m_selectedFolderNode = nullptr;
+
+		if (m_folderTree) {
+			m_folderTree->Shutdown();
+			delete m_folderTree;
+			m_folderTree = nullptr;
+		}
+
+		m_libCollection_currentSlected_id = -1;
+	}
+
+	std::string MaterialLibraryRegistry::LibCollections_MakeNameUnique(const std::string& name) {
+
+
+
+		if (m_libCollectionsList.empty()) {
+			return name;
+		}
+
+		std::string unique = name;
+
+		// first make sure name is unique
+		std::string newNameLower = core::StringUtils::ToLowerCase(name);
+
+		
+		bool nameExistsAlready = false;
+		// first go through once to see if it exsists
+		for (unsigned int i = 0; i < m_libCollectionsList.size(); i++) {
+
+			std::string entryLower = core::StringUtils::ToLowerCase(m_libCollectionsList[i].name);
+
+			if (entryLower == newNameLower) {
+				nameExistsAlready = true;
+				break;
+			}
+		}
+
+		if (!nameExistsAlready) {
+			// if it doesn't exsist we can just return it directly
+			return unique;
+		}
+		else
+		{
+			// if it does exsist keep incrementing number suffix until it is not found anymore.
+
+			std::string compare = newNameLower;
+				
+			unsigned int suffixCounter = 0;
+
+			while (nameExistsAlready) {
+
+				suffixCounter++;
+					
+				compare = newNameLower + "_" + std::to_string(suffixCounter);
+
+				nameExistsAlready = false; // asume it doesn't exsist
+
+				for (unsigned int i = 0; i < m_libCollectionsList.size(); i++) {
+
+					std::string entryLower = core::StringUtils::ToLowerCase(m_libCollectionsList[i].name);
+
+					if (entryLower == compare) {
+						nameExistsAlready = true;
+						break;
+					}
+				}
+
+			}
+
+			// use original name here for final construction to keep initial capilatizaiton.
+			unique = name + "_" + std::to_string(suffixCounter);
+
+		}
+		
+		return unique;
+	}
+
+	void MaterialLibraryRegistry::LibCollections_SaveToFile()
+	{
+		namespace fs = std::filesystem;
+
+		
+		fs::path  dataFilePath = m_fileDirectories->GetDataPath() / fs::path("LibCollections.mnsydata");
+
+		flcrm::JsonSettings dataFile;
+
+		bool success = false;
+
+		dataFile.FileOpen(success, dataFilePath,jsonKey_header,"This File stores the location and names of user created libraries");
+
+		bool anyCollectionLoaded = !m_libCollectionsList.empty();
+		dataFile.WriteBool(success, "AnyLibCollectionsSaved" , anyCollectionLoaded);
+
+
+		if (anyCollectionLoaded) {
+
+			std::vector<std::string> libCollectionPaths;
+			std::vector<std::string> libCollectionNames;
+			
+			
+			for (unsigned int i = 0; i < m_libCollectionsList.size(); i++) {
+
+				libCollectionPaths.push_back(m_libCollectionsList[i].folderPath.generic_string());
+				libCollectionNames.push_back(m_libCollectionsList[i].name);
+			}
+
+			dataFile.WriteVectorString(success, "LibCollectionPaths", libCollectionPaths);
+			dataFile.WriteVectorString(success, "LibCollectionNames", libCollectionNames);
+			dataFile.WriteInt(success, "LastLoadedCollectionId", m_libCollection_currentSlected_id);
+
+			libCollectionPaths.clear();
+			libCollectionNames.clear();
+		}
+		else {
+			dataFile.WriteInt(success, "LastLoadedCollectionId", 0);
+		}
+
+		dataFile.FilePrettyPrintSet(true);
+		dataFile.FileClose(success, dataFilePath);
+	}
+
+	void MaterialLibraryRegistry::LibCollections_LoadFromFile()
+	{
+
+		namespace fs = std::filesystem;
+
+		if (!m_libCollectionsList.empty()) {
+
+			m_libCollectionsList.clear();
+		}
+
+
+		fs::path  dataFilePath = m_fileDirectories->GetDataPath() / fs::path("LibCollections.mnsydata");
+
+		flcrm::JsonSettings dataFile;
+
+		bool success = false;
+
+		dataFile.FileOpen(success, dataFilePath, jsonKey_header, "This File stores the location and names of user created libraries");
+
+
+		bool anyCollectionsSaved = dataFile.ReadBool(success, "AnyLibCollectionsSaved", false, true);
+
+		if (anyCollectionsSaved) {
+
+			int lastLoadedId = dataFile.ReadInt(success, "LastLoadedCollectionId", -1 , true);
+
+			std::vector<std::string> libCollectionPaths = dataFile.ReadVectorString(success, "LibCollectionPaths", std::vector<std::string>(), false);
+			std::vector<std::string> libCollectionNames = dataFile.ReadVectorString(success, "LibCollectionNames", std::vector<std::string>(), false);
+			
+			MNEMOSY_ASSERT(libCollectionPaths.size() == libCollectionNames.size(), "These two are related an must correspond with each other");
+
+			if (libCollectionPaths.empty()) {
+				dataFile.WriteBool(success, "AnyLibCollectionsSaved", false);
+				dataFile.WriteInt(success, "LastLoadedCollectionId", -1);
+
+				m_libCollection_currentSlected_id = -1;
+
+			}
+			else {
+
+				m_libCollectionsList = std::vector<LibCollection>(libCollectionPaths.size());
+				for (unsigned int i = 0; i < libCollectionPaths.size(); i++) {
+
+					m_libCollectionsList[i].folderPath = fs::u8path(libCollectionPaths[i]);
+					m_libCollectionsList[i].name = libCollectionNames[i];
+
+				}
+
+				m_libCollection_currentSlected_id = lastLoadedId;
+
+
+			}
+
+
+			libCollectionPaths.clear();
+			libCollectionNames.clear();
+		}
+
+		dataFile.FilePrettyPrintSet(true);
+		dataFile.FileClose(success, dataFilePath);
+
+	}
+
+
+
 
 
 

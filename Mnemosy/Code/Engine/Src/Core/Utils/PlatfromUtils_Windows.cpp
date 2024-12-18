@@ -1,11 +1,15 @@
+
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
 
 #include "Include/MnemosyConfig.h"
+
+#ifdef MNEMOSY_PLATFORM_WINDOWS
+
+
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 
-#ifdef MNEMOSY_PLATFORM_WINDOWS
 
 
 #include <GLFW/glfw3.h>
@@ -19,17 +23,12 @@
 #include <Shellapi.h>
 
 
-#include <filesystem>
 
 
 
 namespace mnemosy::core
-{
-	// functions return empty string if it didn't work so check for empty string pls
-
-	// filter can be like this ->     "png (*.png)\0*.png"
-	
-	std::string FileDialogs::OpenFile(const char* filter)
+{	
+	std::filesystem::path FileDialogs::OpenFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = {0};
@@ -43,13 +42,17 @@ namespace mnemosy::core
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
-			return ofn.lpstrFile;
+
+			//std::string str = std::string(ofn.lpstrFile);
+			//return std::filesystem::u8path(str);
+
+			return std::filesystem::u8path(ofn.lpstrFile);
 		}
 
-		return std::string();
+		return std::filesystem::path();
 	}
 
-	std::string FileDialogs::SaveFile(const char* filter)
+	std::filesystem::path FileDialogs::SaveFile(const char* filter)
 	{
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -63,13 +66,18 @@ namespace mnemosy::core
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetSaveFileNameA(&ofn) == TRUE)
 		{
-			return ofn.lpstrFile;
+
+			//std::string str = std::string(ofn.lpstrFile);
+
+			//return std::filesystem::u8path(str);
+
+			return std::filesystem::u8path(ofn.lpstrFile);
 		}
 		
-		return std::string();
+		return std::filesystem::path();
 	}
 
-	std::string FileDialogs::SelectFolder(const char* filter) {
+	std::filesystem::path FileDialogs::SelectFolder(const char* filter) {
 
 		IFileDialog* pfd;
 		LPWSTR g_path;
@@ -92,40 +100,26 @@ namespace mnemosy::core
 					psi->Release();
 
 					//hacky string convertion because windows is stupid
-					std::filesystem::path convert = g_path;
-					return convert.generic_string();
+
+					return std::filesystem::path(g_path);
 				}
 			}
 			pfd->Release();
 		}
 
-		
-	
-		return std::string();
+		return std::filesystem::path();
 	}
 
-	void FileDialogs::OpenFolderAt(const char* filepath)
-	{
-		// check if filepath exists 
+	bool FileDialogs::OpenFolderAt(const std::filesystem::path& folderPath) {
 
-		std::filesystem::path path = std::filesystem::path(filepath);
+		if (std::filesystem::exists(folderPath) && std::filesystem::is_directory(folderPath)) {
 
-		std::filesystem::directory_entry dir = std::filesystem::directory_entry(path);
-
-		if (dir.exists()) {
-
-			if (dir.is_directory()) {
-
-
-				ShellExecute(NULL, "open", path.generic_string().c_str() , NULL, NULL, SW_SHOWNORMAL);
-			}
-			else {
-				MNEMOSY_ERROR("PlatformUtils_Windows::OpenFolderAt:  filepath is not a directory: \nPath: {}", filepath);
-			}
+			ShellExecute(NULL, "open", folderPath.generic_string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+			return true;
 
 		}
 		else {
-			MNEMOSY_ERROR("PlatformUtils_Windows::OpenFolderAt:  filepath does not exists: \nPath: {}", filepath);
+			return false;
 		}
 	}
 

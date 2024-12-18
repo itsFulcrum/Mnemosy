@@ -25,6 +25,8 @@ namespace mnemosy::systems {
 		static void CreateDirectoryForFolderNode(systems::FolderNode* node);
 		static bool CheckDataFile(const std::filesystem::path& dataFilePath);
 
+		static void LibCollection_CreateNewJsonDataFile(const std::filesystem::path dataFilePath);
+
 
 		static std::filesystem::path LibEntry_GetFolderPath(systems::LibEntry* libEntry);
 		static std::filesystem::path LibEntry_GetDataFilePath(systems::LibEntry* libEntry);

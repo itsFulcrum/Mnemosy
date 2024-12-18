@@ -303,29 +303,34 @@ namespace mnemosy::gui
 
 			if (ImGui::Button("Export To...", m_buttonSize)) {
 
-				std::string exportFolder = mnemosy::core::FileDialogs::SelectFolder("");
-				if (!exportFolder.empty()) {
+				std::filesystem::path exportPath = mnemosy::core::FileDialogs::SelectFolder("");
+				if (!exportPath.empty()) {
 
-					m_materialRegistry.ActiveLibEntry_SaveToFile();
+
+					if (fs::is_directory(exportPath)) {
+
+
+						m_materialRegistry.ActiveLibEntry_SaveToFile();
 					
-					fs::path exportPath = fs::path(exportFolder);
+						//fs::path exportPath = fs::path(exportFolder);
 					
-					if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
+						if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 						
-						m_exportManager.PbrMat_ExportTextures(exportPath, activeLibEntry , scene.GetPbrMaterial() , m_pbrMat_exportTextureBools, m_pbrMat_exportChannelPackedTexture);					
-					}
-					else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+							m_exportManager.PbrMat_ExportTextures(exportPath, activeLibEntry , scene.GetPbrMaterial() , m_pbrMat_exportTextureBools, m_pbrMat_exportChannelPackedTexture);					
+						}
+						else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
 
 
-						graphics::UnlitMaterial* unlitMat = scene.GetUnlitMaterial();
+							graphics::UnlitMaterial* unlitMat = scene.GetUnlitMaterial();
 
-						MNEMOSY_ASSERT(unlitMat != nullptr, "This should not happen!");
+							MNEMOSY_ASSERT(unlitMat != nullptr, "This should not happen!");
 
-						m_exportManager.UnlitMat_ExportTextures(exportPath,activeLibEntry, *unlitMat);
-					}
-					else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+							m_exportManager.UnlitMat_ExportTextures(exportPath,activeLibEntry, *unlitMat);
+						}
+						else if (entryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
-						m_exportManager.SkyboxMat_ExportTextures(exportPath,activeLibEntry, scene.GetSkybox());
+							m_exportManager.SkyboxMat_ExportTextures(exportPath,activeLibEntry, scene.GetSkybox());
+						}
 					}
 				}
 			}
@@ -362,8 +367,8 @@ namespace mnemosy::gui
 	void MaterialEditorGuiPanel::DrawPbrMaterial(systems::LibEntry* activeLibEntry, graphics::PbrMaterial& activeMat)
 	{
 
-		fs::path libraryDirectory = m_engineInstance.GetFileDirectories().GetLibraryDirectoryPath();
-		
+		fs::path libraryDirectory = m_materialRegistry.ActiveLibCollection_GetFolderPath();
+
 		ImGui::Spacing();
 		ImGui::Spacing();
 
@@ -405,11 +410,9 @@ namespace mnemosy::gui
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Albedo", m_buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ALBEDO, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ALBEDO, filepath);
 					SaveMaterial();
 				}
 			}
@@ -467,12 +470,11 @@ namespace mnemosy::gui
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Roughness", m_buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
 
 					activeMat.IsSmoothnessTexture = false;
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ROUGHNESS, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_ROUGHNESS, filepath);
 					SaveMaterial();
 				}
 			}
@@ -592,10 +594,9 @@ namespace mnemosy::gui
 			//  Load Texture
 			if (ImGui::Button("Load Texture...##Normal", m_buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_NORMAL, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_NORMAL, filepath);
 					SaveMaterial();
 				}
 			}
@@ -698,10 +699,9 @@ namespace mnemosy::gui
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Metallic", m_buttonSizeLoad)) {
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_METALLIC, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_METALLIC, filepath);
 					SaveMaterial();
 				}
 			}
@@ -752,10 +752,9 @@ namespace mnemosy::gui
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##AO", m_buttonSizeLoad)) {
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION, filepath);
 					SaveMaterial();
 				}
 			}
@@ -792,10 +791,9 @@ namespace mnemosy::gui
 
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Emissive", m_buttonSizeLoad)) {
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 				if (!filepath.empty()) {
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_EMISSION, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_EMISSION, filepath);
 					SaveMaterial();
 
 				}
@@ -878,11 +876,10 @@ namespace mnemosy::gui
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Height", m_buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 
 				if (!filepath.empty()) {
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_HEIGHT, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_HEIGHT, filepath);
 					SaveMaterial();
 				}
 			}
@@ -954,11 +951,10 @@ namespace mnemosy::gui
 			// Load Texture
 			if (ImGui::Button("Load Texture...##Opacity", m_buttonSizeLoad)) {
 
-				std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+				fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 
 				if (!filepath.empty()) {
-					std::filesystem::path p = { filepath };
-					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_OPACITY, p);
+					m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(graphics::MNSY_TEXTURE_OPACITY, filepath);
 					SaveMaterial();
 				}
 			}
@@ -1215,11 +1211,9 @@ namespace mnemosy::gui
 		// Load Texture
 		if (ImGui::Button("Load Texture...##UnlitMat", m_buttonSizeLoad)) {
 
-			std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+			fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 			if (!filepath.empty()) {
-
-				std::filesystem::path p = { filepath };
-				m_materialRegistry.ActiveLibEntry_UnlitMat_LoadTexture(p);
+				m_materialRegistry.ActiveLibEntry_UnlitMat_LoadTexture(filepath);
 				SaveMaterial();
 			}
 		}
@@ -1311,7 +1305,7 @@ namespace mnemosy::gui
 		// Load Texture
 		if (ImGui::Button("Load Texture...##SkyMat", m_buttonSizeLoad)) {
 
-			std::string filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
+			fs::path filepath = mnemosy::core::FileDialogs::OpenFile(readable_textureFormats_DialogFilter);
 			if (!filepath.empty()) {
 
 				std::filesystem::path p = { filepath };

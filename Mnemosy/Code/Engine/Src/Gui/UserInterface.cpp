@@ -242,6 +242,7 @@ namespace mnemosy::gui
 		colors[ImGuiCol_DockingPreview] = ImVec4(0.44f, 0.31f, 0.27f, 0.70f);
 		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
 		colors[ImGuiCol_NavHighlight] = ImVec4(0.77f, 0.30f, 0.09f, 1.00f);
+		colors[ImGuiCol_DragDropTarget] = ImVec4(0.88f, 0.63f, 0.08f, 1.00f);
 
 
 	}

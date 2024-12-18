@@ -43,7 +43,7 @@ namespace mnemosy::graphics
 		m_blitFBO = 0;
 		m_blitRenderTexture_ID = 0;
 
-		m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
+		//m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_viewMatrix = glm::mat4(1.0f);
 		m_projectionMatrix = glm::mat4(1.0f);
 		
@@ -358,16 +358,16 @@ namespace mnemosy::graphics
 		m_viewMatrix = viewMatrix;
 	}
 
-	void Renderer::SetClearColor(float r, float g, float b)
-	{
-		m_clearColor.r = r;
-		m_clearColor.g = g;
-		m_clearColor.b = b;
-	}
+	//void Renderer::SetClearColor(float r, float g, float b)
+	//{
+	//	m_clearColor.r = r;
+	//	m_clearColor.g = g;
+	//	m_clearColor.b = b;
+	//}
 
 	void Renderer::ClearFrame()
 	{
-		glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//glEnable(GL_DEPTH_TEST);
 	}

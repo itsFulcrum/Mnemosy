@@ -1,15 +1,21 @@
 #include "Include/Core/Clock.h"
 
+#include "Include/MnemosyConfig.h"
+
+
 #include <GLFW/glfw3.h>
+
+#define DeltaLowLimit	0.006f	// Keep Below 165fps // 1/165
+#define DeltaHighLimit	0.1f	// Keep Above 10fps // 1/10
 
 namespace mnemosy::core
 {
 	void Clock::Init() {
 
-		capDeltaTime = true;
+		//capDeltaTime = true;
 		
-		m_deltaLowLimit = 0.006f;	// Keep Below 165fps // 1/165
-		m_deltaHighLimit = 0.1;		// Keep Above 10fps // 1/10
+		//m_deltaLowLimit = 0.006f;	// Keep Below 165fps // 1/165
+		//m_deltaHighLimit = 0.1;		// Keep Above 10fps // 1/10
 
 		// time is all handled in seconds
 
@@ -30,13 +36,17 @@ namespace mnemosy::core
 
 		m_uncappedDeltaSeconds = m_deltaSeconds;
 
-		if (capDeltaTime)
-		{
-			if (m_deltaSeconds < m_deltaLowLimit)
-				m_deltaSeconds = m_deltaLowLimit;
-			else if (m_deltaSeconds > m_deltaHighLimit)
-				m_deltaSeconds = m_deltaHighLimit;
+
+#ifdef MNSY_CONFIG_CAP_DELTA_TIME
+
+		if (m_deltaSeconds < DeltaLowLimit) {
+			m_deltaSeconds = DeltaLowLimit;
 		}
+		else if (m_deltaSeconds > DeltaHighLimit) {
+			m_deltaSeconds = DeltaHighLimit;
+		}
+#endif // MNSY_CONFIG_CAP_DELTA_TIME
+
 
 		m_timeLastFrame = m_currentTime;
 

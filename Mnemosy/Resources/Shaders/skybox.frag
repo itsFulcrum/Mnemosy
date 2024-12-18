@@ -11,8 +11,9 @@ in vec3 cubeMapSampleVector;
 in vec3 cubeSampleRight;
 in vec3 cubeSampleUp;
 
-in vec2 screenSpacePos;
+//in vec2 screenSpacePos;
 in vec4 fragPos;
+//in vec4 fragPosNormalized;
 
 
 
@@ -45,9 +46,9 @@ void main()
   vec4 skyboxColor = vec4(0.0f,0.0f,0.0f,1.0f);
 
 
-  int maxLod = 8;
+  int maxLod = 8; // get max lod as uniform because it depends on skybox resolution.
 
-  float sampleLOD =   saturate(_blurRadius * 0.5f) * float(maxLod);
+  float sampleLOD =   saturate(_blurRadius) * float(maxLod);
   skyboxColor.rgb = textureLod(_skybox, cubeMapSampleVector, sampleLOD).rgb;
 
 
@@ -63,19 +64,69 @@ void main()
   vec3 background = srgb_to_linear_cheap(vec4(_backgroundColor,1.0f)).rgb;
 
 
-  //vec2 screenSpace01 = (screenSpacePos + 1) *0.5;
-  vec2 screenUV = fragPos.xy / fragPos.w;
+  
+
+  vec4 fragPosNormalized = normalize(fragPos.xyzw);
+  vec2 screenUV = fragPosNormalized.xy / fragPosNormalized.w;
+  //vec2 screenUV = fragPos.xy / fragPos.w;
 
 
-  float gradient = saturate(length(screenUV));
-  vec3 gradientColor = lerp(background,vec3(0.01f,0.01f,0.01f),_gradientOpacity);
+  float gradient = length(screenUV);
+
+  vec3 gradientColor = lerp(background,vec3(0.0f,0.0f,0.0f),_gradientOpacity);
 
   background = lerp(background,gradientColor, gradient);
 
   fragmenColorLinear.rgb = mix(background.rgb,skyboxColor.rgb,_opacity);
 
+
+
+
+  // float radi = RadicalInverse_VdC(pixelX * pixelY);
+  // vec2 ham = Hammersley(pixelX,pixelY);
+  // //fragmenColorLinear.rgb = vec3(radi);
+  
+  // //vec3 posNorm = normalize(fragPos.xyz);
+  // fragmenColorLinear.rg = screenSpace01.xy;
+
+  //fragmenColorLinear.rgb = vec3(simpleHash(screenUV));
+  
   // POST PROCCESSING
-  //fragmentOutputColor = vec4(0.0f,0.0f,0.0f,1.0f);
+
+// ==============  TEST BLOCK  blue noise
+
+  // const int screenRes = 512;
+
+  // vec2 screenUV01 = (screenUV.xy + 1.0f) * 0.5f;
+
+  // int pixelX = int(screenUV01.x * float(screenRes));
+  // int pixelY = int(screenUV01.y * float(screenRes));
+
+  // //float radi = RadicalInverse_VdC(pixelX * pixelY);
+  // //vec2 ham = Hammersley(pixelX,pixelY);
+
+  // fragmentOutputColor = vec4(0.0f,0.0f,0.0f,1.0f);
+
+  // float whiteNoise = WhiteNoise2DTo1D(screenUV01);
+
+
+  // vec2 pixelSize = vec2( float(pixelX),  float(pixelY));
+
+  // float blueNoise = Noise_BlueNoise(pixelSize);
+
+
+  // //blueNoise = ReshapeUniformToTriangle(blueNoise);
+
+
+
+  // float discardValue = step( blueNoise * _gradientOpacity, screenUV01.y);
+
+
+  // fragmentOutputColor.rgb = vec3(discardValue);
+
+
+
+// ==============  TEST BLOCK END
 
   fragmentOutputColor = postProcess(fragmenColorLinear,_postExposure);
 }

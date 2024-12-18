@@ -34,18 +34,16 @@ namespace mnemosy::systems {
 
 		void UnloadAllThumbnails();
 
-	private:
 		void RenderThumbnailForAnyLibEntry_Slow_Fallback(LibEntry* libEntry);
-
+	private:
 
 		void DeleteThumbnailGLTexture_Internal(LibEntry* libEntry);
 		void LoadThumbnailForMaterial_Internal(LibEntry* libEntry);
 
-		bool m_activeEntriesFullyLoaded = false;
 
-		std::vector<systems::LibEntry*> m_thumbnailsQuedForRefresh;
-		
+		std::vector<systems::LibEntry*> m_thumbnailsQuedForRefresh;		
 		std::vector<systems::LibEntry*> m_activeEntries;
+		bool m_activeEntriesFullyLoaded = false;
 	
 	};
 } // ! mnemosy::systems

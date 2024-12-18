@@ -34,37 +34,37 @@ namespace mnemosy::systems
 
 	struct KeyboardInputEntry
 	{
-		int id = 0;
-		int glfw_pressEventToListenTo = GLFW_PRESS;
-		int glfw_keyToListenTo = GLFW_KEY_SPACE;
+		TCallbackSignatureDouble callbackFunction;
+		unsigned int glfw_pressEventToListenTo = GLFW_PRESS;
+		unsigned int glfw_keyToListenTo = GLFW_KEY_SPACE;
+		uint8_t id = 0;
 		bool wasPressedLastFrame = false;
 		bool callbackOnlyOnce = true;
-		TCallbackSignatureDouble callbackFunction;
 	};
 	struct MouseButtonInputEntry
 	{
-		int id = 0;
-		int glfw_pressEventToListenTo = GLFW_PRESS;
-		int glfw_mouseButtonToListenTo = GLFW_MOUSE_BUTTON_LEFT;
+		uint8_t id = 0;
+		unsigned int glfw_pressEventToListenTo = GLFW_PRESS;
+		unsigned int glfw_mouseButtonToListenTo = GLFW_MOUSE_BUTTON_LEFT;
 		TCallbackSignatureDouble callbackFunction;
 	};
 	struct MouseCursorInputEntry
 	{
-		int id = 0;
+		uint8_t id = 0;
 		TCallbackSignatureDouble5 callbackFunction;
 	};
 	struct MouseScrollInputEntry
 	{
-		int id = 0;
+		uint8_t id = 0;
 		TCallbackSignatureDouble3 callbackFunction;
 	};
 	struct WindowResizeInputEntry
 	{
-		int id = 0;
+		uint8_t id = 0;
 		TCallbackSignatureInt2 callbackFunction;
 	};
 	struct DropInputEntry {
-		int id = 0;
+		uint8_t id = 0;
 		TCallbackSingatureDrop callbackFunction;
 	};
 
@@ -124,12 +124,13 @@ namespace mnemosy::systems
 		bool m_processUserInputs = true;
 		bool m_firstMouseInput = true;
 
-		uint16_t m_keyboardIdCounter = 0;
-		uint16_t m_mouseButtonIdCounter = 0;
-		uint16_t m_mouseCursorIdCounter = 0;
-		uint16_t m_mouseScrollIdCounter = 0;
-		uint16_t m_windowResizeIdCounter = 0;
-		uint16_t m_dropIdCounter = 0;
+		// this should be higher probably but for mnemosy purposes 255 different registers is more then enough
+		uint8_t m_keyboardIdCounter = 0;
+		uint8_t m_mouseButtonIdCounter = 0;
+		uint8_t m_mouseCursorIdCounter = 0;
+		uint8_t m_mouseScrollIdCounter = 0;
+		uint8_t m_windowResizeIdCounter = 0;
+		uint8_t m_dropIdCounter = 0;
 
 		std::vector<KeyboardInputEntry> m_keyboardEntries;
 		std::vector<MouseButtonInputEntry> m_mouseButtonEntries;

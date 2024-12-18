@@ -1,0 +1,12 @@
+{
+    "1_Header": "Mnemosy Data File",
+    "2_Description": "This File stores the location and names of user created libraries",
+    "AnyLibCollectionsSaved": true,
+    "LastLoadedCollectionId": 0,
+    "LibCollectionNames": [
+        "TestLib"
+    ],
+    "LibCollectionPaths": [
+        "D:/MnemosyLib"
+    ]
+}

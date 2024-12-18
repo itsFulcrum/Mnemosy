@@ -39,14 +39,17 @@ namespace mnemosy::gui {
 		ImGui::Begin(panelName, &showPanel);
 		{
 
+			if (m_materialRegistry.LibCollections_IsAnyActive()) {
 
-			if (!m_materialRegistry.inSearchMode) {
 
-				DrawMaterialButtons();
-			}
-			else {
+				if (!m_materialRegistry.inSearchMode) {
 
-				DrawMaterialButtonsOfSearch();
+					DrawMaterialButtons();
+				}
+				else {
+
+					DrawMaterialButtonsOfSearch();
+				}
 			}
 
 
@@ -58,20 +61,23 @@ namespace mnemosy::gui {
 		namespace fs = std::filesystem;
 
 		if (m_materialRegistry.GetSelectedNode() == nullptr) {
-			MNEMOSY_TRACE("Selected node is not nullptr");
+			MNEMOSY_TRACE("Selected node is nullptr");
 		}
 
-		std::string directoryText = "Directory: " + m_materialRegistry.GetSelectedNode()->name;
-		ImGui::SeparatorText(directoryText.c_str());
-
-
+		ImGui::Text("Directory: %s", m_materialRegistry.GetSelectedNode()->name.c_str());
+		ImGui::SameLine();
 		ImGui::SliderFloat("Icon Size", &m_imgButtonSize, 32.0f, 350.0f, "%.0f");
+
 		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+
 
 		if (m_materialRegistry.GetSelectedNode()->HasMaterials()) {
 			
-			fs::path lib = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-			fs::path activeFolderPath = lib / fs::path(m_materialRegistry.GetSelectedNode()->pathFromRoot);
+			fs::path lib = m_materialRegistry.ActiveLibCollection_GetFolderPath();
+			fs::path activeFolderPath = lib / m_materialRegistry.GetSelectedNode()->GetPathFromRoot();
 
 
 
@@ -146,11 +152,20 @@ namespace mnemosy::gui {
 
 		namespace fs = std::filesystem;
 
-		ImGui::SeparatorText("Search Results: ");
-
-
+		ImGui::Text("Search Results:");
+		ImGui::SameLine();
 		ImGui::SliderFloat("Icon Size", &m_imgButtonSize, 32.0f, 350.0f, "%.0f");
+
 		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+
+		//ImGui::SeparatorText("Search Results: ");
+
+
+		//ImGui::SliderFloat("Icon Size", &m_imgButtonSize, 32.0f, 350.0f, "%.0f");
+		//ImGui::Spacing();
 
 
 		std::vector<systems::LibEntry*>& searchResultsList = m_materialRegistry.GetSearchResultsList();

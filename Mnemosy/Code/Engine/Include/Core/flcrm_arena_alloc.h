@@ -1,7 +1,6 @@
 #ifndef FLCRM_ARENA_ALLOC_H
 #define FLCRM_ARENA_ALLOC_H
 
-
 #include <stdint.h>
 
 #ifndef FLCRM_ARENA_DEFAULT_ALIGNMENT
@@ -10,30 +9,30 @@
 
 namespace flcrm{
 
-
-
 	class Arena
 	{
 	public:
 		Arena() = default;
 		~Arena() = default;
 
-		// pre allocate a memory buffer
+		// allocate a new memory buffer
 		void arena_init_allocate_buffer(size_t bufferSize);
 
-		// get a pointer to the next free piece of memory aligned
-		// if arena is out of memory return null;
-		void* arena_allocate(size_t size, size_t align);
+		// get a pointer to the next free piece of aligned memory in the arena buffer
+		// returns null, if arena is out of memory
+		void* arena_allocate(size_t size, size_t align = FLCRM_ARENA_DEFAULT_ALIGNMENT);
 		
-
-		// reset the arena and set all memory in the buffer back to 0 esentially "freeing" it;
-		void arena_reset_buffer();
+		// memset the entire arena buffer to 0.
+		void arena_memset_zero();
 		
-		// free the arena memory buffer for real
+		// free the entire arena memory buffer for real
 		void arena_free_all();
 
-		bool has_enough_memory(size_t size);
-		size_t bytes_left();
+		// check if arena has enough memory left in the buffer
+		bool arena_has_enough_memory(size_t size);
+
+		// get how much memory is left in the arena buffer in bytes.
+		size_t arena_get_bytes_left();
 
 	private:
 		bool is_alignment_power_of_two(uintptr_t x);
@@ -41,9 +40,7 @@ namespace flcrm{
 
 		void* m_arena_buffer = nullptr;
 		size_t m_arena_buffer_size = 0;
-		size_t m_arrena_current_offset = 0;
-		
-		
+		size_t m_arrena_current_offset = 0;		
 	};
 
 

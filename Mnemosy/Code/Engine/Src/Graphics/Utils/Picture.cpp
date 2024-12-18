@@ -1,5 +1,6 @@
 #include "Include/Graphics/Utils/Picture.h"
 
+#include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
 
 #include "Include/MnemosyEngine.h"
@@ -211,7 +212,16 @@ namespace mnemosy::graphics {
 
 		TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, pictureInfo.width);
 		TIFFSetField(tif, TIFFTAG_IMAGELENGTH, pictureInfo.height);
-		TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, channels); // channels per pixel (1,2,3,4)
+
+		if (channels == 4) {
+			TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, 4); // channels per pixel (1,2,3,4)
+			//TIFFSetField(tif, TIFFTAG_EXTRASAMPLES, EXTRASAMPLE_UNASSALPHA); // channels per pixel (1,2,3,4)
+		}
+		else {
+			TIFFSetField(tif, TIFFTAG_SAMPLESPERPIXEL, channels); // channels per pixel (1,2,3,4)
+			//TIFFSetField(tif, TIFFTAG_EXTRASAMPLES, 0);
+		}
+
 		TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, bitsPerChannel); // bits per channel (8 , 16 or 32)
 
 		TIFFSetField(tif, TIFFTAG_ROWSPERSTRIP, 1);
@@ -314,7 +324,12 @@ namespace mnemosy::graphics {
 		outPictureError.wasSuccessfull = true;
 		outPictureError.what = "";
 
-		// make sure we can write big enough images
+		// kill tiff warnings in release mode.
+#ifdef MNEMOSY_CONFIG_RELEASE
+		TIFFSetWarningHandler(NULL);
+#endif // MNEMOSY_CONFIG_RELEASE
+
+		// make sure we can read big enough images
 		tmsize_t limit = (sizeof(uint32_t) * 4 * 16384 * 16384); // sizeof(uint32_t) * channels * width * height
 
 		TIFFOpenOptions* opts = TIFFOpenOptionsAlloc();

@@ -1,8 +1,10 @@
 
-Mnemosy is a tool to store and organize PBR texture files and materials.
+Mnemosy is a tool to organize and preview PBR materials and texture files.
 
-The goal of Mnemosy is to be fast, flexible and independent of any other software or service.
-This means that Mnemosy is designed to work with local files stored on your computer. No online accounts, services or subscriptions!
-Textures are only stored on this local machine and nowhere else.
-Mnemosy lets you export textures associated with a material in common image formats like .png or .tif
-it even lets you drag and drop them directly from within the app to other software that implement drag and drop
+The goal of Mnemosy is to be independent of any other software or service.
+No online accounts or subscriptions to access textures.
+Mnemosy is therefore designed to work with files stored locally on your hard drive.
+
+PBR-Textures of a material can be exported in most common file formats like .png or .tif,
+Or you can directly drag them into other software that implement drag and drop functionality.
+Additionally Mnemosy has build in channelpacking for pbr materials.

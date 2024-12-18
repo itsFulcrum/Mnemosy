@@ -13,10 +13,9 @@ namespace mnemosy::gui
 		virtual void Draw() override;
 
 	private:
-		bool m_saveSkyboxPermanentlyUponLoad = false;
-		
-		bool m_openChangeDirectoryModal = false;
-		bool m_changeDirectoryModelState = false;
+				
+		//bool m_openChangeDirectoryModal = false;
+		//bool m_changeDirectoryModelState = false;
 	};
 }
 #endif // !SCENE_SETTINGS_GUI_PANEL_H

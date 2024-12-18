@@ -8,20 +8,6 @@ namespace mnemosy::graphics {
 	struct ModelData;
 }
 
-
-namespace mnemosy::graphics {
-
-	struct ScreenQuad {
-
-	public:
-
-
-	private:
-
-
-	};
-}
-
 // This mesh registry works because the loaded meshes never get freed until the program ends,
 //  -> so we can use the position in the vector as id and be super fast
 
@@ -54,17 +40,19 @@ namespace mnemosy::systems {
 		unsigned int m_ScreenQuad_VBO = 0;
 		unsigned int m_ScreenQuad_VAO = 0;
 
-		const float m_screenQuadVertices[24] = {
-			// triangle 1
-			// positions xy		uvs
-			-1.0f, -1.0f,		0.0f,0.0f,
-			 1.0f,  1.0f,		1.0f,1.0f,
-			-1.0f,  1.0f,		0.0f,1.0f,
-			// triangle 2
-			-1.0f, -1.0f,		0.0f,0.0f,
-			 1.0f, -1.0f,		1.0f,0.0f,
-			 1.0f,  1.0f,		1.0f,1.0f
-		};
+
+		// we only need this once and dont need too keep it in memory.
+		//const float m_screenQuadVertices[24] = {
+		//	// triangle 1
+		//	// positions xy		uvs
+		//	-1.0f, -1.0f,		0.0f,0.0f,
+		//	 1.0f,  1.0f,		1.0f,1.0f,
+		//	-1.0f,  1.0f,		0.0f,1.0f,
+		//	// triangle 2
+		//	-1.0f, -1.0f,		0.0f,0.0f,
+		//	 1.0f, -1.0f,		1.0f,0.0f,
+		//	 1.0f,  1.0f,		1.0f,1.0f
+		//};
 
 
 	};

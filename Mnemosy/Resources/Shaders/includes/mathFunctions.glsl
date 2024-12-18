@@ -209,6 +209,15 @@ float RadicalInverse_VdC(uint bits)
     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
     return float(bits) * 2.3283064365386963e-10; // / 0x100000000
 }
+
+uint ReverseBits(uint x) {
+    x = ((x & 0xaaaaaaaau) >> 1) | ((x & 0x55555555u) << 1);
+    x = ((x & 0xccccccccu) >> 2) | ((x & 0x33333333u) << 2);
+    x = ((x & 0xf0f0f0f0u) >> 4) | ((x & 0x0f0f0f0fu) << 4);
+    x = ((x & 0xff00ff00u) >> 8) | ((x & 0x00ff00ffu) << 8);
+    return (x >> 16) | (x << 16);
+}
+
 // ----------------------------------------------------------------------------
 vec2 Hammersley(uint i, uint N)
 {
@@ -237,6 +246,70 @@ float get_Bayer(int x, int y)
 {
     float b = (ditherBayer[x%8][y%8] + 1 ) / 64.0f;
     return b;
+}
+
+
+float WhiteNoise3DTo1D(vec3 vec){
+
+    vec3 smallValue = vec3(sin(vec.x),sin(vec.y),sin(vec.z));
+
+    float random = dot(smallValue, vec3(12.9898, 78.233, 37.719));
+    
+    random = fract(sin(random) * 143758.5453);
+    return random;
+}
+
+
+float WhiteNoise2DTo1D(vec2 vec){
+
+    vec3 smallValue = vec3( sin(vec.x) , sin(vec.y) , cos(vec.x * vec.y * 37.719 + 11.23) );
+
+    float random = dot(smallValue, vec3(12.9898, 78.233, 37.719));
+    
+    random = fract(sin(random) * 143758.5453);
+    return random;
+}
+
+
+
+uint HilbertIndex(uvec2 p) {
+    uint i = 0u;
+    for(uint l = 0x4000u; l > 0u; l >>= 1u) {
+        uvec2 r = min(p & l, 1u);
+        
+        i = (i << 2u) | ((r.x * 3u) ^ r.y);       
+        p = r.y == 0u ? (0x7FFFu * r.x) ^ p.yx : p;
+    }
+    return i;
+}
+
+
+uint OwenHash(uint x, uint seed) { // seed is any random number
+    x ^= x * 0x3d20adeau;
+    x += seed;
+    x *= (seed >> 16) | 1u;
+    x ^= x * 0x05526c56u;
+    x ^= x * 0x53a22864u;
+    return x;
+}
+
+
+
+
+float Noise_BlueNoise(vec2 uvCoords){
+
+    uint m = HilbertIndex(uvec2(uvCoords));
+    m = OwenHash(ReverseBits(m), 0xe7843fbfu);
+    m = OwenHash(ReverseBits(m), 0x8d8fb1e0u);
+    //mask = float(ReverseBits(m)) / 4294967296.0;
+    return float(ReverseBits(m)) / 4294967296.0;
+
+}
+
+float ReshapeUniformToTriangle(float v) {
+    v = v * 2.0 - 1.0;
+    v = sign(v) * (1.0 - sqrt(max(0.0, 1.0 - abs(v)))); // [-1, 1], max prevents NaNs
+    return v + 0.5; // [-0.5, 1.5]
 }
 
 

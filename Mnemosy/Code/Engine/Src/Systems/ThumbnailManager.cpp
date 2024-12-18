@@ -130,7 +130,6 @@ namespace mnemosy::systems {
 
 	}
 
-	// TODO: Handle entry types
 	void ThumbnailManager::RenderThumbnailForAnyLibEntry_Slow_Fallback(LibEntry* libEntry) {
 
 		MNEMOSY_ASSERT(libEntry != nullptr, "This should not happen");
@@ -261,9 +260,9 @@ namespace mnemosy::systems {
 
 		namespace fs = std::filesystem;
 
-		fs::path libPath = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
+		fs::path libPath = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().ActiveLibCollection_GetFolderPath();
 
-		fs::path materialFolderPath = libPath /  libEntry->parent->pathFromRoot / fs::path(libEntry->name);
+		fs::path materialFolderPath = libPath / libEntry->GetPathFromRoot();// libEntry->parent->pathFromRoot / fs::path(libEntry->name);
 
 		fs::path thumbnailPath = materialFolderPath / fs::path(libEntry->name + "_thumbnail.ktx2");
 

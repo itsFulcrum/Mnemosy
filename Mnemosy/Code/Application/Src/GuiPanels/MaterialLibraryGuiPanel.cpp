@@ -19,6 +19,18 @@
 
 
 #include <string>
+#include <filesystem>
+
+
+#define TextColor_default	ImVec4(0.68f, 0.68f, 0.68f, 1.00f)
+#define TextColor_pbr		ImVec4(0.65f, 0.56f, 0.50f, 1.00f)
+#define TextColor_skybox	ImVec4(0.51f, 0.67f, 0.68f, 1.0f)
+#define TextColor_unlit		ImVec4(0.51f, 0.60f, 0.51f, 1.00f)
+
+
+
+
+
 
 namespace mnemosy::gui
 {
@@ -28,14 +40,15 @@ namespace mnemosy::gui
 		panelName = "Library Hierarchy";
 		panelType = MNSY_GUI_PANEL_MATERIAL_LIBRARY;
 
-		rootNode = m_materialRegistry.GetRootFolder();
-		m_materialRegistry.OpenFolderNode(rootNode);
+		//rootNode = m_materialRegistry.GetRootFolder();
+		//m_materialRegistry.OpenFolderNode(rootNode);
 
 
 		m_directoryTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
 		m_materialTreeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
 	}
+
 
 	void MaterialLibraryGuiPanel::Draw() {
 		
@@ -45,9 +58,38 @@ namespace mnemosy::gui
 		ImGui::Begin(panelName, &showPanel);
 		{
 			
+			
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			DrawLibrarySelection();
+
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			ImGui::Separator();
+
+
+			// return early if no library is selected
+
+			if (!m_materialRegistry.LibCollections_IsAnyActive()) {
+
+				ImGui::Text("No Library is currently loaded.");
+
+
+				ImGui::End();
+				return;
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::Spacing();
+
 			ImGui::Text("Search: ");
 			ImGui::SameLine();
-				 
+
+			// === Search Bar
 			bool searchEnter = ImGui::InputText("##SearchInputField", &m_searchInput, m_textInputFlags);
 			if (searchEnter) {
 
@@ -72,7 +114,7 @@ namespace mnemosy::gui
 						std::vector<systems::LibEntry*>& searchResultsList = m_materialRegistry.GetSearchResultsList();
 
 
-						for (int i = 0; i < searchResultsList.size(); i++) {
+						for (unsigned int i = 0; i < searchResultsList.size(); i++) {
 							
 							thumbManager.AddLibEntryToActiveThumbnails(searchResultsList[i]);							
 						}						
@@ -85,10 +127,17 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 			ImGui::Spacing();
 
+
+
+
+
 			if (!m_materialRegistry.inSearchMode) {
 
-				RecursivDrawSubfolders(rootNode);
-				HandleDeleteHierarchyModal();
+				if (m_materialRegistry.LibCollections_IsAnyActive()) {
+
+					RecursivDrawSubfolders(m_materialRegistry.GetRootFolder());
+					HandleDeleteHierarchyModal();
+				}
 			}
 			else {
 
@@ -97,7 +146,7 @@ namespace mnemosy::gui
 
 				if (!searchResultsList.empty()) {
 
-					for (int i = 0; i < searchResultsList.size(); i++) {
+					for (unsigned int i = 0; i < searchResultsList.size(); i++) {
 						
 						if (ImGui::TreeNodeEx(searchResultsList[i]->name.c_str(), m_materialTreeFlags)) {
 							
@@ -127,8 +176,14 @@ namespace mnemosy::gui
 		// prepare node flags
 		ImGuiTreeNodeFlags node_flags = m_directoryTreeFlags;
 
+
+		std::string displayName = node->name;
+
 		if (node->IsRoot()) {
-			node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
+			node_flags |= ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed;// ImGuiTreeNodeFlags_CollapsingHeader;
+			//node_flags = ImGuiTreeNodeFlags_CollapsingHeader;
+			displayName = m_materialRegistry.ActiveLibCollection_GetName();
+
 		}
 
 
@@ -146,7 +201,7 @@ namespace mnemosy::gui
 			node_flags |= ImGuiTreeNodeFlags_Selected;
 		}
 
-		bool nodeOpen = ImGui::TreeNodeEx(node->name.c_str(), node_flags);
+		bool nodeOpen = ImGui::TreeNodeEx(displayName.c_str(), node_flags);
 			
 		
 		if (ImGui::IsItemClicked()) {
@@ -177,6 +232,25 @@ namespace mnemosy::gui
 
 			for (int i = 0; i < IM_ARRAYSIZE(m_rightClickFolderOptions); i++) {
 
+
+				// make entry types use different text colors
+				ImVec4 txtColor = TextColor_default; // Default
+				if (i == 1) { // pbr
+					txtColor = TextColor_pbr; // PBR
+
+				}
+				else if (i == 2) {
+
+					txtColor = TextColor_unlit; // Texture
+				}
+				else if (i == 3) {
+
+					txtColor = TextColor_skybox; // Skybox
+				}
+
+				ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
+
 				if (ImGui::Selectable(m_rightClickFolderOptions[i])) {
 
 					
@@ -184,21 +258,18 @@ namespace mnemosy::gui
 
 						AddSubfolder(node);
 					}
-					else if (i == 1) { // Add material 
-						//AddPbrMaterial(node);
+					else if (i == 1) { // Add PBR material 
+
 						AddMaterialEntry(node, "New Material", systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT);
 					}
-					else if (i == 2) { // add texture
+					else if (i == 2) { // Add Unlit Texture
 					
 						AddMaterialEntry(node, "New Texture", systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT);
-
-						//MNEMOSY_INFO("Textures are not yet supported");
-						
+												
 					}
-					else if (i == 3) { // add skybox
+					else if (i == 3) { // Add skybox
 						AddMaterialEntry(node, "New Skybox", systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX);
 					
-						//MNEMOSY_INFO("Skyboxs are not yet supported");
 					}
 					else if (i == 4) { // delete but keep children
 						DeleteButKeepChildren(node);
@@ -210,11 +281,14 @@ namespace mnemosy::gui
 					}
 					else if (i == 6) { // open in explorer
 						
-						fs::path pathToFolder = m_materialRegistry.Folder_GetFullPath(node);
-						mnemosy::core::FileDialogs::OpenFolderAt(pathToFolder.generic_string().c_str());
+						//fs::path pathToFolder = m_materialRegistry.Folder_GetFullPath(node);
+						mnemosy::core::FileDialogs::OpenFolderAt(m_materialRegistry.Folder_GetFullPath(node));
 					}
 
 				}
+
+				ImGui::PopStyleColor();
+
 
 			} // end options loop
 			ImGui::EndPopup();
@@ -301,7 +375,7 @@ namespace mnemosy::gui
 			// === Recusivly draw Sub directories
 
 			if (!node->IsLeafNode()) {
-				for (int i = 0; i < node->subNodes.size(); i++) {
+				for (unsigned int i = 0; i < node->subNodes.size(); i++) {
 					RecursivDrawSubfolders(node->subNodes[i]);
 				}
 			}
@@ -320,7 +394,7 @@ namespace mnemosy::gui
 		if (node->subEntries.empty())
 			return;
 
-		for (size_t i = 0; i < node->subEntries.size(); i++) {
+		for (unsigned int i = 0; i < node->subEntries.size(); i++) {
 				
 #ifdef mnemosy_gui_showDebugInfo
 			std::string materialText = node->subMaterials[i]->name + " -MatID: " + std::to_string(node->subMaterials[i]->runtime_ID);
@@ -333,8 +407,23 @@ namespace mnemosy::gui
 			bool matIsOpen = true;
 
 
+			// make entry types use different text colors
+			ImVec4 txtColor = TextColor_pbr; // PBR
+			if (node->subEntries[i]->type == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
+				txtColor = TextColor_unlit;
+			}
+			else if (node->subEntries[i]->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
+
+				txtColor = TextColor_skybox;
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Text, txtColor);
+
+
 			bool selected = ImGui::Selectable(materialText.c_str(), node->subEntries[i]->selected);
 
+
+			ImGui::PopStyleColor();
 
 			if (ImGui::IsItemClicked()) {
 			
@@ -346,7 +435,7 @@ namespace mnemosy::gui
 
 				if (!ImGui::GetIO().KeyCtrl) {
 					// clear selection 
-					for (size_t a = 0; a < node->subEntries.size(); a++) {
+					for (unsigned int a = 0; a < node->subEntries.size(); a++) {
 
 						node->subEntries[a]->selected = false;
 					}
@@ -412,6 +501,10 @@ namespace mnemosy::gui
 
 				// === Right Click Options
 				// right click on open folder to open options
+
+
+
+
 				if (ImGui::BeginPopupContextItem()) {
 
 					m_renameMaterialText = node->subEntries[i]->name;
@@ -424,7 +517,7 @@ namespace mnemosy::gui
 						RenameMaterial(node, node->subEntries[i], m_renameMaterialText, i);
 					}
 
-					for (size_t option = 0; option < IM_ARRAYSIZE(m_rightClickMaterialOptions); option++) {
+					for (unsigned int option = 0; option < IM_ARRAYSIZE(m_rightClickMaterialOptions); option++) {
 
 						if (ImGui::Selectable(m_rightClickMaterialOptions[option])) {
 							
@@ -433,7 +526,7 @@ namespace mnemosy::gui
 
 								std::vector<systems::LibEntry*> subMatsCopy = node->subEntries;
 
-								for (size_t a = 0; a < subMatsCopy.size(); a++) {
+								for (unsigned int a = 0; a < subMatsCopy.size(); a++) {
 
 
 									if (subMatsCopy[a]->selected) {
@@ -441,7 +534,7 @@ namespace mnemosy::gui
 										int posInList = -1;
 										// find posiiton in the original list which is changing as we delete materials
 										int runtimeID = subMatsCopy[a]->runtime_ID;
-										for (size_t b = 0; b < node->subEntries.size(); b++) {
+										for (unsigned int b = 0; b < node->subEntries.size(); b++) {
 
 											if (runtimeID == node->subEntries[b]->runtime_ID) {
 
@@ -463,10 +556,12 @@ namespace mnemosy::gui
 							
 							else if (option == 1) { // open in FileExplorer
 
-								fs::path pathToMaterialFolder = m_materialRegistry.LibEntry_GetFolderPath(node->subEntries[i]);
-								mnemosy::core::FileDialogs::OpenFolderAt(pathToMaterialFolder.generic_string().c_str());
+								// opens folder of the material in system explorer
+								mnemosy::core::FileDialogs::OpenFolderAt(m_materialRegistry.LibEntry_GetFolderPath(node->subEntries[i]));
 							}
 						}
+
+
 
 					} // end options loop
 					ImGui::EndPopup();
@@ -486,17 +581,6 @@ namespace mnemosy::gui
 	}
 
 
-	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node) {
-
-		std::string newName = "New Folder";
-		systems::FolderNode* newFolder = m_materialRegistry.AddNewFolder(node, newName);
-
-		m_materialRegistry.OpenFolderNode(newFolder);
-
-		m_setFolderOpenNextFrame = true;
-		m_folderIdToOpenNextFrame = node->runtime_ID;
-		
-	}
 
 	void MaterialLibraryGuiPanel::HandleDeleteHierarchyModal() {
 
@@ -536,6 +620,253 @@ namespace mnemosy::gui
 
 
 	}
+
+	void MaterialLibraryGuiPanel::DrawLibrarySelection() {
+
+
+
+		//if (ImGui::Button("Add Library##Btn")) {
+
+		//	m_openAddLibrary_popup = true;
+		//}
+
+
+		ImGui::SameLine();
+
+
+		// ==== Combo selection
+		const std::vector<systems::LibCollection>& list = m_materialRegistry.LibCollections_GetListVector();
+
+
+		if (!list.empty()) {
+
+			unsigned int current_selection_id = m_materialRegistry.LibCollections_GetCurrentSelectedID();
+
+			const char* combo_preview_value = list[current_selection_id].name.c_str();
+
+			unsigned int popupOption = 0;
+			unsigned int popupEntryIndex = 0;
+
+			ImGui::SetNextItemWidth(150);
+
+			if (ImGui::BeginCombo(" ##ViewportSkybox", combo_preview_value, 0))
+			{
+				for (uint16_t n = 0; n < list.size(); n++)
+				{
+					const bool is_selected = (current_selection_id == n);
+					if (ImGui::Selectable(list[n].name.c_str(), is_selected)) {
+						current_selection_id = n;
+					}
+
+
+					// popup selection
+					if (ImGui::BeginPopupContextItem()) {
+
+
+						// TODO: rename option
+
+						m_renameLibCollectionText = list[n].name;
+
+						ImGui::Text("Rename: ");
+						ImGui::SameLine();
+
+						bool renamed = ImGui::InputText("##RenameCollectionInputField", &m_renameLibCollectionText, m_textInputFlags);
+						if (renamed) {
+
+							//popupOptionSelected = true;
+							popupEntryIndex = n;
+							popupOption = 1;
+
+						}
+
+
+
+						if (ImGui::Selectable("Remove from List")) {
+
+							popupOption = 2;
+							//popupOptionSelected = true;
+							popupEntryIndex = n;
+						}
+
+
+						ImGui::EndPopup();
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+
+
+			if (popupOption != 0) {
+
+
+				if (popupOption == 1) { // rename seleciton
+
+
+					m_materialRegistry.LibCollections_RenameEntry(popupEntryIndex, m_renameLibCollectionText);
+
+				}
+				else if (popupOption == 2) { // remove entry from list.
+
+					m_materialRegistry.LibCollections_RemoveEntryFromList(popupEntryIndex);
+				}
+			}
+			else if (current_selection_id != m_materialRegistry.LibCollections_GetCurrentSelectedID()) {
+
+				m_materialRegistry.LibCollections_SwitchActiveCollection(current_selection_id);
+			}
+
+		}
+
+
+		ImGui::SameLine();
+		
+		
+		static bool m_openAddLibrary_popup = false;
+		static bool m_addLib_popup_isActive = false;
+
+		if (ImGui::Button("Add Library##Btn")) {
+
+			m_openAddLibrary_popup = true;
+		}
+
+
+
+		// ===  Add library Popup modal.
+
+		if (m_openAddLibrary_popup) {
+			m_openAddLibrary_popup = false;
+			m_addLib_popup_isActive = true;
+			ImGui::OpenPopup("Add Library");
+		}
+
+		if (ImGui::BeginPopupModal("Add Library", &m_addLib_popup_isActive, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::Spacing();
+
+
+			static bool addExisting = false;
+			ImGui::Text("Add Existing Mnemosy Library: ");
+			ImGui::SameLine();
+			ImGui::Checkbox("##AddExisting", &addExisting);
+			ImGui::SetItemTooltip("Wheather to add the new library from an existing mnemosy library directory or create a new empty one.");
+
+			ImGui::Spacing();
+
+			// Lib Name
+
+			static std::string addLib_newNameInput = "New Library";
+
+			ImGui::Text("Library Name: ");
+			ImGui::SameLine();
+
+			bool renamed = ImGui::InputText("##LibName", &addLib_newNameInput, m_textInputFlags);
+			if (renamed) {
+				addLib_newNameInput = m_materialRegistry.LibCollections_MakeNameUnique(addLib_newNameInput);
+			}
+
+			ImGui::Spacing();
+
+
+			// filepath 
+			static std::filesystem::path filepath = std::filesystem::path("C:/");
+
+
+			if (addExisting) {
+				ImGui::Text("Select the 'MnemosyMaterialLibraryData.mnsydata' file of an existing Mnemosy Libray");
+				
+				ImGui::Text("Path: %s", filepath.generic_string().c_str());
+
+				if (ImGui::Button("Select .mnsydata File...##AddLib")) {
+
+					std::filesystem::path p = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
+
+					if (!p.empty()) {
+						filepath = p;
+					}
+				}
+			
+			}
+			else {
+				ImGui::Text("Select an empty folder for the new Mnemosy Libray");
+
+				ImGui::Text("Path: %s", filepath.generic_string().c_str());
+
+				if (ImGui::Button("Select Folder...##AddLib")) {
+
+					std::filesystem::path p = mnemosy::core::FileDialogs::SelectFolder("");
+				
+					if (!p.empty()) {
+						filepath = p;
+					}
+				}
+			}
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+
+
+			if (ImGui::Button("Cancel", ImVec2(120, 0) )  ) {
+
+				m_addLib_popup_isActive = false;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Add", ImVec2(120, 0) )) {
+
+				if (addExisting) {
+
+					m_materialRegistry.LibCollections_CreateNewEntryFromExisting(addLib_newNameInput,filepath);
+				}
+				else {
+					m_materialRegistry.LibCollections_CreateNewEntry(addLib_newNameInput,filepath);
+				}
+
+
+
+
+
+				m_addLib_popup_isActive = false;
+				ImGui::CloseCurrentPopup();
+			}
+
+			
+
+			ImGui::EndPopup();
+		}
+
+
+		
+
+
+
+
+	}
+
+
+
+
+
+
+	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node) {
+
+		std::string newName = "New Folder";
+		systems::FolderNode* newFolder = m_materialRegistry.AddNewFolder(node, newName);
+
+		m_materialRegistry.OpenFolderNode(newFolder);
+
+		m_setFolderOpenNextFrame = true;
+		m_folderIdToOpenNextFrame = node->runtime_ID;
+		
+	}
+
 
 	void MaterialLibraryGuiPanel::DeleteButKeepChildren(systems::FolderNode* node) {
 

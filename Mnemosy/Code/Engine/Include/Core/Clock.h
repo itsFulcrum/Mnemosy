@@ -21,12 +21,12 @@ namespace mnemosy::core
 		const int GetFPS() { return m_currentFPS; }
 		const float GetFrameTime();
 
-		bool capDeltaTime = true;
+		//bool capDeltaTime = true;
 
 	private:
 
-		double m_deltaLowLimit = 0.006f;	// Keep Below 165fps // 1/165
-		double m_deltaHighLimit = 0.1;		// Keep Above 10fps // 1/10
+		//double m_deltaLowLimit = 0.006f;	// Keep Below 165fps // 1/165
+		//double m_deltaHighLimit = 0.1;		// Keep Above 10fps // 1/10
 
 		// time is all handled in seconds
 
@@ -36,7 +36,7 @@ namespace mnemosy::core
 		double m_uncappedDeltaSeconds = 0.0;
 
 		float m_fpsCounter = 0.0f;
-		int m_frameCount = 0;
+		unsigned int m_frameCount = 0;
 		int m_frameCountAtLastSecondStep = 0;
 		int m_currentFPS = 0;
 

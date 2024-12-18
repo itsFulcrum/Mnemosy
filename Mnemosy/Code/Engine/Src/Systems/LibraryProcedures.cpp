@@ -12,6 +12,7 @@
 #include "Include/Graphics/Skybox.h"
 #include "Include/Graphics/Cubemap.h"
 
+#include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/FolderTreeNode.h"
 #include "Include/Systems/JsonKeys.h"
 
@@ -25,21 +26,12 @@ namespace mnemosy::systems {
 
 void LibProcedures::CreateDirectoryForFolderNode(systems::FolderNode* node) {
 	namespace fs = std::filesystem;
+	
+	fs::path folderPath = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().Folder_GetFullPath(node);
 
-	fs::path libraryDir = MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath();
-	fs::path directoryPath = libraryDir / fs::path(node->pathFromRoot);
+	if (!fs::exists(folderPath)) {
 
-	fs::directory_entry newDir;
-	try {
-		newDir = fs::directory_entry(directoryPath);
-	}
-	catch (fs::filesystem_error error) {
-		MNEMOSY_ERROR("Error creating initializing Directory {}\n Error Message: {}", directoryPath.generic_string(), error.what());
-		return;
-	}
-
-	if (!newDir.exists()) {
-		fs::create_directories(newDir.path());
+		fs::create_directories(folderPath);
 	}
 }
 
@@ -47,28 +39,60 @@ bool LibProcedures::CheckDataFile(const std::filesystem::path& dataFilePath)
 {
 	namespace fs = std::filesystem;
 
-	fs::directory_entry dataFile = fs::directory_entry(dataFilePath);
-
-	if (!dataFile.exists() || !dataFile.is_regular_file()) {
-
-		MNEMOSY_WARN("Data file did Not Exist or is not a regular file: {} \nCreating new empty file at that location", dataFilePath.generic_string());
-		std::ofstream file;
-		file.open(dataFilePath);
-		file << "";
-		file.close();
+	if (!fs::exists(dataFilePath) || !fs::is_regular_file(dataFilePath)) {
+		
+		LibProcedures::LibCollection_CreateNewJsonDataFile(dataFilePath);
 		return false;
 	}
 
 	return true;
 }
 
+void LibProcedures::LibCollection_CreateNewJsonDataFile(const std::filesystem::path dataFilePath)
+{
+	nlohmann::json TopLevelJson; // top level json object
+	TopLevelJson[jsonLibKey_MnemosyDataFile] = "UserLibraryDirectoriesData";
+
+	nlohmann::json HeaderInfo;
+	std::string descriptionString = "!!! == DO NOT DELETE, MOVE, OR MODIFY THIS FILE ==!!! This file stores the treelike folder structure defined by users to organise their materials";
+	HeaderInfo[jsonLibKey_Description] = descriptionString;
+
+	TopLevelJson[jsonLibKey_HeaderInfo] = HeaderInfo;
+
+
+	// empty root json
+	nlohmann::json emptyRootFolder;
+	emptyRootFolder[jsonLibKey_name] = "Root";
+	emptyRootFolder[jsonLibKey_isLeaf] = true;
+	emptyRootFolder[jsonLibKey_pathFromRoot] = "";
+	emptyRootFolder[jsonLibKey_hasMaterials] = false;
+
+
+	nlohmann::json userDirectoriesJson;
+	userDirectoriesJson["Root"] = emptyRootFolder;
+
+	TopLevelJson[jsonLibKey_FolderTree] = userDirectoriesJson;
+
+
+	std::ofstream dataFileStream;
+	dataFileStream.open(dataFilePath);
+
+	dataFileStream << TopLevelJson.dump(4);
+	
+	dataFileStream.close();
+}
+
 
 std::filesystem::path LibProcedures::LibEntry_GetFolderPath(systems::LibEntry* libEntry) {
 
-	return MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath() / libEntry->GetPathFromRoot();
+
+	return MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().ActiveLibCollection_GetFolderPath() / libEntry->GetPathFromRoot();
+
+	//return MnemosyEngine::GetInstance().GetFileDirectories().GetLibraryDirectoryPath() / libEntry->GetPathFromRoot();
 }
 
 std::filesystem::path LibProcedures::LibEntry_GetDataFilePath(systems::LibEntry* libEntry) {
+
 	return LibProcedures::LibEntry_GetFolderPath(libEntry) / std::filesystem::path(libEntry->name + ".mnsydata");
 }
 

@@ -201,7 +201,7 @@ namespace mnemosy::graphics
 		 userSceneSettings.background_color_b			= file.ReadFloat(success, "background_color_b", 0.2f, true);
 		 userSceneSettings.background_rotation			= file.ReadFloat(success, "background_rotation", 0.0f, true);
 		 userSceneSettings.background_opacity			= file.ReadFloat(success, "background_opacity", 0.0f, true);
-		 userSceneSettings.background_gradientOpacity	= file.ReadFloat(success, "background_gradientopacity", 1.0f, true);
+		 userSceneSettings.background_gradientOpacity	= file.ReadFloat(success, "background_gradientopacity", 0.5f, true);
 		 userSceneSettings.background_blurRadius		= file.ReadFloat(success, "background_blurRadius", 0.0f, true);
 		 //userSceneSettings.background_blurSteps		= file.ReadInt(success, "background_blurSteps", 0, true);
 

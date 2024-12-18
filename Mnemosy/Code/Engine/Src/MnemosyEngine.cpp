@@ -75,7 +75,7 @@ namespace mnemosy
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
 		
-		m_arena_persistent.arena_init_allocate_buffer(2248); //1024000 = 1 mb memory block
+		m_arena_persistent.arena_init_allocate_buffer(1648); //1024000 = 1 mb memory block
 
 
 		//MNEMOSY_TRACE("Initializing Subsystems");
@@ -84,6 +84,8 @@ namespace mnemosy
 		m_pFileDirectories = arena_placement_new(core::FileDirectories);// need to come before scene and image base lighting renderer
 		m_pFileDirectories->Init();
 
+		//MNEMOSY_WARN("Init: FileDirectories");
+
 		m_pWindow = arena_placement_new(core::Window);
 		m_pWindow->Init(WindowTitle);
 
@@ -91,59 +93,80 @@ namespace mnemosy
 		m_pWindow->EnableVsync(false);
 		#endif
 
-		MNEMOSY_DEBUG("Window created");
+		//MNEMOSY_WARN("Init: Window");
 		
 		// subsystems
 		// Mnemosy::core
 		m_pClock = arena_placement_new(core::Clock);
 		m_pClock->Init();
 
+		//MNEMOSY_WARN("Init: Clock");
 		
 		m_pDropHandler = arena_placement_new(core::DropHandler);
 		m_pDropHandler->Init(m_pWindow->GetWindow());
 
+		//MNEMOSY_WARN("Init: DropHandler");
 		// mnemosy::systems
 		m_pInputSystem = arena_placement_new(systems::InputSystem);
 		m_pInputSystem->Init();
 
+		//MNEMOSY_WARN("Init: InputSystem");
+
 		m_pSkyboxAssetRegistry = arena_placement_new(systems::SkyboxAssetRegistry);
 		m_pSkyboxAssetRegistry->Init();
 
-		m_pMaterialLibraryRegistry = arena_placement_new(systems::MaterialLibraryRegistry);
-		m_pMaterialLibraryRegistry->Init();
-		
-		m_pThumbnailManger = arena_placement_new(systems::ThumbnailManager);
-		m_pThumbnailManger->Init();
+		//MNEMOSY_WARN("Init: SkyReg");
+
+		m_pThumbnailManager = arena_placement_new(systems::ThumbnailManager);
+		m_pThumbnailManager->Init();
+
+		//MNEMOSY_WARN("Init: ThumbnailMana");
 
 		m_pTextureGenerationManager = arena_placement_new(systems::TextureGenerationManager);
 		m_pTextureGenerationManager->Init();
 
+		//MNEMOSY_WARN("Init: TexGenManag");
+
+		m_pMaterialLibraryRegistry = arena_placement_new(systems::MaterialLibraryRegistry);
+		m_pMaterialLibraryRegistry->Init();
+
+		//MNEMOSY_WARN("Init: MatLibReg");
 
 		m_pExportManager = arena_placement_new(systems::ExportManager);
-		m_pExportManager->Init(),
+		m_pExportManager->Init();
 
-			m_pMeshRegistry = arena_placement_new(systems::MeshRegistry);
+		//MNEMOSY_WARN("Init: ExportManag");
+
+		m_pMeshRegistry = arena_placement_new(systems::MeshRegistry);
 		m_pMeshRegistry->Init();
 
+		//MNEMOSY_WARN("Init: MeshReg");
 
 		// menmosy::graphcs
-		MNEMOSY_DEBUG("Initializing Renderer");
+		//MNEMOSY_DEBUG("Initializing Renderer");
 		m_pIbl_renderer =  arena_placement_new(graphics::ImageBasedLightingRenderer);
 		m_pIbl_renderer->Init();
 
+		//MNEMOSY_WARN("Init: Ibl_Rend");
+		
 		m_pRenderer = arena_placement_new(graphics::Renderer);
 		m_pRenderer->Init();
 
+		//MNEMOSY_WARN("Init: Render");
 
-		MNEMOSY_DEBUG("Loading Scenes");
+		//MNEMOSY_DEBUG("Loading Scenes");
 		m_pScene = arena_placement_new(graphics::Scene);
 		m_pScene->Init();
+		//MNEMOSY_WARN("Init: Scene");
 
 		m_pThumbnailScene = arena_placement_new(graphics::ThumbnailScene);
 		m_pThumbnailScene->Init();
 
+		//MNEMOSY_WARN("Init: ThumbScene");
+
 		m_pUserInterface =  arena_placement_new(gui::UserInterface);
 		m_pUserInterface->Init();
+		//MNEMOSY_WARN("Init: UserInterface");
 
 		m_pRenderer->SetPbrShaderBrdfLutUniforms();
 		m_pRenderer->SetPbrShaderLightUniforms(m_pScene->GetLight());
@@ -170,7 +193,7 @@ namespace mnemosy
 
 			m_pInputSystem->Update(m_pClock->GetDeltaSeconds());
 
-			m_pThumbnailManger->Update();
+			m_pThumbnailManager->Update();
 			//m_pScene->Update();
 
 			// Rendering
@@ -186,7 +209,7 @@ namespace mnemosy
 
 	void MnemosyEngine::Shutdown() {	
 		
-		m_pMaterialLibraryRegistry->ActiveLibEntry_SaveToFile();
+		m_pMaterialLibraryRegistry->SaveCurrentSate();
 
 		m_pUserInterface->Shutdown();
 
@@ -200,7 +223,7 @@ namespace mnemosy
 
 		m_pExportManager->Shutdown();
 		m_pTextureGenerationManager->Shutdown();
-		m_pThumbnailManger->Shutdown();
+		m_pThumbnailManager->Shutdown();
 
 
 		m_pMeshRegistry->Shutdown();
@@ -210,6 +233,9 @@ namespace mnemosy
 
 		m_pInputSystem->Shutdown();
 		m_pDropHandler->Shutdown();
+		
+
+		m_pFileDirectories->Shutdown();
 
 		m_pWindow->Shutdown();
 
@@ -221,12 +247,19 @@ namespace mnemosy
 		delete m_sInstance;
 	}
 
-	void* MnemosyEngine::arena_persistent_malloc(size_t size, size_t align)
-	{
-		MNEMOSY_ASSERT(m_arena_persistent.has_enough_memory(size),"Temporary Storage is out of memory");
+	void* MnemosyEngine::arena_persistent_malloc(size_t size, size_t align) {
+
+#ifdef MNEMOSY_CONFIG_DEBUG
+		MNEMOSY_ASSERT(m_arena_persistent.arena_has_enough_memory(size),"Arena Storage is out of memory");
+#endif // MNEMOSY_CONFIG_DEBUG
 
 		void* ptr = m_arena_persistent.arena_allocate(size, align);
-		MNEMOSY_TRACE("Arena_Allocated {} bytes, Align {} , {} bytes left ", (int)size,(int)align, (int)m_arena_persistent.bytes_left());
+
+#ifdef MNEMOSY_CONFIG_DEBUG
+		MNEMOSY_TRACE("Arena_Allocated {} bytes, Align {} , {} bytes left ", (int)size,(int)align, (int)m_arena_persistent.arena_get_bytes_left());
+#endif // MNEMOSY_CONFIG_DEBUG
+		
+		
 		return ptr;
 	}
 

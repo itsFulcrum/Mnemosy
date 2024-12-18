@@ -81,7 +81,7 @@ namespace mnemosy::graphics
 
 		void SetViewMatrix(const glm::mat4& viewMatrix);
 
-		void SetClearColor(float r, float g, float b);
+		//void SetClearColor(float r, float g, float b);
 		void ClearFrame();
 
 		void StartFrame(unsigned int width, unsigned int height);
@@ -139,7 +139,7 @@ namespace mnemosy::graphics
 		unsigned int m_blitRenderTexture_ID;
 
 
-		glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
+		//glm::vec3 m_clearColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		glm::mat4 m_viewMatrix = glm::mat4(1.0f);
 		glm::mat4 m_projectionMatrix = glm::mat4(1.0f);
@@ -153,8 +153,10 @@ namespace mnemosy::graphics
 		Shader* m_pSkyboxShader = nullptr;
 
 		//int m_msaaSamples = 4;
-		MSAAsamples m_msaaSamplesSettings = MSAA4X;
 		bool m_msaaOff = false;
+		MSAAsamples m_msaaSamplesSettings = MSAA4X;
+
+		RenderModes m_renderMode = MNSY_RENDERMODE_SHADED;
 
 		// Thumbnails
 		ThumbnailResolution m_thumbnailResolution = ThumbnailResolution::MNSY_THUMBNAILRES_128;
@@ -168,7 +170,6 @@ namespace mnemosy::graphics
 		unsigned int m_thumb_blitFBO = 0;
 		unsigned int m_thumb_blitTexture_ID = 0;
 		
-		RenderModes m_renderMode = MNSY_RENDERMODE_SHADED;
 
 	private:
 		//BackgroundSettings m_userBackgroundSettings;

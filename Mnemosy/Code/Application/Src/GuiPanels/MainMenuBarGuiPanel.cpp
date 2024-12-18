@@ -59,7 +59,7 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 			ImGui::Spacing();
 			ImGui::Spacing();
-			ImGui::Text("														"); // hack to get some spacing
+			ImGui::Text("		"); // hack to get some spacing
 
 			// Quick select mesh
 			{
@@ -83,7 +83,7 @@ namespace mnemosy::gui
 			ImGui::Spacing();
 			ImGui::Spacing();
 
-			// TODO: rewrite this probably
+			
 			// Quick Select Skybox
 			{
 
@@ -151,7 +151,7 @@ namespace mnemosy::gui
 				int rendermode_Current = renderer.GetCurrentRenderModeInt();
 
 
-				ImGui::Text("Render: ");
+				ImGui::Text("PBR Render Mode: ");
 				ImGui::SetNextItemWidth(180.0f);
 				ImGui::Combo(" ##ViewportRenderModes", &rendermode_Current, renderModes_List, IM_ARRAYSIZE(renderModes_List));
 
@@ -180,129 +180,15 @@ namespace mnemosy::gui
 
 			if (ImGui::MenuItem("Save All")) {
 
-				MnemosyEngine& engineInstance = MnemosyEngine::GetInstance();
-
-
-				engineInstance.GetMaterialLibraryRegistry().ActiveLibEntry_SaveToFile();
-				engineInstance.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
-
+				
+				MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().SaveCurrentSate();
 				Application::GetInstance().GetGuiPanelManager().UserSettingsSave();
 
 				MNEMOSY_INFO("Saved library");
 			}
 
-
-			if (ImGui::MenuItem("Restore Default Settings")) {
-
-				Application::GetInstance().GetGuiPanelManager().UserSettingsLoad(true);
-
-			}
-
-			if (ImGui::MenuItem("Load Existing Library")) {
-
-				m_open_loadMnemosyLibraryModel = true;
-			}
-
-
-
 			ImGui::EndMenu();
 		}
-
-
-
-		if (m_open_loadMnemosyLibraryModel) {
-			m_open_loadMnemosyLibraryModel = false;
-
-			m_loadMnemosyLibraryModal = true;
-			ImGui::OpenPopup("Load Mnemosy Library");
-		}
-
-
-
-		if (ImGui::BeginPopupModal("Load Mnemosy Library", &m_loadMnemosyLibraryModal, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-
-			ImGui::TextWrapped("Do you want to permanently change the library directory or only for this session?");
-			ImGui::Spacing();
-			ImGui::TextWrapped("Pick and option below and select the MnemosyMaterialLibrary.mnsydata  file that is next to your material library folder.");
-
-			ImGui::Spacing();
-			ImGui::Spacing();
-
-
-			if (ImGui::Button("Change Permanently and DELETE old files")) {
-
-				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
-				if (!filePath.empty()) {
-
-					fs::path dataFilePath = fs::path(filePath);
-					bool success = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadExistingMnemosyLibrary(dataFilePath,true,true);
-
-
-					if (success) {
-						m_loadMnemosyLibraryModal = false;
-						ImGui::CloseCurrentPopup();
-					}
-				}
-				else {
-					MNEMOSY_ERROR("You didnt select a valid mnemosy data file");
-				}
-			}
-
-			ImGui::Spacing();
-			ImGui::Spacing();
-
-			if (ImGui::Button("Change Permanently, but KEEP old files")) {
-
-
-				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
-
-				if (!filePath.empty()) {
-
-
-					fs::path dataFilePath = fs::path(filePath);
-					bool success = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadExistingMnemosyLibrary(dataFilePath, true, false);
-
-					if (success) {
-						m_loadMnemosyLibraryModal = false;
-						ImGui::CloseCurrentPopup();
-					}
-
-				}
-				else {
-					MNEMOSY_ERROR("You didnt select a valid mnemosy data file");
-				}
-			}
-
-			ImGui::Spacing();
-			ImGui::Spacing();
-
-
-			if (ImGui::Button("Only This Session")) {
-
-				std::string filePath = mnemosy::core::FileDialogs::OpenFile("mnsydata (*.mnsydata)\0*.mnsydata\0");
-
-				if (!filePath.empty()) {
-
-					fs::path dataFilePath = fs::path(filePath);
-					bool success = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LoadExistingMnemosyLibrary(dataFilePath, false, false);
-
-					if (success) {
-						m_loadMnemosyLibraryModal = false;
-						ImGui::CloseCurrentPopup();
-					}
-
-				}
-				else {
-					MNEMOSY_ERROR("You didnt select a valid mnemosy data file");
-				}
-			}
-
-			ImGui::EndPopup();
-		}
-
-
-
 
 	}
 

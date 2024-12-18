@@ -23,7 +23,7 @@ namespace mnemosy::systems
 
 	struct FolderNode;
 
-	struct LibEntry {
+	struct LibEntry { // 56 bytes wasting 4 bytes padding
 	public:
 		FolderNode* parent = nullptr; // 8
 		LibEntryType type; // 4
@@ -32,28 +32,31 @@ namespace mnemosy::systems
 		bool selected = false; // 1
 		bool thumbnailLoaded = false; // 1
 		unsigned int thumbnailTexure_ID = 0; // 4
-		std::string name; // 40
+		std::string name; // 32
 
 
 		std::filesystem::path GetPathFromRoot();
 	};
 
-
-	// this struct wastes a lot of padding space
-	struct FolderNode {
+	struct FolderNode { // 128 bytes wasting 6 bytes padding
 	public:
 
-		std::vector<LibEntry*> subEntries; 
-		std::vector<FolderNode*> subNodes; 
+		std::string name; // 32
+		FolderNode* parent; // 8
 
-		std::string name;
-		std::filesystem::path pathFromRoot;
+		// consider if we can get rid of runtime id
+		uint16_t runtime_ID; // 2
+
+		std::vector<FolderNode*> subNodes; // 24
+		std::vector<LibEntry*> subEntries; // 24
+
+
+		// we could potentially replace this with a method walking up parents and constructing the pathFromRoot dynamically.
+		//std::filesystem::path pathFromRoot; // 32
 		
-		FolderNode* parent;
-		uint16_t runtime_ID;
 
 
-
+		std::filesystem::path GetPathFromRoot();
 		
 		
 		bool HasMaterials();

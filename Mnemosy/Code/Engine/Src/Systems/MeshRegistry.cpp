@@ -23,6 +23,20 @@ namespace mnemosy::systems {
 		
 		// Init screen quad Mesh buffers
 		
+		const float m_screenQuadVertices[24] = {
+			// triangle 1
+			// positions xy		uvs
+			-1.0f, -1.0f,		0.0f,0.0f,
+			 1.0f,  1.0f,		1.0f,1.0f,
+			-1.0f,  1.0f,		0.0f,1.0f,
+			// triangle 2
+			-1.0f, -1.0f,		0.0f,0.0f,
+			 1.0f, -1.0f,		1.0f,0.0f,
+			 1.0f,  1.0f,		1.0f,1.0f
+		};
+
+
+
 		m_ScreenQuad_VBO = 0;
 		m_ScreenQuad_VAO = 0;
 		
@@ -39,14 +53,11 @@ namespace mnemosy::systems {
 			glBufferData(GL_ARRAY_BUFFER, sizeof(m_screenQuadVertices), m_screenQuadVertices, GL_STATIC_DRAW);
 
 			// Setup Attributes
-			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(0); // position
 			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(4);
+			glEnableVertexAttribArray(4); // uvs
 			glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 		}
-
-		MNEMOSY_TRACE("VAO_ ID: {}", m_ScreenQuad_VAO);
-
 	}
 
 	void MeshRegistry::Shutdown()
@@ -98,7 +109,6 @@ namespace mnemosy::systems {
 
 				// found mesh in the registry
 				if (m_loadedMeshesPaths[i] == filepath) {
-					//MNEMOSY_DEBUG("MeshRegistry::LoadMesh: found mesh in the registry, {}", filepath)
 					return i;
 				}
 			}

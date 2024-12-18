@@ -26,7 +26,12 @@ namespace mnemosy::graphics {
 
 namespace mnemosy::systems
 {
-	// TODO: make seperate file with file directory procedures that can be handle outside of this class so that it gets less crowded
+
+	struct LibCollection {
+		std::filesystem::path folderPath;
+		std::string name;
+	};
+
 	class MaterialLibraryRegistry
 	{
 	public:
@@ -36,8 +41,7 @@ namespace mnemosy::systems
 		void Init();
 		void Shutdown();
 
-		void LoadUserDirectoriesFromFile();
-		void SaveUserDirectoriesData();
+		void SaveCurrentSate();
 
 		FolderNode* AddNewFolder(FolderNode* parentNode,std::string& name);
 		void RenameFolder(FolderNode* node, std::string& newName);
@@ -45,7 +49,6 @@ namespace mnemosy::systems
 		void DeleteAndKeepChildren(FolderNode* node);
 		void DeleteFolderHierarchy(FolderNode* node);
 
-		// TODO: make sure thumbnails get directly created for the different entry types
 		void LibEntry_CreateNew(FolderNode* node,  LibEntryType type, std::string& name);
 		void LibEntry_Rename(systems::LibEntry* libEntry, std::string& newName);
 		void LibEntry_Delete(systems::LibEntry* libEntry, int positionInVector);
@@ -54,7 +57,6 @@ namespace mnemosy::systems
 		std::filesystem::path LibEntry_GetDataFilePath(LibEntry* libEntry);
 		std::filesystem::path LibEntry_GetFolderPath(LibEntry* libEntry);
 		
-		// TODO: handle skybox Entry type
 		void LibEntry_Load(systems::LibEntry* libEntry);
 
 		bool IsActiveEntry(uint16_t runtimeID);
@@ -80,13 +82,9 @@ namespace mnemosy::systems
 
 
 		void SetDefaultMaterial();
-		bool UserEntrySelected() { return m_activeLibEntry != nullptr; }		
+		bool UserEntrySelected();
 
 		void OpenFolderNode(FolderNode* node);
-		void ClearUserMaterialsAndFolders();
-		void ClearInternalTree_OnlyMemory();
-
-		bool LoadExistingMnemosyLibrary(std::filesystem::path& pathToDataFile, bool savePermanently, bool deleteCurrentLibrary);
 
 
 		// Getters
@@ -94,8 +92,6 @@ namespace mnemosy::systems
 		FolderNode* GetFolderByID(FolderNode* node, const unsigned int id);
 		FolderNode* GetSelectedNode() { return m_selectedFolderNode; }
 		
-
-		std::filesystem::path GetLibraryPath();
 		std::filesystem::path Folder_GetFullPath(FolderNode* node);
 
 		bool SearchLibEntriesForKeyword(const std::string& keyword);
@@ -104,7 +100,39 @@ namespace mnemosy::systems
 		systems::LibEntryType GetEntryTypeToRenderWith();
 
 
+		// Lib Collections
+		const bool LibCollections_IsAnyActive() { return m_folderTree != nullptr; }
+
+
+		void LibCollections_CreateNewEntry(const std::string& name, const std::filesystem::path& folderPath);
+		void LibCollections_CreateNewEntryFromExisting(const std::string& name, const std::filesystem::path& dataFilePath);
+		void LibCollections_RenameEntry(const unsigned int index, const std::string& newName);
+		void LibCollections_RemoveEntryFromList(const unsigned int index);
+
+		const std::vector<LibCollection>&  LibCollections_GetListVector() const { return  m_libCollectionsList; }
+		const unsigned int LibCollections_GetCurrentSelectedID() const { return m_libCollection_currentSlected_id; }
+		std::string LibCollections_MakeNameUnique(const std::string& name);
+		void LibCollections_SwitchActiveCollection(const unsigned int index);
+		
+		std::filesystem::path ActiveLibCollection_GetFolderPath();
+		std::filesystem::path ActiveLibCollection_GetDataFilePath();
+		const std::string ActiveLibCollection_GetName();
+
 	private:
+
+		const bool LibCollection_LoadIntoActiveTree(std::filesystem::path& folderPath);
+		void ActiveLibCollection_SaveToFile();
+		void ActiveLibCollection_Unload();
+		
+		void LibCollections_SaveToFile();
+		void LibCollections_LoadFromFile();
+
+	private:
+
+		// Lib Collection
+		std::vector<LibCollection> m_libCollectionsList;
+		int m_libCollection_currentSlected_id = -1; // if -1 it means none is selected
+
 		FolderTree* m_folderTree = nullptr;
 		core::FileDirectories* m_fileDirectories = nullptr;
 		FolderNode* m_selectedFolderNode = nullptr;

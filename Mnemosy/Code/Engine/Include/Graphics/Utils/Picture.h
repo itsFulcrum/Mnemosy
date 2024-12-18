@@ -5,8 +5,6 @@
 
 #include <string>
 
-
-// In development
 /*
 	
 	Wrapper for loading images using different image libraries under a common interface

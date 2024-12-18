@@ -6,7 +6,7 @@
 
 namespace flcrm{
 
-	void Arena::arena_init_allocate_buffer(size_t bufferSize){
+	void Arena::arena_init_allocate_buffer(size_t bufferSize) {
 
 		if(m_arena_buffer){
 			free(m_arena_buffer);
@@ -20,9 +20,13 @@ namespace flcrm{
 
 	}
 
+	void* Arena::arena_allocate(size_t size, size_t align) {
+		
+		if (m_arena_buffer == nullptr) {
+			printf("WARNING! ========  Arena Allocator - no buffer allocated yet.\n");
+			assert(false);
+		}
 
-	void* Arena::arena_allocate(size_t size, size_t align = FLCRM_ARENA_DEFAULT_ALIGNMENT)
-	{
 
 		uintptr_t curr_ptr = (uintptr_t)m_arena_buffer + (uintptr_t)m_arrena_current_offset;
 
@@ -43,7 +47,7 @@ namespace flcrm{
 		return (void*)aligned_ptr;
 	}
 
-	void Arena::arena_reset_buffer(){
+	void Arena::arena_memset_zero() {
 
 		if(m_arena_buffer){
 			memset(m_arena_buffer,0,m_arena_buffer_size);
@@ -51,17 +55,17 @@ namespace flcrm{
 		}
 	}
 
-
-	void Arena::arena_free_all(){
+	void Arena::arena_free_all() {
 		
 		if(m_arena_buffer){
 			free(m_arena_buffer);
+			m_arena_buffer = nullptr;
 		}
 		m_arena_buffer_size = 0;
 		m_arrena_current_offset = 0;
 	}
 
-	bool Arena::has_enough_memory(size_t size){
+	bool Arena::arena_has_enough_memory(size_t size) {
 
 		if(m_arrena_current_offset + size > m_arena_buffer_size){
 			return false;
@@ -70,18 +74,17 @@ namespace flcrm{
 		return true;
 	}
 
-	size_t Arena::bytes_left()
-	{
+	size_t Arena::arena_get_bytes_left() {
 		return m_arena_buffer_size - m_arrena_current_offset;
 	}
 
 // private
 
-	bool Arena::is_alignment_power_of_two(uintptr_t x){
+	bool Arena::is_alignment_power_of_two(uintptr_t x) {
 		return (x & (x-1)) == 0;
 	}
 
-	uintptr_t Arena::align_forward(uintptr_t ptr, size_t align){
+	uintptr_t Arena::align_forward(uintptr_t ptr, size_t align) {
 
 		uintptr_t p, a, modolo;
 
@@ -90,7 +93,7 @@ namespace flcrm{
 		p = ptr;
 		a = (uintptr_t) align;
 
-		// same as p% a but faster as 'a' is a power of 2
+		// same as p % a ,but faster as 'a' is a power of 2
 		modolo = p & (a-1);
 
 		if(modolo != 0){

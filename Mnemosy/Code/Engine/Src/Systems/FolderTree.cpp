@@ -7,12 +7,11 @@
 
 namespace mnemosy::systems {
 
-	void FolderTree::Init(std::string rootName) {
+	void FolderTree::Init() {
 		m_runtimeIDCounter = 1;
 		m_runtimeMaterialIDCounter = 1;
-		m_rootNodeName = std::string(rootName);
-
-		m_rootNode = CreateNewFolder_Internal(nullptr, m_rootNodeName);
+		
+		m_rootNode = CreateNewFolder_Internal(nullptr, "Root");
 
 	}
 
@@ -32,7 +31,7 @@ namespace mnemosy::systems {
 	void FolderTree::RenameFolder(FolderNode* node, const std::string& newName) {
 
 		node->name = MakeNameUnique(newName);
-		RecursivUpdatePathFromRoot(node);
+		//RecursivUpdatePathFromRoot(node);
 	}
 
 	bool FolderTree::CollectMaterialsFromSearchKeyword(const std::string& searchKeyword) {
@@ -110,7 +109,7 @@ namespace mnemosy::systems {
 		targetParentNode->subEntries.push_back(libEntry);
 		libEntry->parent = targetParentNode;
 
-		for (size_t i = 0; i < sourceNode->subEntries.size(); i++) {
+		for (unsigned int i = 0; i < sourceNode->subEntries.size(); i++) {
 
 			if (sourceNode->subEntries[i]->runtime_ID == libEntry->runtime_ID) {
 
@@ -180,14 +179,14 @@ namespace mnemosy::systems {
 		// add as child of new parent
 		targetParentNode->subNodes.push_back(sourceNode);
 
-		RecursivUpdatePathFromRoot(sourceNode);
+		//RecursivUpdatePathFromRoot(sourceNode);
 	}
 
 	void FolderTree::Clear(){
 		// clears the entire tree but not the root node
 
 		if (!m_rootNode->IsLeafNode()) {
-			for (size_t i = 0; i < m_rootNode->subNodes.size(); i++) {
+			for (unsigned int i = 0; i < m_rootNode->subNodes.size(); i++) {
 
 				RecursivDeleteHierarchy(m_rootNode->subNodes[i]);
 			}
@@ -196,7 +195,7 @@ namespace mnemosy::systems {
 
 		if (m_rootNode->HasMaterials()) {
 
-			for (int i = 0; i < m_rootNode->subEntries.size(); i++) {
+			for (unsigned int i = 0; i < m_rootNode->subEntries.size(); i++) {
 
 				delete m_rootNode->subEntries[i];
 			}
@@ -228,7 +227,7 @@ namespace mnemosy::systems {
 
 		//bool rootIsLeaf = rootJson["3_UserDirectories"][m_rootNodeName]["2_isLeaf"].get<bool>();
 
-		nlohmann::json firstTreeEntryJson = rootJson["3_UserDirectories"][m_rootNodeName];
+		nlohmann::json firstTreeEntryJson = rootJson["3_UserDirectories"]["Root"];
 
 		RecursivLoadFromJson(m_rootNode, firstTreeEntryJson);
 	}
@@ -248,7 +247,7 @@ namespace mnemosy::systems {
 		nlohmann::json rootFolderJson = RecursivWriteToJson(m_rootNode);
 
 		nlohmann::json userDirectoriesJson;
-		userDirectoriesJson[m_rootNodeName] = rootFolderJson;
+		userDirectoriesJson["Root"] = rootFolderJson;
 		LibraryDirectoriesJson[jsonLibKey_FolderTree] = userDirectoriesJson;
 
 		return new nlohmann::json(LibraryDirectoriesJson);
@@ -302,12 +301,12 @@ namespace mnemosy::systems {
 
 			parentNode->subNodes.push_back(node);
 
-			if (parentNode->IsRoot()) {
+			/*if (parentNode->IsRoot()) {
 				node->pathFromRoot = std::filesystem::path(node->name);
 			}
 			else {
 				node->pathFromRoot = parentNode->pathFromRoot / std::filesystem::path(node->name);
-			}
+			}*/
 		}
 
 		return node;
@@ -334,6 +333,7 @@ namespace mnemosy::systems {
 		node = nullptr;
 	}
 
+	/*
 	void FolderTree::RecursivUpdatePathFromRoot(FolderNode* node) {
 
 		if (node->parent->IsRoot()) {
@@ -349,6 +349,7 @@ namespace mnemosy::systems {
 			}
 		}
 	}
+	*/
 
 	bool FolderTree::RecursivDoesNameExist(FolderNode* node, const std::string& name) {
 
@@ -435,18 +436,30 @@ namespace mnemosy::systems {
 		bool isLeafNode = node->IsLeafNode();
 		nodeJson[jsonLibKey_isLeaf] = isLeafNode;
 
-		std::string pathFromRoot = "";
-		if (node->parent != nullptr) { // if not root node
 
-			if (node->parent->IsRoot()) {
+		std::filesystem::path pathRoot = node->GetPathFromRoot();
 
-				pathFromRoot = node->name;
-			}
-			else {
-				std::filesystem::path fs_path = node->parent->pathFromRoot / std::filesystem::path(node->name);
-				pathFromRoot = fs_path.generic_string();
-			}
+		std::string pathFromRoot;
+
+		if (pathRoot.empty()) {
+			pathFromRoot = "";
 		}
+		else {
+
+			pathFromRoot = pathRoot.generic_string();
+		}
+
+		//if (node->parent != nullptr) { // if not root node
+
+		//	if (node->parent->IsRoot()) {
+
+		//		pathFromRoot = node->name;
+		//	}
+		//	else {
+		//		std::filesystem::path fs_path = node->parent->pathFromRoot / std::filesystem::path(node->name);
+		//		pathFromRoot = fs_path.generic_string();
+		//	}
+		//}
 
 		nodeJson[jsonLibKey_pathFromRoot] = pathFromRoot;
 
@@ -458,7 +471,7 @@ namespace mnemosy::systems {
 			std::vector<std::string> entryNames;
 			std::vector<int> entryTypes;
 
-			for (size_t i = 0; i < node->subEntries.size(); i++) {
+			for (unsigned int i = 0; i < node->subEntries.size(); i++) {
 				entryNames.push_back(node->subEntries[i]->name);
 				entryTypes.push_back((int)node->subEntries[i]->type);
 			}
@@ -472,14 +485,14 @@ namespace mnemosy::systems {
 		if (!isLeafNode) {
 			std::vector<std::string> subNodeNames;
 
-			for (size_t i = 0; i < node->subNodes.size(); i++) {
+			for (unsigned int i = 0; i < node->subNodes.size(); i++) {
 
 				subNodeNames.push_back(node->subNodes[i]->name);
 			}
 			nodeJson[jsonLibKey_subFolderNames] = subNodeNames;
 
 			nlohmann::json subNodes;
-			for (size_t i = 0; i < node->subNodes.size(); i++) {
+			for (unsigned int i = 0; i < node->subNodes.size(); i++) {
 
 				subNodes[node->subNodes[i]->name] = RecursivWriteToJson(node->subNodes[i]);
 			}
@@ -509,7 +522,7 @@ namespace mnemosy::systems {
 			
 			MNEMOSY_ASSERT(subEntryTypes.size() == subMatNames.size(), "Something broke in the saved data file. Names and entryType lists must have equal size");
 
-			for (size_t i = 0; i < subMatNames.size(); i++) {
+			for (unsigned int i = 0; i < subMatNames.size(); i++) {
 
 				CreateMaterial_Internal(node, (systems::LibEntryType)subEntryTypes[i] , subMatNames[i]);
 			}
@@ -523,7 +536,7 @@ namespace mnemosy::systems {
 
 			mnemosy::core::StringUtils::SortVectorListAlphabetcially(subFolderNames);
 
-			for (size_t i = 0; i < subFolderNames.size(); i++) {
+			for (unsigned int i = 0; i < subFolderNames.size(); i++) {
 
 				FolderNode* subNode = CreateNewFolder_Internal(node, subFolderNames[i]);
 				nlohmann::json subJson = jsonNode[jsonLibKey_subFolders][subFolderNames[i]];

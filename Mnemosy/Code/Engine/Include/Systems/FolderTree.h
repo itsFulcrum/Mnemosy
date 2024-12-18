@@ -20,12 +20,13 @@ namespace mnemosy::systems {
 		~FolderTree() = default;
 
 
-		void Init(std::string rootName);
+		void Init();
 		void Shutdown();
+
 
 		FolderNode& GetRoot() { return *m_rootNode; }
 		FolderNode* GetRootPtr() { return m_rootNode; }
-		std::string& GetRootName() { return m_rootNodeName; }
+		//std::string& GetRootName() { return m_rootNodeName; }
 
 		FolderNode* CreateNewFolder(FolderNode* parentNode, const std::string& name);
 		void RenameFolder(FolderNode* node, const std::string& newName);
@@ -65,7 +66,7 @@ namespace mnemosy::systems {
 
 
 		void RecursivDeleteHierarchy(FolderNode* node);
-		void RecursivUpdatePathFromRoot(FolderNode* node);
+		//void RecursivUpdatePathFromRoot(FolderNode* node);
 
 		bool RecursivDoesNameExist(FolderNode* node, const std::string& name);
 
@@ -79,7 +80,7 @@ namespace mnemosy::systems {
 		unsigned int m_runtimeIDCounter;
 		unsigned int m_runtimeMaterialIDCounter;
 
-		std::string m_rootNodeName;
+		//std::string m_treeName;
 		FolderNode* m_rootNode = nullptr;
 
 		std::vector<LibEntry*> m_searchResults;

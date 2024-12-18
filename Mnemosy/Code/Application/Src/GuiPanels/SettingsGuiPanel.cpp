@@ -23,11 +23,10 @@
 
 #include "ImGui/imgui.h"
 
+#include "Include/Core/Utils/PlatfromUtils_Windows.h"
 
-#ifdef MNEMOSY_PLATFORM_WINDOWS
-	#include "Include/Core/Utils/PlatfromUtils_Windows.h"
-#endif // MNEMOSY_PLATFORM_WINDOWS
 
+#include <filesystem>
 #include <glm/glm.hpp>
 
 namespace mnemosy::gui
@@ -37,6 +36,8 @@ namespace mnemosy::gui
 		panelName = "Settings";
 		panelType = MNSY_GUI_PANEL_SETTINGS;
 	}
+
+
 
 	void SettingsGuiPanel::Draw()
 	{
@@ -50,182 +51,13 @@ namespace mnemosy::gui
 		ImGui::Begin(panelName, &showPanel);
 
 
-		// Library settings
-		{
-			ImGui::SeparatorText("Library Directory");
-			core::FileDirectories& fd = engine.GetFileDirectories();
-
-
-			std::string currentLibraryDirectory = fd.GetLibraryDirectoryPath().generic_string();
-			ImGui::Text("Path: %s", currentLibraryDirectory.c_str());
-
-			if (ImGui::Button("Select Folder...")) {
-
-				// check if the current library folder contains any data
-				if (fd.ContainsUserData()) {
-					// open popup modal..
-					m_openChangeDirectoryModal = true;
-				}
-				else { // user directory does not contain anything so we can savely set a new path
-#ifdef MNEMOSY_PLATFORM_WINDOWS
-					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
-					if (!directoryPath.empty()) {
-
-
-						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), false, false);
-						engine.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
-
-					}
-					else {
-						MNEMOSY_ERROR("You didnt select a valid folder path");
-					}
-#endif
-				}
-
-			}
-			//static bool popModal = false;
-
-
-			if (m_openChangeDirectoryModal) {
-
-				m_openChangeDirectoryModal = false; // to make sure its only called once
-				m_changeDirectoryModelState = true;
-				ImGui::OpenPopup("Change Library Directory");
-			}
-
-
-			if (ImGui::BeginPopupModal("Change Library Directory", &m_changeDirectoryModelState, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-				ImGui::Text("The current library directory has some files in it. \nDo you want to copy all contents over to the new directory? ");
-
-				ImGui::Spacing();
-
-				if (ImGui::Button("No Delete All!", ImVec2(200, 0))) {
-
-#ifdef MNEMOSY_PLATFORM_WINDOWS
-					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
-					if (!directoryPath.empty()) {
-						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), false, true);
-						// delete all material and directory data from material registry
-						systems::MaterialLibraryRegistry& registry = MnemosyEngine::GetInstance().GetMaterialLibraryRegistry();
-						registry.ClearUserMaterialsAndFolders();
-
-					}
-					else {
-						MNEMOSY_ERROR("You didnt select a valid folder path");
-					}
-#endif
-
-					m_changeDirectoryModelState = false;
-					ImGui::CloseCurrentPopup();
-				}
-				ImGui::SameLine();
-
-				if (ImGui::Button("Yes Copy!", ImVec2(200, 0))) {
-
-#ifdef MNEMOSY_PLATFORM_WINDOWS
-					std::string directoryPath = mnemosy::core::FileDialogs::SelectFolder("");
-					if (!directoryPath.empty()) {
-						fd.SetNewUserLibraryDirectory(std::filesystem::directory_entry(directoryPath), true, true);
-						engine.GetMaterialLibraryRegistry().SaveUserDirectoriesData();
-					}
-					else {
-						MNEMOSY_ERROR("You didnt select a valid folder path");
-					}
-#endif
-
-					m_changeDirectoryModelState = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-
-				ImGui::Spacing();
-
-				if (ImGui::Button("Cancel", ImVec2(150, 0))) {
-
-					m_changeDirectoryModelState = false;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-
-
-		}
-
-		ImGui::Spacing();
 		ImGui::Spacing();
 		ImGui::Spacing();
 
 
-		// --- Render Mesh settings
-		if (ImGui::TreeNode("Mesh Settings"))
-		{
-			graphics::RenderMesh& renderMesh = scene.GetMesh();
 
-			//ImGui::Text("Mesh Settings");
-			{
-				const char* previewMesh_List[8] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne","Fabric"}; // they need to be ordered the same as in lightType Enum in light class
-				int previewMesh_Current = (int)scene.GetCurrentPreviewMesh();
-				ImGui::Combo("Preview Mesh", &previewMesh_Current, previewMesh_List, IM_ARRAYSIZE(previewMesh_List));
-
-				if ((int)scene.GetCurrentPreviewMesh() != previewMesh_Current)
-				{
-					scene.SetPreviewMesh((graphics::PreviewMesh)previewMesh_Current);
-				}
-
-				if ((graphics::PreviewMesh)previewMesh_Current == graphics::PreviewMesh::Custom)
-				{
-					if (ImGui::Button("Load Mesh..."))
-					{
-
-#ifdef MNEMOSY_PLATFORM_WINDOWS
-						std::string filepath = mnemosy::core::FileDialogs::OpenFile("FBX (*.fbx)\0*.fbx\0 Obj (*.obj)\0*.obj\0");
-
-						if (!filepath.empty())
-						{
-							renderMesh.LoadMesh(filepath.c_str());
-						}
-#endif
-					}
-				}
-
-			}
-
-			float meshPos[3] = { 1.0f,1.0f,1.0f };
-			meshPos[0] = renderMesh.transform.GetPosition().x;
-			meshPos[1] = renderMesh.transform.GetPosition().y;
-			meshPos[2] = renderMesh.transform.GetPosition().z;
-			ImGui::DragFloat3("Mesh Position", (float*)meshPos, 0.1f, -100, 100, "%0.1f");
-			glm::vec3 newMeshPos = glm::vec3(meshPos[0], meshPos[1], meshPos[2]);
-			renderMesh.transform.SetPosition(newMeshPos);
-
-			float meshRot[3] = { 1.0f,1.0f,1.0f };
-			meshRot[0] = renderMesh.transform.GetRotationEulerAngles().x;
-			meshRot[1] = renderMesh.transform.GetRotationEulerAngles().y;
-			meshRot[2] = renderMesh.transform.GetRotationEulerAngles().z;
-			ImGui::DragFloat3("Mesh Rotation", (float*)meshRot, 0.1f, -360.0f, 360.0f, "%0.1f");
-			glm::vec3 newMeshRot = glm::vec3(meshRot[0], meshRot[1], meshRot[2]);
-			renderMesh.transform.SetRotationEulerAngles(newMeshRot);
-
-
-			float meshScale[3] = { 1.0f,1.0f,1.0f };
-			meshScale[0] = renderMesh.transform.GetScale().x;
-			meshScale[1] = renderMesh.transform.GetScale().y;
-			meshScale[2] = renderMesh.transform.GetScale().z;
-			ImGui::DragFloat3("Mesh Scale", (float*)meshScale, 0.01f, 0.000001f, 10.0f, "%0.4f");
-			glm::vec3 newMeshScale = glm::vec3(meshScale[0], meshScale[1], meshScale[2]);
-			renderMesh.transform.SetScale(newMeshScale);
-
-
-
-
-			ImGui::TreePop();
-		}
-
-		// --- Skybox Settings
-		if (ImGui::TreeNode("Background Settings"))
+		// --- Background Settings
+		if (ImGui::TreeNode("Background"))
 		{
 			graphics::Skybox& skybox = scene.GetSkybox();
 			mnemosy::systems::SkyboxAssetRegistry& skyReg = engine.GetSkyboxAssetRegistry();
@@ -301,26 +133,27 @@ namespace mnemosy::gui
 			skybox = scene.GetSkybox(); // we have to set this again because we may have changed it in the quick selection by removing an entry
 
 
-			ImGui::SliderFloat("Opacity", &scene.userSceneSettings.background_opacity, 0.0f, 1.0f, "%.4f");
+			ImGui::SliderFloat("Opacity", &scene.userSceneSettings.background_opacity, 0.0f, 1.0f, "%.2f");
 			
 			ImGui::ColorEdit3("Background Color", (float*)&scene.userSceneSettings.background_color_r); // hacky, may fail
-			ImGui::SliderFloat("Gradient", &scene.userSceneSettings.background_gradientOpacity, 0.0f, 1.0f, "%.4f");
-			ImGui::SliderFloat("Blur Radius", &scene.userSceneSettings.background_blurRadius, 0.0f, 2.0f, "%.5f");
+			ImGui::SliderFloat("Gradient", &scene.userSceneSettings.background_gradientOpacity, 0.0f, 1.0f, "%.2f");
+			ImGui::SliderFloat("Blur", &scene.userSceneSettings.background_blurRadius, 0.0f, 1.0f, "%.2f");
 			//ImGui::SliderInt("Blur Steps", &scene.userSceneSettings.background_blurSteps, 0, 50);
 			
 			//ImGui::SliderFloat("Background Rotation", &scene.userSceneSettings.background_rotation, 0.0f, 6.28f, "%.4f");
-			ImGui::Spacing();
-
-			ImGui::SliderFloat("Post Exposure", &scene.userSceneSettings.globalExposure, -8.0f, 8.0f, "%.4f");
+			
+			ImGui::DragFloat("Post Exposure", &scene.userSceneSettings.globalExposure, 0.005f, -8.0f, 8.0f, "%.3f");
 
 			// we shouldn't do this every frame
 			renderer.SetShaderSkyboxUniforms(scene.userSceneSettings,skybox);
 
 			ImGui::TreePop();
 		}
+		
+		ImGui::Separator();
 
 		// --- Light Settings
-		if (ImGui::TreeNode("Light Settings"))
+		if (ImGui::TreeNode("Light"))
 		{
 			graphics::Light& light = scene.GetLight();
 
@@ -340,7 +173,7 @@ namespace mnemosy::gui
 			pos[0] = light.transform.GetPosition().x;
 			pos[1] = light.transform.GetPosition().y;
 			pos[2] = light.transform.GetPosition().z;
-			ImGui::DragFloat3("Position", (float*)pos, 0.1f, -100, 100, "%0.1f");
+			ImGui::DragFloat3("Position", (float*)pos, 0.1f, -100, 100, "%0.2f");
 			glm::vec3 newPos = glm::vec3(pos[0], pos[1], pos[2]);
 			light.transform.SetPosition(newPos);
 
@@ -349,22 +182,23 @@ namespace mnemosy::gui
 			rot[0] = light.transform.GetRotationEulerAngles().x;
 			rot[1] = light.transform.GetRotationEulerAngles().y;
 			rot[2] = light.transform.GetRotationEulerAngles().z;
-			ImGui::DragFloat3("Rotation", (float*)rot, 0.1f, -360.0f, 360.0f, "%0.1f");
+			ImGui::DragFloat3("Rotation", (float*)rot, 0.1f, -360.0f, 360.0f, "%0.2f");
 			glm::vec3 newRot = glm::vec3(rot[0], rot[1], rot[2]);
 			light.transform.SetRotationEulerAngles(newRot);
 
-			ImGui::DragFloat("Strength",&light.strength,1.0f,0.0f,1000.0f,"%.1f");
-			ImGui::SliderFloat("Falloff",&light.falloff,0.01f,5.0f,"%.1f");
 			ImGui::ColorEdit3("Color", (float*)&light.color);
+			ImGui::DragFloat("Strength",&light.strength,0.02f,0.0f,1000.0f,"%.3f");
+			ImGui::DragFloat("Falloff",&light.falloff,0.002f,0.05f,5.0f,"%.3f");
 
 			renderer.SetPbrShaderLightUniforms(light);
 
 			ImGui::TreePop();
 		}
 
+		ImGui::Separator();
 
 		// --- Render Settings
-		if (ImGui::TreeNode("Render Settings"))
+		if (ImGui::TreeNode("Render"))
 		{
 			ImGui::Spacing();
 
@@ -414,6 +248,70 @@ namespace mnemosy::gui
 
 
 			}
+
+			ImGui::TreePop();
+		}
+		
+		ImGui::Separator();
+		
+		// --- Render Mesh settings
+		if (ImGui::TreeNode("Mesh"))
+		{
+			graphics::RenderMesh& renderMesh = scene.GetMesh();
+
+			// Mesh Selection
+			{
+				const char* previewMesh_List[8] = { "Custom","Default","Cube","Plane","Sphere","Cylinder","Suzanne","Fabric"}; // they need to be ordered the same as in lightType Enum in light class
+				int previewMesh_Current = (int)scene.GetCurrentPreviewMesh();
+				ImGui::Combo("Preview Mesh", &previewMesh_Current, previewMesh_List, IM_ARRAYSIZE(previewMesh_List));
+
+				if ((int)scene.GetCurrentPreviewMesh() != previewMesh_Current)
+				{
+					scene.SetPreviewMesh((graphics::PreviewMesh)previewMesh_Current);
+				}
+
+				if ((graphics::PreviewMesh)previewMesh_Current == graphics::PreviewMesh::Custom)
+				{
+					if (ImGui::Button("Load Mesh..."))
+					{
+						std::filesystem::path filepath = mnemosy::core::FileDialogs::OpenFile("FBX (*.fbx)\0*.fbx\0 Obj (*.obj)\0*.obj\0");
+
+						if (!filepath.empty())
+						{
+							renderMesh.LoadMesh(filepath.generic_string().c_str());
+						}
+					}
+				}
+
+			}
+
+			float meshPos[3] = { 1.0f,1.0f,1.0f };
+			meshPos[0] = renderMesh.transform.GetPosition().x;
+			meshPos[1] = renderMesh.transform.GetPosition().y;
+			meshPos[2] = renderMesh.transform.GetPosition().z;
+			ImGui::DragFloat3("Position##Mesh", (float*)meshPos, 0.1f, -100, 100, "%0.2f");
+			glm::vec3 newMeshPos = glm::vec3(meshPos[0], meshPos[1], meshPos[2]);
+			renderMesh.transform.SetPosition(newMeshPos);
+
+			float meshRot[3] = { 1.0f,1.0f,1.0f };
+			meshRot[0] = renderMesh.transform.GetRotationEulerAngles().x;
+			meshRot[1] = renderMesh.transform.GetRotationEulerAngles().y;
+			meshRot[2] = renderMesh.transform.GetRotationEulerAngles().z;
+			ImGui::DragFloat3("Rotation ##Mesh", (float*)meshRot, 0.1f, -360.0f, 360.0f, "%0.2f");
+			glm::vec3 newMeshRot = glm::vec3(meshRot[0], meshRot[1], meshRot[2]);
+			renderMesh.transform.SetRotationEulerAngles(newMeshRot);
+
+
+			float meshScale[3] = { 1.0f,1.0f,1.0f };
+			meshScale[0] = renderMesh.transform.GetScale().x;
+			meshScale[1] = renderMesh.transform.GetScale().y;
+			meshScale[2] = renderMesh.transform.GetScale().z;
+			ImGui::DragFloat3("Scale ##Scale", (float*)meshScale, 0.01f, 0.000001f, 10.0f, "%0.2f");
+			glm::vec3 newMeshScale = glm::vec3(meshScale[0], meshScale[1], meshScale[2]);
+			renderMesh.transform.SetScale(newMeshScale);
+
+
+
 
 			ImGui::TreePop();
 		}

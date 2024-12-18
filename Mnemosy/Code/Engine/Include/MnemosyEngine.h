@@ -40,7 +40,7 @@ namespace mnemosy::gui
 }
 
 #define arena_malloc(type)	MnemosyEngine::GetInstance().arena_persistent_malloc(sizeof(type),alignof(type))
-#define arena_placement_new(type)		new (MnemosyEngine::GetInstance().arena_persistent_malloc(sizeof(type),alignof(type))) type 
+#define arena_placement_new(type) new (MnemosyEngine::GetInstance().arena_persistent_malloc(sizeof(type),alignof(type))) type 
 
 namespace mnemosy 
 {
@@ -70,7 +70,7 @@ namespace mnemosy
 		systems::InputSystem& GetInputSystem()								{ return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry()				{ return *m_pSkyboxAssetRegistry; }
 		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry()		{ return *m_pMaterialLibraryRegistry; }
-		systems::ThumbnailManager& GetThumbnailManager()					{ return *m_pThumbnailManger; }
+		systems::ThumbnailManager& GetThumbnailManager()					{ return *m_pThumbnailManager; }
 		systems::TextureGenerationManager& GetTextureGenerationManager()	{ return *m_pTextureGenerationManager; }
 		systems::ExportManager& GetExportManager()							{ return *m_pExportManager; }
 		systems::MeshRegistry& GetMeshRegistry()							{ return *m_pMeshRegistry; }
@@ -85,6 +85,8 @@ namespace mnemosy
 		void* arena_persistent_malloc(size_t size, size_t align);
 
 	private:
+
+		flcrm::Arena m_arena_persistent;
 
 		bool m_isInitialized = false;
 		
@@ -105,7 +107,7 @@ namespace mnemosy
 		systems::MaterialLibraryRegistry* m_pMaterialLibraryRegistry;
 		systems::MeshRegistry* m_pMeshRegistry;
 
-		systems::ThumbnailManager* m_pThumbnailManger;
+		systems::ThumbnailManager* m_pThumbnailManager;
 		systems::TextureGenerationManager* m_pTextureGenerationManager;
 		systems::ExportManager* m_pExportManager;
 		
@@ -118,7 +120,6 @@ namespace mnemosy
 
 		gui::UserInterface* m_pUserInterface;
 	
-		flcrm::Arena m_arena_persistent;
 	};
 
 

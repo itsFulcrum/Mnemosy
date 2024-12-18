@@ -59,6 +59,9 @@ namespace mnemosy::gui
 		void HandleDeleteHierarchyModal();
 
 
+		void DrawLibrarySelection();
+
+
 	private:
 		systems::FolderNode* m_nodeDeleteHierarchy = nullptr;
 
@@ -66,17 +69,20 @@ namespace mnemosy::gui
 		ImGuiTreeNodeFlags m_materialTreeFlags;
 
 		systems::MaterialLibraryRegistry& m_materialRegistry;
-		systems::FolderNode* rootNode = nullptr; // pointer lifetime is handled by the engine
+
+
+		//systems::FolderNode* rootNode = nullptr; // pointer lifetime is handled by the engine
 
 
 		//systems::FolderNode* m_selectedNode = nullptr;
-		const char* m_rightClickFolderOptions[7] = {"Add Subfolder", "Add Pbr Material", "Add Texture", "Add Skybox" , "Delete", "Delete Hierarchy", "Open in FileExplorer"};
-		const char* m_rightClickMaterialOptions[2] = { "Delete Selection", "Open in FileExplorer" };
+		const char* m_rightClickFolderOptions[7] = {"Add Subfolder", "Add PBR Material", "Add Unlit Texture", "Add Skybox" , "Delete", "Delete Hierarchy", "Open Folder"};
+		const char* m_rightClickMaterialOptions[2] = { "Delete Selection", "Open Folder" };
 		
 		ImGuiInputTextFlags m_textInputFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;
 		std::string m_renameMaterialText = "";
 		std::string m_renameFolderText = "";
 		std::string m_searchInput = "";
+		std::string m_renameLibCollectionText = "";
 
 		unsigned int m_folderIdToOpenNextFrame = 0;
 		bool m_setFolderOpenNextFrame = false;
