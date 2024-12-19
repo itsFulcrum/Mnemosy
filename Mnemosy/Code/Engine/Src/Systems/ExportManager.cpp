@@ -470,8 +470,17 @@ namespace mnemosy::systems
 			glHalfFloatType = GL_HALF_FLOAT;
 		}
 
-		//// ensure 4 byte alignment
-		glPixelStorei(GL_PACK_ALIGNMENT, 4);
+
+		uint32_t rowSize = width * bytesPerPixel;
+
+		// ensure byte alignment
+		unsigned int packAlignment = 4;
+
+		if (rowSize % 4 != 0) {
+			packAlignment = 1;
+		}
+
+		glPixelStorei(GL_PACK_ALIGNMENT, packAlignment);
 
 		switch (format) {
 		// 8 bits per pixel

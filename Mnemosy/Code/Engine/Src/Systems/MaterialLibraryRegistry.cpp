@@ -40,8 +40,8 @@ namespace mnemosy::systems {
 		namespace fs = std::filesystem;
 
 
-		MNEMOSY_WARN("Sizeof LibEntry:		{}", sizeof(LibEntry));
-		MNEMOSY_WARN("Sizeof FolderNode:	 {}", sizeof(FolderNode));
+		//MNEMOSY_WARN("Sizeof LibEntry:		{}", sizeof(LibEntry));
+		//MNEMOSY_WARN("Sizeof FolderNode:	 {}", sizeof(FolderNode));
 
 
 
