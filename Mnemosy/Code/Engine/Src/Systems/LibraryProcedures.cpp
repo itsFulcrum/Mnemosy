@@ -3,6 +3,7 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+#include "Include/Core/Utils/StringUtils.h"
 
 #include "Include/Graphics/Utils/Picture.h"
 #include "Include/Graphics/Utils/KtxImage.h"
@@ -50,6 +51,7 @@ bool LibProcedures::CheckDataFile(const std::filesystem::path& dataFilePath)
 
 void LibProcedures::LibCollection_CreateNewJsonDataFile(const std::filesystem::path dataFilePath)
 {
+
 	nlohmann::json TopLevelJson; // top level json object
 	TopLevelJson[jsonLibKey_MnemosyDataFile] = "UserLibraryDirectoriesData";
 
@@ -93,7 +95,7 @@ std::filesystem::path LibProcedures::LibEntry_GetFolderPath(systems::LibEntry* l
 
 std::filesystem::path LibProcedures::LibEntry_GetDataFilePath(systems::LibEntry* libEntry) {
 
-	return LibProcedures::LibEntry_GetFolderPath(libEntry) / std::filesystem::path(libEntry->name + ".mnsydata");
+	return LibProcedures::LibEntry_GetFolderPath(libEntry) / std::filesystem::u8path(libEntry->name + ".mnsydata");
 }
 
 void LibProcedures::LibEntry_PbrMaterial_CreateNewDataFile( systems::LibEntry* libEntry, bool prettyPrint)
@@ -334,7 +336,7 @@ void LibProcedures::LibEntry_UnlitMaterial_SaveToFile(systems::LibEntry* libEntr
 	if (unlitMat->TextureIsAssigned()) {
 
 		std::string textureFilename = libEntry->name + texture_unlit_fileSuffix;
-		fs::path texPath = LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::path(textureFilename);
+		fs::path texPath = LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::u8path(textureFilename);
 
 		if (fs::exists(texPath)) {
 
@@ -394,7 +396,7 @@ void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEn
 	file.WriteFloat(success, jsonKey_skybox_sunStrength, skybox->sunStrength);*/
 
 
-	if (skybox->IsColorCubeAssigned()) {
+	if (skybox->HasCubemaps()) {
 	// we will just assume at this point that irradiance and prefilter are also assigned
 
 		// check if the img really exists
@@ -422,8 +424,6 @@ void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEn
 	file.FileClose(success, dataFilePath);
 }
 
-
-
 void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::filesystem::path& entryFolderOldNamePath, std::string& oldName, bool prettyPrint) {
 
 	// libEntry->name is already reanme to the new name but the folder has not been renamed yet
@@ -435,8 +435,8 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 	fs::path entryFolder = entryFolderOldNamePath;
 	// change name of data file.
 	{
-		fs::path newDataFilePath = entryFolder / fs::path(finalName + ".mnsydata");
-		fs::path oldDataFilePath = entryFolder / fs::path(oldName + ".mnsydata");
+		fs::path newDataFilePath = entryFolder / fs::u8path(finalName + ".mnsydata");
+		fs::path oldDataFilePath = entryFolder / fs::u8path(oldName + ".mnsydata");
 
 		bool success = false;
 		flcrm::JsonSettings matFile;
@@ -464,13 +464,13 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 				std::string pathJsonKey = graphics::TexUtil::get_JsonMatKey_path_from_PBRTextureType((graphics::PBRTextureType)i);
 
 				std::string oldFileName = matFile.ReadString(success, pathJsonKey, jsonKey_pathNotAssigned, false);
-				fs::path oldTextureFile = entryFolder / fs::path(oldFileName);
+				fs::path oldTextureFile = entryFolder / fs::u8path(oldFileName);
 
 				if (fs::exists(oldTextureFile)) { // check if the texture exists
 
 
 					std::string newFileName = graphics::TexUtil::get_filename_from_PBRTextureType(finalName, (graphics::PBRTextureType)i);
-					fs::path newTextureFile = entryFolder / fs::path(newFileName);
+					fs::path newTextureFile = entryFolder / fs::u8path(newFileName);
 
 					try {
 						fs::rename(oldTextureFile, newTextureFile);
@@ -510,8 +510,8 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 					std::string oldFileName = oldName + suffixes[i] + texture_fileExtentionTiff;
 					std::string newFileName = finalName + suffixes[i] + texture_fileExtentionTiff;
 
-					fs::path oldFilePath = entryFolder / fs::path(oldFileName);
-					fs::path newFilePath = entryFolder / fs::path(newFileName);
+					fs::path oldFilePath = entryFolder / fs::u8path(oldFileName);
+					fs::path newFilePath = entryFolder / fs::u8path(newFileName);
 
 					try {
 						fs::rename(oldFilePath, newFilePath);
@@ -526,8 +526,8 @@ void LibProcedures::LibEntry_PbrMaterial_RenameFiles(LibEntry* libEntry, std::fi
 		// change name of thumbnail file
 		std::string oldFileName = matFile.ReadString(success, jsonMatKey_thumbnailPath, jsonKey_pathNotAssigned, false);
 		std::string newFileName = finalName + texture_fileSuffix_thumbnail;
-		fs::path oldTextureFile = entryFolder / fs::path(oldFileName);
-		fs::path newTextureFile = entryFolder / fs::path(newFileName);
+		fs::path oldTextureFile = entryFolder / fs::u8path(oldFileName);
+		fs::path newTextureFile = entryFolder / fs::u8path(newFileName);
 
 		if (fs::exists(oldTextureFile)) {
 			try { 
@@ -564,8 +564,8 @@ void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::
 	fs::path entryFolder = entryFolderOldNamePath;
 
 
-	fs::path newDataFilePath = entryFolder / fs::path(newName + ".mnsydata");
-	fs::path oldDataFilePath = entryFolder / fs::path(oldName + ".mnsydata");
+	fs::path newDataFilePath = entryFolder / fs::u8path(newName + ".mnsydata");
+	fs::path oldDataFilePath = entryFolder / fs::u8path(oldName + ".mnsydata");
 
 	bool success = false;
 	flcrm::JsonSettings dataFile;
@@ -584,11 +584,11 @@ void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::
 
 	if (textureAssigend) {
 
-		fs::path oldTextureFile = entryFolder / fs::path(oldName + texture_unlit_fileSuffix);
+		fs::path oldTextureFile = entryFolder / fs::u8path(oldName + texture_unlit_fileSuffix);
 
 		if (fs::exists(oldTextureFile)) { // check that the file exists
 
-			fs::path newTextureFile = entryFolder / fs::path(newName + texture_unlit_fileSuffix);
+			fs::path newTextureFile = entryFolder / fs::u8path(newName + texture_unlit_fileSuffix);
 
 			try {
 				fs::rename(oldTextureFile, newTextureFile);
@@ -608,11 +608,11 @@ void LibProcedures::LibEntry_UnlitMaterial_RenameFiles(LibEntry* libEntry, std::
 
 	// change name of thumbnail file
 	{
-		fs::path oldTextureFile = entryFolder / fs::path(oldName + texture_fileSuffix_thumbnail);
+		fs::path oldTextureFile = entryFolder / fs::u8path(oldName + texture_fileSuffix_thumbnail);
 		
 		if (fs::exists(oldTextureFile)) {
 
-			fs::path newTextureFile = entryFolder / fs::path(newName + texture_fileSuffix_thumbnail);
+			fs::path newTextureFile = entryFolder / fs::u8path(newName + texture_fileSuffix_thumbnail);
 
 
 			try { 
@@ -650,8 +650,8 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 	fs::path entryFolder = entryFolderOldNamePath;
 
 
-	fs::path newDataFilePath = entryFolder / fs::path(newName + ".mnsydata");
-	fs::path oldDataFilePath = entryFolder / fs::path(oldName + ".mnsydata");
+	fs::path newDataFilePath = entryFolder / fs::u8path(newName + ".mnsydata");
+	fs::path oldDataFilePath = entryFolder / fs::u8path(oldName + ".mnsydata");
 
 	bool success = false;
 	flcrm::JsonSettings dataFile;
@@ -669,12 +669,12 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 
 	if (textureAssigend) {
 
-		fs::path oldTextureFile = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_equirectangular);
+		fs::path oldTextureFile = entryFolder / fs::u8path(oldName + texture_skybox_fileSuffix_equirectangular);
 
 		// rename hdr equirectangular img
 		if (fs::exists(oldTextureFile)) { // check that the file exists
 
-			fs::path newTextureFile = entryFolder / fs::path(newName + texture_skybox_fileSuffix_equirectangular);
+			fs::path newTextureFile = entryFolder / fs::u8path(newName + texture_skybox_fileSuffix_equirectangular);
 
 			try {
 				fs::rename(oldTextureFile, newTextureFile);
@@ -689,29 +689,29 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 		}
 
 
-			// rename cubeColor file
-		{
-			fs::path cubeColorFile_old = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_cubeColor);
+		//	// rename cubeColor file
+		//{
+		//	fs::path cubeColorFile_old = entryFolder / fs::u8path(oldName + texture_skybox_fileSuffix_cubeColor);
 
-			if (fs::exists(cubeColorFile_old)) {
+		//	if (fs::exists(cubeColorFile_old)) {
 
-				fs::path cubeColorFile_new = entryFolder / fs::path(newName + texture_skybox_fileSuffix_cubeColor);
-				try {
-					fs::rename(cubeColorFile_old, cubeColorFile_new);
-				}
-				catch (fs::filesystem_error e) {
-					MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
-				}
-			}
-		}
+		//		fs::path cubeColorFile_new = entryFolder / fs::u8path(newName + texture_skybox_fileSuffix_cubeColor);
+		//		try {
+		//			fs::rename(cubeColorFile_old, cubeColorFile_new);
+		//		}
+		//		catch (fs::filesystem_error e) {
+		//			MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
+		//		}
+		//	}
+		//}
 
 		// rename cubePrefilter file
 		{
-			fs::path cubePrefilterFile_old = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_cubePrefilter);
+			fs::path cubePrefilterFile_old = entryFolder / fs::u8path(oldName + texture_skybox_fileSuffix_cubePrefilter);
 
 			if (fs::exists(cubePrefilterFile_old)) {
 
-				fs::path cubePrefilterFile_new = entryFolder / fs::path(newName + texture_skybox_fileSuffix_cubePrefilter);
+				fs::path cubePrefilterFile_new = entryFolder / fs::u8path(newName + texture_skybox_fileSuffix_cubePrefilter);
 				try {
 					fs::rename(cubePrefilterFile_old, cubePrefilterFile_new);
 				}
@@ -723,11 +723,11 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 
 		// rename cubeIrradiance file
 		{
-			fs::path cubeIrradianceFile_old = entryFolder / fs::path(oldName + texture_skybox_fileSuffix_cubeIrradiance);
+			fs::path cubeIrradianceFile_old = entryFolder / fs::u8path(oldName + texture_skybox_fileSuffix_cubeIrradiance);
 
 			if (fs::exists(cubeIrradianceFile_old)) {
 
-				fs::path cubeIrradianceFile_new = entryFolder / fs::path(newName + texture_skybox_fileSuffix_cubeIrradiance);
+				fs::path cubeIrradianceFile_new = entryFolder / fs::u8path(newName + texture_skybox_fileSuffix_cubeIrradiance);
 				try {
 					fs::rename(cubeIrradianceFile_old, cubeIrradianceFile_new);
 				}
@@ -745,11 +745,11 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 
 	// change name of thumbnail file
 	{
-		fs::path oldThumbFile = entryFolder / fs::path(oldName + texture_fileSuffix_thumbnail);
+		fs::path oldThumbFile = entryFolder / fs::u8path(oldName + texture_fileSuffix_thumbnail);
 
 		if (fs::exists(oldThumbFile)) {
 
-			fs::path newThumbFile = entryFolder / fs::path(newName + texture_fileSuffix_thumbnail);
+			fs::path newThumbFile = entryFolder / fs::u8path(newName + texture_fileSuffix_thumbnail);
 
 
 			try {
@@ -1196,7 +1196,7 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 		graphics::PictureInfo picInfo;
 		graphics::PictureError picError;
 
-		fs::path texturePath = LibEntry_GetFolderPath(libEntry) / fs::path(textureFilename);
+		fs::path texturePath = LibEntry_GetFolderPath(libEntry) / fs::u8path(textureFilename);
 
 
 		if (fs::exists(texturePath)) {
@@ -1234,7 +1234,7 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 	return unlitMat;
 }
 
-// TODO: handle case if main equirectangular .hdr file is missing but for some reason colorCubemap is still present. In theorey it is possible to reconstruct hdr again.
+// TODO: handle case if main equirectangular .hdr file is missing but for some reason colorCubemap is still present. In theory it is possible to reconstruct hdr again.
 graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::filesystem::path& folderPath, std::string& name, bool prettyPrint)
 {
 	namespace fs = std::filesystem;
@@ -1281,7 +1281,7 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 		fs::path entryFolder = folderPath;// systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
 
 		fs::path equirectangularPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_equirectangular);
-		fs::path cubeColorPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeColor);
+		//fs::path cubeColorPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeColor);
 		fs::path cubeIrradiancePath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeIrradiance);
 		fs::path cubePrefilterPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubePrefilter);
 
@@ -1295,14 +1295,14 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 
 			// for now as we dont yet have a way to reconstruct equirectangular from cubemap just delete the other files if they exist
 
-			if (fs::exists(cubeColorPath)) {
+			/*if (fs::exists(cubeColorPath)) {
 				try {
 					fs::remove(cubeColorPath);
 				}
 				catch (fs::filesystem_error err) {
 					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
 				}
-			}
+			}*/
 
 			if (fs::exists(cubeIrradiancePath)) {		
 				try {
@@ -1341,12 +1341,12 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 			// check if ktx file exists if not generate it from equirectangular
 
 
-			bool cubeColorMissing = false;
+			//bool cubeColorMissing = false;
 			bool cubeIrradianceMissing = false;
 			bool cubePrefilterMissing = false;
 
 
-			if (fs::exists(cubeColorPath)) {
+		/*	if (fs::exists(cubeColorPath)) {
 
 				graphics::Cubemap* cube = new graphics::Cubemap();
 				cube->GenerateOpenGlCubemap_FromKtx2File(cubeColorPath,false);
@@ -1354,7 +1354,7 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 			}
 			else {
 				cubeColorMissing = true;
-			}
+			}*/
 
 			if (fs::exists(cubeIrradiancePath)) {
 
@@ -1379,7 +1379,7 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 
 			// handle case if one or more ktx files are missing
 			// we handle this bundled here because its likely that if one is missing others are too and we dont  want to load new equirectangular texture every time again
-			if (cubeColorMissing || cubeIrradianceMissing || cubePrefilterMissing) {
+			if ( cubeIrradianceMissing || cubePrefilterMissing) {
 
 				graphics::Texture* equirectangular = new graphics::Texture();
 
@@ -1398,17 +1398,17 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 					if (picInfo.pixels)
 						free(picInfo.pixels);
 
-					// if anyone of these is missing generate it new and save it
-					if (cubeColorMissing) {
+					//// if anyone of these is missing generate it new and save it
+					//if (cubeColorMissing) {
 
-						graphics::Cubemap* cube = new graphics::Cubemap();
-						cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangular,graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,false,0);
+					//	graphics::Cubemap* cube = new graphics::Cubemap();
+					//	cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangular,graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,false,0);
 
-						graphics::KtxImage ktx;
-						ktx.SaveCubemap(cubeColorPath.generic_string().c_str(), cube->GetGlID(), equirectangular->GetTextureFormat(), cube->GetResolution(),false);
+					//	graphics::KtxImage ktx;
+					//	ktx.SaveCubemap(cubeColorPath.generic_string().c_str(), cube->GetGlID(), equirectangular->GetTextureFormat(), cube->GetResolution(),false);
 
-						skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
-					}
+					//	skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
+					//}
 
 					if (cubeIrradianceMissing) {
 						graphics::Cubemap* cube = new graphics::Cubemap();

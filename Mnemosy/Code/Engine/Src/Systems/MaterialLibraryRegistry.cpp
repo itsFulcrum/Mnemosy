@@ -32,17 +32,24 @@
 #include <fstream>
 #include <thread>
 
+#include <FulcrumUtils/Flcrm_Log.hpp>
+
+
 namespace mnemosy::systems {
 	// == public methods
+
+
+
+
+
+
+
 
 	void MaterialLibraryRegistry::Init()
 	{
 		namespace fs = std::filesystem;
-
-
-		//MNEMOSY_WARN("Sizeof LibEntry:		{}", sizeof(LibEntry));
-		//MNEMOSY_WARN("Sizeof FolderNode:	 {}", sizeof(FolderNode));
-
+		
+		flcrm::log::log_test();
 
 
 		m_folderTree = nullptr;
@@ -87,28 +94,39 @@ namespace mnemosy::systems {
 		namespace fs = std::filesystem;
 
 
+		//fs::path folderPathWide = core::StringUtils::u8path_from_path(folderPath);
+
 		if (!fs::exists(folderPath)) {
 			return false;
 		}
 
-		fs::path dataFile = folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
+		fs::path dataFilePath = folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
 
-		if (!LibProcedures::CheckDataFile(dataFile)) {
+		if (!LibProcedures::CheckDataFile(dataFilePath)) {
 
-			MNEMOSY_ERROR("LibCollection_LoadFromFile: Data file is invalid or not existing: {}", dataFile.generic_string());
+			MNEMOSY_ERROR("LibCollection_LoadIntoActiveTree: Data file is invalid or not existing: {}", dataFilePath.generic_string());
 			return false;
 		}		
 
 
 		std::ifstream dataFileStream;
-		dataFileStream.open(dataFile);
+		dataFileStream.open(dataFilePath);
 
 		nlohmann::json readFile;
 		try {
 			readFile = nlohmann::json::parse(dataFileStream);
 		} catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadUserDirectoriesFromFile: Error Parsing File. Message: {}", err.what());
+			MNEMOSY_ERROR("LibCollection_LoadIntoActiveTree: Error Parsing File. Message: {}", err.what());
 			dataFileStream.close();
+
+			// clear folder tree if neccesary
+			if (m_folderTree) {
+				m_folderTree->Shutdown();
+				delete m_folderTree;
+				m_folderTree = nullptr;
+			}
+
+
 			return false;
 		}
 		dataFileStream.close();
@@ -137,9 +155,8 @@ namespace mnemosy::systems {
 		if (!LibCollections_IsAnyActive()) {
 			return;
 		}
-		
-		fs::path dataFile = ActiveLibCollection_GetDataFilePath();
 
+		fs::path dataFile = ActiveLibCollection_GetDataFilePath();
 
 		LibProcedures::CheckDataFile(dataFile);
 
@@ -148,14 +165,36 @@ namespace mnemosy::systems {
 		std::ofstream dataFileStream;
 		dataFileStream.open(dataFile);
 
-		if (prettyPrintDataFile)
-			dataFileStream << LibraryDirectoriesJson->dump(4);
-		else
-			dataFileStream << LibraryDirectoriesJson->dump(-1);
 
+		bool savingSuccess = true;
+
+		try {
+
+			dataFileStream << LibraryDirectoriesJson->dump(-1);
+			//if (prettyPrintDataFile) {
+			//	dataFileStream << LibraryDirectoriesJson->dump(4);
+			//}
+			//else {
+			//}
+
+		}
+		catch (nlohmann::json::type_error jErr) {
+
+			MNEMOSY_ERROR("Failed to save Library data file correctly. Message: {}", jErr.what());
+			savingSuccess = false;
+		}
+		
+		
 		dataFileStream.close();
 
 		delete LibraryDirectoriesJson;
+
+		if (savingSuccess) {
+
+			// copy and make a backup file.			
+			fs::path copyLocation = dataFile.parent_path() / fs::path("MnemosyMaterialLibraryData_BACKUP_COPY.mnsydata");
+			fs::copy_file(dataFile, copyLocation, fs::copy_options::overwrite_existing);
+		}
   	}
 
 	void MaterialLibraryRegistry::SaveCurrentSate() {
@@ -199,7 +238,10 @@ namespace mnemosy::systems {
 		m_folderTree->RenameFolder(node, newName);
 
 		// rename files on disk
-		fs::path newPath = libraryDir / node->GetPathFromRoot();// fs::path(node->parent->pathFromRoot) / fs::path(node->name);
+		fs::path newPath =  libraryDir / node->GetPathFromRoot();
+
+		//newPath = fs::u8path(newPath.generic_string());
+
 		try {
 			fs::rename(oldPath, newPath);
 		}
@@ -216,8 +258,9 @@ namespace mnemosy::systems {
 		namespace fs = std::filesystem;
 
 		fs::path libraryDir = ActiveLibCollection_GetFolderPath();
-		fs::path fromPath = libraryDir / dragSource->GetPathFromRoot(); //fs::path(dragSource->pathFromRoot);
-		fs::path toPath = libraryDir / dragTarget->GetPathFromRoot(); //fs::path(dragTarget->pathFromRoot);
+		fs::path fromPath = libraryDir / dragSource->GetPathFromRoot();
+		fs::path toPath = libraryDir / dragTarget->GetPathFromRoot();
+
 
 		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
 			//fs::rename(fromPath, toPath / fromPath.filename());
@@ -319,6 +362,8 @@ namespace mnemosy::systems {
 		{ // delete directories from disk
 
 			fs::path folderPath = Folder_GetFullPath(node);
+
+
 			try {
 				// this call removes all files and directories underneith permanently without moving it to trashbin
 				fs::remove_all(folderPath);
@@ -443,6 +488,9 @@ namespace mnemosy::systems {
 
 
 		ActiveLibCollection_SaveToFile();
+
+
+		LibEntry_Load(libEntry);
 	}
 
 	void MaterialLibraryRegistry::LibEntry_Rename(systems::LibEntry* libEntry, std::string& newName) {
@@ -589,6 +637,7 @@ namespace mnemosy::systems {
 
 		if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
 
+			
 
 			graphics::PbrMaterial* mat = LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithreaded(libEntry,prettyPrintMaterialFiles);
 			MNEMOSY_ASSERT(mat != nullptr, "This should not happen");
@@ -639,7 +688,7 @@ namespace mnemosy::systems {
 
 
 		double endTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-		MNEMOSY_TRACE("Loaded Material in {} seconds", endTime - beginTime);
+		MNEMOSY_WARN("Loaded Material in {} seconds", endTime - beginTime);
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_SaveToFile() {
@@ -652,12 +701,12 @@ namespace mnemosy::systems {
 		if (!UserEntrySelected())
 			return;
 
-		fs::path thumbnailPath = fs::path(m_activeLibEntry->name + texture_fileSuffix_thumbnail);
+		//fs::path thumbnailPath = fs::u8path(m_activeLibEntry->name + texture_fileSuffix_thumbnail);
 
 		fs::path entryFolderPath = LibEntry_GetFolderPath(m_activeLibEntry);
 
 		{ // Render thumbnail of active material
-			fs::path thumbnailAbsolutePath = entryFolderPath / thumbnailPath;
+			//fs::path thumbnailAbsolutePath = entryFolderPath / thumbnailPath;
 			MnemosyEngine::GetInstance().GetThumbnailManager().RenderThumbnailForActiveLibEntry(m_activeLibEntry);
 		}
 
@@ -1008,7 +1057,7 @@ namespace mnemosy::systems {
 
 			fs::path textureFilePath = materialDir / fs::path(matFile.ReadString(success,jsonMatKey_path_ofTextureType,jsonKey_pathNotAssigned,false));
 			try { fs::remove(textureFilePath); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()) }
+			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()); }
 
 			std::string jsonMatKey_assigned_ofTextureType = graphics::TexUtil::get_JsonMatKey_assigned_from_PBRTextureType(textureType);
 
@@ -1066,7 +1115,7 @@ namespace mnemosy::systems {
 
 		fs::path materialDir = LibEntry_GetFolderPath(m_activeLibEntry);
 		std::string filename = std::string(m_activeLibEntry->name + texture_unlit_fileSuffix);			
-		fs::path exportPath = materialDir / fs::path(filename);
+		fs::path exportPath = materialDir / fs::u8path(filename);
 
 		// export texture to entry folder
 		systems::ExportManager& exportManager = MnemosyEngine::GetInstance().GetExportManager();
@@ -1117,14 +1166,14 @@ namespace mnemosy::systems {
 			fs::path entryFolder = LibEntry_GetFolderPath(m_activeLibEntry);
 
 			std::string filename = m_activeLibEntry->name + texture_unlit_fileSuffix;
-			fs::path textureFilePath = entryFolder / fs::path(filename);
+			fs::path textureFilePath = entryFolder / fs::u8path(filename);
 
 			if (fs::exists(textureFilePath)) {
 				try { 
 					fs::remove(textureFilePath); 
 				}
 				catch (fs::filesystem_error e) { 
-					MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what()) 
+					MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what());
 				}
 			}
 		}
@@ -1152,20 +1201,18 @@ namespace mnemosy::systems {
 
 	void MaterialLibraryRegistry::ActiveLibEntry_Skybox_LoadTexture(std::filesystem::path& filepath)
 	{
+
+		//double start = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
 		MNEMOSY_ASSERT(m_activeLibEntry != nullptr, "This should not happen");
 		MNEMOSY_ASSERT(m_activeLibEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX, "It must be pbr if calling this method!");
-
-		core::Clock& clock = MnemosyEngine::GetInstance().GetClock();
-
-		double timeStart = clock.GetTimeSinceLaunch();
-
 
 		// first load equirectangular from file.
 		graphics::PictureError err;
 		graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(err, filepath.generic_string().c_str(), true, true, false);
 		if (!err.wasSuccessfull) {
-			MNEMOSY_ERROR("Unable to load Texture: {} \nMessage: {}", filepath.generic_string(), err.what);
-			
+
+			MNEMOSY_ERROR("Unable to load Texture: {} \nMessage: {}", filepath.generic_string(), err.what);			
 			return;
 		}
 
@@ -1174,9 +1221,7 @@ namespace mnemosy::systems {
 			if (picInfo.pixels)
 				free(picInfo.pixels);
 
-
 			MNEMOSY_ERROR("Too large image sizes are not supported for skyboxes because they are stored in high bit depth (32bit) format and loading becomes unstable.  You may try storing them as non skybox unlit texture materials instead.");
-
 			return;
 		}
 
@@ -1184,8 +1229,9 @@ namespace mnemosy::systems {
 
 		equirectangularTex->GenerateOpenGlTexture(picInfo,true);
 
-		if (picInfo.pixels)
+		if (picInfo.pixels) {
 			free(picInfo.pixels);
+		}
 
 		std::string entryName = m_activeLibEntry->name;
 		fs::path entryFolder = LibEntry_GetFolderPath(m_activeLibEntry);
@@ -1219,114 +1265,38 @@ namespace mnemosy::systems {
 			}
 		}
 
-		double timeEquiEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
-		MNEMOSY_WARN("Loaded and saved equirectangula in: {} sec", timeEquiEnd - timeStart);
-
-
 		graphics::Skybox& skybox = MnemosyEngine::GetInstance().GetScene().GetSkybox();
 
 		// generate cubemaps , assign them to skybox and export them as ktx2 files 
 		{
-			double timeStartColor = clock.GetTimeSinceLaunch();
-
-			// color cube
-			{
-				fs::path cubeColorPath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubeColor);
-
-				double colorGenCubeStart = clock.GetTimeSinceLaunch();
-
-				graphics::Cubemap* colorCube = new graphics::Cubemap();
-				colorCube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,false,0);
-
-				double colorGenCubeEnd = clock.GetTimeSinceLaunch();
-
-				MNEMOSY_TRACE("Color Gen Cube: {} sec", colorGenCubeEnd - colorGenCubeStart);
-				
-				graphics::KtxImage ktx;
-				ktx.SaveCubemap(cubeColorPath.generic_string().c_str(), colorCube->GetGlID(), equirectangularTex->GetTextureFormat(), colorCube->GetResolution(), false);
-
-
-				double colorSaveCubeEnd = clock.GetTimeSinceLaunch();
-
-				MNEMOSY_TRACE("Color Export Cube: {} sec", colorSaveCubeEnd - colorGenCubeEnd);
-
-				skybox.AssignCubemap(colorCube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
-			}
-
-
-			double timeEndColor = clock.GetTimeSinceLaunch();
-
-			MNEMOSY_WARN("Loaded color cube in: {} sec", timeEndColor - timeStartColor);
-
-
-			double timeStartIrradiance = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 			// cube irradiance
 			{
 				fs::path cubeIrradiancePath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubeIrradiance);
 
-				double irradGenCubeStart = clock.GetTimeSinceLaunch();
-
 				graphics::Cubemap* irradCube = new graphics::Cubemap();
 				irradCube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE,false,0);
-
-				double irradGenCubeEnd = clock.GetTimeSinceLaunch();
-
-				MNEMOSY_TRACE("Irradiance Gen Cube: {} sec", irradGenCubeEnd - irradGenCubeStart);
 
 				graphics::KtxImage ktx;
 				ktx.SaveCubemap(cubeIrradiancePath.generic_string().c_str(), irradCube->GetGlID(), equirectangularTex->GetTextureFormat(), irradCube->GetResolution(),false);
 
-				double irradSaveCubeEnd = clock.GetTimeSinceLaunch();
-
-				MNEMOSY_TRACE("Irradiance Save Cube: {} sec", irradSaveCubeEnd  - irradGenCubeEnd);
-
-
 				skybox.AssignCubemap(irradCube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE);
 
 			}
-			double timeEndIrradiance = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
-			MNEMOSY_WARN("Loaded Irrad cube in: {} sec", timeEndIrradiance - timeStartIrradiance);
-
-			double timeStartPrefilter = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
 
 			// cube prefilter
 			{
 				fs::path cubePrefilterPath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubePrefilter);
 
-				double preGenCubeStart = clock.GetTimeSinceLaunch();
-
 				graphics::Cubemap* cube = new graphics::Cubemap();
-				cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER,false,0);
-
-				double preGenCubeEnd = clock.GetTimeSinceLaunch();
-
-				MNEMOSY_TRACE("Prefilter Gen Cube: {} sec", preGenCubeEnd - preGenCubeStart);
+				cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER, false, 0);
 
 				graphics::KtxImage ktx;
-				ktx.SaveCubemap(cubePrefilterPath.generic_string().c_str(), cube->GetGlID(), equirectangularTex->GetTextureFormat(),cube->GetResolution(),true);
-
-				double preSaveCubeEnd = clock.GetTimeSinceLaunch();
-
-				MNEMOSY_TRACE("Prefilter Save Cube: {} sec", preSaveCubeEnd- preGenCubeEnd);
+				ktx.SaveCubemap(cubePrefilterPath.generic_string().c_str(), cube->GetGlID(), equirectangularTex->GetTextureFormat(), cube->GetResolution(), true);
 
 				skybox.AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER);
 			}
-			double timeEndPrefilter = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
-			MNEMOSY_WARN("Loaded prefilter cube in: {} sec", timeEndPrefilter - timeStartPrefilter);
 
 		}
-
-
-		double timeEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
-		MNEMOSY_WARN("Generated Skybox in: {} sec", timeEnd - timeStart);
-
-
-		// TODO: parse irradance map to determine brightes spot for sun direction and color
-		// save that data to the data file and the active skybox
 
 		// update data file
 		{
@@ -1350,6 +1320,12 @@ namespace mnemosy::systems {
 
 			dataFile.FileClose(success, dataFilePath);
 		}
+
+
+		//double end = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+		//MNEMOSY_TRACE("Loaded and gen skybox: {} sec", end - start);
+
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_Skybox_DeleteTexture() {
@@ -1375,7 +1351,7 @@ namespace mnemosy::systems {
 						fs::remove(equirectangularFile);
 					}
 					catch (fs::filesystem_error e) {
-						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what())
+						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what());
 					}
 				}
 			}
@@ -1389,7 +1365,7 @@ namespace mnemosy::systems {
 						fs::remove(cubeColorFile);
 					}
 					catch (fs::filesystem_error e) {
-						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what())
+						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what());
 					}
 				}
 			}
@@ -1403,7 +1379,7 @@ namespace mnemosy::systems {
 						fs::remove(cubePrefilterFile);
 					}
 					catch (fs::filesystem_error e) {
-						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what())
+						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what());
 					}
 				}
 			}
@@ -1417,7 +1393,7 @@ namespace mnemosy::systems {
 						fs::remove(cubeIrradianceFile);
 					}
 					catch (fs::filesystem_error e) {
-						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what())
+						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what());
 					}
 				}
 			}
@@ -1609,7 +1585,7 @@ namespace mnemosy::systems {
 
 			graphics::Skybox& skyboxMat = MnemosyEngine::GetInstance().GetScene().GetSkybox();
 
-			if (skyboxMat.IsColorCubeAssigned()) {
+			if (skyboxMat.HasCubemaps()) {
 
 				std::string filename = m_activeLibEntry->name + texture_skybox_fileSuffix_equirectangular;
 
@@ -1666,6 +1642,9 @@ namespace mnemosy::systems {
 		namespace fs = std::filesystem;
 		// Make sure the folder is valid.
 		
+		//fs::path folderPathWide = core::StringUtils::u8path_from_path(folderPath);
+
+
 		if (!fs::exists(folderPath)) {
 			MNEMOSY_ERROR("Failed to create new library because path doesn't exsist, Path: {}", folderPath.generic_string());
 			return;
@@ -1689,6 +1668,11 @@ namespace mnemosy::systems {
 
 		// First Save Current
 		ActiveLibCollection_SaveToFile();
+
+		//std::string strFolderPathWide = folderPath.generic_string();
+		//std::string strFolderPathutf8 = core::StringUtils::string_fix_u8Encoding(strFolderPathWide);
+
+		//fs::path folderPathUtf8 = fs::path(strFolderPathutf8);
 
 
 		std::string uniqueCollectionName = LibCollections_MakeNameUnique(name);
@@ -1761,7 +1745,7 @@ namespace mnemosy::systems {
 			}
 			catch (nlohmann::json::parse_error err) {
 
-				MNEMOSY_ERROR("Failed to rename Library - Error Parsing Json Data File. Message: {}", err.what());
+				MNEMOSY_ERROR("Failed to create new library entry - Error Reading Json File Contents. Message: {}", err.what());
 				inFileStream.close();
 				return;
 			}
@@ -1910,6 +1894,7 @@ namespace mnemosy::systems {
 
 		// folder path of the collection
 		fs::path folderPath = m_libCollectionsList[index].folderPath;
+		//fs::path folderPathWide = core::StringUtils::u8path_from_path(folderPath);
 
 		if (!fs::exists(folderPath)) {
 
@@ -1924,13 +1909,15 @@ namespace mnemosy::systems {
 			return;
 		}
 
+
+		unsigned int current = m_libCollection_currentSlected_id;
+
 		if (LibCollections_IsAnyActive()) {
 			ActiveLibCollection_Unload();
 		}
 
 
 		bool success = LibCollection_LoadIntoActiveTree(folderPath);
-
 		if (!success) {
 
 			if (m_folderTree) {
@@ -1938,9 +1925,16 @@ namespace mnemosy::systems {
 				m_folderTree = nullptr;
 			}
 
-			m_libCollection_currentSlected_id = -1;
 
 			MNEMOSY_ERROR("Failed to switch to a library");
+
+			// if switching failed we should switch back to the one selected before.
+			if (current != -1) {
+				LibCollections_SwitchActiveCollection(current);
+				return;
+			}
+
+			m_libCollection_currentSlected_id = -1;
 		}
 		else {
 			m_libCollection_currentSlected_id = index;
@@ -1966,14 +1960,16 @@ namespace mnemosy::systems {
 
 		MNEMOSY_ASSERT(m_libCollection_currentSlected_id < m_libCollectionsList.size(), "Selection must map to an exsiting entry!");
 
-		fs::path dataFile = m_libCollectionsList[m_libCollection_currentSlected_id].folderPath / std::filesystem::path("MnemosyMaterialLibraryData.mnsydata");
-	
-		if (!fs::exists(dataFile)) {
-			MNEMOSY_CRITICAL("Data File of a library does not exist anymore. Path: {}", dataFile.generic_string());
+		fs::path dataFilePath = m_libCollectionsList[m_libCollection_currentSlected_id].folderPath / std::filesystem::path("MnemosyMaterialLibraryData.mnsydata");
+		
+
+		//fs::path dataPathWide = core::StringUtils::u8path_from_path(dataFile);
+		if (!fs::exists(dataFilePath)) {
+			MNEMOSY_CRITICAL("Data File of a library does not exist anymore. Path: {}", dataFilePath.generic_string());
 			return fs::path();
 		}
 
-		return dataFile;	
+		return dataFilePath;
 	}
 
 	const std::string MaterialLibraryRegistry::ActiveLibCollection_GetName()
@@ -2101,7 +2097,12 @@ namespace mnemosy::systems {
 			
 			for (unsigned int i = 0; i < m_libCollectionsList.size(); i++) {
 
-				libCollectionPaths.push_back(m_libCollectionsList[i].folderPath.generic_string());
+
+				std::string path = m_libCollectionsList[i].folderPath.generic_string();
+
+				path = core::StringUtils::string_fix_u8Encoding(path);
+
+				libCollectionPaths.push_back(path);
 				libCollectionNames.push_back(m_libCollectionsList[i].name);
 			}
 
@@ -2142,6 +2143,7 @@ namespace mnemosy::systems {
 
 		bool anyCollectionsSaved = dataFile.ReadBool(success, "AnyLibCollectionsSaved", false, true);
 
+
 		if (anyCollectionsSaved) {
 
 			int lastLoadedId = dataFile.ReadInt(success, "LastLoadedCollectionId", -1 , true);
@@ -2160,12 +2162,71 @@ namespace mnemosy::systems {
 			}
 			else {
 
-				m_libCollectionsList = std::vector<LibCollection>(libCollectionPaths.size());
+				//m_libCollectionsList = std::vector<LibCollection>(libCollectionPaths.size());
 				for (unsigned int i = 0; i < libCollectionPaths.size(); i++) {
 
-					m_libCollectionsList[i].folderPath = fs::u8path(libCollectionPaths[i]);
-					m_libCollectionsList[i].name = libCollectionNames[i];
 
+					LibCollection l;
+					l.folderPath = fs::u8path(libCollectionPaths[i]);
+					l.name = libCollectionNames[i];
+
+					bool failedToLoad = false;
+
+					if (!fs::exists(l.folderPath)) {
+						failedToLoad = true;
+					}
+
+					fs::path dataFile = l.folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
+
+					if (!fs::exists(dataFile)) {
+						failedToLoad = true;
+					}
+
+					if (!failedToLoad) {
+
+						// try reading the json data
+						std::ifstream inputFileStream;
+						inputFileStream.open(dataFile);
+
+
+						try {
+							nlohmann::json j = nlohmann::json::parse(inputFileStream);
+
+						}
+						catch (nlohmann::json::parse_error pErr) {
+
+							MNEMOSY_ERROR("Failed Parse jsonFile, message: {}", pErr.what());
+							failedToLoad = true;
+						}
+
+						inputFileStream.close();
+
+					}
+
+					if (failedToLoad) {
+
+						MNEMOSY_ERROR("Failed to Load Material Library with Name {}: MaterialLibraryDataFile.mnsydata my be corrupted or missing \npath: {}",l.name, dataFile.generic_string());
+
+						if (i == lastLoadedId) {
+							// if the last loaded id is the one we cant load..
+
+							if (i > 0) {
+								// if we already loaded the 0 entry wihtout problems, select that one as default.
+								lastLoadedId = 0;
+							}
+							else if (i < libCollectionPaths.size() - 1) {
+								 // if we still have libraries to load set lastLoadedID to the next inline and hopefully those wont fail.
+								lastLoadedId = i + 1;
+							}
+							else {
+								// this case should only happen if we fail to load all user libraries in wich case non will be selected by default.
+								lastLoadedId = -1;
+							}
+						}
+					}
+					else {
+						m_libCollectionsList.push_back(l);
+					}
 				}
 
 				m_libCollection_currentSlected_id = lastLoadedId;

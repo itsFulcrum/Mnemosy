@@ -12,9 +12,9 @@ namespace mnemosy::graphics {
 namespace mnemosy::graphics
 {
 	enum CubemapType {
-		MNSY_CUBEMAP_TYPE_COLOR = 0,
-		MNSY_CUBEMAP_TYPE_IRRADIANCE = 1,
-		MNSY_CUBEMAP_TYPE_PREFILTER = 2,
+		//MNSY_CUBEMAP_TYPE_COLOR = 0,
+		MNSY_CUBEMAP_TYPE_IRRADIANCE = 0,
+		MNSY_CUBEMAP_TYPE_PREFILTER = 1,
 		MNSY_CUBEMAP_TYPE_COUNT,
 		MNSY_CUBEMAP_TYPE_NONE
 	};
@@ -41,10 +41,10 @@ namespace mnemosy::graphics
 
 	private:
 		unsigned int m_gl_ID = 0;
-		bool m_isInitialized = false;
 
 		uint16_t m_resolution = 0;
 		uint8_t m_lastBoundLocation = 0;
+		bool m_isInitialized = false;
 	};
 
 

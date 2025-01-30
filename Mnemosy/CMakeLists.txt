@@ -66,6 +66,10 @@ set(spdLog_subDir "Code/Dependencies/spdlog-1.x/")
 include(${CMAKE_CURRENT_LIST_DIR}/${spdLog_subDir}cmake-Mnemosy-SpdLogOptions.cmake)
 add_subdirectory(${spdLog_subDir})
 
+# FULCRUM Utils
+set(flcrm_subDir ${DEPENDENCIES_DIR}/FulcrumUtils/)
+add_subdirectory(${flcrm_subDir})
+
 # nlohmann Json
 set(nlohmannJson_subDir ${DEPENDENCIES_DIR}/nlohmannjson)
 add_subdirectory(${nlohmannJson_subDir})
@@ -83,6 +87,9 @@ SET(ZLIB_ROOT ${zlib_subDir})
 find_package(ZLIB REQUIRED)
 message("MNEMOSY ZLIB Found "  ${ZLIB_FOUND})
 
+# utf8cpp
+set(utf8cpp_subDir ${DEPENDENCIES_DIR}/utf8cpp)
+add_subdirectory(${utf8cpp_subDir})
 
 # stbImage Read
 set(stbImageRead_subDir ${DEPENDENCIES_DIR}/stbImageRead)
@@ -176,7 +183,7 @@ glfw
 glm
 nlohmann_json
 spdlog::spdlog_header_only
-
+Fulcrum_Utils
 )
 
 
@@ -191,7 +198,7 @@ ktx
 OpenEXR
 stbImageWrite
 stbImageRead
-
+utf8cpp
 assimp
 )
 

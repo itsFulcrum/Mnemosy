@@ -22,6 +22,7 @@ uniform sampler2D _equirectangularMap;
 uniform int _mode = 0;
 uniform int _currentFace;
 uniform float _roughness;
+uniform int _maxPrefilterMip;
 
 vec3 uvToXYZ(int face, vec2 uv)
 {

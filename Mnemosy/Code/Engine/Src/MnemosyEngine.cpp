@@ -58,6 +58,20 @@ namespace mnemosy
 		if (m_isInitialized)
 			return;
 
+
+		//mnemosy::core::MNSY_log_console_format_info.add_time = true;
+		//mnemosy::core::MNSY_log_console_format_info.add_year = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_month = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_day = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_hour = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_minute = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_second = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_milisecond = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_log_level = true;
+		//mnemosy::core::MNSY_log_console_format_info.add_source_file = false;
+		//mnemosy::core::MNSY_log_console_format_info.add_source_function_name = true;
+		//mnemosy::core::MNSY_log_console_format_info.add_source_line = true;
+
 		m_pLogger = std::make_unique<core::Logger>();
 
 		MNEMOSY_INFO("Starting Mnemosy v{}.{}-{}", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR,MNEMOSY_VERSION_SUFFIX);

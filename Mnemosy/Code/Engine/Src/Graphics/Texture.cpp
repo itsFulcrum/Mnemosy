@@ -44,7 +44,7 @@ namespace mnemosy::graphics
 
 		if (activeTextureLocation > 16 || activeTextureLocation < 0)
 		{
-			MNEMOSY_ERROR("Can't bind texture to location {} only range 0 to 16 allowed \nBinding to Default location 0", activeTextureLocation)
+			MNEMOSY_ERROR("Can't bind texture to location {} only range 0 to 16 allowed \nBinding to Default location 0", activeTextureLocation);
 			glActiveTexture(GL_TEXTURE0);
 			m_lastBoundLocation = 0;
 		}
@@ -62,7 +62,7 @@ namespace mnemosy::graphics
 		MNEMOSY_ASSERT(m_isInitialized, "Trying to unbind texture that is not loaded");
 
 		if (activeTextureLocation > 16 || activeTextureLocation < 0) {
-			MNEMOSY_CRITICAL("Can't unbind texture from location {} only range 0 to 16 possible", activeTextureLocation)
+			MNEMOSY_CRITICAL("Can't unbind texture from location {} only range 0 to 16 possible", activeTextureLocation);
 		}
 		else {
 			glActiveTexture(GL_TEXTURE0 + activeTextureLocation);

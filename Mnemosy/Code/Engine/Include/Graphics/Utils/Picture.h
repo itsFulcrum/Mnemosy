@@ -75,7 +75,7 @@ namespace mnemosy::graphics
 
 		// Read .tif images. Supports full RGBA channels with up to 32 bit.
 		static PictureInfo ReadTiff(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertGrayToRGB);
-
+		
 		// Write image data to a tiff file. Using scaline interface
 		static void WriteTiff(PictureError& outPictureError, const char* filepath,const PictureInfo& pictureInfo, const bool flipVertically);
 

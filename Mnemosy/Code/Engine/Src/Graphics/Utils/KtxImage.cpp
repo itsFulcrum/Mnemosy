@@ -3,6 +3,7 @@
 
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Clock.h"
+#include "Include/Core/Utils/StringUtils.h"
 
 #include "Include/Graphics/TextureDefinitions.h"
 
@@ -10,6 +11,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <thread>
 
 #include <glad/glad.h>
 
@@ -29,11 +31,17 @@ namespace mnemosy::graphics
 		ktxTexture2* kTexture = nullptr;
 		KTX_error_code errorCode;
 		
-		errorCode = ktxTexture2_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+
+		std::string utf8Path{ filepath };
+		utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+		
+		//std::filesystem::path p = std::filesystem::u8path(str);
+
+		errorCode = ktxTexture2_CreateFromNamedFile(utf8Path.c_str(), KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		//errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		if (errorCode != 0) {
 
-			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed\nPath:{} \nError code: {}",filepath, ktxErrorString(errorCode));
+			MNEMOSY_ERROR("KtxImage::LoadKtx - CreatFromNamedFile Failed\nPath:{} \nError code: {}", utf8Path, ktxErrorString(errorCode));
 			numChannels = 0; width = 0; height = 0;
 			if(kTexture)
 				ktxTexture_Destroy(ktxTexture(kTexture));
@@ -78,6 +86,11 @@ namespace mnemosy::graphics
 		// seeing artifacs when using GLUpload()
 		// only possible because i know the format (GL_RG32F) ahead of time
 
+
+		std::string utf8Path{ filepath };
+		utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+
+
 		ktxTexture* kTexture;
 		KTX_error_code errorCode;
 		ktx_size_t offset;
@@ -85,7 +98,8 @@ namespace mnemosy::graphics
 		ktx_uint32_t level, layer, faceSlice;
 
 
-		errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+
+		errorCode = ktxTexture_CreateFromNamedFile(utf8Path.c_str(), KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		if (errorCode != 0)
 		{
 			MNEMOSY_ERROR("KtxImage::LoadBrdfKTX - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
@@ -129,10 +143,14 @@ namespace mnemosy::graphics
 	const bool KtxImage::LoadCubemap(const char* filepath, unsigned int& glTextureID, bool loadStoredMips, bool genMips) {
 
 		namespace fs = std::filesystem;
+		
+		std::string utf8Path{ filepath };
+		utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+
 		{
 			// we do those checks here , even if they might be done early already because libKtx doesn't handle error very well and crashes easily.
 
-			std::filesystem::path  p{ filepath };
+			std::filesystem::path  p = fs::u8path(utf8Path);
 
 			if (!fs::exists(p)) {
 				MNEMOSY_ERROR("Ktx Load Cubemap Failed - path does not exsit. Path: {}", filepath);
@@ -142,13 +160,13 @@ namespace mnemosy::graphics
 				MNEMOSY_ERROR("Ktx Load Cubemap Failed - File is not a ktx file. Path: {}", filepath);
 				return false;
 			}
-		}		
+		}
 		
 		ktxTexture2* kTexture = nullptr;
 		KTX_error_code errorCode;
 
 		//errorCode = ktxTexture_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT, &kTexture);
-		errorCode = ktxTexture2_CreateFromNamedFile(filepath, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
+		errorCode = ktxTexture2_CreateFromNamedFile(utf8Path.c_str(), KTX_TEXTURE_CREATE_ALLOC_STORAGE, &kTexture);
 		if (errorCode != 0) {
 
 			MNEMOSY_ERROR("KtxImage::LoadCubemap: - CreatFromNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
@@ -266,6 +284,12 @@ namespace mnemosy::graphics
 
 	const bool KtxImage::SaveCubemap(const char* filepath, unsigned int& glTextureID, TextureFormat format, unsigned int resolution, bool storeMipMaps) {
 
+		//double start = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+		//std::string utf8Path{ filepath };
+		//utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+
+
 		ktxTexture2* texture;
 		ktxTextureCreateInfo createInfo;
 		KTX_error_code errorCode;
@@ -298,15 +322,12 @@ namespace mnemosy::graphics
 			ktxTexture_Destroy(ktxTexture(texture));
 			return false;
 		}
-		//ktx_uint32_t layer = 0; // array layer but I dont use it
 
 		// for cubemaps only allow rgb channels
 		uint8_t channels = 3;
-		uint8_t mip = 0;
 
 		uint16_t bytesOfPixel = (sizeof(float)) * channels ;// bytes of one pixel
-		uint16_t baseRes = resolution;
-		uint16_t nextMipRes = baseRes;
+		uint16_t currMipRes = resolution;
 
 		glActiveTexture(GL_TEXTURE0); // just to make sure
 		glBindTexture(GL_TEXTURE_CUBE_MAP, glTextureID);
@@ -314,35 +335,43 @@ namespace mnemosy::graphics
 		// ensure we are getting 4 byte aligned data from openGl
 		glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
-		void* buf = malloc(baseRes* baseRes * channels * sizeof(float));
+		unsigned char* buf = (unsigned char*)malloc(resolution * resolution * bytesOfPixel * 6);
+		
 
 		for (unsigned int mip = 0; mip < (unsigned int)createInfo.numLevels; mip++) {
-			//float* pixels = new float[nextMipRes * nextMipRes * channels];
-			size_t srcSize = (nextMipRes * nextMipRes) * bytesOfPixel;
+			
+			size_t srcSize = (currMipRes * currMipRes) * bytesOfPixel;
 
-			// loop over cubemap faces
-			for (uint8_t cubeFace = 0; cubeFace < 6; cubeFace++) {
-				
-				glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubeFace , mip, GL_RGB, GL_FLOAT, buf);
-				
-				errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0 , cubeFace, (unsigned char*)buf, srcSize);
-				if (errorCode != 0) {
-					MNEMOSY_ERROR("KtxImage::SaveCubemapKtx: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
-					ktxTexture_Destroy(ktxTexture(texture));
-					
-					if (buf) {
-						free(buf);
-					}
-					
-					return false;
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + 0, mip, GL_RGB, GL_FLOAT, buf + (srcSize * 0));
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + 1, mip, GL_RGB, GL_FLOAT, buf + (srcSize * 1));
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + 2, mip, GL_RGB, GL_FLOAT, buf + (srcSize * 2));
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + 3, mip, GL_RGB, GL_FLOAT, buf + (srcSize * 3));
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + 4, mip, GL_RGB, GL_FLOAT, buf + (srcSize * 4));
+			glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + 5, mip, GL_RGB, GL_FLOAT, buf + (srcSize * 5));
+
+			errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0, 0, buf + (srcSize * 0), srcSize);
+			errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0, 1, buf + (srcSize * 1), srcSize);
+			errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0, 2, buf + (srcSize * 2), srcSize);
+			errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0, 3, buf + (srcSize * 3), srcSize);
+			errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0, 4, buf + (srcSize * 4), srcSize);
+			errorCode = ktxTexture_SetImageFromMemory(ktxTexture(texture), mip, 0, 5, buf + (srcSize * 5), srcSize);
+
+			if (errorCode != 0) {
+				MNEMOSY_ERROR("KtxImage::SaveCubemapKtx: SetImageFromMemory Failed \nError code: {}", ktxErrorString(errorCode));
+				ktxTexture_Destroy(ktxTexture(texture));
+
+				if (buf) {
+					free(buf);
 				}
+
+				return false;
 			}
 			
-			// if it becomes < 2 we cant devide anymore and it causes frees on the math operation
-			if (nextMipRes <= 2) 
+			// if it becomes < 2 we cant devide anymore and it causes freeze  on the math operation
+			if (currMipRes <= 2) 
 				break;
 
-			nextMipRes = (unsigned int)nextMipRes / 2;
+			currMipRes = (unsigned int)currMipRes / 2;
 		}
 
 		if (buf) {
@@ -357,17 +386,21 @@ namespace mnemosy::graphics
 			return false;
 		}
 
+		ktxTexture_Destroy(ktxTexture(texture));		
 		
-		
-		ktxTexture_Destroy(ktxTexture(texture));
+		//double end = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
+		//MNEMOSY_WARN("Write Cubemap in {} sec", end - start);
 		
 		
 		return true;
 	}
-	
-	
-	
+		
 	const bool KtxImage::SaveKtx(const char* filepath,unsigned char* imageData, unsigned int numChannels, unsigned int width, unsigned int height) {
+
+		//std::string utf8Path{ filepath };
+		//utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+
 
 		ktxTexture2* texture;                   // For KTX2
 		ktxTextureCreateInfo createInfo;
@@ -453,6 +486,10 @@ namespace mnemosy::graphics
 
 	const bool KtxImage::SaveBrdfLutKtx(const char* filepath, unsigned int& glTextureID, unsigned int resolution)
 	{
+		//std::string utf8Path{ filepath };
+		//utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+
+
 		ktxTexture2* texture;
 		ktxTextureCreateInfo createInfo;
 		KTX_error_code errorCode;
@@ -539,9 +576,13 @@ namespace mnemosy::graphics
 
 	}
 
-
 	//fixme please
 	const bool KtxImage::ExportGlTexture(const char* filepath, unsigned int glTextureID, const unsigned int numChannels, const unsigned int width, const unsigned int height, ktxImgFormat imgFormat, bool exportMips) {
+
+		namespace fs = std::filesystem;
+
+		std::string utf8Path{ filepath };
+		utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
 
 		ktxTexture2* texture;
 		ktxTextureCreateInfo createInfo;
@@ -759,7 +800,7 @@ namespace mnemosy::graphics
 		}
 
 		// export to file
-		errorCode = ktxTexture_WriteToNamedFile(ktxTexture(texture), filepath);
+		errorCode = ktxTexture_WriteToNamedFile(ktxTexture(texture), utf8Path.c_str());
 		if (errorCode != 0) {
 			MNEMOSY_ERROR("KtxImage::ExportGLTexture: WriteToNamedFile Failed \nError code: {}", ktxErrorString(errorCode));
 			ktxTexture_Destroy(ktxTexture(texture));
@@ -767,12 +808,31 @@ namespace mnemosy::graphics
 		}
 
 		ktxTexture_Destroy(ktxTexture(texture));
+
+		{
+
+			fs::path widePath = filepath;
+			fs::path narrowU8 = fs::path(utf8Path);
+		
+		
+			//if (fs::exists(narrowU8)) {
+
+			//	fs::rename(narrowU8, widePath);
+			//}
+		}
+
+
+
+
 		return true;
 	}
 
-
 	unsigned int KtxImage::Save_WithoutMips(const char* filepath, void* pixels,const bool flipVertically, const TextureFormat format, const uint16_t _width, const uint16_t _height, const bool isHalfFloat)
 	{
+
+		//std::string utf8Path{ filepath };
+		//utf8Path = core::StringUtils::string_fix_u8Encoding(utf8Path);
+
 		if (pixels == nullptr) {
 			return (unsigned int)KTX_FILE_DATA_ERROR;
 		}
@@ -1040,5 +1100,6 @@ namespace mnemosy::graphics
 
 		return (VkFormat)vkFormat;
 	}
+
 
 } // mnemosy::graphics

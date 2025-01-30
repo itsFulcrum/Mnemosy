@@ -20,6 +20,7 @@
 
 #include <string>
 #include <filesystem>
+#include <iostream>
 
 
 #define TextColor_default	ImVec4(0.68f, 0.68f, 0.68f, 1.00f)
@@ -171,7 +172,6 @@ namespace mnemosy::gui
 		
 		if (node == nullptr)
 			return;
-
 		
 		// prepare node flags
 		ImGuiTreeNodeFlags node_flags = m_directoryTreeFlags;
@@ -183,7 +183,6 @@ namespace mnemosy::gui
 			node_flags |= ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed;// ImGuiTreeNodeFlags_CollapsingHeader;
 			//node_flags = ImGuiTreeNodeFlags_CollapsingHeader;
 			displayName = m_materialRegistry.ActiveLibCollection_GetName();
-
 		}
 
 
@@ -224,7 +223,30 @@ namespace mnemosy::gui
 				bool renamed = ImGui::InputText("##RenameFolderInputField", &m_renameFolderText, m_textInputFlags);
 				if (renamed) {
 
+					// create the string with utf8
+					//std::string su8 = std::filesystem::u8path(m_renameFolderText).generic_string();
+
+					/*MNEMOSY_TRACE("Ut8 test print with loglib: ÖöÄäÜü");
+
+					std::cout << "Ut8 test print with cout: ÖöÄäÜü" << std::endl;
+
+					printf("Ut8 test print with printf: ÖöÄäÜü \n");
+
+
+
+					MNEMOSY_TRACE("Ut8 test print u8string with loglib: {}", su8);
+
+					std::cout << "Ut8 test print with cout: " << su8 << std::endl;
+
+					printf("Ut8 test print with printf: %s \n", su8);
+
+
+					MNEMOSY_TRACE("Folder Name: {}", m_renameFolderText);*/
 					RenameFolder(node, m_renameFolderText);
+
+
+
+
 				}
 			}
 
@@ -637,12 +659,15 @@ namespace mnemosy::gui
 		// ==== Combo selection
 		const std::vector<systems::LibCollection>& list = m_materialRegistry.LibCollections_GetListVector();
 
+		unsigned int current_selection_id = m_materialRegistry.LibCollections_GetCurrentSelectedID();
 
-		if (!list.empty()) {
+		if (!list.empty() && current_selection_id != -1) {
 
-			unsigned int current_selection_id = m_materialRegistry.LibCollections_GetCurrentSelectedID();
 
+			
 			const char* combo_preview_value = list[current_selection_id].name.c_str();
+
+
 
 			unsigned int popupOption = 0;
 			unsigned int popupEntryIndex = 0;

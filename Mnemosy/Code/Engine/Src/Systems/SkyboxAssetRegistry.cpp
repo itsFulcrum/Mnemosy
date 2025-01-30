@@ -103,7 +103,7 @@ namespace mnemosy::systems
 				return;
 			}
 
-			fs::path cubeColorPath		= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeColor);
+			//fs::path cubeColorPath		= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeColor);
 			fs::path cubeIrradiancePath = entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeIrradiance);
 			fs::path cubePrefilterPath	= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubePrefilter);
 			
@@ -120,22 +120,22 @@ namespace mnemosy::systems
 
 			fs::path newEquirectangularPath = cubemapsPath / equirectangularPath.filename();
 
-			// generate color cube new because we want to downsample it to 1024.
-			{
-				equirectangularTex->GenerateOpenGlTexture(picInfo,true);
+			//// generate color cube new because we want to downsample it to 1024.
+			//{
+			//	equirectangularTex->GenerateOpenGlTexture(picInfo,true);
 
-				if (picInfo.pixels) {
-					free(picInfo.pixels);
-				}
+			//	if (picInfo.pixels) {
+			//		free(picInfo.pixels);
+			//	}
 
-				fs::path newColorCubePath = cubemapsPath / cubeColorPath.filename();
+			//	fs::path newColorCubePath = cubemapsPath / cubeColorPath.filename();
 
-				graphics::Cubemap cube;
-				cube.GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,true, 1024);
+			//	graphics::Cubemap cube;
+			//	cube.GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,true, 1024);
 
-				graphics::KtxImage ktx;
-				ktx.SaveCubemap(newColorCubePath.generic_string().c_str(), cube.GetGlID(), equirectangularTex->GetTextureFormat(), cube.GetResolution(),false);
-			}
+			//	graphics::KtxImage ktx;
+			//	ktx.SaveCubemap(newColorCubePath.generic_string().c_str(), cube.GetGlID(), equirectangularTex->GetTextureFormat(), cube.GetResolution(),false);
+			//}
 
 			// copy equirectangular file - we keep it there in full resolution bc we dont yet have an easy way to downsample images.
 			try {

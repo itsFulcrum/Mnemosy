@@ -6,12 +6,7 @@ namespace mnemosy::systems
 	std::filesystem::path LibEntry::GetPathFromRoot()
 	{
 		namespace fs = std::filesystem;
-
-		//fs::path pFromRoot = parent->GetPathFromRoot();
-
-		//fs::path pathRoot = parent->pathFromRoot;
-
-		return parent->GetPathFromRoot() / std::filesystem::path(name);
+		return parent->GetPathFromRoot() / fs::u8path(name);
 	}
 
 
@@ -39,13 +34,13 @@ namespace mnemosy::systems
 			return fs::path();
 		}
 
-		fs::path rootPath = fs::path(this->name);
+		fs::path rootPath = fs::u8path(this->name);
 
 		FolderNode* currParent = this->parent;
 
 		while (!currParent->IsRoot()) {
 
-			rootPath = fs::path(currParent->name) / rootPath;
+			rootPath = fs::u8path(currParent->name) / rootPath;
 
 			currParent = currParent->parent;
 		}

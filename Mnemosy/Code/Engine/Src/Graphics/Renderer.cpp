@@ -285,7 +285,7 @@ namespace mnemosy::graphics
 		
 		m_pPbrShader->Use();
 		
-		bool skyboxHasTextures = skybox.IsColorCubeAssigned();
+		bool skyboxHasTextures = skybox.HasCubemaps();// IsColorCubeAssigned();
 
 		if (skyboxHasTextures) {
 
@@ -294,49 +294,49 @@ namespace mnemosy::graphics
 
 			skybox.GetPrefilterCube().Bind(9);
 			m_pPbrShader->SetUniformInt("_prefilterMap", 9);
+
+			int prefilterMaxMip = log2(skybox.GetPrefilterCube().GetResolution());
+			m_pPbrShader->SetUniformInt("_prefilterMaxMip", prefilterMaxMip);
+
 		
 			m_pPbrShader->SetUniformFloat4("_skyboxColorValue", skybox.color.r, skybox.color.g, skybox.color.b, 1.0f);
 		}
 		else {
-			m_pPbrShader->SetUniformFloat4("_skyboxColorValue", skybox.color.r, skybox.color.g, skybox.color.b, 0.0f);		
+			m_pPbrShader->SetUniformFloat4("_skyboxColorValue", skybox.color.r, skybox.color.g, skybox.color.b, 0.0f);
+			m_pSkyboxShader->SetUniformInt("_prefilterMaxMip", 0);
 		}
 		// set color and let shader know if skyboxes are bound
 
 
 		m_pPbrShader->SetUniformFloat("_skyboxExposure", skybox.exposure);
-
 		m_pPbrShader->SetUniformFloat("_skyboxRotation", sceneSettings.background_rotation);
-
 		m_pPbrShader->SetUniformFloat("_postExposure", sceneSettings.globalExposure);
-
-
-
 
 		m_pSkyboxShader->Use();
 
 		if (skyboxHasTextures) {
 
-			skybox.GetColorCube().Bind(0);
-			m_pSkyboxShader->SetUniformInt("_skybox", 0);
+			//skybox.GetColorCube().Bind(0);
+			//m_pSkyboxShader->SetUniformInt("_skybox", 0);
 			skybox.GetIrradianceCube().Bind(1);
 			m_pSkyboxShader->SetUniformInt("_irradianceMap", 1);
 			skybox.GetPrefilterCube().Bind(2);
 			m_pSkyboxShader->SetUniformInt("_prefilterMap", 2);
 
+			int prefilterMaxMip = log2(skybox.GetPrefilterCube().GetResolution());
+			m_pSkyboxShader->SetUniformInt("_prefilterMaxMip", prefilterMaxMip);
 
 			m_pSkyboxShader->SetUniformFloat4("_skyboxColorValue",skybox.color.r, skybox.color.g, skybox.color.b, 1.0f);
 		}
 		else {
 
 			m_pSkyboxShader->SetUniformFloat4("_skyboxColorValue",skybox.color.r, skybox.color.g, skybox.color.b, 0.0f);
+
+			m_pSkyboxShader->SetUniformInt("_prefilterMaxMip", 0);
 		}
 
 
 		m_pSkyboxShader->SetUniformFloat("_postExposure", sceneSettings.globalExposure);
-
-
-
-
 		m_pSkyboxShader->SetUniformFloat("_exposure", skybox.exposure);
 
 		m_pSkyboxShader->SetUniformFloat("_rotation", sceneSettings.background_rotation);
@@ -740,14 +740,18 @@ namespace mnemosy::graphics
 
 
 		m_pSkyboxShader->Use();
-		if (skyboxMaterial.IsColorCubeAssigned()) {
-			skyboxMaterial.GetColorCube().Bind(0);
-			m_pSkyboxShader->SetUniformInt("_skybox", 0);
+		if (skyboxMaterial.HasCubemaps()) {
+			//skyboxMaterial.GetColorCube().Bind(0);
+			//m_pSkyboxShader->SetUniformInt("_skybox", 0);
 			skyboxMaterial.GetIrradianceCube().Bind(1);
 			m_pSkyboxShader->SetUniformInt("_irradianceMap", 1);
 			skyboxMaterial.GetPrefilterCube().Bind(2);
 			m_pSkyboxShader->SetUniformInt("_prefilterMap", 2);
 			
+			int prefilterMaxMip = 0; // since we dont use blurring for thumbnails we can just set this to 0  log2(skyboxMaterial.GetPrefilterCube().GetResolution());
+			m_pSkyboxShader->SetUniformInt("_prefilterMaxMip", prefilterMaxMip);
+
+
 			m_pSkyboxShader->SetUniformFloat4("_skyboxColorValue", skyboxMaterial.color.r, skyboxMaterial.color.g, skyboxMaterial.color.b, 1.0f);
 		}
 		else {

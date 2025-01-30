@@ -12,7 +12,7 @@
 
 #include <filesystem>
 #include <glad/glad.h>
-
+#include <math.h>
 
 namespace mnemosy::graphics
 {
@@ -127,7 +127,7 @@ namespace mnemosy::graphics
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 
-		MNEMOSY_DEBUG("Rendered Equirectangular to Irradiance..");
+		MNEMOSY_TRACE("Rendered Equirectangular to Irradiance..");
 
 		EndCubemapRendering();
 	}
@@ -155,12 +155,16 @@ namespace mnemosy::graphics
 		glBindVertexArray(m_unitCube->meshes[0].vertexArrayObject);
 
 		unsigned int maxMipLevels = 8; // is dependent on prefilter resolution of 512
-		for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+		
+		maxMipLevels = log2(resolution);
+
+
+		for (unsigned int mip = 0; mip < maxMipLevels; mip++)
 		{
 			unsigned int mipRes = int(resolution * std::pow(0.5, mip));
 			glViewport(0, 0, mipRes, mipRes);
 
-			float roughness = float(mip) / float(maxMipLevels - 2); // 6
+			float roughness = float(mip) / float(maxMipLevels - 2); // 7
 
 
 			m_imagedBasedLightingShader->SetUniformFloat("_roughness", roughness);
@@ -185,7 +189,7 @@ namespace mnemosy::graphics
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
 
-		MNEMOSY_DEBUG("Rendered Equirectangular to Prefilter..");
+		MNEMOSY_TRACE("Rendered Equirectangular to Prefilter..");
 
 		EndCubemapRendering();
 	}

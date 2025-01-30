@@ -9,6 +9,7 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/Utils/StringUtils.h"
 
 
 
@@ -21,10 +22,6 @@
 #include <shobjidl_core.h>
 //#include <shlobj_core.h>
 #include <Shellapi.h>
-
-
-
-
 
 namespace mnemosy::core
 {	
@@ -46,7 +43,11 @@ namespace mnemosy::core
 			//std::string str = std::string(ofn.lpstrFile);
 			//return std::filesystem::u8path(str);
 
-			return std::filesystem::u8path(ofn.lpstrFile);
+			// make sure we import path as ut8 encoded paths
+			std::string str = std::string(ofn.lpstrFile);
+			str = core::StringUtils::string_fix_u8Encoding(str);
+			std::filesystem::path outPath = std::filesystem::u8path(str);
+			return outPath;
 		}
 
 		return std::filesystem::path();
@@ -67,11 +68,11 @@ namespace mnemosy::core
 		if (GetSaveFileNameA(&ofn) == TRUE)
 		{
 
-			//std::string str = std::string(ofn.lpstrFile);
 
-			//return std::filesystem::u8path(str);
-
-			return std::filesystem::u8path(ofn.lpstrFile);
+			std::string str = std::string(ofn.lpstrFile);
+			str = core::StringUtils::string_fix_u8Encoding(str);
+			std::filesystem::path outPath = std::filesystem::u8path(str);
+			return outPath;
 		}
 		
 		return std::filesystem::path();
@@ -101,7 +102,9 @@ namespace mnemosy::core
 
 					//hacky string convertion because windows is stupid
 
-					return std::filesystem::path(g_path);
+					std::string gPath = std::filesystem::path(g_path).generic_string();
+					gPath = core::StringUtils::string_fix_u8Encoding(gPath);
+					return std::filesystem::u8path(gPath);
 				}
 			}
 			pfd->Release();
@@ -112,9 +115,15 @@ namespace mnemosy::core
 
 	bool FileDialogs::OpenFolderAt(const std::filesystem::path& folderPath) {
 
-		if (std::filesystem::exists(folderPath) && std::filesystem::is_directory(folderPath)) {
+		// make sure that path has the correct utf8 encoding.
+		std::string folderPathString = folderPath.generic_string();
+		folderPathString = core::StringUtils::string_fix_u8Encoding(folderPathString);
+		std::filesystem::path p = std::filesystem::u8path(folderPathString);
 
-			ShellExecute(NULL, "open", folderPath.generic_string().c_str(), NULL, NULL, SW_SHOWNORMAL);
+
+		if (std::filesystem::exists(p) && std::filesystem::is_directory(p)) {
+
+			ShellExecute(NULL, "open", p.generic_string().c_str(), NULL, NULL, SW_SHOWNORMAL);
 			return true;
 
 		}

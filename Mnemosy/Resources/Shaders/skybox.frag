@@ -23,7 +23,7 @@ in vec4 fragPos;
 uniform float _postExposure;
 
 
-uniform samplerCube _skybox;
+//uniform samplerCube _skybox;
 uniform samplerCube _irradianceMap;
 uniform samplerCube _prefilterMap;
 
@@ -35,7 +35,7 @@ uniform float _opacity;
 uniform float _gradientOpacity;
 uniform float _blurRadius;
 uniform int   _blurSteps;
-
+uniform int _prefilterMaxMip;
 
 
 out vec4 fragmentOutputColor;
@@ -46,17 +46,77 @@ void main()
   vec4 skyboxColor = vec4(0.0f,0.0f,0.0f,1.0f);
 
 
-  int maxLod = 8; // get max lod as uniform because it depends on skybox resolution.
+  int maxLod = _prefilterMaxMip -2; // get max lod as uniform because it depends on skybox resolution.
 
-  float sampleLOD =   saturate(_blurRadius) * float(maxLod);
-  skyboxColor.rgb = textureLod(_skybox, cubeMapSampleVector, sampleLOD).rgb;
+  // running this through a ease because prefilter drops exponentially so blurring with 0-1 range doesn't feel like linear blurr increase.
+  float blurFactor = _blurRadius * _blurRadius;
+
+
+
+  float sampleLOD = saturate(blurFactor) * float(maxLod);
+  //skyboxColor.rgb = textureLod(_prefilterMap, cubeMapSampleVector, sampleLOD).rgb;
+
+
+
+
+
+  int samples = int (25.0f * ( pow(-_blurRadius,3)+1.0f )  );
+
+  if(_blurRadius < 0.001f){
+    samples = 0;
+  }
+
+  // main sample has a weight of 1.
+  vec3 skyColorBlur = textureLod(_prefilterMap, cubeMapSampleVector, sampleLOD).rgb;
+  float totalWeight = 1.0f;
+
+
+  vec3 cubeSampleUpRight = normalize(cubeSampleUp + cubeSampleRight);
+  vec3 cubeSampleUpLeft = normalize(cubeSampleUp +  -cubeSampleRight);
+
+
+  for(int i = 1; i < samples; i++){
+
+
+    float weight = float(i) / float(samples);
+
+    float offset = weight * blurFactor;
+
+    vec3 north      = normalize(cubeMapSampleVector + (cubeSampleUp      * offset) );
+    vec3 northEast  = normalize(cubeMapSampleVector + (cubeSampleUpRight * offset) );
+    vec3 east       = normalize(cubeMapSampleVector + (cubeSampleRight  * offset) );
+    vec3 southEast  = normalize(cubeMapSampleVector + (-cubeSampleUpLeft  * offset) );
+    vec3 south      = normalize(cubeMapSampleVector + (-cubeSampleUp    * offset) );
+    vec3 southWest  = normalize(cubeMapSampleVector + (-cubeSampleUpRight    * offset) );
+    vec3 west       = normalize(cubeMapSampleVector + (-cubeSampleRight * offset) );
+    vec3 northWest  = normalize(cubeMapSampleVector + (cubeSampleUpLeft * offset) );
+
+    weight = 1.0f - weight;
+
+    skyColorBlur += textureLod(_prefilterMap, north, sampleLOD).rgb * weight;
+    skyColorBlur += textureLod(_prefilterMap, northEast, sampleLOD).rgb * weight;
+    skyColorBlur += textureLod(_prefilterMap, east, sampleLOD).rgb  * weight;
+    skyColorBlur += textureLod(_prefilterMap, southEast, sampleLOD).rgb  * weight;
+    skyColorBlur += textureLod(_prefilterMap, south, sampleLOD).rgb * weight;
+    skyColorBlur += textureLod(_prefilterMap, southWest, sampleLOD).rgb  * weight;
+    skyColorBlur += textureLod(_prefilterMap, west, sampleLOD).rgb  * weight;
+    skyColorBlur += textureLod(_prefilterMap, northWest, sampleLOD).rgb  * weight;
+
+    totalWeight += (weight * 8);
+  }
+
+
+
+  skyboxColor.rgb = skyColorBlur.rgb  / totalWeight;
+
+
+ //skyboxColor.rgb = textureLod(_prefilterMap, cubeMapSampleVector, sampleLOD).rgb;
+
 
 
 
 
   skyboxColor.rgb = lerp(_skyboxColorValue.rgb , skyboxColor.rgb,_skyboxColorValue.w);
-
-
   skyboxColor = applyExposure(skyboxColor,_exposure);
 
 

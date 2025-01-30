@@ -22,11 +22,13 @@ namespace mnemosy::graphics
 		void AssignCubemap(Cubemap* cubemap, CubemapType type);
 		void RemoveAllCubemaps();
 
-		bool IsColorCubeAssigned()		{ return m_colorCubemap; }
+		bool HasCubemaps() { return IsIrradianceCubeAssigned() && IsPrefilterCubeAssigned(); }
+
+		//bool IsColorCubeAssigned()		{ return m_colorCubemap; }
 		bool IsIrradianceCubeAssigned() { return m_irradianceCubemap; }
 		bool IsPrefilterCubeAssigned()	{ return m_prefilterCubemap; }
 
-		Cubemap& GetColorCube()      { return *m_colorCubemap; }
+		//Cubemap& GetColorCube()      { return *m_colorCubemap; }
 		Cubemap& GetIrradianceCube() { return *m_irradianceCubemap; }
 		Cubemap& GetPrefilterCube()  { return *m_prefilterCubemap; }
 
@@ -40,7 +42,7 @@ namespace mnemosy::graphics
 		float exposure = 0.0f;
 
 	private:
-		Cubemap* m_colorCubemap = nullptr;
+		//Cubemap* m_colorCubemap = nullptr;
 		Cubemap* m_irradianceCubemap = nullptr;
 		Cubemap* m_prefilterCubemap = nullptr;
 

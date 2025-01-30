@@ -78,7 +78,7 @@ namespace mnemosy::systems {
 
 		namespace fs = std::filesystem;
 
-		fs::path thumbnailAbsolutePath = systems::LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::path(libEntry->name + "_thumbnail.ktx2");
+		fs::path thumbnailAbsolutePath = systems::LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::u8path(libEntry->name + "_thumbnail.ktx2");
 
 
 		graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();

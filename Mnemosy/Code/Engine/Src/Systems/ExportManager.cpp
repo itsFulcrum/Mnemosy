@@ -280,7 +280,7 @@ namespace mnemosy::systems
 						}
 						catch (fs::filesystem_error error) {
 
-							MNEMOSY_WARN("ExportManager::ExportMaterialTextures: System error copying files. \nError Message: {}", error.what())
+							MNEMOSY_WARN("ExportManager::ExportMaterialTextures: System error copying files. \nError Message: {}", error.what());
 						}
 					}
 					// otherwise we must generate a gl textuere first
@@ -340,7 +340,7 @@ namespace mnemosy::systems
 		namespace fs = std::filesystem;
 
 
-		if (skyboxMat.IsColorCubeAssigned()) {
+		if (skyboxMat.HasCubemaps()) {
 
 
 			// first load the hdr equirectangular

@@ -1316,7 +1316,7 @@ namespace mnemosy::gui
 		m_isSkyboxLoadButtonHovered = ImGui::IsItemHovered();
 
 
-		bool textureAssigned = skyboxMat->IsColorCubeAssigned();
+		bool textureAssigned = skyboxMat->HasCubemaps();// IsColorCubeAssigned();
 
 		// we cant merge this with the below if statement because the button can change the state of the texture assigned bool
 		if (textureAssigned) {
@@ -1330,28 +1330,27 @@ namespace mnemosy::gui
 			}
 		}
 
-		if (textureAssigned) {
+		// atm we dont have a propper way of accessing the original resolution because prefitler is constant 1024.
+		/*if (textureAssigned) {
 
-			std::string res = std::to_string(skyboxMat->GetColorCube().GetResolution());
+			std::string res = std::to_string(skyboxMat->GetPrefilterCube().GetResolution());
 
 			std::string resolution = "Resolution: " + res + "x" + res + "px";
 			ImGui::Text(resolution.c_str());
 
 
-		}
+		}*/
 
 		ImGui::Spacing();
 		ImGui::Spacing();
 
 		// color,
-		
-
 		if (ImGui::ColorEdit3("Color", (float*)&skyboxMat->color)) {
 			m_valuesChanged = true;
 		}
 		// exposure
 
-		if (ImGui::SliderFloat("Exposure", &skyboxMat->exposure, -10.0f, 10.0f, "%.5f")) {
+		if (ImGui::DragFloat("Exposure", &skyboxMat->exposure,0.01f, -10.0f, 10.0f, "%.5f")) {
 			m_valuesChanged = true;
 		}
 
@@ -1362,14 +1361,7 @@ namespace mnemosy::gui
 		if (m_valuesChanged) {
 			MnemosyEngine::GetInstance().GetRenderer().SetShaderSkyboxUniforms(MnemosyEngine::GetInstance().GetScene().userSceneSettings,*skyboxMat);
 		}
-
-
-
-
 	}
-
-	// 
-
 
 	// Callback when files are droped into mnemosy
 	void MaterialEditorGuiPanel::OnFileDropInput(int count, std::vector<std::string>& dropedFilePaths) {
@@ -1413,6 +1405,7 @@ namespace mnemosy::gui
 
 			if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
 
+				// if we drag over the butten it always get loaded even if there is a texture already. if user drags only in the window then we only load the texture if none is loaded already to avoid accidental and unwanted deletions by users.
 				if (m_isUnlitLoadButtonHovered) {
 
 					m_materialRegistry.ActiveLibEntry_UnlitMat_LoadTexture(firstPath);
@@ -1486,7 +1479,9 @@ namespace mnemosy::gui
 			}
 			else if (activeEntryType == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 				
-				if (m_isUnlitLoadButtonHovered) {
+				// if we drag over the butten it always get loaded even if there is a texture already. if user drags only in the window then we only load the texture if none is loaded already to avoid accidental and unwanted deletions by users.
+
+				if (m_isSkyboxLoadButtonHovered) {
 
 					m_materialRegistry.ActiveLibEntry_Skybox_LoadTexture(firstPath);
 					SaveMaterial();
@@ -1494,23 +1489,17 @@ namespace mnemosy::gui
 				}
 
 				// we do the same thing but with out the butten but the only if no texture is assigned yet
-
-				if (!MnemosyEngine::GetInstance().GetScene().GetSkybox().IsColorCubeAssigned()) {
+				if (!MnemosyEngine::GetInstance().GetScene().GetSkybox().HasCubemaps()) {
 					m_materialRegistry.ActiveLibEntry_Skybox_LoadTexture(firstPath);
 					SaveMaterial();
 					return;
-
 				}
 				else {
 				
 					MNEMOSY_WARN("A texture is already loaded in the material, to avoid accidental deletions of textures you should delete the texture from the material slot first or drag it directly over the load button.");
 				
 				}
-
-
-
-			}
-			
+			}		
 
 		}
 
@@ -1546,17 +1535,32 @@ namespace mnemosy::gui
 					graphics::PBRTextureType type = graphics::TexUtil::get_PBRTextureType_from_filename(filenameString);
 
 
+
 					if (type != graphics::MNSY_TEXTURE_NONE && type != graphics::MNSY_TEXTURE_COUNT) {
 
 
 						//std::string typeString = graphics::TextureDefinitions::GetTextureNameFromEnumType(type);
 						//MNEMOSY_TRACE("FileDrop: {}, Matches Type: {} Path: {}", filenameString,typeString, filepath.generic_string());
+						bool textureIsInThisSlot = activeMat.IsTextureTypeAssigned(type);
 
-						m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(type, filepath);
+
+						if (!textureIsInThisSlot) {
+							m_materialRegistry.ActiveLibEntry_PbrMat_LoadTexture(type, filepath);
+						} 
+						else {
+
+							std::string typeString = graphics::TexUtil::get_string_from_PBRTextureType(type);
+							MNEMOSY_WARN("A texture is already loaded in the material slot {}, to avoid accidental deletions of textures you should delete the texture from the material slot {} first or drag it directly over the respective load button.", typeString, typeString);
+						}					
 					}
 					else {
-						MNEMOSY_WARN("Could not determine pbr type for texture with name: {}, {}", filename.generic_string(), filepath.generic_string());
+						MNEMOSY_WARN("Could not determine pbr type for texture with name: {}, {}", filename.generic_string(), filepath.generic_string());					
 					}
+
+					
+
+
+
 
 					SaveMaterial();
 				}

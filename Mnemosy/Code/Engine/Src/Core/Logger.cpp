@@ -10,6 +10,7 @@
 namespace mnemosy::core
 {
 	Logger::Logger() {
+
 		consoleSink = std::make_shared<spdlog::sinks::stderr_color_sink_mt>();
 		
 		

@@ -25,15 +25,15 @@ namespace mnemosy::graphics
 	{
 		switch (type)
 		{
-		case mnemosy::graphics::MNSY_CUBEMAP_TYPE_COLOR:
+		//case mnemosy::graphics::MNSY_CUBEMAP_TYPE_COLOR:
 
-			if (m_colorCubemap) {
-				delete m_colorCubemap;
+		//	if (m_colorCubemap) {
+		//		delete m_colorCubemap;
 
-			}
-			m_colorCubemap = cubemap;
+		//	}
+		//	m_colorCubemap = cubemap;
 
-			break;
+		//	break;
 		case mnemosy::graphics::MNSY_CUBEMAP_TYPE_IRRADIANCE:
 
 			if (m_irradianceCubemap) {
@@ -65,10 +65,10 @@ namespace mnemosy::graphics
 	void Skybox::RemoveAllCubemaps()
 	{
 
-		if (m_colorCubemap) {
+		/*if (m_colorCubemap) {
 			delete m_colorCubemap;
 			m_colorCubemap = nullptr;
-		}
+		}*/
 
 		if (m_irradianceCubemap) {
 			delete m_irradianceCubemap;

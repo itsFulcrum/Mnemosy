@@ -8,7 +8,7 @@
 
 //const float LIGHTING_PI = 3.14159265359;
 //const float DIALECTRIC_F0 = 0.04f;
-const float MAX_REFLECTION_LOD = 7.0;
+const float MAX_REFLECTION_LOD = 8.0;
 
 struct SurfaceData
 {

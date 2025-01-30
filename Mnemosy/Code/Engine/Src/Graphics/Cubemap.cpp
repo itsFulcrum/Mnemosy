@@ -36,25 +36,34 @@ namespace mnemosy::graphics
 		// set resolution of the cubemap type
 		unsigned int resolution = 1024;
 
-		if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_COLOR) {
+		//if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_COLOR) {
 
-			// we are assuming her that a standard equirectangular texture provided will aspect ration of 
-			// 2:1 where width has double the pixels of height,
-			// therefore we will use height as skybox resolution because higher values will not contain more information than that.
+		//	// we are assuming her that a standard equirectangular texture provided will aspect ration of 
+		//	// 2:1 where width has double the pixels of height,
+		//	// therefore we will use height as skybox resolution because higher values will not contain more information than that.
 
-			if (overrideTexResolution && _resolution > 0) {
-				resolution = _resolution;
-			}
-			else {
-				resolution = equirectangularTex.GetHeight();
-			}
+		//	if (overrideTexResolution && _resolution > 0) {
+		//		resolution = _resolution;
+		//	}
+		//	else {
+		//		resolution = equirectangularTex.GetHeight();
+		//	}
 
-		}
-		else if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE) {
+		//}
+		if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE) {
 			resolution = 64;
 		}
 		else if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER) {
-			resolution = 512;
+
+			resolution = 1024;
+			
+			///if (overrideTexResolution && _resolution > 0) {
+			///	resolution = _resolution;
+			///}
+			///else {
+			///	resolution = equirectangularTex.GetHeight();
+			///}
+
 		}
 		m_resolution = resolution;
 
@@ -89,11 +98,11 @@ namespace mnemosy::graphics
 		// Generate Convolution maps
 		ImageBasedLightingRenderer& ibl_Renderer = MnemosyEngine::GetInstance().GetIblRenderer();
 		
-		if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_COLOR) {
+		/*if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_COLOR) {
 
 			MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToCubemapTexture(m_gl_ID, equirectangularTex.GetID(), resolution,true);
-		}
-		else if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE) {
+		}*/
+		if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE) {
 			
 			MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToIrradianceCubemapTexture( m_gl_ID, equirectangularTex.GetID(), resolution,true);		
 		}

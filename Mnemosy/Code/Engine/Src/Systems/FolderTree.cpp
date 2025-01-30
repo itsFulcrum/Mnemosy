@@ -333,23 +333,6 @@ namespace mnemosy::systems {
 		node = nullptr;
 	}
 
-	/*
-	void FolderTree::RecursivUpdatePathFromRoot(FolderNode* node) {
-
-		if (node->parent->IsRoot()) {
-			node->pathFromRoot = std::filesystem::path(node->name);
-		}
-		else {
-			node->pathFromRoot = node->parent->pathFromRoot / std::filesystem::path(node->name);
-		}
-
-		if (!node->IsLeafNode()) {
-			for (FolderNode* child : node->subNodes) {
-				RecursivUpdatePathFromRoot(child);
-			}
-		}
-	}
-	*/
 
 	bool FolderTree::RecursivDoesNameExist(FolderNode* node, const std::string& name) {
 
@@ -426,18 +409,19 @@ namespace mnemosy::systems {
 
 	}
 
+
 	nlohmann::json FolderTree::RecursivWriteToJson(FolderNode* node) {
 
-		nlohmann::json nodeJson;
+		nlohmann::json nodeJson;	
 
-		
-		nodeJson[jsonLibKey_name] = node->name;
+
+		nodeJson[jsonLibKey_name] = core::StringUtils::string_fix_u8Encoding(node->name);
 
 		bool isLeafNode = node->IsLeafNode();
 		nodeJson[jsonLibKey_isLeaf] = isLeafNode;
 
 
-		std::filesystem::path pathRoot = node->GetPathFromRoot();
+		std::filesystem::path pathRoot =  node->GetPathFromRoot();
 
 		std::string pathFromRoot;
 
@@ -461,7 +445,7 @@ namespace mnemosy::systems {
 		//	}
 		//}
 
-		nodeJson[jsonLibKey_pathFromRoot] = pathFromRoot;
+		nodeJson[jsonLibKey_pathFromRoot] = core::StringUtils::string_fix_u8Encoding(pathFromRoot);
 
 		bool hasMaterials = !node->subEntries.empty();
 
@@ -472,7 +456,9 @@ namespace mnemosy::systems {
 			std::vector<int> entryTypes;
 
 			for (unsigned int i = 0; i < node->subEntries.size(); i++) {
-				entryNames.push_back(node->subEntries[i]->name);
+
+				std::string u8 = core::StringUtils::string_fix_u8Encoding(node->subEntries[i]->name);
+				entryNames.push_back(u8);
 				entryTypes.push_back((int)node->subEntries[i]->type);
 			}
 
@@ -485,9 +471,13 @@ namespace mnemosy::systems {
 		if (!isLeafNode) {
 			std::vector<std::string> subNodeNames;
 
+
+
+
 			for (unsigned int i = 0; i < node->subNodes.size(); i++) {
 
-				subNodeNames.push_back(node->subNodes[i]->name);
+				std::string u8 = core::StringUtils::string_fix_u8Encoding(node->subNodes[i]->name);
+				subNodeNames.push_back(u8);
 			}
 			nodeJson[jsonLibKey_subFolderNames] = subNodeNames;
 
