@@ -1442,10 +1442,10 @@ typedef ZSTD_ErrorCode ERR_enum;
 *  Error codes handling
 ******************************************/
 #undef ERROR   /* already defined on Visual Studio */
-#define ERROR(name) ZSTD_ERROR(name)
+#define LEVEL_ERROR(name) ZSTD_ERROR(name)
 #define ZSTD_ERROR(name) ((size_t)-PREFIX(name))
 
-ERR_STATIC unsigned ERR_isError(size_t code) { return (code > ERROR(maxCode)); }
+ERR_STATIC unsigned ERR_isError(size_t code) { return (code > LEVEL_ERROR(maxCode)); }
 
 ERR_STATIC ERR_enum ERR_getErrorCode(size_t code) { if (!ERR_isError(code)) return (ERR_enum)0; return (ERR_enum) (0-code); }
 
@@ -1502,11 +1502,11 @@ void _force_has_format_string(const char *format, ...) {
 #define RETURN_ERROR_IF(cond, err, ...) \
   if (cond) { \
     RAWLOG(3, "%s:%d: ERROR!: check %s failed, returning %s", \
-           __FILE__, __LINE__, ERR_QUOTE(cond), ERR_QUOTE(ERROR(err))); \
+           __FILE__, __LINE__, ERR_QUOTE(cond), ERR_QUOTE(LEVEL_ERROR(err))); \
     _FORCE_HAS_FORMAT_STRING(__VA_ARGS__); \
     RAWLOG(3, ": " __VA_ARGS__); \
     RAWLOG(3, "\n"); \
-    return ERROR(err); \
+    return LEVEL_ERROR(err); \
   }
 
 /**
@@ -1517,11 +1517,11 @@ void _force_has_format_string(const char *format, ...) {
 #define RETURN_ERROR(err, ...) \
   do { \
     RAWLOG(3, "%s:%d: ERROR!: unconditional check failed, returning %s", \
-           __FILE__, __LINE__, ERR_QUOTE(ERROR(err))); \
+           __FILE__, __LINE__, ERR_QUOTE(LEVEL_ERROR(err))); \
     _FORCE_HAS_FORMAT_STRING(__VA_ARGS__); \
     RAWLOG(3, ": " __VA_ARGS__); \
     RAWLOG(3, "\n"); \
-    return ERROR(err); \
+    return LEVEL_ERROR(err); \
   } while(0);
 
 /**
@@ -2147,7 +2147,7 @@ MEM_STATIC size_t BIT_initCStream(BIT_CStream_t* bitC,
     bitC->startPtr = (char*)startPtr;
     bitC->ptr = bitC->startPtr;
     bitC->endPtr = bitC->startPtr + dstCapacity - sizeof(bitC->bitContainer);
-    if (dstCapacity <= sizeof(bitC->bitContainer)) return ERROR(dstSize_tooSmall);
+    if (dstCapacity <= sizeof(bitC->bitContainer)) return LEVEL_ERROR(dstSize_tooSmall);
     return 0;
 }
 
@@ -2240,7 +2240,7 @@ MEM_STATIC size_t BIT_closeCStream(BIT_CStream_t* bitC)
  */
 MEM_STATIC size_t BIT_initDStream(BIT_DStream_t* bitD, const void* srcBuffer, size_t srcSize)
 {
-    if (srcSize < 1) { ZSTD_memset(bitD, 0, sizeof(*bitD)); return ERROR(srcSize_wrong); }
+    if (srcSize < 1) { ZSTD_memset(bitD, 0, sizeof(*bitD)); return LEVEL_ERROR(srcSize_wrong); }
 
     bitD->start = (const char*)srcBuffer;
     bitD->limitPtr = bitD->start + sizeof(bitD->bitContainer);
@@ -2250,7 +2250,7 @@ MEM_STATIC size_t BIT_initDStream(BIT_DStream_t* bitD, const void* srcBuffer, si
         bitD->bitContainer = MEM_readLEST(bitD->ptr);
         { BYTE const lastByte = ((const BYTE*)srcBuffer)[srcSize-1];
           bitD->bitsConsumed = lastByte ? 8 - ZSTD_highbit32(lastByte) : 0;  /* ensures bitsConsumed is always set */
-          if (lastByte == 0) return ERROR(GENERIC); /* endMark not present */ }
+          if (lastByte == 0) return LEVEL_ERROR(GENERIC); /* endMark not present */ }
     } else {
         bitD->ptr   = bitD->start;
         bitD->bitContainer = *(const BYTE*)(bitD->start);
@@ -2278,7 +2278,7 @@ MEM_STATIC size_t BIT_initDStream(BIT_DStream_t* bitD, const void* srcBuffer, si
         }
         {   BYTE const lastByte = ((const BYTE*)srcBuffer)[srcSize-1];
             bitD->bitsConsumed = lastByte ? 8 - ZSTD_highbit32(lastByte) : 0;
-            if (lastByte == 0) return ERROR(corruption_detected);  /* endMark not present */
+            if (lastByte == 0) return LEVEL_ERROR(corruption_detected);  /* endMark not present */
         }
         bitD->bitsConsumed += (U32)(sizeof(bitD->bitContainer) - srcSize)*8;
     }
@@ -3145,7 +3145,7 @@ size_t FSE_readNCount_body(short* normalizedCounter, unsigned* maxSVPtr, unsigne
         {   size_t const countSize = FSE_readNCount(normalizedCounter, maxSVPtr, tableLogPtr,
                                                     buffer, sizeof(buffer));
             if (FSE_isError(countSize)) return countSize;
-            if (countSize > hbSize) return ERROR(corruption_detected);
+            if (countSize > hbSize) return LEVEL_ERROR(corruption_detected);
             return countSize;
     }   }
     assert(hbSize >= 8);
@@ -3154,7 +3154,7 @@ size_t FSE_readNCount_body(short* normalizedCounter, unsigned* maxSVPtr, unsigne
     ZSTD_memset(normalizedCounter, 0, (*maxSVPtr+1) * sizeof(normalizedCounter[0]));   /* all symbols not present in NCount have a frequency of 0 */
     bitStream = MEM_readLE32(ip);
     nbBits = (bitStream & 0xF) + FSE_MIN_TABLELOG;   /* extract tableLog */
-    if (nbBits > FSE_TABLELOG_ABSOLUTE_MAX) return ERROR(tableLog_tooLarge);
+    if (nbBits > FSE_TABLELOG_ABSOLUTE_MAX) return LEVEL_ERROR(tableLog_tooLarge);
     bitStream >>= 4;
     bitCount = 4;
     *tableLogPtr = nbBits;
@@ -3260,10 +3260,10 @@ size_t FSE_readNCount_body(short* normalizedCounter, unsigned* maxSVPtr, unsigne
             }
             bitStream = MEM_readLE32(ip) >> bitCount;
     }   }
-    if (remaining != 1) return ERROR(corruption_detected);
+    if (remaining != 1) return LEVEL_ERROR(corruption_detected);
     /* Only possible when there are too many zeros. */
-    if (charnum > maxSV1) return ERROR(maxSymbolValue_tooSmall);
-    if (bitCount > 32) return ERROR(corruption_detected);
+    if (charnum > maxSV1) return LEVEL_ERROR(maxSymbolValue_tooSmall);
+    if (bitCount > 32) return LEVEL_ERROR(corruption_detected);
     *maxSVPtr = charnum-1;
 
     ip += (bitCount+7)>>3;
@@ -3335,15 +3335,15 @@ HUF_readStats_body(BYTE* huffWeight, size_t hwSize, U32* rankStats,
     size_t iSize;
     size_t oSize;
 
-    if (!srcSize) return ERROR(srcSize_wrong);
+    if (!srcSize) return LEVEL_ERROR(srcSize_wrong);
     iSize = ip[0];
     /* ZSTD_memset(huffWeight, 0, hwSize);   *//* is not necessary, even though some analyzer complain ... */
 
     if (iSize >= 128) {  /* special header */
         oSize = iSize - 127;
         iSize = ((oSize+1)/2);
-        if (iSize+1 > srcSize) return ERROR(srcSize_wrong);
-        if (oSize >= hwSize) return ERROR(corruption_detected);
+        if (iSize+1 > srcSize) return LEVEL_ERROR(srcSize_wrong);
+        if (oSize >= hwSize) return LEVEL_ERROR(corruption_detected);
         ip += 1;
         {   U32 n;
             for (n=0; n<oSize; n+=2) {
@@ -3351,7 +3351,7 @@ HUF_readStats_body(BYTE* huffWeight, size_t hwSize, U32* rankStats,
                 huffWeight[n+1] = ip[n/2] & 15;
     }   }   }
     else  {   /* header compressed with FSE (normal case) */
-        if (iSize+1 > srcSize) return ERROR(srcSize_wrong);
+        if (iSize+1 > srcSize) return LEVEL_ERROR(srcSize_wrong);
         /* max (hwSize-1) values decoded, as last one is implied */
         oSize = FSE_decompress_wksp_bmi2(huffWeight, hwSize-1, ip+1, iSize, 6, workSpace, wkspSize, bmi2);
         if (FSE_isError(oSize)) return oSize;
@@ -3361,28 +3361,28 @@ HUF_readStats_body(BYTE* huffWeight, size_t hwSize, U32* rankStats,
     ZSTD_memset(rankStats, 0, (HUF_TABLELOG_MAX + 1) * sizeof(U32));
     weightTotal = 0;
     {   U32 n; for (n=0; n<oSize; n++) {
-            if (huffWeight[n] > HUF_TABLELOG_MAX) return ERROR(corruption_detected);
+            if (huffWeight[n] > HUF_TABLELOG_MAX) return LEVEL_ERROR(corruption_detected);
             rankStats[huffWeight[n]]++;
             weightTotal += (1 << huffWeight[n]) >> 1;
     }   }
-    if (weightTotal == 0) return ERROR(corruption_detected);
+    if (weightTotal == 0) return LEVEL_ERROR(corruption_detected);
 
     /* get last non-null symbol weight (implied, total must be 2^n) */
     {   U32 const tableLog = ZSTD_highbit32(weightTotal) + 1;
-        if (tableLog > HUF_TABLELOG_MAX) return ERROR(corruption_detected);
+        if (tableLog > HUF_TABLELOG_MAX) return LEVEL_ERROR(corruption_detected);
         *tableLogPtr = tableLog;
         /* determine last weight */
         {   U32 const total = 1 << tableLog;
             U32 const rest = total - weightTotal;
             U32 const verif = 1 << ZSTD_highbit32(rest);
             U32 const lastWeight = ZSTD_highbit32(rest) + 1;
-            if (verif != rest) return ERROR(corruption_detected);    /* last value must be a clean power of 2 */
+            if (verif != rest) return LEVEL_ERROR(corruption_detected);    /* last value must be a clean power of 2 */
             huffWeight[oSize] = (BYTE)lastWeight;
             rankStats[lastWeight]++;
     }   }
 
     /* check tree construction validity */
-    if ((rankStats[1] < 2) || (rankStats[1] & 1)) return ERROR(corruption_detected);   /* by construction : at least 2 elts of rank 1, must be even */
+    if ((rankStats[1] < 2) || (rankStats[1] & 1)) return LEVEL_ERROR(corruption_detected);   /* by construction : at least 2 elts of rank 1, must be even */
 
     /* results */
     *nbSymbolsPtr = (U32)(oSize+1);
@@ -3559,9 +3559,9 @@ static size_t FSE_buildDTable_internal(FSE_DTable* dt, const short* normalizedCo
     U32 highThreshold = tableSize-1;
 
     /* Sanity Checks */
-    if (FSE_BUILD_DTABLE_WKSP_SIZE(tableLog, maxSymbolValue) > wkspSize) return ERROR(maxSymbolValue_tooLarge);
-    if (maxSymbolValue > FSE_MAX_SYMBOL_VALUE) return ERROR(maxSymbolValue_tooLarge);
-    if (tableLog > FSE_MAX_TABLELOG) return ERROR(tableLog_tooLarge);
+    if (FSE_BUILD_DTABLE_WKSP_SIZE(tableLog, maxSymbolValue) > wkspSize) return LEVEL_ERROR(maxSymbolValue_tooLarge);
+    if (maxSymbolValue > FSE_MAX_SYMBOL_VALUE) return LEVEL_ERROR(maxSymbolValue_tooLarge);
+    if (tableLog > FSE_MAX_TABLELOG) return LEVEL_ERROR(tableLog_tooLarge);
 
     /* Init, lay down lowprob symbols */
     {   FSE_DTableHeader DTableH;
@@ -3637,7 +3637,7 @@ static size_t FSE_buildDTable_internal(FSE_DTable* dt, const short* normalizedCo
                 position = (position + step) & tableMask;
                 while (position > highThreshold) position = (position + step) & tableMask;   /* lowprob area */
         }   }
-        if (position!=0) return ERROR(GENERIC);   /* position must reach all cells once, otherwise normalizedCounter is incorrect */
+        if (position!=0) return LEVEL_ERROR(GENERIC);   /* position must reach all cells once, otherwise normalizedCounter is incorrect */
     }
 
     /* Build Decoding table */
@@ -3709,14 +3709,14 @@ FORCE_INLINE_TEMPLATE size_t FSE_decompress_usingDTable_generic(
     /* tail */
     /* note : BIT_reloadDStream(&bitD) >= FSE_DStream_partiallyFilled; Ends at exactly BIT_DStream_completed */
     while (1) {
-        if (op>(omax-2)) return ERROR(dstSize_tooSmall);
+        if (op>(omax-2)) return LEVEL_ERROR(dstSize_tooSmall);
         *op++ = FSE_GETSYMBOL(&state1);
         if (BIT_reloadDStream(&bitD)==BIT_DStream_overflow) {
             *op++ = FSE_GETSYMBOL(&state2);
             break;
         }
 
-        if (op>(omax-2)) return ERROR(dstSize_tooSmall);
+        if (op>(omax-2)) return LEVEL_ERROR(dstSize_tooSmall);
         *op++ = FSE_GETSYMBOL(&state2);
         if (BIT_reloadDStream(&bitD)==BIT_DStream_overflow) {
             *op++ = FSE_GETSYMBOL(&state1);
@@ -3745,19 +3745,19 @@ FORCE_INLINE_TEMPLATE size_t FSE_decompress_wksp_body(
     FSE_DecompressWksp* const wksp = (FSE_DecompressWksp*)workSpace;
 
     DEBUG_STATIC_ASSERT((FSE_MAX_SYMBOL_VALUE + 1) % 2 == 0);
-    if (wkspSize < sizeof(*wksp)) return ERROR(GENERIC);
+    if (wkspSize < sizeof(*wksp)) return LEVEL_ERROR(GENERIC);
 
     /* normal FSE decoding mode */
     {
         size_t const NCountLength = FSE_readNCount_bmi2(wksp->ncount, &maxSymbolValue, &tableLog, istart, cSrcSize, bmi2);
         if (FSE_isError(NCountLength)) return NCountLength;
-        if (tableLog > maxLog) return ERROR(tableLog_tooLarge);
+        if (tableLog > maxLog) return LEVEL_ERROR(tableLog_tooLarge);
         assert(NCountLength <= cSrcSize);
         ip += NCountLength;
         cSrcSize -= NCountLength;
     }
 
-    if (FSE_DECOMPRESS_WKSP_SIZE(tableLog, maxSymbolValue) > wkspSize) return ERROR(tableLog_tooLarge);
+    if (FSE_DECOMPRESS_WKSP_SIZE(tableLog, maxSymbolValue) > wkspSize) return LEVEL_ERROR(tableLog_tooLarge);
     assert(sizeof(*wksp) + FSE_DTABLE_SIZE(tableLog) <= wkspSize);
     workSpace = (BYTE*)workSpace + sizeof(*wksp) + FSE_DTABLE_SIZE(tableLog);
     wkspSize -= sizeof(*wksp) + FSE_DTABLE_SIZE(tableLog);
@@ -3864,7 +3864,7 @@ extern "C" {
 #undef ERROR   /* reported already defined on VS 2015 (Rich Geldreich) */
 #include <windows.h>
 #undef ERROR
-#define ERROR(name) ZSTD_ERROR(name)
+#define LEVEL_ERROR(name) ZSTD_ERROR(name)
 
 
 /* mutex */
@@ -14343,7 +14343,7 @@ size_t FSE_buildCTable_wksp(FSE_CTable* ct,
     U32 highThreshold = tableSize-1;
 
     assert(((size_t)workSpace & 1) == 0);  /* Must be 2 bytes-aligned */
-    if (FSE_BUILD_CTABLE_WORKSPACE_SIZE(maxSymbolValue, tableLog) > wkspSize) return ERROR(tableLog_tooLarge);
+    if (FSE_BUILD_CTABLE_WORKSPACE_SIZE(maxSymbolValue, tableLog) > wkspSize) return LEVEL_ERROR(tableLog_tooLarge);
     /* CTable header */
     tableU16[-2] = (U16) tableLog;
     tableU16[-1] = (U16) maxSymbolValue;
@@ -14525,7 +14525,7 @@ FSE_writeNCount_generic (void* header, size_t headerBufferSize,
                 start+=24;
                 bitStream += 0xFFFFU << bitCount;
                 if ((!writeIsSafe) && (out > oend-2))
-                    return ERROR(dstSize_tooSmall);   /* Buffer overflow */
+                    return LEVEL_ERROR(dstSize_tooSmall);   /* Buffer overflow */
                 out[0] = (BYTE) bitStream;
                 out[1] = (BYTE)(bitStream>>8);
                 out+=2;
@@ -14540,7 +14540,7 @@ FSE_writeNCount_generic (void* header, size_t headerBufferSize,
             bitCount += 2;
             if (bitCount>16) {
                 if ((!writeIsSafe) && (out > oend - 2))
-                    return ERROR(dstSize_tooSmall);   /* Buffer overflow */
+                    return LEVEL_ERROR(dstSize_tooSmall);   /* Buffer overflow */
                 out[0] = (BYTE)bitStream;
                 out[1] = (BYTE)(bitStream>>8);
                 out += 2;
@@ -14557,12 +14557,12 @@ FSE_writeNCount_generic (void* header, size_t headerBufferSize,
             bitCount  += nbBits;
             bitCount  -= (count<max);
             previousIs0  = (count==1);
-            if (remaining<1) return ERROR(GENERIC);
+            if (remaining<1) return LEVEL_ERROR(GENERIC);
             while (remaining<threshold) { nbBits--; threshold>>=1; }
         }
         if (bitCount>16) {
             if ((!writeIsSafe) && (out > oend - 2))
-                return ERROR(dstSize_tooSmall);   /* Buffer overflow */
+                return LEVEL_ERROR(dstSize_tooSmall);   /* Buffer overflow */
             out[0] = (BYTE)bitStream;
             out[1] = (BYTE)(bitStream>>8);
             out += 2;
@@ -14571,12 +14571,12 @@ FSE_writeNCount_generic (void* header, size_t headerBufferSize,
     }   }
 
     if (remaining != 1)
-        return ERROR(GENERIC);  /* incorrect normalized distribution */
+        return LEVEL_ERROR(GENERIC);  /* incorrect normalized distribution */
     assert(symbol <= alphabetSize);
 
     /* flush remaining bitStream */
     if ((!writeIsSafe) && (out > oend - 2))
-        return ERROR(dstSize_tooSmall);   /* Buffer overflow */
+        return LEVEL_ERROR(dstSize_tooSmall);   /* Buffer overflow */
     out[0] = (BYTE)bitStream;
     out[1] = (BYTE)(bitStream>>8);
     out+= (bitCount+7) /8;
@@ -14588,8 +14588,8 @@ FSE_writeNCount_generic (void* header, size_t headerBufferSize,
 size_t FSE_writeNCount (void* buffer, size_t bufferSize,
                   const short* normalizedCounter, unsigned maxSymbolValue, unsigned tableLog)
 {
-    if (tableLog > FSE_MAX_TABLELOG) return ERROR(tableLog_tooLarge);   /* Unsupported */
-    if (tableLog < FSE_MIN_TABLELOG) return ERROR(GENERIC);   /* Unsupported */
+    if (tableLog > FSE_MAX_TABLELOG) return LEVEL_ERROR(tableLog_tooLarge);   /* Unsupported */
+    if (tableLog < FSE_MIN_TABLELOG) return LEVEL_ERROR(GENERIC);   /* Unsupported */
 
     if (bufferSize < FSE_NCountWriteBound(maxSymbolValue, tableLog))
         return FSE_writeNCount_generic(buffer, bufferSize, normalizedCounter, maxSymbolValue, tableLog, 0);
@@ -14712,7 +14712,7 @@ static size_t FSE_normalizeM2(short* norm, U32 tableLog, const unsigned* count, 
                 U32 const sEnd = (U32)(end >> vStepLog);
                 U32 const weight = sEnd - sStart;
                 if (weight < 1)
-                    return ERROR(GENERIC);
+                    return LEVEL_ERROR(GENERIC);
                 norm[s] = (short)weight;
                 tmpTotal = end;
     }   }   }
@@ -14726,9 +14726,9 @@ size_t FSE_normalizeCount (short* normalizedCounter, unsigned tableLog,
 {
     /* Sanity checks */
     if (tableLog==0) tableLog = FSE_DEFAULT_TABLELOG;
-    if (tableLog < FSE_MIN_TABLELOG) return ERROR(GENERIC);   /* Unsupported size */
-    if (tableLog > FSE_MAX_TABLELOG) return ERROR(tableLog_tooLarge);   /* Unsupported size */
-    if (tableLog < FSE_minTableLog(total, maxSymbolValue)) return ERROR(GENERIC);   /* Too small tableLog, compression potentially impossible */
+    if (tableLog < FSE_MIN_TABLELOG) return LEVEL_ERROR(GENERIC);   /* Unsupported size */
+    if (tableLog > FSE_MAX_TABLELOG) return LEVEL_ERROR(tableLog_tooLarge);   /* Unsupported size */
+    if (tableLog < FSE_minTableLog(total, maxSymbolValue)) return LEVEL_ERROR(GENERIC);   /* Too small tableLog, compression potentially impossible */
 
     {   static U32 const rtbTable[] = {     0, 473195, 504333, 520860, 550000, 700000, 750000, 830000 };
         short const lowProbCount = useLowProbCount ? -1 : 1;
@@ -15010,7 +15010,7 @@ static size_t HIST_count_parallel_wksp(
 
     {   unsigned maxSymbolValue = 255;
         while (!Counting1[maxSymbolValue]) maxSymbolValue--;
-        if (check && maxSymbolValue > *maxSymbolValuePtr) return ERROR(maxSymbolValue_tooSmall);
+        if (check && maxSymbolValue > *maxSymbolValuePtr) return LEVEL_ERROR(maxSymbolValue_tooSmall);
         *maxSymbolValuePtr = maxSymbolValue;
         ZSTD_memmove(count, Counting1, countSize);   /* in case count & Counting1 are overlapping */
     }
@@ -15028,8 +15028,8 @@ size_t HIST_countFast_wksp(unsigned* count, unsigned* maxSymbolValuePtr,
 {
     if (sourceSize < 1500) /* heuristic threshold */
         return HIST_count_simple(count, maxSymbolValuePtr, source, sourceSize);
-    if ((size_t)workSpace & 3) return ERROR(GENERIC);  /* must be aligned on 4-bytes boundaries */
-    if (workSpaceSize < HIST_WKSP_SIZE) return ERROR(workSpace_tooSmall);
+    if ((size_t)workSpace & 3) return LEVEL_ERROR(GENERIC);  /* must be aligned on 4-bytes boundaries */
+    if (workSpaceSize < HIST_WKSP_SIZE) return LEVEL_ERROR(workSpace_tooSmall);
     return HIST_count_parallel_wksp(count, maxSymbolValuePtr, source, sourceSize, trustInput, (U32*)workSpace);
 }
 
@@ -15040,8 +15040,8 @@ size_t HIST_count_wksp(unsigned* count, unsigned* maxSymbolValuePtr,
                        const void* source, size_t sourceSize,
                        void* workSpace, size_t workSpaceSize)
 {
-    if ((size_t)workSpace & 3) return ERROR(GENERIC);  /* must be aligned on 4-bytes boundaries */
-    if (workSpaceSize < HIST_WKSP_SIZE) return ERROR(workSpace_tooSmall);
+    if ((size_t)workSpace & 3) return LEVEL_ERROR(GENERIC);  /* must be aligned on 4-bytes boundaries */
+    if (workSpaceSize < HIST_WKSP_SIZE) return LEVEL_ERROR(workSpace_tooSmall);
     if (*maxSymbolValuePtr < 255)
         return HIST_count_parallel_wksp(count, maxSymbolValuePtr, source, sourceSize, checkMaxSymbolValue, (U32*)workSpace);
     *maxSymbolValuePtr = 255;
@@ -15224,7 +15224,7 @@ HUF_compressWeights(void* dst, size_t dstSize,
     U32 tableLog = MAX_FSE_TABLELOG_FOR_HUFF_HEADER;
     HUF_CompressWeightsWksp* wksp = (HUF_CompressWeightsWksp*)HUF_alignUpWorkspace(workspace, &workspaceSize, ZSTD_ALIGNOF(U32));
 
-    if (workspaceSize < sizeof(HUF_CompressWeightsWksp)) return ERROR(GENERIC);
+    if (workspaceSize < sizeof(HUF_CompressWeightsWksp)) return LEVEL_ERROR(GENERIC);
 
     /* init conditions */
     if (wtSize <= 1) return 0;  /* Not compressible */
@@ -15306,8 +15306,8 @@ size_t HUF_writeCTable_wksp(void* dst, size_t maxDstSize,
     HUF_STATIC_ASSERT(HUF_CTABLE_WORKSPACE_SIZE >= sizeof(HUF_WriteCTableWksp));
 
     /* check conditions */
-    if (workspaceSize < sizeof(HUF_WriteCTableWksp)) return ERROR(GENERIC);
-    if (maxSymbolValue > HUF_SYMBOLVALUE_MAX) return ERROR(maxSymbolValue_tooLarge);
+    if (workspaceSize < sizeof(HUF_WriteCTableWksp)) return LEVEL_ERROR(GENERIC);
+    if (maxSymbolValue > HUF_SYMBOLVALUE_MAX) return LEVEL_ERROR(maxSymbolValue_tooLarge);
 
     /* convert to weight */
     wksp->bitsToWeight[0] = 0;
@@ -15317,7 +15317,7 @@ size_t HUF_writeCTable_wksp(void* dst, size_t maxDstSize,
         wksp->huffWeight[n] = wksp->bitsToWeight[HUF_getNbBits(ct[n])];
 
     /* attempt weights compression by FSE */
-    if (maxDstSize < 1) return ERROR(dstSize_tooSmall);
+    if (maxDstSize < 1) return LEVEL_ERROR(dstSize_tooSmall);
     {   CHECK_V_F(hSize, HUF_compressWeights(op+1, maxDstSize-1, wksp->huffWeight, maxSymbolValue, &wksp->wksp, sizeof(wksp->wksp)) );
         if ((hSize>1) & (hSize < maxSymbolValue/2)) {   /* FSE compressed */
             op[0] = (BYTE)hSize;
@@ -15325,8 +15325,8 @@ size_t HUF_writeCTable_wksp(void* dst, size_t maxDstSize,
     }   }
 
     /* write raw values as 4-bits (max : 15) */
-    if (maxSymbolValue > (256-128)) return ERROR(GENERIC);   /* should not happen : likely means source cannot be compressed */
-    if (((maxSymbolValue+1)/2) + 1 > maxDstSize) return ERROR(dstSize_tooSmall);   /* not enough space within dst buffer */
+    if (maxSymbolValue > (256-128)) return LEVEL_ERROR(GENERIC);   /* should not happen : likely means source cannot be compressed */
+    if (((maxSymbolValue+1)/2) + 1 > maxDstSize) return LEVEL_ERROR(dstSize_tooSmall);   /* not enough space within dst buffer */
     op[0] = (BYTE)(128 /*special case*/ + (maxSymbolValue-1));
     wksp->huffWeight[maxSymbolValue] = 0;   /* to be sure it doesn't cause msan issue in final combination */
     for (n=0; n<maxSymbolValue; n+=2)
@@ -15348,8 +15348,8 @@ size_t HUF_readCTable (HUF_CElt* CTable, unsigned* maxSymbolValuePtr, const void
     *hasZeroWeights = (rankVal[0] > 0);
 
     /* check result */
-    if (tableLog > HUF_TABLELOG_MAX) return ERROR(tableLog_tooLarge);
-    if (nbSymbols > *maxSymbolValuePtr+1) return ERROR(maxSymbolValue_tooSmall);
+    if (tableLog > HUF_TABLELOG_MAX) return LEVEL_ERROR(tableLog_tooLarge);
+    if (nbSymbols > *maxSymbolValuePtr+1) return LEVEL_ERROR(maxSymbolValue_tooSmall);
 
     CTable[0] = tableLog;
 
@@ -15810,10 +15810,10 @@ HUF_buildCTable_wksp(HUF_CElt* CTable, const unsigned* count, U32 maxSymbolValue
 
     /* safety checks */
     if (wkspSize < sizeof(HUF_buildCTable_wksp_tables))
-        return ERROR(workSpace_tooSmall);
+        return LEVEL_ERROR(workSpace_tooSmall);
     if (maxNbBits == 0) maxNbBits = HUF_TABLELOG_DEFAULT;
     if (maxSymbolValue > HUF_SYMBOLVALUE_MAX)
-        return ERROR(maxSymbolValue_tooLarge);
+        return LEVEL_ERROR(maxSymbolValue_tooLarge);
     ZSTD_memset(huffNode0, 0, sizeof(huffNodeTable));
 
     /* sort, decreasing order */
@@ -15825,7 +15825,7 @@ HUF_buildCTable_wksp(HUF_CElt* CTable, const unsigned* count, U32 maxSymbolValue
 
     /* determine and enforce maxTableLog */
     maxNbBits = HUF_setMaxHeight(huffNode, (U32)nonNullRank, maxNbBits);
-    if (maxNbBits > HUF_TABLELOG_MAX) return ERROR(GENERIC);   /* check fit into table */
+    if (maxNbBits > HUF_TABLELOG_MAX) return LEVEL_ERROR(GENERIC);   /* check fit into table */
 
     HUF_buildCTableFromTree(CTable, huffNode, nonNullRank, maxSymbolValue, maxNbBits);
 
@@ -15895,7 +15895,7 @@ static size_t HUF_initCStream(HUF_CStream_t* bitC,
     bitC->startPtr = (BYTE*)startPtr;
     bitC->ptr = bitC->startPtr;
     bitC->endPtr = bitC->startPtr + dstCapacity - sizeof(bitC->bitContainer[0]);
-    if (dstCapacity <= sizeof(bitC->bitContainer[0])) return ERROR(dstSize_tooSmall);
+    if (dstCapacity <= sizeof(bitC->bitContainer[0])) return LEVEL_ERROR(dstSize_tooSmall);
     return 0;
 }
 
@@ -16379,12 +16379,12 @@ HUF_compress_internal (void* dst, size_t dstSize,
     HUF_STATIC_ASSERT(sizeof(*table) + HUF_WORKSPACE_MAX_ALIGNMENT <= HUF_WORKSPACE_SIZE);
 
     /* checks & inits */
-    if (wkspSize < sizeof(*table)) return ERROR(workSpace_tooSmall);
+    if (wkspSize < sizeof(*table)) return LEVEL_ERROR(workSpace_tooSmall);
     if (!srcSize) return 0;  /* Uncompressed */
     if (!dstSize) return 0;  /* cannot fit anything within dst budget */
-    if (srcSize > HUF_BLOCKSIZE_MAX) return ERROR(srcSize_wrong);   /* current block size limit */
-    if (huffLog > HUF_TABLELOG_MAX) return ERROR(tableLog_tooLarge);
-    if (maxSymbolValue > HUF_SYMBOLVALUE_MAX) return ERROR(maxSymbolValue_tooLarge);
+    if (srcSize > HUF_BLOCKSIZE_MAX) return LEVEL_ERROR(srcSize_wrong);   /* current block size limit */
+    if (huffLog > HUF_TABLELOG_MAX) return LEVEL_ERROR(tableLog_tooLarge);
+    if (maxSymbolValue > HUF_SYMBOLVALUE_MAX) return LEVEL_ERROR(maxSymbolValue_tooLarge);
     if (!maxSymbolValue) maxSymbolValue = HUF_SYMBOLVALUE_MAX;
     if (!huffLog) huffLog = HUF_TABLELOG_DEFAULT;
 
@@ -19341,7 +19341,7 @@ size_t ZSTD_fseBitCost(
     if (ZSTD_getFSEMaxSymbolValue(ctable) < max) {
         DEBUGLOG(5, "Repeat FSE_CTable has maxSymbolValue %u < %u",
                     ZSTD_getFSEMaxSymbolValue(ctable), max);
-        return ERROR(GENERIC);
+        return LEVEL_ERROR(GENERIC);
     }
     for (s = 0; s <= max; ++s) {
         unsigned const tableLog = cstate.stateLog;
@@ -19351,7 +19351,7 @@ size_t ZSTD_fseBitCost(
             continue;
         if (bitCost >= badCost) {
             DEBUGLOG(5, "Repeat FSE_CTable has Prob[%u] == 0", s);
-            return ERROR(GENERIC);
+            return LEVEL_ERROR(GENERIC);
         }
         cost += (size_t)count[s] * bitCost;
     }
@@ -19430,8 +19430,8 @@ ZSTD_selectEncodingType(
             }
         }
     } else {
-        size_t const basicCost = isDefaultAllowed ? ZSTD_crossEntropyCost(defaultNorm, defaultNormLog, count, max) : ERROR(GENERIC);
-        size_t const repeatCost = *repeatMode != FSE_repeat_none ? ZSTD_fseBitCost(prevCTable, count, max) : ERROR(GENERIC);
+        size_t const basicCost = isDefaultAllowed ? ZSTD_crossEntropyCost(defaultNorm, defaultNormLog, count, max) : LEVEL_ERROR(GENERIC);
+        size_t const repeatCost = *repeatMode != FSE_repeat_none ? ZSTD_fseBitCost(prevCTable, count, max) : LEVEL_ERROR(GENERIC);
         size_t const NCountCost = ZSTD_NCountCost(count, max, nbSeq, FSELog);
         size_t const compressedCost = (NCountCost << 3) + ZSTD_entropyCost(count, max, nbSeq);
 
@@ -19440,7 +19440,7 @@ ZSTD_selectEncodingType(
             assert(!(*repeatMode == FSE_repeat_valid && ZSTD_isError(repeatCost)));
         }
         assert(!ZSTD_isError(NCountCost));
-        assert(compressedCost < ERROR(maxCode));
+        assert(compressedCost < LEVEL_ERROR(maxCode));
         DEBUGLOG(5, "Estimated bit costs: basic=%u\trepeat=%u\tcompressed=%u",
                     (unsigned)basicCost, (unsigned)repeatCost, (unsigned)compressedCost);
         if (basicCost <= repeatCost && basicCost <= compressedCost) {
@@ -20050,7 +20050,7 @@ static size_t ZSTD_estimateSubBlockSize_symbolType(symbolEncodingType_e type,
         assert(max <= defaultMax);
         cSymbolTypeSizeEstimateInBits = max <= defaultMax
                 ? ZSTD_crossEntropyCost(defaultNorm, defaultNormLog, countWksp, max)
-                : ERROR(GENERIC);
+                : LEVEL_ERROR(GENERIC);
     } else if (type == set_rle) {
         cSymbolTypeSizeEstimateInBits = 0;
     } else if (type == set_compressed || type == set_repeat) {
@@ -20733,7 +20733,7 @@ void ZSTD_ldm_adjustParameters(ldmParams_t* params,
  */
 size_t ZSTD_compressBound(size_t srcSize) {
     size_t const r = ZSTD_COMPRESSBOUND(srcSize);
-    if (r==0) return ERROR(srcSize_wrong);
+    if (r==0) return LEVEL_ERROR(srcSize_wrong);
     return r;
 }
 
@@ -21297,7 +21297,7 @@ ZSTD_bounds ZSTD_cParam_getBounds(ZSTD_cParameter param)
         return bounds;
 
     default:
-        bounds.error = ERROR(parameter_unsupported);
+        bounds.error = LEVEL_ERROR(parameter_unsupported);
         return bounds;
     }
 }
@@ -23631,7 +23631,7 @@ ZSTD_entropyCompressSeqStore(
     /* When srcSize <= dstCapacity, there is enough space to write a raw uncompressed block.
      * Since we ran out of space, block must be not compressible, so fall back to raw uncompressed block.
      */
-    if ((cSize == ERROR(dstSize_tooSmall)) & (srcSize <= dstCapacity)) {
+    if ((cSize == LEVEL_ERROR(dstSize_tooSmall)) & (srcSize <= dstCapacity)) {
         DEBUGLOG(4, "not enough dstCapacity (%zu) for ZSTD_entropyCompressSeqStore_internal()=> do not compress block", dstCapacity);
         return 0;  /* block not compressed */
     }
@@ -24983,7 +24983,7 @@ static size_t ZSTD_compressBlock_targetCBlockSize_body(ZSTD_CCtx* zc,
          */
         {   size_t const cSize =
                 ZSTD_compressSuperBlock(zc, dst, dstCapacity, src, srcSize, lastBlock);
-            if (cSize != ERROR(dstSize_tooSmall)) {
+            if (cSize != LEVEL_ERROR(dstSize_tooSmall)) {
                 size_t const maxCSize =
                     srcSize - ZSTD_minGain(srcSize, zc->appliedParams.cParams.strategy);
                 FORWARD_IF_ERROR(cSize, "ZSTD_compressSuperBlock failed");
@@ -32277,7 +32277,7 @@ static size_t ZSTD_ldm_generateSequences_internal(
 
                 /* Out of sequence storage */
                 if (rawSeqStore->size == rawSeqStore->capacity)
-                    return ERROR(dstSize_tooSmall);
+                    return LEVEL_ERROR(dstSize_tooSmall);
                 seq->litLength = (U32)(split - backwardMatchLength - anchor);
                 seq->matchLength = (U32)mLength;
                 seq->offset = offset;
@@ -34698,14 +34698,14 @@ static void ZSTDMT_compressionJob(void* jobDescription)
     size_t lastCBlockSize = 0;
 
     /* resources */
-    if (cctx==NULL) JOB_ERROR(ERROR(memory_allocation));
+    if (cctx==NULL) JOB_ERROR(LEVEL_ERROR(memory_allocation));
     if (dstBuff.start == NULL) {   /* streaming job : doesn't provide a dstBuffer */
         dstBuff = ZSTDMT_getBuffer(job->bufPool);
-        if (dstBuff.start==NULL) JOB_ERROR(ERROR(memory_allocation));
+        if (dstBuff.start==NULL) JOB_ERROR(LEVEL_ERROR(memory_allocation));
         job->dstBuff = dstBuff;   /* this value can be read in ZSTDMT_flush, when it copies the whole job */
     }
     if (jobParams.ldmParams.enableLdm == ZSTD_ps_enable && rawSeqStore.seq == NULL)
-        JOB_ERROR(ERROR(memory_allocation));
+        JOB_ERROR(LEVEL_ERROR(memory_allocation));
 
     /* Don't compute the checksum for chunks, since we compute it externally,
      * but write it in the header.
@@ -34924,7 +34924,7 @@ static size_t ZSTDMT_expandJobsTable (ZSTDMT_CCtx* mtctx, U32 nbWorkers) {
         ZSTDMT_freeJobsTable(mtctx->jobs, mtctx->jobIDMask+1, mtctx->cMem);
         mtctx->jobIDMask = 0;
         mtctx->jobs = ZSTDMT_createJobsTable(&nbJobs, mtctx->cMem);
-        if (mtctx->jobs==NULL) return ERROR(memory_allocation);
+        if (mtctx->jobs==NULL) return LEVEL_ERROR(memory_allocation);
         assert((nbJobs != 0) && ((nbJobs & (nbJobs - 1)) == 0));  /* ensure nbJobs is a power of 2 */
         mtctx->jobIDMask = nbJobs - 1;
     }
@@ -35069,14 +35069,14 @@ size_t ZSTDMT_sizeof_CCtx(ZSTDMT_CCtx* mtctx)
  * @return : error code if fails, 0 on success */
 static size_t ZSTDMT_resize(ZSTDMT_CCtx* mtctx, unsigned nbWorkers)
 {
-    if (POOL_resize(mtctx->factory, nbWorkers)) return ERROR(memory_allocation);
+    if (POOL_resize(mtctx->factory, nbWorkers)) return LEVEL_ERROR(memory_allocation);
     FORWARD_IF_ERROR( ZSTDMT_expandJobsTable(mtctx, nbWorkers) , "");
     mtctx->bufPool = ZSTDMT_expandBufferPool(mtctx->bufPool, BUF_POOL_MAX_NB_BUFFERS(nbWorkers));
-    if (mtctx->bufPool == NULL) return ERROR(memory_allocation);
+    if (mtctx->bufPool == NULL) return LEVEL_ERROR(memory_allocation);
     mtctx->cctxPool = ZSTDMT_expandCCtxPool(mtctx->cctxPool, nbWorkers);
-    if (mtctx->cctxPool == NULL) return ERROR(memory_allocation);
+    if (mtctx->cctxPool == NULL) return LEVEL_ERROR(memory_allocation);
     mtctx->seqPool = ZSTDMT_expandSeqPool(mtctx->seqPool, nbWorkers);
-    if (mtctx->seqPool == NULL) return ERROR(memory_allocation);
+    if (mtctx->seqPool == NULL) return LEVEL_ERROR(memory_allocation);
     ZSTDMT_CCtxParam_setNbWorkers(&mtctx->params, nbWorkers);
     return 0;
 }
@@ -35274,7 +35274,7 @@ size_t ZSTDMT_initCStream_internal(
                                                     ZSTD_dlm_byCopy, dictContentType, /* note : a loadPrefix becomes an internal CDict */
                                                     params.cParams, mtctx->cMem);
         mtctx->cdict = mtctx->cdictLocal;
-        if (mtctx->cdictLocal == NULL) return ERROR(memory_allocation);
+        if (mtctx->cdictLocal == NULL) return LEVEL_ERROR(memory_allocation);
     } else {
         ZSTD_freeCDict(mtctx->cdictLocal);
         mtctx->cdictLocal = NULL;
@@ -35326,7 +35326,7 @@ size_t ZSTDMT_initCStream_internal(
             mtctx->roundBuff.buffer = (BYTE*)ZSTD_customMalloc(capacity, mtctx->cMem);
             if (mtctx->roundBuff.buffer == NULL) {
                 mtctx->roundBuff.capacity = 0;
-                return ERROR(memory_allocation);
+                return LEVEL_ERROR(memory_allocation);
             }
             mtctx->roundBuff.capacity = capacity;
         }
@@ -35344,7 +35344,7 @@ size_t ZSTDMT_initCStream_internal(
     mtctx->produced = 0;
     if (ZSTDMT_serialState_reset(&mtctx->serial, mtctx->seqPool, params, mtctx->targetSectionSize,
                                  dict, dictSize, dictContentType))
-        return ERROR(memory_allocation);
+        return LEVEL_ERROR(memory_allocation);
     return 0;
 }
 
@@ -35362,7 +35362,7 @@ static void ZSTDMT_writeLastEmptyBlock(ZSTDMT_jobDescription* job)
     assert(job->dstBuff.start == NULL);   /* invoked from streaming variant only (otherwise, dstBuff might be user's output) */
     job->dstBuff = ZSTDMT_getBuffer(job->bufPool);
     if (job->dstBuff.start == NULL) {
-      job->cSize = ERROR(memory_allocation);
+      job->cSize = LEVEL_ERROR(memory_allocation);
       return;
     }
     assert(job->dstBuff.capacity >= ZSTD_blockHeaderSize);   /* no buffer should ever be that small */
@@ -35830,7 +35830,7 @@ size_t ZSTDMT_compressStream_generic(ZSTDMT_CCtx* mtctx,
 
     if ((mtctx->frameEnded) && (endOp==ZSTD_e_continue)) {
         /* current frame being ended. Only flush/end are allowed */
-        return ERROR(stage_wrong);
+        return LEVEL_ERROR(stage_wrong);
     }
 
     /* fill input buffer */
@@ -36092,7 +36092,7 @@ static size_t HUF_DecompressFastArgs_init(HUF_DecompressFastArgs* args, void* ds
 
     /* strict minimum : jump table + 1 byte per stream */
     if (srcSize < 10)
-        return ERROR(corruption_detected);
+        return LEVEL_ERROR(corruption_detected);
 
     /* Must have at least 8 bytes per stream because we don't handle initializing smaller bit containers.
      * If table log is not correct at this point, fallback to the old decoder.
@@ -36120,7 +36120,7 @@ static size_t HUF_DecompressFastArgs_init(HUF_DecompressFastArgs* args, void* ds
          */
         if (length1 < 16 || length2 < 8 || length3 < 8 || length4 < 8)
             return 0;
-        if (length4 > srcSize) return ERROR(corruption_detected);   /* overflow */
+        if (length4 > srcSize) return LEVEL_ERROR(corruption_detected);   /* overflow */
     }
     /* ip[] contains the position that is currently loaded into bits[]. */
     args->ip[0] = args->iend[1] - sizeof(U64);
@@ -36166,14 +36166,14 @@ static size_t HUF_initRemainingDStream(BIT_DStream_t* bit, HUF_DecompressFastArg
 {
     /* Validate that we haven't overwritten. */
     if (args->op[stream] > segmentEnd)
-        return ERROR(corruption_detected);
+        return LEVEL_ERROR(corruption_detected);
     /* Validate that we haven't read beyond iend[].
         * Note that ip[] may be < iend[] because the MSB is
         * the next bit to read, and we may have consumed 100%
         * of the stream, so down to iend[i] - 8 is valid.
         */
     if (args->ip[stream] < args->iend[stream] - 8)
-        return ERROR(corruption_detected);
+        return LEVEL_ERROR(corruption_detected);
 
     /* Construct the BIT_DStream_t. */
     assert(sizeof(size_t) == 8);
@@ -36258,7 +36258,7 @@ size_t HUF_readDTableX1_wksp(HUF_DTable* DTable, const void* src, size_t srcSize
     HUF_ReadDTableX1_Workspace* wksp = (HUF_ReadDTableX1_Workspace*)workSpace;
 
     DEBUG_STATIC_ASSERT(HUF_DECOMPRESS_WORKSPACE_SIZE >= sizeof(*wksp));
-    if (sizeof(*wksp) > wkspSize) return ERROR(tableLog_tooLarge);
+    if (sizeof(*wksp) > wkspSize) return LEVEL_ERROR(tableLog_tooLarge);
 
     DEBUG_STATIC_ASSERT(sizeof(DTableDesc) == sizeof(HUF_DTable));
     /* ZSTD_memset(huffWeight, 0, sizeof(huffWeight)); */   /* is not necessary, even though some analyzer complain ... */
@@ -36272,7 +36272,7 @@ size_t HUF_readDTableX1_wksp(HUF_DTable* DTable, const void* src, size_t srcSize
         U32 const maxTableLog = dtd.maxTableLog + 1;
         U32 const targetTableLog = MIN(maxTableLog, HUF_DECODER_FAST_TABLELOG);
         tableLog = HUF_rescaleStats(wksp->huffWeight, wksp->rankVal, nbSymbols, tableLog, targetTableLog);
-        if (tableLog > (U32)(dtd.maxTableLog+1)) return ERROR(tableLog_tooLarge);   /* DTable too small, Huffman tree cannot fit in */
+        if (tableLog > (U32)(dtd.maxTableLog+1)) return LEVEL_ERROR(tableLog_tooLarge);   /* DTable too small, Huffman tree cannot fit in */
         dtd.tableType = 0;
         dtd.tableLog = (BYTE)tableLog;
         ZSTD_memcpy(DTable, &dtd, sizeof(dtd));
@@ -36451,7 +36451,7 @@ HUF_decompress1X1_usingDTable_internal_body(
 
     HUF_decodeStreamX1(op, &bitD, oend, dt, dtLog);
 
-    if (!BIT_endOfDStream(&bitD)) return ERROR(corruption_detected);
+    if (!BIT_endOfDStream(&bitD)) return LEVEL_ERROR(corruption_detected);
 
     return dstSize;
 }
@@ -36467,7 +36467,7 @@ HUF_decompress4X1_usingDTable_internal_body(
     const HUF_DTable* DTable)
 {
     /* Check */
-    if (cSrcSize < 10) return ERROR(corruption_detected);  /* strict minimum : jump table + 1 byte per stream */
+    if (cSrcSize < 10) return LEVEL_ERROR(corruption_detected);  /* strict minimum : jump table + 1 byte per stream */
 
     {   const BYTE* const istart = (const BYTE*) cSrc;
         BYTE* const ostart = (BYTE*) dst;
@@ -36501,9 +36501,9 @@ HUF_decompress4X1_usingDTable_internal_body(
         U32 const dtLog = dtd.tableLog;
         U32 endSignal = 1;
 
-        if (length4 > cSrcSize) return ERROR(corruption_detected);   /* overflow */
-        if (opStart4 > oend) return ERROR(corruption_detected);      /* overflow */
-        if (dstSize < 6) return ERROR(corruption_detected);         /* stream 4-split doesn't work */
+        if (length4 > cSrcSize) return LEVEL_ERROR(corruption_detected);   /* overflow */
+        if (opStart4 > oend) return LEVEL_ERROR(corruption_detected);      /* overflow */
+        if (dstSize < 6) return LEVEL_ERROR(corruption_detected);         /* stream 4-split doesn't work */
         CHECK_F( BIT_initDStream(&bitD1, istart1, length1) );
         CHECK_F( BIT_initDStream(&bitD2, istart2, length2) );
         CHECK_F( BIT_initDStream(&bitD3, istart3, length3) );
@@ -36538,9 +36538,9 @@ HUF_decompress4X1_usingDTable_internal_body(
         /* check corruption */
         /* note : should not be necessary : op# advance in lock step, and we control op4.
          *        but curiously, binary generated by gcc 7.2 & 7.3 with -mbmi2 runs faster when >=1 test is present */
-        if (op1 > opStart2) return ERROR(corruption_detected);
-        if (op2 > opStart3) return ERROR(corruption_detected);
-        if (op3 > opStart4) return ERROR(corruption_detected);
+        if (op1 > opStart2) return LEVEL_ERROR(corruption_detected);
+        if (op2 > opStart3) return LEVEL_ERROR(corruption_detected);
+        if (op3 > opStart4) return LEVEL_ERROR(corruption_detected);
         /* note : op4 supposed already verified within main loop */
 
         /* finish bitStreams one by one */
@@ -36551,7 +36551,7 @@ HUF_decompress4X1_usingDTable_internal_body(
 
         /* check */
         { U32 const endCheck = BIT_endOfDStream(&bitD1) & BIT_endOfDStream(&bitD2) & BIT_endOfDStream(&bitD3) & BIT_endOfDStream(&bitD4);
-          if (!endCheck) return ERROR(corruption_detected); }
+          if (!endCheck) return LEVEL_ERROR(corruption_detected); }
 
         /* decoded size */
         return dstSize;
@@ -36726,7 +36726,7 @@ HUF_decompress4X1_usingDTable_internal_fast(
             FORWARD_IF_ERROR(HUF_initRemainingDStream(&bit, &args, i, segmentEnd), "corruption");
             /* Decompress and validate that we've produced exactly the expected length. */
             args.op[i] += HUF_decodeStreamX1(args.op[i], &bit, segmentEnd, (HUF_DEltX1 const*)dt, HUF_DECODER_FAST_TABLELOG);
-            if (args.op[i] != segmentEnd) return ERROR(corruption_detected);
+            if (args.op[i] != segmentEnd) return LEVEL_ERROR(corruption_detected);
         }
     }
 
@@ -36778,7 +36778,7 @@ static size_t HUF_decompress4X1_DCtx_wksp(HUF_DTable* dctx, void* dst, size_t ds
 
     size_t const hSize = HUF_readDTableX1_wksp(dctx, cSrc, cSrcSize, workSpace, wkspSize, flags);
     if (HUF_isError(hSize)) return hSize;
-    if (hSize >= cSrcSize) return ERROR(srcSize_wrong);
+    if (hSize >= cSrcSize) return LEVEL_ERROR(srcSize_wrong);
     ip += hSize; cSrcSize -= hSize;
 
     return HUF_decompress4X1_usingDTable_internal(dst, dstSize, ip, cSrcSize, dctx, flags);
@@ -37033,21 +37033,21 @@ size_t HUF_readDTableX2_wksp(HUF_DTable* DTable,
 
     HUF_ReadDTableX2_Workspace* const wksp = (HUF_ReadDTableX2_Workspace*)workSpace;
 
-    if (sizeof(*wksp) > wkspSize) return ERROR(GENERIC);
+    if (sizeof(*wksp) > wkspSize) return LEVEL_ERROR(GENERIC);
 
     rankStart = wksp->rankStart0 + 1;
     ZSTD_memset(wksp->rankStats, 0, sizeof(wksp->rankStats));
     ZSTD_memset(wksp->rankStart0, 0, sizeof(wksp->rankStart0));
 
     DEBUG_STATIC_ASSERT(sizeof(HUF_DEltX2) == sizeof(HUF_DTable));   /* if compiler fails here, assertion is wrong */
-    if (maxTableLog > HUF_TABLELOG_MAX) return ERROR(tableLog_tooLarge);
+    if (maxTableLog > HUF_TABLELOG_MAX) return LEVEL_ERROR(tableLog_tooLarge);
     /* ZSTD_memset(weightList, 0, sizeof(weightList)); */  /* is not necessary, even though some analyzer complain ... */
 
     iSize = HUF_readStats_wksp(wksp->weightList, HUF_SYMBOLVALUE_MAX + 1, wksp->rankStats, &nbSymbols, &tableLog, src, srcSize, wksp->calleeWksp, sizeof(wksp->calleeWksp), flags);
     if (HUF_isError(iSize)) return iSize;
 
     /* check result */
-    if (tableLog > maxTableLog) return ERROR(tableLog_tooLarge);   /* DTable can't fit code depth */
+    if (tableLog > maxTableLog) return LEVEL_ERROR(tableLog_tooLarge);   /* DTable can't fit code depth */
     if (tableLog <= HUF_DECODER_FAST_TABLELOG && maxTableLog > HUF_DECODER_FAST_TABLELOG) maxTableLog = HUF_DECODER_FAST_TABLELOG;
 
     /* find maxWeight */
@@ -37209,7 +37209,7 @@ HUF_decompress1X2_usingDTable_internal_body(
     }
 
     /* check */
-    if (!BIT_endOfDStream(&bitD)) return ERROR(corruption_detected);
+    if (!BIT_endOfDStream(&bitD)) return LEVEL_ERROR(corruption_detected);
 
     /* decoded size */
     return dstSize;
@@ -37225,7 +37225,7 @@ HUF_decompress4X2_usingDTable_internal_body(
     const void* cSrc, size_t cSrcSize,
     const HUF_DTable* DTable)
 {
-    if (cSrcSize < 10) return ERROR(corruption_detected);   /* strict minimum : jump table + 1 byte per stream */
+    if (cSrcSize < 10) return LEVEL_ERROR(corruption_detected);   /* strict minimum : jump table + 1 byte per stream */
 
     {   const BYTE* const istart = (const BYTE*) cSrc;
         BYTE* const ostart = (BYTE*) dst;
@@ -37259,9 +37259,9 @@ HUF_decompress4X2_usingDTable_internal_body(
         DTableDesc const dtd = HUF_getDTableDesc(DTable);
         U32 const dtLog = dtd.tableLog;
 
-        if (length4 > cSrcSize) return ERROR(corruption_detected);  /* overflow */
-        if (opStart4 > oend) return ERROR(corruption_detected);     /* overflow */
-        if (dstSize < 6) return ERROR(corruption_detected);         /* stream 4-split doesn't work */
+        if (length4 > cSrcSize) return LEVEL_ERROR(corruption_detected);  /* overflow */
+        if (opStart4 > oend) return LEVEL_ERROR(corruption_detected);     /* overflow */
+        if (dstSize < 6) return LEVEL_ERROR(corruption_detected);         /* stream 4-split doesn't work */
         CHECK_F( BIT_initDStream(&bitD1, istart1, length1) );
         CHECK_F( BIT_initDStream(&bitD2, istart2, length2) );
         CHECK_F( BIT_initDStream(&bitD3, istart3, length3) );
@@ -37318,9 +37318,9 @@ HUF_decompress4X2_usingDTable_internal_body(
         }
 
         /* check corruption */
-        if (op1 > opStart2) return ERROR(corruption_detected);
-        if (op2 > opStart3) return ERROR(corruption_detected);
-        if (op3 > opStart4) return ERROR(corruption_detected);
+        if (op1 > opStart2) return LEVEL_ERROR(corruption_detected);
+        if (op2 > opStart3) return LEVEL_ERROR(corruption_detected);
+        if (op3 > opStart4) return LEVEL_ERROR(corruption_detected);
         /* note : op4 already verified within main loop */
 
         /* finish bitStreams one by one */
@@ -37331,7 +37331,7 @@ HUF_decompress4X2_usingDTable_internal_body(
 
         /* check */
         { U32 const endCheck = BIT_endOfDStream(&bitD1) & BIT_endOfDStream(&bitD2) & BIT_endOfDStream(&bitD3) & BIT_endOfDStream(&bitD4);
-          if (!endCheck) return ERROR(corruption_detected); }
+          if (!endCheck) return LEVEL_ERROR(corruption_detected); }
 
         /* decoded size */
         return dstSize;
@@ -37540,7 +37540,7 @@ HUF_decompress4X2_usingDTable_internal_fast(
             FORWARD_IF_ERROR(HUF_initRemainingDStream(&bit, &args, i, segmentEnd), "corruption");
             args.op[i] += HUF_decodeStreamX2(args.op[i], &bit, segmentEnd, (HUF_DEltX2 const*)dt, HUF_DECODER_FAST_TABLELOG);
             if (args.op[i] != segmentEnd)
-                return ERROR(corruption_detected);
+                return LEVEL_ERROR(corruption_detected);
         }
     }
 
@@ -37592,7 +37592,7 @@ size_t HUF_decompress1X2_DCtx_wksp(HUF_DTable* DCtx, void* dst, size_t dstSize,
     size_t const hSize = HUF_readDTableX2_wksp(DCtx, cSrc, cSrcSize,
                                                workSpace, wkspSize, flags);
     if (HUF_isError(hSize)) return hSize;
-    if (hSize >= cSrcSize) return ERROR(srcSize_wrong);
+    if (hSize >= cSrcSize) return LEVEL_ERROR(srcSize_wrong);
     ip += hSize; cSrcSize -= hSize;
 
     return HUF_decompress1X2_usingDTable_internal(dst, dstSize, ip, cSrcSize, DCtx, flags);
@@ -37607,7 +37607,7 @@ static size_t HUF_decompress4X2_DCtx_wksp(HUF_DTable* dctx, void* dst, size_t ds
     size_t hSize = HUF_readDTableX2_wksp(dctx, cSrc, cSrcSize,
                                          workSpace, wkspSize, flags);
     if (HUF_isError(hSize)) return hSize;
-    if (hSize >= cSrcSize) return ERROR(srcSize_wrong);
+    if (hSize >= cSrcSize) return LEVEL_ERROR(srcSize_wrong);
     ip += hSize; cSrcSize -= hSize;
 
     return HUF_decompress4X2_usingDTable_internal(dst, dstSize, ip, cSrcSize, dctx, flags);
@@ -37679,8 +37679,8 @@ size_t HUF_decompress1X_DCtx_wksp(HUF_DTable* dctx, void* dst, size_t dstSize,
                                   void* workSpace, size_t wkspSize, int flags)
 {
     /* validation checks */
-    if (dstSize == 0) return ERROR(dstSize_tooSmall);
-    if (cSrcSize > dstSize) return ERROR(corruption_detected);   /* invalid */
+    if (dstSize == 0) return LEVEL_ERROR(dstSize_tooSmall);
+    if (cSrcSize > dstSize) return LEVEL_ERROR(corruption_detected);   /* invalid */
     if (cSrcSize == dstSize) { ZSTD_memcpy(dst, cSrc, dstSize); return dstSize; }   /* not compressed */
     if (cSrcSize == 1) { ZSTD_memset(dst, *(const BYTE*)cSrc, dstSize); return dstSize; }   /* RLE */
 
@@ -37729,7 +37729,7 @@ size_t HUF_decompress1X1_DCtx_wksp(HUF_DTable* dctx, void* dst, size_t dstSize, 
 
     size_t const hSize = HUF_readDTableX1_wksp(dctx, cSrc, cSrcSize, workSpace, wkspSize, flags);
     if (HUF_isError(hSize)) return hSize;
-    if (hSize >= cSrcSize) return ERROR(srcSize_wrong);
+    if (hSize >= cSrcSize) return LEVEL_ERROR(srcSize_wrong);
     ip += hSize; cSrcSize -= hSize;
 
     return HUF_decompress1X1_usingDTable_internal(dst, dstSize, ip, cSrcSize, dctx, flags);
@@ -37756,8 +37756,8 @@ size_t HUF_decompress4X_usingDTable(void* dst, size_t maxDstSize, const void* cS
 size_t HUF_decompress4X_hufOnly_wksp(HUF_DTable* dctx, void* dst, size_t dstSize, const void* cSrc, size_t cSrcSize, void* workSpace, size_t wkspSize, int flags)
 {
     /* validation checks */
-    if (dstSize == 0) return ERROR(dstSize_tooSmall);
-    if (cSrcSize == 0) return ERROR(corruption_detected);
+    if (dstSize == 0) return LEVEL_ERROR(dstSize_tooSmall);
+    if (cSrcSize == 0) return LEVEL_ERROR(corruption_detected);
 
     {   U32 const algoNb = HUF_selectDecoder(dstSize, cSrcSize);
 #if defined(HUF_FORCE_DECOMPRESS_X1)
@@ -39531,13 +39531,13 @@ ZSTD_loadEntropy_intoDDict(ZSTD_DDict* ddict,
 
     if (ddict->dictSize < 8) {
         if (dictContentType == ZSTD_dct_fullDict)
-            return ERROR(dictionary_corrupted);   /* only accept specified dictionaries */
+            return LEVEL_ERROR(dictionary_corrupted);   /* only accept specified dictionaries */
         return 0;   /* pure content mode */
     }
     {   U32 const magic = MEM_readLE32(ddict->dictContent);
         if (magic != ZSTD_MAGIC_DICTIONARY) {
             if (dictContentType == ZSTD_dct_fullDict)
-                return ERROR(dictionary_corrupted);   /* only accept specified dictionaries */
+                return LEVEL_ERROR(dictionary_corrupted);   /* only accept specified dictionaries */
             return 0;   /* pure content mode */
         }
     }
@@ -39565,7 +39565,7 @@ static size_t ZSTD_initDDict_internal(ZSTD_DDict* ddict,
         void* const internalBuffer = ZSTD_customMalloc(dictSize, ddict->cMem);
         ddict->dictBuffer = internalBuffer;
         ddict->dictContent = internalBuffer;
-        if (!internalBuffer) return ERROR(memory_allocation);
+        if (!internalBuffer) return LEVEL_ERROR(memory_allocation);
         ZSTD_memcpy(internalBuffer, dict, dictSize);
     }
     ddict->dictSize = dictSize;
@@ -40509,7 +40509,7 @@ static ZSTD_frameSizeInfo ZSTD_findFrameSizeInfo(const void* src, size_t srcSize
             if (ZSTD_isError(ret))
                 return ZSTD_errorFrameSizeInfo(ret);
             if (ret > 0)
-                return ZSTD_errorFrameSizeInfo(ERROR(srcSize_wrong));
+                return ZSTD_errorFrameSizeInfo(LEVEL_ERROR(srcSize_wrong));
         }
 
         ip += zfh.headerSize;
@@ -40523,7 +40523,7 @@ static ZSTD_frameSizeInfo ZSTD_findFrameSizeInfo(const void* src, size_t srcSize
                 return ZSTD_errorFrameSizeInfo(cBlockSize);
 
             if (ZSTD_blockHeaderSize + cBlockSize > remainingSize)
-                return ZSTD_errorFrameSizeInfo(ERROR(srcSize_wrong));
+                return ZSTD_errorFrameSizeInfo(LEVEL_ERROR(srcSize_wrong));
 
             ip += ZSTD_blockHeaderSize + cBlockSize;
             remainingSize -= ZSTD_blockHeaderSize + cBlockSize;
@@ -40535,7 +40535,7 @@ static ZSTD_frameSizeInfo ZSTD_findFrameSizeInfo(const void* src, size_t srcSize
         /* Final frame content checksum */
         if (zfh.checksumFlag) {
             if (remainingSize < 4)
-                return ZSTD_errorFrameSizeInfo(ERROR(srcSize_wrong));
+                return ZSTD_errorFrameSizeInfo(LEVEL_ERROR(srcSize_wrong));
             ip += 4;
         }
 
@@ -40597,7 +40597,7 @@ size_t ZSTD_decompressionMargin(void const* src, size_t srcSize)
 
         FORWARD_IF_ERROR(ZSTD_getFrameHeader(&zfh, src, srcSize), "");
         if (ZSTD_isError(compressedSize) || decompressedBound == ZSTD_CONTENTSIZE_ERROR)
-            return ERROR(corruption_detected);
+            return LEVEL_ERROR(corruption_detected);
 
         if (zfh.frameType == ZSTD_frame) {
             /* Add the frame header to our margin */
@@ -41577,7 +41577,7 @@ ZSTD_bounds ZSTD_dParam_getBounds(ZSTD_dParameter dParam)
 
         default:;
     }
-    bounds.error = ERROR(parameter_unsupported);
+    bounds.error = LEVEL_ERROR(parameter_unsupported);
     return bounds;
 }
 
@@ -45503,17 +45503,17 @@ static size_t COVER_ctx_init(COVER_ctx_t *ctx, const void *samplesBuffer,
       totalSamplesSize >= (size_t)COVER_MAX_SAMPLES_SIZE) {
     DISPLAYLEVEL(1, "Total samples size is too large (%u MB), maximum size is %u MB\n",
                  (unsigned)(totalSamplesSize>>20), (COVER_MAX_SAMPLES_SIZE >> 20));
-    return ERROR(srcSize_wrong);
+    return LEVEL_ERROR(srcSize_wrong);
   }
   /* Check if there are at least 5 training samples */
   if (nbTrainSamples < 5) {
     DISPLAYLEVEL(1, "Total number of training samples is %u and is invalid.", nbTrainSamples);
-    return ERROR(srcSize_wrong);
+    return LEVEL_ERROR(srcSize_wrong);
   }
   /* Check if there's testing sample */
   if (nbTestSamples < 1) {
     DISPLAYLEVEL(1, "Total number of testing samples is %u and is invalid.", nbTestSamples);
-    return ERROR(srcSize_wrong);
+    return LEVEL_ERROR(srcSize_wrong);
   }
   /* Zero the context */
   memset(ctx, 0, sizeof(*ctx));
@@ -45536,7 +45536,7 @@ static size_t COVER_ctx_init(COVER_ctx_t *ctx, const void *samplesBuffer,
   if (!ctx->suffix || !ctx->dmerAt || !ctx->offsets) {
     DISPLAYLEVEL(1, "Failed to allocate scratch buffers\n");
     COVER_ctx_destroy(ctx);
-    return ERROR(memory_allocation);
+    return LEVEL_ERROR(memory_allocation);
   }
   ctx->freqs = NULL;
   ctx->d = d;
@@ -45688,16 +45688,16 @@ ZDICTLIB_API size_t ZDICT_trainFromBuffer_cover(
   /* Checks */
   if (!COVER_checkParameters(parameters, dictBufferCapacity)) {
     DISPLAYLEVEL(1, "Cover parameters incorrect\n");
-    return ERROR(parameter_outOfBound);
+    return LEVEL_ERROR(parameter_outOfBound);
   }
   if (nbSamples == 0) {
     DISPLAYLEVEL(1, "Cover must have at least one input file\n");
-    return ERROR(srcSize_wrong);
+    return LEVEL_ERROR(srcSize_wrong);
   }
   if (dictBufferCapacity < ZDICT_DICTSIZE_MIN) {
     DISPLAYLEVEL(1, "dictBufferCapacity must be at least %u\n",
                  ZDICT_DICTSIZE_MIN);
-    return ERROR(dstSize_tooSmall);
+    return LEVEL_ERROR(dstSize_tooSmall);
   }
   /* Initialize context and activeDmers */
   {
@@ -45711,7 +45711,7 @@ ZDICTLIB_API size_t ZDICT_trainFromBuffer_cover(
   if (!COVER_map_init(&activeDmers, parameters.k - parameters.d + 1)) {
     DISPLAYLEVEL(1, "Failed to allocate dmer map: out of memory\n");
     COVER_ctx_destroy(&ctx);
-    return ERROR(memory_allocation);
+    return LEVEL_ERROR(memory_allocation);
   }
 
   DISPLAYLEVEL(2, "Building dictionary\n");
@@ -45739,7 +45739,7 @@ size_t COVER_checkTotalCompressedSize(const ZDICT_cover_params_t parameters,
                                     size_t *offsets,
                                     size_t nbTrainSamples, size_t nbSamples,
                                     BYTE *const dict, size_t dictBufferCapacity) {
-  size_t totalCompressedSize = ERROR(GENERIC);
+  size_t totalCompressedSize = LEVEL_ERROR(GENERIC);
   /* Pointers */
   ZSTD_CCtx *cctx;
   ZSTD_CDict *cdict;
@@ -45870,7 +45870,7 @@ void COVER_best_finish(COVER_best_t *best, ZDICT_cover_params_t parameters,
         }
         best->dict = malloc(dictSize);
         if (!best->dict) {
-          best->compressedSize = ERROR(GENERIC);
+          best->compressedSize = LEVEL_ERROR(GENERIC);
           best->dictSize = 0;
           ZSTD_pthread_cond_signal(&best->cond);
           ZSTD_pthread_mutex_unlock(&best->mutex);
@@ -46022,11 +46022,11 @@ static void COVER_tryParameters(void *opaque)
   const COVER_ctx_t *const ctx = data->ctx;
   const ZDICT_cover_params_t parameters = data->parameters;
   size_t dictBufferCapacity = data->dictBufferCapacity;
-  size_t totalCompressedSize = ERROR(GENERIC);
+  size_t totalCompressedSize = LEVEL_ERROR(GENERIC);
   /* Allocate space for hash table, dict, and freqs */
   COVER_map_t activeDmers;
   BYTE* const dict = (BYTE*)malloc(dictBufferCapacity);
-  COVER_dictSelection_t selection = COVER_dictSelectionError(ERROR(GENERIC));
+  COVER_dictSelection_t selection = COVER_dictSelectionError(LEVEL_ERROR(GENERIC));
   U32* const freqs = (U32*)malloc(ctx->suffixSize * sizeof(U32));
   if (!COVER_map_init(&activeDmers, parameters.k - parameters.d + 1)) {
     DISPLAYLEVEL(1, "Failed to allocate dmer map: out of memory\n");
@@ -46090,25 +46090,25 @@ ZDICTLIB_API size_t ZDICT_optimizeTrainFromBuffer_cover(
   /* Checks */
   if (splitPoint <= 0 || splitPoint > 1) {
     LOCALDISPLAYLEVEL(displayLevel, 1, "Incorrect parameters\n");
-    return ERROR(parameter_outOfBound);
+    return LEVEL_ERROR(parameter_outOfBound);
   }
   if (kMinK < kMaxD || kMaxK < kMinK) {
     LOCALDISPLAYLEVEL(displayLevel, 1, "Incorrect parameters\n");
-    return ERROR(parameter_outOfBound);
+    return LEVEL_ERROR(parameter_outOfBound);
   }
   if (nbSamples == 0) {
     DISPLAYLEVEL(1, "Cover must have at least one input file\n");
-    return ERROR(srcSize_wrong);
+    return LEVEL_ERROR(srcSize_wrong);
   }
   if (dictBufferCapacity < ZDICT_DICTSIZE_MIN) {
     DISPLAYLEVEL(1, "dictBufferCapacity must be at least %u\n",
                  ZDICT_DICTSIZE_MIN);
-    return ERROR(dstSize_tooSmall);
+    return LEVEL_ERROR(dstSize_tooSmall);
   }
   if (nbThreads > 1) {
     pool = POOL_create(nbThreads, 1);
     if (!pool) {
-      return ERROR(memory_allocation);
+      return LEVEL_ERROR(memory_allocation);
     }
   }
   /* Initialization */
@@ -46146,7 +46146,7 @@ ZDICTLIB_API size_t ZDICT_optimizeTrainFromBuffer_cover(
         COVER_best_destroy(&best);
         COVER_ctx_destroy(&ctx);
         POOL_free(pool);
-        return ERROR(memory_allocation);
+        return LEVEL_ERROR(memory_allocation);
       }
       data->ctx = &ctx;
       data->best = &best;
@@ -48512,19 +48512,19 @@ FASTCOVER_ctx_init(FASTCOVER_ctx_t* ctx,
         totalSamplesSize >= (size_t)FASTCOVER_MAX_SAMPLES_SIZE) {
         DISPLAYLEVEL(1, "Total samples size is too large (%u MB), maximum size is %u MB\n",
                     (unsigned)(totalSamplesSize >> 20), (FASTCOVER_MAX_SAMPLES_SIZE >> 20));
-        return ERROR(srcSize_wrong);
+        return LEVEL_ERROR(srcSize_wrong);
     }
 
     /* Check if there are at least 5 training samples */
     if (nbTrainSamples < 5) {
         DISPLAYLEVEL(1, "Total number of training samples is %u and is invalid\n", nbTrainSamples);
-        return ERROR(srcSize_wrong);
+        return LEVEL_ERROR(srcSize_wrong);
     }
 
     /* Check if there's testing sample */
     if (nbTestSamples < 1) {
         DISPLAYLEVEL(1, "Total number of testing samples is %u and is invalid.\n", nbTestSamples);
-        return ERROR(srcSize_wrong);
+        return LEVEL_ERROR(srcSize_wrong);
     }
 
     /* Zero the context */
@@ -48549,7 +48549,7 @@ FASTCOVER_ctx_init(FASTCOVER_ctx_t* ctx,
     if (ctx->offsets == NULL) {
         DISPLAYLEVEL(1, "Failed to allocate scratch buffers \n");
         FASTCOVER_ctx_destroy(ctx);
-        return ERROR(memory_allocation);
+        return LEVEL_ERROR(memory_allocation);
     }
 
     /* Fill offsets from the samplesSizes */
@@ -48566,7 +48566,7 @@ FASTCOVER_ctx_init(FASTCOVER_ctx_t* ctx,
     if (ctx->freqs == NULL) {
         DISPLAYLEVEL(1, "Failed to allocate frequency table \n");
         FASTCOVER_ctx_destroy(ctx);
-        return ERROR(memory_allocation);
+        return LEVEL_ERROR(memory_allocation);
     }
 
     DISPLAYLEVEL(2, "Computing frequencies\n");
@@ -48660,12 +48660,12 @@ static void FASTCOVER_tryParameters(void* opaque)
   const FASTCOVER_ctx_t *const ctx = data->ctx;
   const ZDICT_cover_params_t parameters = data->parameters;
   size_t dictBufferCapacity = data->dictBufferCapacity;
-  size_t totalCompressedSize = ERROR(GENERIC);
+  size_t totalCompressedSize = LEVEL_ERROR(GENERIC);
   /* Initialize array to keep track of frequency of dmer within activeSegment */
   U16* segmentFreqs = (U16*)calloc(((U64)1 << ctx->f), sizeof(U16));
   /* Allocate space for hash table, dict, and freqs */
   BYTE *const dict = (BYTE*)malloc(dictBufferCapacity);
-  COVER_dictSelection_t selection = COVER_dictSelectionError(ERROR(GENERIC));
+  COVER_dictSelection_t selection = COVER_dictSelectionError(LEVEL_ERROR(GENERIC));
   U32* freqs = (U32*) malloc(((U64)1 << ctx->f) * sizeof(U32));
   if (!segmentFreqs || !dict || !freqs) {
     DISPLAYLEVEL(1, "Failed to allocate buffers: out of memory\n");
@@ -48751,16 +48751,16 @@ ZDICT_trainFromBuffer_fastCover(void* dictBuffer, size_t dictBufferCapacity,
     if (!FASTCOVER_checkParameters(coverParams, dictBufferCapacity, parameters.f,
                                    parameters.accel)) {
       DISPLAYLEVEL(1, "FASTCOVER parameters incorrect\n");
-      return ERROR(parameter_outOfBound);
+      return LEVEL_ERROR(parameter_outOfBound);
     }
     if (nbSamples == 0) {
       DISPLAYLEVEL(1, "FASTCOVER must have at least one input file\n");
-      return ERROR(srcSize_wrong);
+      return LEVEL_ERROR(srcSize_wrong);
     }
     if (dictBufferCapacity < ZDICT_DICTSIZE_MIN) {
       DISPLAYLEVEL(1, "dictBufferCapacity must be at least %u\n",
                    ZDICT_DICTSIZE_MIN);
-      return ERROR(dstSize_tooSmall);
+      return LEVEL_ERROR(dstSize_tooSmall);
     }
     /* Assign corresponding FASTCOVER_accel_t to accelParams*/
     accelParams = FASTCOVER_defaultAccelParameters[parameters.accel];
@@ -48832,29 +48832,29 @@ ZDICT_optimizeTrainFromBuffer_fastCover(
     /* Checks */
     if (splitPoint <= 0 || splitPoint > 1) {
       LOCALDISPLAYLEVEL(displayLevel, 1, "Incorrect splitPoint\n");
-      return ERROR(parameter_outOfBound);
+      return LEVEL_ERROR(parameter_outOfBound);
     }
     if (accel == 0 || accel > FASTCOVER_MAX_ACCEL) {
       LOCALDISPLAYLEVEL(displayLevel, 1, "Incorrect accel\n");
-      return ERROR(parameter_outOfBound);
+      return LEVEL_ERROR(parameter_outOfBound);
     }
     if (kMinK < kMaxD || kMaxK < kMinK) {
       LOCALDISPLAYLEVEL(displayLevel, 1, "Incorrect k\n");
-      return ERROR(parameter_outOfBound);
+      return LEVEL_ERROR(parameter_outOfBound);
     }
     if (nbSamples == 0) {
       LOCALDISPLAYLEVEL(displayLevel, 1, "FASTCOVER must have at least one input file\n");
-      return ERROR(srcSize_wrong);
+      return LEVEL_ERROR(srcSize_wrong);
     }
     if (dictBufferCapacity < ZDICT_DICTSIZE_MIN) {
       LOCALDISPLAYLEVEL(displayLevel, 1, "dictBufferCapacity must be at least %u\n",
                    ZDICT_DICTSIZE_MIN);
-      return ERROR(dstSize_tooSmall);
+      return LEVEL_ERROR(dstSize_tooSmall);
     }
     if (nbThreads > 1) {
       pool = POOL_create(nbThreads, 1);
       if (!pool) {
-        return ERROR(memory_allocation);
+        return LEVEL_ERROR(memory_allocation);
       }
     }
     /* Initialization */
@@ -48895,7 +48895,7 @@ ZDICT_optimizeTrainFromBuffer_fastCover(
           COVER_best_destroy(&best);
           FASTCOVER_ctx_destroy(&ctx);
           POOL_free(pool);
-          return ERROR(memory_allocation);
+          return LEVEL_ERROR(memory_allocation);
         }
         data->ctx = &ctx;
         data->best = &best;
@@ -49060,12 +49060,12 @@ unsigned ZDICT_getDictID(const void* dictBuffer, size_t dictSize)
 size_t ZDICT_getDictHeaderSize(const void* dictBuffer, size_t dictSize)
 {
     size_t headerSize;
-    if (dictSize <= 8 || MEM_readLE32(dictBuffer) != ZSTD_MAGIC_DICTIONARY) return ERROR(dictionary_corrupted);
+    if (dictSize <= 8 || MEM_readLE32(dictBuffer) != ZSTD_MAGIC_DICTIONARY) return LEVEL_ERROR(dictionary_corrupted);
 
     {   ZSTD_compressedBlockState_t* bs = (ZSTD_compressedBlockState_t*)malloc(sizeof(ZSTD_compressedBlockState_t));
         U32* wksp = (U32*)malloc(HUF_WORKSPACE_SIZE);
         if (!bs || !wksp) {
-            headerSize = ERROR(memory_allocation);
+            headerSize = LEVEL_ERROR(memory_allocation);
         } else {
             ZSTD_reset_compressedBlockState(bs);
             headerSize = ZSTD_loadCEntropy(bs, wksp, dictBuffer, dictSize);
@@ -49436,7 +49436,7 @@ static size_t ZDICT_trainBuffer_legacy(dictItem* dictList, U32 dictListSize,
     /* init */
     DISPLAYLEVEL(2, "\r%70s\r", "");   /* clean display line */
     if (!suffix0 || !reverseSuffix || !doneMarks || !filePos) {
-        result = ERROR(memory_allocation);
+        result = LEVEL_ERROR(memory_allocation);
         goto _cleanup;
     }
     if (minRatio < MINRATIO) minRatio = MINRATIO;
@@ -49449,7 +49449,7 @@ static size_t ZDICT_trainBuffer_legacy(dictItem* dictList, U32 dictListSize,
     /* sort */
     DISPLAYLEVEL(2, "sorting %u files of total size %u MB ...\n", nbFiles, (unsigned)(bufferSize>>20));
     {   int const divSuftSortResult = divsufsort((const unsigned char*)buffer, suffix, (int)bufferSize, 0);
-        if (divSuftSortResult != 0) { result = ERROR(GENERIC); goto _cleanup; }
+        if (divSuftSortResult != 0) { result = LEVEL_ERROR(GENERIC); goto _cleanup; }
     }
     suffix[bufferSize] = (int)bufferSize;   /* leads into noise */
     suffix0[0] = (int)bufferSize;           /* leads into noise */
@@ -49630,7 +49630,7 @@ static size_t ZDICT_analyzeEntropy(void*  dstBuffer, size_t maxDstSize,
 
     /* init */
     DEBUGLOG(4, "ZDICT_analyzeEntropy");
-    if (offcodeMax>OFFCODE_MAX) { eSize = ERROR(dictionaryCreation_failed); goto _cleanup; }   /* too large dictionary */
+    if (offcodeMax>OFFCODE_MAX) { eSize = LEVEL_ERROR(dictionaryCreation_failed); goto _cleanup; }   /* too large dictionary */
     for (u=0; u<256; u++) countLit[u] = 1;   /* any character must be described */
     for (u=0; u<=offcodeMax; u++) offcodeCount[u] = 1;
     for (u=0; u<=MaxML; u++) matchLengthCount[u] = 1;
@@ -49645,7 +49645,7 @@ static size_t ZDICT_analyzeEntropy(void*  dstBuffer, size_t maxDstSize,
     esr.zc = ZSTD_createCCtx();
     esr.workPlace = malloc(ZSTD_BLOCKSIZE_MAX);
     if (!esr.dict || !esr.zc || !esr.workPlace) {
-        eSize = ERROR(memory_allocation);
+        eSize = LEVEL_ERROR(memory_allocation);
         DISPLAYLEVEL(1, "Not enough memory \n");
         goto _cleanup;
     }
@@ -49762,7 +49762,7 @@ static size_t ZDICT_analyzeEntropy(void*  dstBuffer, size_t maxDstSize,
     }
 
     if (maxDstSize<12) {
-        eSize = ERROR(dstSize_tooSmall);
+        eSize = LEVEL_ERROR(dstSize_tooSmall);
         DISPLAYLEVEL(1, "not enough space to write RepOffsets \n");
         goto _cleanup;
     }
@@ -49816,8 +49816,8 @@ size_t ZDICT_finalizeDictionary(void* dictBuffer, size_t dictBufferCapacity,
 
     /* check conditions */
     DEBUGLOG(4, "ZDICT_finalizeDictionary");
-    if (dictBufferCapacity < dictContentSize) return ERROR(dstSize_tooSmall);
-    if (dictBufferCapacity < ZDICT_DICTSIZE_MIN) return ERROR(dstSize_tooSmall);
+    if (dictBufferCapacity < dictContentSize) return LEVEL_ERROR(dstSize_tooSmall);
+    if (dictBufferCapacity < ZDICT_DICTSIZE_MIN) return LEVEL_ERROR(dstSize_tooSmall);
 
     /* dictionary header */
     MEM_writeLE32(header, ZSTD_MAGIC_DICTIONARY);
@@ -49935,9 +49935,9 @@ static size_t ZDICT_trainFromBuffer_unsafe_legacy(
     U32 const notificationLevel = params.zParams.notificationLevel;
 
     /* checks */
-    if (!dictList) return ERROR(memory_allocation);
-    if (maxDictSize < ZDICT_DICTSIZE_MIN) { free(dictList); return ERROR(dstSize_tooSmall); }   /* requested dictionary size is too small */
-    if (samplesBuffSize < ZDICT_MIN_SAMPLES_SIZE) { free(dictList); return ERROR(dictionaryCreation_failed); }   /* not enough source to create dictionary */
+    if (!dictList) return LEVEL_ERROR(memory_allocation);
+    if (maxDictSize < ZDICT_DICTSIZE_MIN) { free(dictList); return LEVEL_ERROR(dstSize_tooSmall); }   /* requested dictionary size is too small */
+    if (samplesBuffSize < ZDICT_MIN_SAMPLES_SIZE) { free(dictList); return LEVEL_ERROR(dictionaryCreation_failed); }   /* not enough source to create dictionary */
 
     /* init */
     ZDICT_initDictItem(dictList);
@@ -49961,7 +49961,7 @@ static size_t ZDICT_trainFromBuffer_unsafe_legacy(
             U32 const printedLength = MIN(40, length);
             if ((pos > samplesBuffSize) || ((pos + length) > samplesBuffSize)) {
                 free(dictList);
-                return ERROR(GENERIC);   /* should never happen */
+                return LEVEL_ERROR(GENERIC);   /* should never happen */
             }
             DISPLAYLEVEL(3, "%3u:%3u bytes at pos %8u, savings %7u bytes |",
                          u, length, pos, (unsigned)dictList[u].savings);
@@ -49972,7 +49972,7 @@ static size_t ZDICT_trainFromBuffer_unsafe_legacy(
 
     /* create dictionary */
     {   unsigned dictContentSize = ZDICT_dictSize(dictList);
-        if (dictContentSize < ZDICT_CONTENTSIZE_MIN) { free(dictList); return ERROR(dictionaryCreation_failed); }   /* dictionary content too small */
+        if (dictContentSize < ZDICT_CONTENTSIZE_MIN) { free(dictList); return LEVEL_ERROR(dictionaryCreation_failed); }   /* dictionary content too small */
         if (dictContentSize < targetDictSize/4) {
             DISPLAYLEVEL(2, "!  warning : selected content significantly smaller than requested (%u < %u) \n", dictContentSize, (unsigned)maxDictSize);
             if (samplesBuffSize < 10 * targetDictSize)
@@ -50008,7 +50008,7 @@ static size_t ZDICT_trainFromBuffer_unsafe_legacy(
             for (u=1; u<dictList->pos; u++) {
                 U32 l = dictList[u].length;
                 ptr -= l;
-                if (ptr<(BYTE*)dictBuffer) { free(dictList); return ERROR(GENERIC); }   /* should not happen */
+                if (ptr<(BYTE*)dictBuffer) { free(dictList); return LEVEL_ERROR(GENERIC); }   /* should not happen */
                 memcpy(ptr, (const char*)samplesBuffer+dictList[u].pos, l);
         }   }
 
@@ -50036,7 +50036,7 @@ size_t ZDICT_trainFromBuffer_legacy(void* dictBuffer, size_t dictBufferCapacity,
     if (sBuffSize < ZDICT_MIN_SAMPLES_SIZE) return 0;   /* not enough content => no dictionary */
 
     newBuff = malloc(sBuffSize + NOISELENGTH);
-    if (!newBuff) return ERROR(memory_allocation);
+    if (!newBuff) return LEVEL_ERROR(memory_allocation);
 
     memcpy(newBuff, samplesBuffer, sBuffSize);
     ZDICT_fillNoise((char*)newBuff + sBuffSize, NOISELENGTH);   /* guard band, for end of buffer condition */

@@ -762,7 +762,7 @@ namespace mnemosy::graphics {
 		return;
 	}
 
-
+	// could use some performance improvements (e.g smd)
 	PictureInfo Picture::ReadExr(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertToSrgb, const bool convertGrayToRGB) {
 	
 		namespace exr = Imf;
@@ -1647,17 +1647,9 @@ namespace mnemosy::graphics {
 		
 		if (convertToSrgb) {
 
-			//double srgbStart = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
 			size_t pixelCount = width * height * channels;
 
 			pic_util_linear2srgb_floatBuffer(buffer, pixelCount);
-
-			/*for (int p = 0; p < pixelCount; p++) {
-
-				float val = buffer[p];
-				buffer[p] = Picture::pic_util_linear2srgb_float(val);
-			}*/
 
 
 		} // end convertToSrgb
@@ -1876,8 +1868,6 @@ namespace mnemosy::graphics {
 
 	PictureInfo Picture::ReadPng(PictureError& outPictureError, const char* filepath, const bool flipVertically, const bool convertGrayToRGB) {
 
-		double swapStart = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
 		// initialize outputs
 		outPictureError.wasSuccessfull = true;
 		outPictureError.what = "";
@@ -1912,7 +1902,6 @@ namespace mnemosy::graphics {
 		// grab info about the file
 		LodePNGColorType file_colType = state.info_png.color.colortype;
 		uint8_t file_bitDepth = state.info_png.color.bitdepth;
-
 
 		state.decoder.color_convert = true; // make sure lodepng converts
 
@@ -2060,11 +2049,6 @@ namespace mnemosy::graphics {
 		info.textureFormat = format;
 		info.pixels = (void*)pixelBuffer;
 
-
-		double swapEnd = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-
-		MNEMOSY_WARN("Png Read SwapEndian: {}", swapEnd - swapStart);
-
 		return info;
 	}
 
@@ -2137,14 +2121,6 @@ namespace mnemosy::graphics {
 			size_t pixelCount = width * height * numChannels;
 
 			pic_util_SwapEndianness(bufferCopy, 0, pixelCount);
-
-			//for (size_t i = 0; i < pixelCount; ++i) {
-			//	unsigned char* pixel = bufferCopy + i * 2;
-			//	// Swap the two bytes to convert  little to big-endian
-			//	unsigned char temp = pixel[0];
-			//	pixel[0] = pixel[1];
-			//	pixel[1] = temp;
-			//}
 		}
 
 
@@ -2231,8 +2207,6 @@ namespace mnemosy::graphics {
 		if (pngFile) {
 			free(pngFile);
 		}
-
-
 	}
 
 	void Picture::WriteKtx2(PictureError& outPictureError, const char* filepath, const PictureInfo& pictureInfo, const bool flipVertically)

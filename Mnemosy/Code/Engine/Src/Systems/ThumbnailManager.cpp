@@ -15,8 +15,6 @@
 
 #include <glad/glad.h>
 
-
-
 namespace mnemosy::systems {
 
 	void ThumbnailManager::Init() {
@@ -138,7 +136,7 @@ namespace mnemosy::systems {
 
 
 
-		fs::path thumbnailPath = entryFolder / fs::path(libEntry->name + "_thumbnail.ktx2");
+		fs::path thumbnailPath = entryFolder / fs::u8path(libEntry->name + "_thumbnail.ktx2");
 		graphics::Renderer& renderer = MnemosyEngine::GetInstance().GetRenderer();
 
 		if (libEntry->type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
@@ -199,7 +197,7 @@ namespace mnemosy::systems {
 			for (int i = 0; i < m_activeEntries.size(); i++) {
 
 				if (m_activeEntries[i]->runtime_ID == libEntry->runtime_ID) {
-					MNEMOSY_ERROR("ThumbnailManager::AddMaterialForThumbnailing: Entry is already in the thumbnail list");
+					MNEMOSY_ERROR("Entry is already in the thumbnail list");
 					return;
 				}
 			}
@@ -264,7 +262,7 @@ namespace mnemosy::systems {
 
 		fs::path materialFolderPath = libPath / libEntry->GetPathFromRoot();// libEntry->parent->pathFromRoot / fs::path(libEntry->name);
 
-		fs::path thumbnailPath = materialFolderPath / fs::path(libEntry->name + "_thumbnail.ktx2");
+		fs::path thumbnailPath = materialFolderPath / fs::u8path(libEntry->name + "_thumbnail.ktx2");
 
 		if (fs::exists(thumbnailPath)) {
 
@@ -277,7 +275,6 @@ namespace mnemosy::systems {
 				MNEMOSY_WARN("Failed to load thumbnail for material: {}", libEntry->name);
 				glDeleteTextures(1, &libEntry->thumbnailTexure_ID);
 				return;
-
 			}
 		}
 		else {

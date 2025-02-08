@@ -184,6 +184,7 @@ glm
 nlohmann_json
 spdlog::spdlog_header_only
 Fulcrum_Utils
+utf8cpp
 )
 
 
@@ -198,7 +199,6 @@ ktx
 OpenEXR
 stbImageWrite
 stbImageRead
-utf8cpp
 assimp
 )
 

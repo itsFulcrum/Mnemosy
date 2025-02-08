@@ -202,26 +202,13 @@ void LibProcedures::LibEntry_SkyboxMaterial_CreateNewDataFile( systems::LibEntry
 	file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_skybox_description);
 
 	file.WriteString(success, jsonKey_skybox_name, libEntry->name);
-
 	file.WriteFloat(success, jsonKey_skybox_exposure, 0.0f);
-
 	file.WriteBool(success,  jsonKey_skybox_textureIsAssigned, false);
-	file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
-
-	
+	file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);	
 	file.WriteFloat(success, jsonKey_skybox_color_r, 1.0f);
 	file.WriteFloat(success, jsonKey_skybox_color_g, 1.0f);
 	file.WriteFloat(success, jsonKey_skybox_color_b, 1.0f);
 
-	/*file.WriteFloat(success, jsonKey_skybox_sunColor_r, 1.0f);
-	file.WriteFloat(success, jsonKey_skybox_sunColor_g, 1.0f);
-	file.WriteFloat(success, jsonKey_skybox_sunColor_b, 1.0f);
-
-	file.WriteFloat(success, jsonKey_skybox_sunDir_x, 0.0f);
-	file.WriteFloat(success, jsonKey_skybox_sunDir_y, 1.0f);
-	file.WriteFloat(success, jsonKey_skybox_sunDir_z, 0.0f);
-
-	file.WriteFloat(success, jsonKey_skybox_sunStrength, 1.0f);*/
 
 	file.FilePrettyPrintSet(prettyPrint);
 	file.FileClose(success, dataFilePath);
@@ -241,7 +228,7 @@ void LibProcedures::LibEntry_PbrMaterial_SaveToFile( systems::LibEntry* libEntry
 	fs::path dataFilePath = LibProcedures::LibEntry_GetDataFilePath(libEntry);
 	matFile.FileOpen(success, dataFilePath, jsonKey_header, jsonMatKey_description);
 	if (!success) {
-		MNEMOSY_WARN("MaterialLibraryRegistry::SaveActiveMaterialToFile: Failed to open material data file. msg: {}", matFile.ErrorStringLastGet());
+		MNEMOSY_WARN("Failed to open material data file. msg: {}", matFile.ErrorStringLastGet());
 	}
 
 	// write all material data to file.
@@ -378,22 +365,11 @@ void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEn
 	}
 
 	file.WriteString(success, jsonKey_skybox_name, libEntry->name);
-
 	file.WriteFloat(success, jsonKey_skybox_exposure, skybox->exposure);
 
 	file.WriteFloat(success, jsonKey_skybox_color_r, skybox->color.r);
 	file.WriteFloat(success, jsonKey_skybox_color_g, skybox->color.g);
 	file.WriteFloat(success, jsonKey_skybox_color_b, skybox->color.b);
-
-	/*file.WriteFloat(success, jsonKey_skybox_sunColor_r, skybox->sunColor.r);
-	file.WriteFloat(success, jsonKey_skybox_sunColor_g, skybox->sunColor.g);
-	file.WriteFloat(success, jsonKey_skybox_sunColor_b, skybox->sunColor.b);
-
-	file.WriteFloat(success, jsonKey_skybox_sunDir_x, skybox->sunDir.x);
-	file.WriteFloat(success, jsonKey_skybox_sunDir_y, skybox->sunDir.y);
-	file.WriteFloat(success, jsonKey_skybox_sunDir_z, skybox->sunDir.z);
-
-	file.WriteFloat(success, jsonKey_skybox_sunStrength, skybox->sunStrength);*/
 
 
 	if (skybox->HasCubemaps()) {
@@ -402,7 +378,7 @@ void LibProcedures::LibEntry_SkyboxMaterial_SaveToFile( systems::LibEntry* libEn
 		// check if the img really exists
 
 		std::string textureFilename = libEntry->name + texture_skybox_fileSuffix_equirectangular;
-		fs::path texPath = LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::path(textureFilename);
+		fs::path texPath = LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::u8path(textureFilename);
 
 		if (fs::exists(texPath)) {
 
@@ -688,23 +664,6 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 			dataFile.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
 		}
 
-
-		//	// rename cubeColor file
-		//{
-		//	fs::path cubeColorFile_old = entryFolder / fs::u8path(oldName + texture_skybox_fileSuffix_cubeColor);
-
-		//	if (fs::exists(cubeColorFile_old)) {
-
-		//		fs::path cubeColorFile_new = entryFolder / fs::u8path(newName + texture_skybox_fileSuffix_cubeColor);
-		//		try {
-		//			fs::rename(cubeColorFile_old, cubeColorFile_new);
-		//		}
-		//		catch (fs::filesystem_error e) {
-		//			MNEMOSY_ERROR("System error renaming file. \nError message: {}", e.what());
-		//		}
-		//	}
-		//}
-
 		// rename cubePrefilter file
 		{
 			fs::path cubePrefilterFile_old = entryFolder / fs::u8path(oldName + texture_skybox_fileSuffix_cubePrefilter);
@@ -740,9 +699,7 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 
 	}
 
-
 	// todo thumbnail rename
-
 	// change name of thumbnail file
 	{
 		fs::path oldThumbFile = entryFolder / fs::u8path(oldName + texture_fileSuffix_thumbnail);
@@ -773,7 +730,6 @@ void LibProcedures::LibEntry_SkyboxMaterial_RenameFiles(LibEntry* libEntry, std:
 	catch (fs::filesystem_error error) {
 		MNEMOSY_ERROR("System error renaming dataFile. \nError message: {}", error.what());
 	}
-
 }
 
 
@@ -785,15 +741,14 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	// load json file
 	fs::path materialDir = LibProcedures::LibEntry_GetFolderPath(libEntry);
 	fs::path dataFile = LibProcedures::LibEntry_GetDataFilePath(libEntry);
-
+	std::string entryName = libEntry->name;
 
 	bool success = false;
 
 	flcrm::JsonSettings matFile;
 	matFile.FileOpen(success, dataFile, jsonKey_header, jsonMatKey_description);
 	if (!success) {
-		MNEMOSY_WARN("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded: Error opening data file: {} \nMessage: {}", dataFile.generic_string(), matFile.ErrorStringLastGet());
-		//return nullptr;
+		MNEMOSY_WARN("Error opening data file: {} \nMessage: {}", dataFile.generic_string(), matFile.ErrorStringLastGet());
 	}
 
 
@@ -807,7 +762,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 				std::vector<std::string> packSuffixesCopy;
 				for (int i = 0; i < packSuffixes.size(); i++) {
 
-					fs::path packedTexPath = materialDir / fs::path(libEntry->name + packSuffixes[i] + ".tif");
+					fs::path packedTexPath = materialDir / fs::u8path(libEntry->name + packSuffixes[i] + ".tif");
 
 					if (fs::exists(packedTexPath)) {
 
@@ -849,7 +804,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	graphics::PictureInfo albedo_picInfo;
 	if (albedoAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_albedoPath, jsonKey_pathNotAssigned, false);
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_albedo);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_albedoPath, jsonKey_pathNotAssigned);
@@ -857,7 +812,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			albedoAssigned = false;
 		}
 		else {
-			thread_load_albedo = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(albedo_picErr), std::ref(albedo_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
+			thread_load_albedo = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(albedo_picErr), std::ref(albedo_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO);
 		}
 	}
 
@@ -870,7 +825,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 
 	if (roughnessAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_roughPath, jsonKey_pathNotAssigned, false);
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_roughness);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_roughPath, jsonKey_pathNotAssigned);
@@ -878,7 +833,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			roughnessAssigned = false;
 		}
 		else {
-			thread_load_roughness = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(roughness_picErr), std::ref(roughness_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
+			thread_load_roughness = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(roughness_picErr), std::ref(roughness_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_ROUGHNESS);
 		}
 	}
 
@@ -888,7 +843,8 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	graphics::PictureInfo  metallic_picInfo;
 	std::thread thread_load_metallic;
 	if (metallicAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_metalPath, jsonKey_pathNotAssigned, false);
+
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_metallic);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_metalPath, jsonKey_pathNotAssigned);
@@ -896,7 +852,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			metallicAssigned = false;
 		}
 		else {
-			thread_load_metallic = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(metallic_picErr), std::ref(metallic_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
+			thread_load_metallic = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(metallic_picErr), std::ref(metallic_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_METALLIC);
 		}
 	}
 
@@ -907,7 +863,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	std::thread thread_load_emissive;
 	if (emissiveAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_emissionPath, jsonKey_pathNotAssigned, false);
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_emissive);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_emissionPath, jsonKey_pathNotAssigned);
@@ -915,7 +871,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			emissiveAssigned = false;
 		}
 		else {
-			thread_load_emissive = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(emissive_picErr), std::ref(emissive_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
+			thread_load_emissive = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(emissive_picErr), std::ref(emissive_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_EMISSION);
 		}
 
 	}
@@ -927,7 +883,8 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 
 	std::thread thread_load_normal;
 	if (normalAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_normalPath, jsonKey_pathNotAssigned, false);
+		
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_normal);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_normalPath, jsonKey_pathNotAssigned);
@@ -935,7 +892,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			normalAssigned = false;
 		}
 		else {
-			thread_load_normal = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(normal_picErr), std::ref(normal_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
+			thread_load_normal = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(normal_picErr), std::ref(normal_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_NORMAL);
 		}
 
 	}
@@ -947,7 +904,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	std::thread thread_load_ao;
 	if (aoAssigned) {
 
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_aoPath, jsonKey_pathNotAssigned, false);
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_ambientOcclusion);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_aoPath, jsonKey_pathNotAssigned);
@@ -955,7 +912,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			aoAssigned = false;
 		}
 		else {
-			thread_load_ao = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(ao_picErr), std::ref(ao_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
+			thread_load_ao = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(ao_picErr), std::ref(ao_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_AMBIENTOCCLUSION);
 		}
 	}
 
@@ -965,7 +922,8 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	graphics::PictureInfo  height_picInfo;
 	std::thread thread_load_height;
 	if (heightAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_heightPath, jsonKey_pathNotAssigned, false);
+
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_height);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_heightPath, jsonKey_pathNotAssigned);
@@ -973,7 +931,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			heightAssigned = false;
 		}
 		else {
-			thread_load_height = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(height_picErr), std::ref(height_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
+			thread_load_height = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(height_picErr), std::ref(height_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_HEIGHT);
 		}
 	}
 
@@ -983,7 +941,8 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 	graphics::PictureInfo  opacity_picInfo;
 	std::thread thread_load_opacity;
 	if (opacityAssigned) {
-		std::string path = materialDir.generic_string() + "/" + matFile.ReadString(success, jsonMatKey_opacityPath, jsonKey_pathNotAssigned, false);
+		
+		fs::path path = materialDir / fs::u8path(entryName + texture_fileSuffix_opacity);
 
 		if (!fs::exists(path)) {
 			matFile.WriteString(success, jsonMatKey_opacityPath, jsonKey_pathNotAssigned);
@@ -991,7 +950,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			opacityAssigned = false;
 		}
 		else {
-			thread_load_opacity = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(opacity_picErr), std::ref(opacity_picInfo), path, true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
+			thread_load_opacity = std::thread(&graphics::Picture::ReadPicture_PbrThreaded, std::ref(opacity_picErr), std::ref(opacity_picInfo), path.generic_string(), true, graphics::PBRTextureType::MNSY_TEXTURE_OPACITY);
 		}
 	}
 
@@ -1056,7 +1015,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(albedo_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading albedo Texture \nMessage: {}", albedo_picErr.what);
+			MNEMOSY_ERROR("Error loading albedo Texture \nMessage: {}", albedo_picErr.what);
 		}
 	}
 
@@ -1069,7 +1028,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(roughness_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading roughness Texture \nMessage: {}", roughness_picErr.what);
+			MNEMOSY_ERROR("Error loading roughness Texture \nMessage: {}", roughness_picErr.what);
 		}
 	}
 
@@ -1083,7 +1042,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(metallic_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Metallic Texture \nMessage: {}", metallic_picErr.what);
+			MNEMOSY_ERROR("Error loading Metallic Texture \nMessage: {}", metallic_picErr.what);
 		}
 	}
 
@@ -1096,7 +1055,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(emissive_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Emission Texture \nMessage: {}", emissive_picErr.what);
+			MNEMOSY_ERROR("Error loading Emission Texture \nMessage: {}", emissive_picErr.what);
 		}
 	}
 
@@ -1109,7 +1068,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(normal_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Normal Texture \nMessage: {}", normal_picErr.what);
+			MNEMOSY_ERROR("Error loading Normal Texture \nMessage: {}", normal_picErr.what);
 		}
 	}
 
@@ -1122,7 +1081,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(ao_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading AmbientOcclusion Texture \nMessage: {}", ao_picErr.what);
+			MNEMOSY_ERROR("Error loading AmbientOcclusion Texture \nMessage: {}", ao_picErr.what);
 		}
 	}
 
@@ -1135,7 +1094,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(height_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Height Texture \nMessage: {}", height_picErr.what);
+			MNEMOSY_ERROR("Error loading Height Texture \nMessage: {}", height_picErr.what);
 		}
 	}
 
@@ -1149,7 +1108,7 @@ graphics::PbrMaterial* LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithr
 			free(opacity_picInfo.pixels);
 		}
 		else {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadActiveMaterialFromFile_Multithreaded:: Error loading Opacity Texture \nMessage: {}", opacity_picErr.what);
+			MNEMOSY_ERROR("Error loading Opacity Texture \nMessage: {}", opacity_picErr.what);
 		}
 	}
 
@@ -1169,7 +1128,7 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 
 	file.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_unlit_description);
 	if (!success) {
-		MNEMOSY_WARN("MaterialLibraryRegistry::LoadUnlitMaterialFromFile: Error opening data file: {} \nMessage: {}", dataFilePath.generic_string(), file.ErrorStringLastGet());
+		MNEMOSY_WARN("Error opening data file: {} \nMessage: {}", dataFilePath.generic_string(), file.ErrorStringLastGet());
 	}
 
 	bool useAlpha = file.ReadBool(success, jsonKey_unlit_useAlpha, false, true);
@@ -1234,13 +1193,12 @@ graphics::UnlitMaterial* LibProcedures::LibEntry_UnlitMaterial_LoadFromFile(syst
 	return unlitMat;
 }
 
-// TODO: handle case if main equirectangular .hdr file is missing but for some reason colorCubemap is still present. In theory it is possible to reconstruct hdr again.
 graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::filesystem::path& folderPath, std::string& name, bool prettyPrint)
 {
 	namespace fs = std::filesystem;
 
 
-	fs::path dataFilePath = folderPath / fs::path(name + ".mnsydata");// LibProcedures::LibEntry_GetDataFilePath(libEntry);
+	fs::path dataFilePath = folderPath / fs::u8path(name + ".mnsydata");// LibProcedures::LibEntry_GetDataFilePath(libEntry);
 
 
 	bool success = false;
@@ -1261,17 +1219,6 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 	skybox->color.g = file.ReadFloat(success, jsonKey_skybox_color_g, 1.0f, true);
 	skybox->color.b = file.ReadFloat(success, jsonKey_skybox_color_b, 1.0f, true);
 
-	//skybox->sunColor.r = file.ReadFloat(success, jsonKey_skybox_sunColor_r, 1.0f, true);
-	//skybox->sunColor.g = file.ReadFloat(success, jsonKey_skybox_sunColor_g, 1.0f, true);
-	//skybox->sunColor.b = file.ReadFloat(success, jsonKey_skybox_sunColor_b, 1.0f, true);
-
-	//skybox->sunDir.x = file.ReadFloat(success, jsonKey_skybox_sunDir_x, 0.0f, true);
-	//skybox->sunDir.y = file.ReadFloat(success, jsonKey_skybox_sunDir_y, 1.0f, true);
-	//skybox->sunDir.z = file.ReadFloat(success, jsonKey_skybox_sunDir_z, 0.0f, true);
-
-	//skybox->sunStrength = file.ReadFloat(success, jsonKey_skybox_sunStrength, 1.0f, true);
-
-
 	bool hasTextures = file.ReadBool(success, jsonKey_skybox_textureIsAssigned, false, true);
 
 
@@ -1280,36 +1227,25 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 
 		fs::path entryFolder = folderPath;// systems::LibProcedures::LibEntry_GetFolderPath(libEntry);
 
-		fs::path equirectangularPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_equirectangular);
-		//fs::path cubeColorPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeColor);
-		fs::path cubeIrradiancePath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubeIrradiance);
-		fs::path cubePrefilterPath = entryFolder / fs::path(name + texture_skybox_fileSuffix_cubePrefilter);
+		fs::path equirectangularPath = entryFolder / fs::u8path(name + texture_skybox_fileSuffix_equirectangular);
+		fs::path cubeIrradiancePath  = entryFolder / fs::u8path(name + texture_skybox_fileSuffix_cubeIrradiance);
+		fs::path cubePrefilterPath   = entryFolder / fs::u8path(name + texture_skybox_fileSuffix_cubePrefilter);
 
 		if (!fs::exists(equirectangularPath)) {
-			// handle case if main equirectangular file is missing
 
-			// if the main hdr equirectangular file is missing we look for the color cubemap, 
-			// if that one is also missing we will not be able to reconstructe the main equirecangular ever, 
-			// so we can just delete all other files we may find and reset skybox
-			MNEMOSY_WARN("error loading skybox: {}, skybox hdr file is missing.", name);
+			// if the main hdr equirectangular file is missing we look for the other ktx2 files and delete them if neccesary
+			// could think about reconstructing hdr from prefilter highest mip in the future..
+
+			MNEMOSY_WARN("Error loading skybox: {}, skybox hdr file is missing.", name);
 
 			// for now as we dont yet have a way to reconstruct equirectangular from cubemap just delete the other files if they exist
-
-			/*if (fs::exists(cubeColorPath)) {
-				try {
-					fs::remove(cubeColorPath);
-				}
-				catch (fs::filesystem_error err) {
-					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
-				}
-			}*/
 
 			if (fs::exists(cubeIrradiancePath)) {		
 				try {
 					fs::remove(cubeIrradiancePath);
 				}
 				catch (fs::filesystem_error err) {
-					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
+					MNEMOSY_ERROR("Failed to delete skybox ktx file. \nMessage: {}", err.what());
 				}
 			}
 
@@ -1318,23 +1254,14 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 					fs::remove(cubePrefilterPath);
 				}
 				catch (fs::filesystem_error err) {
-					MNEMOSY_ERROR("LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile: Failed to delete skybox ktx file. \nMessage: {}", err.what());
+					MNEMOSY_ERROR("Failed to delete skybox ktx file. \nMessage: {}", err.what());
 				}
 			}
 
 			file.WriteBool(success, jsonKey_skybox_textureIsAssigned, false);
 			file.WriteString(success, jsonKey_skybox_texturePath, jsonKey_pathNotAssigned);
 
-			// handle this separatly in the future if we have a reconstruct method
-			//if (!fs::exists(cubeColorPath)) {
-			//	// now lets just reset it
-
-			//	// delete other files
-			//}
-			//else {
-			//	// TODO:
-			//	// also just reset it for now but in the future we may implement a way to reconstruct it in a shader.
-			//}
+			
 		}
 		else { // hdr equirectangular exists
 
@@ -1344,17 +1271,6 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 			//bool cubeColorMissing = false;
 			bool cubeIrradianceMissing = false;
 			bool cubePrefilterMissing = false;
-
-
-		/*	if (fs::exists(cubeColorPath)) {
-
-				graphics::Cubemap* cube = new graphics::Cubemap();
-				cube->GenerateOpenGlCubemap_FromKtx2File(cubeColorPath,false);
-				skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
-			}
-			else {
-				cubeColorMissing = true;
-			}*/
 
 			if (fs::exists(cubeIrradiancePath)) {
 
@@ -1387,7 +1303,7 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 
 				graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picError, equirectangularPath.generic_string().c_str(), true, true, false);
 				if (!picError.wasSuccessfull) {
-					MNEMOSY_ERROR("LibProcedures:LibEntry_load_skybox: Failed to load hdr equirectangular image.");
+					MNEMOSY_ERROR("Failed to load hdr equirectangular image.");
 
 				}
 				else {
@@ -1397,18 +1313,6 @@ graphics::Skybox* LibProcedures::LibEntry_SkyboxMaterial_LoadFromFile(std::files
 
 					if (picInfo.pixels)
 						free(picInfo.pixels);
-
-					//// if anyone of these is missing generate it new and save it
-					//if (cubeColorMissing) {
-
-					//	graphics::Cubemap* cube = new graphics::Cubemap();
-					//	cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangular,graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,false,0);
-
-					//	graphics::KtxImage ktx;
-					//	ktx.SaveCubemap(cubeColorPath.generic_string().c_str(), cube->GetGlID(), equirectangular->GetTextureFormat(), cube->GetResolution(),false);
-
-					//	skybox->AssignCubemap(cube, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR);
-					//}
 
 					if (cubeIrradianceMissing) {
 						graphics::Cubemap* cube = new graphics::Cubemap();

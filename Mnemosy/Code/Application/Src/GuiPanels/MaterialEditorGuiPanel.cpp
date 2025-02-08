@@ -6,11 +6,13 @@
 #include "Include/Core/Clock.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/FileDirectories.h"
+
 #ifdef MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/PlatfromUtils_Windows.h"
-#endif // MNEMOSY_PLATFORM_WINDOWS
 #include "Include/Core/Utils/DropHandler_Windows.h"
+#endif // MNEMOSY_PLATFORM_WINDOWS
 
+#include "Include/Core/Utils/StringUtils.h"
 
 #include "Include/Systems/Input/InputSystem.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
@@ -60,10 +62,7 @@ namespace mnemosy::gui
 
 		ImGui::Begin(panelName, &showPanel);
 
-		// TODO: 
-		// adapt to work with different libEntry types if no type then dont show anything and behind the scenes it will be handled to fallback to default pbr material
-
-
+		
 		systems::LibEntry* libEntry = m_materialRegistry.ActiveLibEntry_Get();
 
 		// return early if no entry is selcted yet
@@ -145,10 +144,7 @@ namespace mnemosy::gui
 			graphics::Skybox* skybox = &m_engineInstance.GetScene().GetSkybox();
 
 			DrawEntrySkybox(libEntry, skybox);
-		}
-
-
-		
+		}		
 
 		ImGui::End();
 
@@ -530,18 +526,13 @@ namespace mnemosy::gui
 					// roughness changed update
 					activeMat.IsSmoothnessTexture = isSmoothness;
 
-
-					//MNEMOSY_TRACE("Changed isSmoothneess to: {}", activeMat.IsSmoothnessTexture);
-
 					systems::LibEntry* entry = m_materialRegistry.ActiveLibEntry_Get();
 
 					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(entry);
 
-					fs::path roughnessPath = materialFolderPath / fs::path(std::string(entry->name + texture_fileSuffix_roughness));
-
+					fs::path roughnessPath = materialFolderPath / fs::u8path(entry->name + texture_fileSuffix_roughness);
 
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().InvertRoughness(activeMat, roughnessPath.generic_string().c_str(), true);
-
 
 					// Load newly created texture as new roughness texture 
 
@@ -568,8 +559,6 @@ namespace mnemosy::gui
 
 					SaveMaterial();
 					MNEMOSY_TRACE("SavedMaterialFile");
-
-
 				}
 
 			}
@@ -641,7 +630,7 @@ namespace mnemosy::gui
 				if (activeMat.GetNormalFormatAsInt() != format_current) {
 
 					fs::path materialFolderPath = m_materialRegistry.LibEntry_GetFolderPath(activeLibEntry);
-					fs::path normalMapPath = materialFolderPath / fs::path(std::string(activeLibEntry->name + texture_fileSuffix_normal));
+					fs::path normalMapPath = materialFolderPath / fs::u8path(activeLibEntry->name + texture_fileSuffix_normal);
 
 					// Generate inverted normal Texture.
 					MnemosyEngine::GetInstance().GetTextureGenerationManager().FlipNormalMap(normalMapPath.generic_string().c_str(), activeMat, true);
@@ -1387,18 +1376,20 @@ namespace mnemosy::gui
 		
 		// try handle only first one an check if it is above a specific button
 		{
-			std::filesystem::path firstPath = { dropedFilePaths[0] };
-			//std::string firstPath = dropedFilePaths[0];
-			fs::directory_entry firstFile = fs::directory_entry(firstPath);
+			std::filesystem::path firstPath = fs::u8path(mnemosy::core::StringUtils::string_fix_u8Encoding(dropedFilePaths[0]));			
 
-
-			if (!firstFile.exists()) 
+			if (!fs::exists(firstPath)) {
 				return;
+			}
 
-			if (!firstFile.is_regular_file())
+			if (!fs::is_regular_file(firstPath)) {
 				return;
+			}
 
-			std::string extention = firstFile.path().extension().generic_string();
+			std::string extention = firstPath.extension().generic_string();
+
+
+
 			if (!graphics::TexUtil::is_image_file_extention_supported(extention)) {
 				return;
 			}
@@ -1515,9 +1506,7 @@ namespace mnemosy::gui
 		for (int i = 0; i < dropedFilePaths.size(); i++) {
 
 
-			fs::path filepath{ dropedFilePaths[i] };
-			//fs::directory_entry file{ filepath };
-
+			std::filesystem::path filepath = fs::u8path(mnemosy::core::StringUtils::string_fix_u8Encoding(dropedFilePaths[i]));
 
 			if(filepath.has_extension()){
 
@@ -1556,11 +1545,6 @@ namespace mnemosy::gui
 					else {
 						MNEMOSY_WARN("Could not determine pbr type for texture with name: {}, {}", filename.generic_string(), filepath.generic_string());					
 					}
-
-					
-
-
-
 
 					SaveMaterial();
 				}

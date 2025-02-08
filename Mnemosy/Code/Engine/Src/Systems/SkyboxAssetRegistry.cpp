@@ -97,15 +97,14 @@ namespace mnemosy::systems
 
 		if (hasTextures) {
 			
-			fs::path equirectangularPath = entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_equirectangular);
+			fs::path equirectangularPath = entryFolder / fs::u8path(libEntry->name + texture_skybox_fileSuffix_equirectangular);
 			if (!fs::exists(equirectangularPath)) {
 				MNEMOSY_ERROR("Cannot add entry to preview skyboxes because the equirectangular file is missing. Path: {} ", equirectangularPath.generic_string());
 				return;
 			}
 
-			//fs::path cubeColorPath		= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeColor);
-			fs::path cubeIrradiancePath = entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubeIrradiance);
-			fs::path cubePrefilterPath	= entryFolder / fs::path(libEntry->name + texture_skybox_fileSuffix_cubePrefilter);
+			fs::path cubeIrradiancePath = entryFolder / fs::u8path(libEntry->name + texture_skybox_fileSuffix_cubeIrradiance);
+			fs::path cubePrefilterPath	= entryFolder / fs::u8path(libEntry->name + texture_skybox_fileSuffix_cubePrefilter);
 			
 
 			graphics::PictureError picError;
@@ -119,23 +118,6 @@ namespace mnemosy::systems
 			graphics::Texture* equirectangularTex = new graphics::Texture();
 
 			fs::path newEquirectangularPath = cubemapsPath / equirectangularPath.filename();
-
-			//// generate color cube new because we want to downsample it to 1024.
-			//{
-			//	equirectangularTex->GenerateOpenGlTexture(picInfo,true);
-
-			//	if (picInfo.pixels) {
-			//		free(picInfo.pixels);
-			//	}
-
-			//	fs::path newColorCubePath = cubemapsPath / cubeColorPath.filename();
-
-			//	graphics::Cubemap cube;
-			//	cube.GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_COLOR,true, 1024);
-
-			//	graphics::KtxImage ktx;
-			//	ktx.SaveCubemap(newColorCubePath.generic_string().c_str(), cube.GetGlID(), equirectangularTex->GetTextureFormat(), cube.GetResolution(),false);
-			//}
 
 			// copy equirectangular file - we keep it there in full resolution bc we dont yet have an easy way to downsample images.
 			try {
@@ -296,7 +278,7 @@ namespace mnemosy::systems
 
 		// data file
 		{
-			fs::path filePath = folderPath / fs::path(name + ".mnsydata");
+			fs::path filePath = folderPath / fs::u8path(name + ".mnsydata");
 
 			if (fs::exists(filePath)) {
 				try {
@@ -310,7 +292,7 @@ namespace mnemosy::systems
 
 		// equirectangular map
 		{
-			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_equirectangular);
+			fs::path filePath = folderPath / fs::u8path(name + texture_skybox_fileSuffix_equirectangular);
 
 			if (fs::exists(filePath)) {
 				try {
@@ -322,22 +304,9 @@ namespace mnemosy::systems
 			}
 		}
 
-		// color cube map
-		{
-			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_cubeColor);
-
-			if (fs::exists(filePath)) {
-				try {
-					fs::remove(filePath);
-				}
-				catch (fs::filesystem_error err) {
-					MNEMOSY_WARN("System Error removing file: {},  \nMessage: {}", filePath.generic_string(), err.what());
-				}
-			}
-		}
 		// irradiance cube map
 		{
-			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_cubeIrradiance);
+			fs::path filePath = folderPath / fs::u8path(name + texture_skybox_fileSuffix_cubeIrradiance);
 
 			if (fs::exists(filePath)) {
 				try {
@@ -350,7 +319,7 @@ namespace mnemosy::systems
 		}
 		// prefilter cube map
 		{
-			fs::path filePath = folderPath / fs::path(name + texture_skybox_fileSuffix_cubePrefilter);
+			fs::path filePath = folderPath / fs::u8path(name + texture_skybox_fileSuffix_cubePrefilter);
 
 			if (fs::exists(filePath)) {
 				try {

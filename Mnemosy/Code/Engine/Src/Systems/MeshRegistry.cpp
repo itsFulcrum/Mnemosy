@@ -16,7 +16,6 @@ namespace mnemosy::systems {
 	void MeshRegistry::Init() {
 
 		// Load Skybox Render Mesh
-
 		std::filesystem::path skyboxMeshPath = MnemosyEngine::GetInstance().GetFileDirectories().GetMeshesPath() / std::filesystem::path("mnemosy_skybox_render_mesh.fbx");
 
 		m_skybox_render_ModelData_ID = LoadMesh(skyboxMeshPath.generic_string());
@@ -34,8 +33,6 @@ namespace mnemosy::systems {
 			 1.0f, -1.0f,		1.0f,0.0f,
 			 1.0f,  1.0f,		1.0f,1.0f
 		};
-
-
 
 		m_ScreenQuad_VBO = 0;
 		m_ScreenQuad_VAO = 0;
@@ -115,6 +112,7 @@ namespace mnemosy::systems {
 		}
 
 		double beginTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
+
 		// mesh is not contained in the registry yet
 
 		graphics::ModelLoader modelLoader;

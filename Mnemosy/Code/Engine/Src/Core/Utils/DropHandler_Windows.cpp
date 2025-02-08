@@ -5,6 +5,7 @@
 #include "Include/Core/Window.h"
 #include "Include/Core/Log.h"
 #include "Include/Core/Utils/DropManager_Windows.h"
+#include "Include/Core/Utils/StringUtils.h"
 
 #include <filesystem>
 
@@ -32,11 +33,11 @@ namespace mnemosy::core {
 		//Check_HRESULT_Error("DropHandler::Initialize::CoInitialize() ", hr);
 
 		HRESULT hr = OleInitialize(NULL);
-		Check_HRESULT_Error("DropHandler::Initialize::OleInitialize(): ", hr);
+		Check_HRESULT_Error("OleInitialize(): ", hr);
 		
 		m_pDropManager = new DropManager();
 		hr = RegisterDragDrop(glfwGetWin32Window(&window), static_cast<IDropTarget*>(m_pDropManager));
-		Check_HRESULT_Error("DropHandler::Initialize::RegisterDragDrop(): ", hr);
+		Check_HRESULT_Error("RegisterDragDrop(): ", hr);
 		
 		
 		// Apperently I don't need the factory stuff at all..
@@ -47,23 +48,23 @@ namespace mnemosy::core {
 
 		DWORD class_reg2;
 		hr = CoRegisterClassObject(CLSID_DropSource, (IUnknown*)m_pDropSourceFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg2);
-		Check_HRESULT_Error("DropHandler::Initialize::CoRegisterClassObject(): DropSource ", hr);
+		Check_HRESULT_Error("CoRegisterClassObject(): DropSource ", hr);
 			
 			
 		DWORD class_reg;
 		hr = CoRegisterClassObject(CLSID_FileDataObject, (IUnknown*)m_pDataObjectFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg);
-		Check_HRESULT_Error("DropHandler::Initialize::CoRegisterClassObject(): FileDataObject ", hr);
+		Check_HRESULT_Error("CoRegisterClassObject(): FileDataObject ", hr);
 
 
 		DWORD class_reg3;
 		hr = CoRegisterClassObject(CLSID_DataFormatEtc, (IUnknown*)m_pEnumFormatEtcFactory, CLSCTX_INPROC_SERVER, REGCLS_MULTIPLEUSE, &class_reg3);
-		Check_HRESULT_Error("DropHandler::Initialize::CoRegisterClassObject(): DataEnumFormatEtc ", hr);
+		Check_HRESULT_Error("CoRegisterClassObject(): DataEnumFormatEtc ", hr);
 		
 	}
 
 	void DropHandler::Shutdown() {
 		
-		// I think the reason this crashes is because glfw already calls these functions when terminating the window..
+		// I think the reason this crashes is because glfw already calls these functions when terminating the window?..
 		// OleUninitialize();
 		//HRESULT hr = RevokeDragDrop(glfwGetWin32Window(&MnemosyEngine::GetInstance().GetWindow().GetWindow()));
 		//Check_HRESULT_Error("DropHandler::Uninitialze:RevokeDragDrop: ", hr);
@@ -101,8 +102,8 @@ namespace mnemosy::core {
 		STGMEDIUM* stg = new STGMEDIUM();
 				
 
-		// It seems I dont need to use the factories and could just new DropSource()
-		// but its probably good to register with windows
+		// It seems I dont need to use the factories bullshit and could just do new DropSource()
+		// buuut its probably good to register with windows?
 		DropSource* pDropSource;
 		HRESULT hr = CoCreateInstance(CLSID_DropSource, NULL, CLSCTX_INPROC_SERVER, IID_IDropSource, reinterpret_cast<void**>(&pDropSource));
 		Check_HRESULT_Error("CoCreateInstance for DropSource", hr);
@@ -112,16 +113,18 @@ namespace mnemosy::core {
 		Check_HRESULT_Error("CoCreateInstance for FileDataObject", hr);
 				
 		// just pass the vector of string filepaths to the FileDataObject
+
+		// 'filesToDrag'  are not ut8 encoded but already wide as we handle all paths internally this way.
 		pDataObject->Init(filesToDrag);
 
 		// Start drag operation
 		DWORD dwEffect = 0;
 		hr = DoDragDrop(pDataObject, pDropSource, DROPEFFECT_COPY, &dwEffect);
 		if (SUCCEEDED(hr)) {
-			MNEMOSY_TRACE("DropHandler::BeginDrag::DoDragDrop() Succeeded");
+			MNEMOSY_TRACE("DoDragDrop() Succeeded");
 		}
 		else {
-			Check_HRESULT_Error("DropHandler::BeginDrag::DoDragDrop():", hr);
+			Check_HRESULT_Error("DoDragDrop():", hr);
 		}
 
 		// release dataObject and dropSource
@@ -265,16 +268,22 @@ namespace mnemosy::core {
 	STDMETHODIMP_(HRESULT __stdcall) FileDataObject::GetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium) {	
 
 		if (pFormatetc->cfFormat == CF_HDROP && pFormatetc->tymed == TYMED_HGLOBAL) {
+
+
 			// Convert file paths from multibyte to wide-character strings
 			std::vector<std::wstring> unicodeFilePaths;
+			unicodeFilePaths.reserve(m_filePaths.size());
 			for (const auto& filePath : m_filePaths) {
-				int wcharCount = MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, nullptr, 0);
-				if (wcharCount > 0) {
-					std::wstring unicodeFilePath;
-					unicodeFilePath.resize(wcharCount - 1); // Exclude null terminator
-					MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, &unicodeFilePath[0], wcharCount);
-					unicodeFilePaths.push_back(std::move(unicodeFilePath));
-				}
+
+				unicodeFilePaths.push_back(mnemosy::core::StringUtils::string_to_wString(filePath));
+
+				//int wcharCount = MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, nullptr, 0);
+				//if (wcharCount > 0) {
+				//	std::wstring unicodeFilePath;
+				//	unicodeFilePath.resize(wcharCount - 1); // Exclude null terminator
+				//	MultiByteToWideChar(CP_UTF8, 0, filePath.c_str(), -1, &unicodeFilePath[0], wcharCount);
+				//	unicodeFilePaths.push_back(std::move(unicodeFilePath));
+				//}
 			}
 			
 			// Calculate total size needed for DROPFILES structure

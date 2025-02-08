@@ -2,12 +2,12 @@
 #define MNEMOSY_ENGINE_H
 
 #include <memory>
-#include "Include/Core/flcrm_arena_alloc.h"
+#include <Include/Core/flcrm_arena_alloc.h>
+#include "Include/Core/Logger.h"
 
 namespace mnemosy::core
 {
 	class Clock;
-	class Logger;
 	class Window;
 	class FileDirectories;
 	class DropHandler;
@@ -91,10 +91,11 @@ namespace mnemosy
 		bool m_isInitialized = false;
 		
 
-
 		core::Window* m_pWindow = nullptr;
 		
-		std::unique_ptr<core::Logger> m_pLogger;
+		core::Logger m_logger;
+
+		//std::unique_ptr<core::Logger> m_pLogger;
 		core::Clock* m_pClock;
 		core::FileDirectories* m_pFileDirectories;
 

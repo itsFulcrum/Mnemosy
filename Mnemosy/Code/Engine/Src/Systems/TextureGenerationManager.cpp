@@ -24,9 +24,6 @@ namespace mnemosy::systems
 	void TextureGenerationManager::Init() {
 		m_pTextureGenShader = nullptr;
 
-		//m_VBO = 0;
-		//m_VAO = 0;
-
 		m_FBO = 0;
 		m_renderTexture_ID = 0;
 	}
@@ -255,7 +252,6 @@ namespace mnemosy::systems
 			InitializeShaderTextureAndFBO(1024, 1024);
 		}
 
-
 		// === START FRAME
 		glViewport(0, 0, width, height);
 		// Bind framebuffer
@@ -441,8 +437,6 @@ namespace mnemosy::systems
 
 			systems::ExportManager& exporter = MnemosyEngine::GetInstance().GetExportManager();
 
-
-
 			graphics::TextureFormat Format = graphics::MNSY_RGBA16;
 
 			if (packType == graphics::ChannelPackType::MNSY_PACKTYPE_RGB) {
@@ -474,7 +468,6 @@ namespace mnemosy::systems
 
 			exporter.GLTextureExport(m_renderTexture_ID,info);
 		}
-
 
 		// === END FRAME
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

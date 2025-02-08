@@ -38,18 +38,9 @@
 namespace mnemosy::systems {
 	// == public methods
 
-
-
-
-
-
-
-
 	void MaterialLibraryRegistry::Init()
 	{
 		namespace fs = std::filesystem;
-		
-		flcrm::log::log_test();
 
 
 		m_folderTree = nullptr;
@@ -104,7 +95,7 @@ namespace mnemosy::systems {
 
 		if (!LibProcedures::CheckDataFile(dataFilePath)) {
 
-			MNEMOSY_ERROR("LibCollection_LoadIntoActiveTree: Data file is invalid or not existing: {}", dataFilePath.generic_string());
+			MNEMOSY_ERROR("Data file is invalid or not existing: {}", dataFilePath.generic_string());
 			return false;
 		}		
 
@@ -116,7 +107,7 @@ namespace mnemosy::systems {
 		try {
 			readFile = nlohmann::json::parse(dataFileStream);
 		} catch (nlohmann::json::parse_error err) {
-			MNEMOSY_ERROR("LibCollection_LoadIntoActiveTree: Error Parsing File. Message: {}", err.what());
+			MNEMOSY_ERROR("Error Parsing File. Message: {}", err.what());
 			dataFileStream.close();
 
 			// clear folder tree if neccesary
@@ -269,7 +260,7 @@ namespace mnemosy::systems {
 			fs::copy(fromPath, toPath / fromPath.filename(), fs::copy_options::recursive);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveFolder: System Error Copying directory: \nMessage: {}", error.what());
+			MNEMOSY_ERROR("System Error Copying directory: \nMessage: {}", error.what());
 			return;
 		}
 
@@ -277,14 +268,14 @@ namespace mnemosy::systems {
 			fs::remove_all(fromPath);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveFolder: System Error Removing old directory: \nMessage: {}", error.what());
+			MNEMOSY_ERROR("System Error Removing old directory: \nMessage: {}", error.what());
 
 			// if this happens we should clean up the copy we just did
 			try {
 				fs::remove_all(toPath / fromPath.filename());
 			}
 			catch (fs::filesystem_error error2) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::MoveFolder: System Error Removing directory that was just copied, if this happend something went really wrong! \nMessage: {}", error.what());
+				MNEMOSY_ERROR("System Error Removing directory that was just copied, if this happend something went really wrong! \nMessage: {}", error.what());
 			}
 			return;
 		}
@@ -297,11 +288,11 @@ namespace mnemosy::systems {
 		ActiveLibCollection_SaveToFile();
 	}
 
-	void MaterialLibraryRegistry::DeleteAndKeepChildren(FolderNode* node)
-	{
+	void MaterialLibraryRegistry::DeleteAndKeepChildren(FolderNode* node) {
+
 		// never delete root node
 		if (node->IsRoot()) {
-			MNEMOSY_WARN("MaterialLibraryRegistry::DeleteAndKeepChildren: You can't delete the root directory");
+			MNEMOSY_WARN("You can't delete the root directory");
 			return;
 		}
 
@@ -369,15 +360,13 @@ namespace mnemosy::systems {
 				fs::remove_all(folderPath);
 			}
 			catch (fs::filesystem_error error) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteFolderHierarchy: System error deleting directory: {} \nError Message: {} ", folderPath.generic_string(), error.what());
+				MNEMOSY_ERROR("System error deleting directory: {} \nError Message: {} ", folderPath.generic_string(), error.what());
 			}
 		}
 
 		m_folderTree->DeleteFolderHierarchy(node);
 	}
-
-
-	
+		
 	void MaterialLibraryRegistry::LibEntry_CreateNew(FolderNode* node, LibEntryType type , std::string& name) {
 
 		namespace fs = std::filesystem;
@@ -391,7 +380,7 @@ namespace mnemosy::systems {
 			fs::create_directory(entryDirectory);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::AddMaterial: System error creating directory. \nError message: {}", error.what());
+			MNEMOSY_ERROR("System error creating directory. \nError message: {}", error.what());
 
 			int posInVector = -1;
 			for (unsigned int i = 0; i < node->subEntries.size(); i++) {
@@ -537,8 +526,7 @@ namespace mnemosy::systems {
 		// save library data file;
 		ActiveLibCollection_SaveToFile();
 	}
-
-	
+		
 	void MaterialLibraryRegistry::LibEntry_Delete(systems::LibEntry* libEntry, int positionInVector) {
 
 		namespace fs = std::filesystem;
@@ -565,7 +553,7 @@ namespace mnemosy::systems {
 			fs::remove_all(libEntryFolderPath);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteMaterial: System error deleting directory \nError message: ", error.what());
+			MNEMOSY_ERROR("System error deleting directory \nError message: ", error.what());
 			return;
 		}
 		
@@ -588,15 +576,15 @@ namespace mnemosy::systems {
 		// Copying and then removing works rn but is not very elegant. fs::rename() does not work and throws acces denied error
 			//fs::rename(fromPath, toPath / fromPath.filename());
 
-		fs::path fromPath = libraryDir / sourceNode->GetPathFromRoot() / fs::path(entryName);//  fs::path(sourceNode->pathFromRoot) / fs::path(entryName);
-		fs::path toPath = libraryDir / targetNode->GetPathFromRoot() / fs::path(entryName); // fs::path(targetNode->pathFromRoot) / fs::path(entryName);
+		fs::path fromPath = libraryDir / sourceNode->GetPathFromRoot() / fs::u8path(entryName);//  fs::path(sourceNode->pathFromRoot) / fs::path(entryName);
+		fs::path toPath   = libraryDir / targetNode->GetPathFromRoot() / fs::u8path(entryName); // fs::path(targetNode->pathFromRoot) / fs::path(entryName);
 	
 		// first copy files to new folder
 		try { 
 			fs::copy(fromPath, toPath , fs::copy_options::recursive);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveMaterial: System Error Copying directory: \nMessage: {}", error.what());
+			MNEMOSY_ERROR("System Error Copying directory: \nMessage: {}", error.what());
 			return;
 		}
 
@@ -605,7 +593,7 @@ namespace mnemosy::systems {
 			fs::remove_all(fromPath);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::MoveMaterial: System Error Removing old directory: \nMessage: {}", error.what());
+			MNEMOSY_ERROR("System Error Removing old directory: \nMessage: {}", error.what());
 			return;
 		}
 
@@ -644,7 +632,7 @@ namespace mnemosy::systems {
 
 			MnemosyEngine::GetInstance().GetScene().SetPbrMaterial(mat);
 
-			MNEMOSY_DEBUG("MaterialLibrary: Loaded PBR Material: {}", libEntry->name);
+			MNEMOSY_DEBUG("Loaded PBR Material: {}", libEntry->name);
 		}
 		else if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT) {
 
@@ -652,7 +640,7 @@ namespace mnemosy::systems {
 
 			MnemosyEngine::GetInstance().GetScene().SetUnlitMaterial(unlitMat);
 
-			MNEMOSY_DEBUG("MaterialLibrary: Loaded Unlit Material: {}", libEntry->name);
+			MNEMOSY_DEBUG("Loaded Unlit Material: {}", libEntry->name);
 		}
 		else if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX) {
 
@@ -666,7 +654,7 @@ namespace mnemosy::systems {
 
 			MnemosyEngine::GetInstance().GetRenderer().SetShaderSkyboxUniforms(scene.userSceneSettings,*sky);
 
-			MNEMOSY_DEBUG("MaterialLibrary: Loaded Skybox Material: {}", libEntry->name);
+			MNEMOSY_DEBUG("Loaded Skybox Material: {}", libEntry->name);
 		}
 
 
@@ -688,7 +676,7 @@ namespace mnemosy::systems {
 
 
 		double endTime = MnemosyEngine::GetInstance().GetClock().GetTimeSinceLaunch();
-		MNEMOSY_WARN("Loaded Material in {} seconds", endTime - beginTime);
+		MNEMOSY_TRACE("Loaded Material in {} seconds", endTime - beginTime);
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_SaveToFile() {
@@ -730,12 +718,11 @@ namespace mnemosy::systems {
 
 	}
 
-
 	void MaterialLibraryRegistry::ActiveLibEntry_PbrMat_GenerateOpacityFromAlbedoAlpha(LibEntry* libEntry, graphics::PbrMaterial& activePbrMat) {
 
 		namespace fs = std::filesystem;
 
-		fs::path opacityMapPath = LibEntry_GetFolderPath(m_activeLibEntry) / fs::path(std::string(libEntry->name + texture_fileSuffix_opacity));
+		fs::path opacityMapPath = LibEntry_GetFolderPath(m_activeLibEntry) / fs::u8path(libEntry->name + texture_fileSuffix_opacity);
 
 		//Generate opacity Texture
 		MnemosyEngine::GetInstance().GetTextureGenerationManager().GenerateOpacityFromAlbedoAlpha(activePbrMat, opacityMapPath.generic_string().c_str(), true);
@@ -752,7 +739,7 @@ namespace mnemosy::systems {
 				fs::remove_all(opacityMapPath);
 			}
 			catch (fs::filesystem_error error) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::GenerateOpacityFromAlbedoAlpha: System error deleting file \nError message: ", error.what());
+				MNEMOSY_ERROR("System error deleting file \nError message: ", error.what());
 				return;
 			}
 
@@ -799,7 +786,7 @@ namespace mnemosy::systems {
 
 
 		std::string filename = libEntry->name + suffix + texture_fileExtentionTiff;
-		std::filesystem::path channelPackedExportPath = LibEntry_GetFolderPath(m_activeLibEntry) / std::filesystem::path(filename);
+		std::filesystem::path channelPackedExportPath = LibEntry_GetFolderPath(m_activeLibEntry) / std::filesystem::u8path(filename);
 
 		MnemosyEngine::GetInstance().GetTextureGenerationManager().GenerateChannelPackedTexture(activeMat, channelPackedExportPath.generic_string().c_str(),true,packType,packComponent_R,packComponent_G,packComponent_B,packComponent_A, width,height,bitDepth);
 
@@ -831,7 +818,7 @@ namespace mnemosy::systems {
 			fs::remove_all(filepath);
 		}
 		catch (fs::filesystem_error error) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteChannelPackedTexture: System error deleting file \nError message: ", error.what());
+			MNEMOSY_ERROR("System error deleting file \nError message: ", error.what());
 			return;
 		}
 
@@ -919,8 +906,6 @@ namespace mnemosy::systems {
 
 		fs::path materialDir = LibEntry_GetFolderPath(m_activeLibEntry);//  m_fileDirectories->GetLibraryDirectoryPath() / fs::path(m_folderNodeOfActiveMaterial->pathFromRoot) / fs::path(activeMat.Name);
 
-		std::string filename;
-		fs::path exportPath;
 		graphics::TextureFormat format = graphics::MNSY_RGB8;
 
 
@@ -928,8 +913,8 @@ namespace mnemosy::systems {
 		graphics::TexUtil::get_information_from_textureFormat(picInfo.textureFormat,numChannels,bitsPerChannel,bytesPerPixel);
 
 
-		filename = graphics::TexUtil::get_filename_from_PBRTextureType(m_activeLibEntry->name,textureType);
-		exportPath = materialDir / fs::path(filename);
+		std::string filename = graphics::TexUtil::get_filename_from_PBRTextureType(m_activeLibEntry->name,textureType);
+		fs::path exportPath  = materialDir / fs::u8path(filename);
 
 
 		bool isGrayscaleImage = textureType != graphics::PBRTextureType::MNSY_TEXTURE_ALBEDO && textureType != graphics::PBRTextureType::MNSY_TEXTURE_NORMAL && textureType != graphics::PBRTextureType::MNSY_TEXTURE_EMISSION && textureType != graphics::PBRTextureType::MNSY_TEXTURE_NONE;
@@ -1000,7 +985,7 @@ namespace mnemosy::systems {
 
 		matFile.FileOpen(success, dataFilePath, jsonKey_header, jsonMatKey_description);
 		if(!success){
-			MNEMOSY_ERROR("MaterialLibraryRegistry::LoadTextureForActiveMaterial: Error Opening Data File. Message: {}", matFile.ErrorStringLastGet());
+			MNEMOSY_ERROR("Error Opening Data File. Message: {}", matFile.ErrorStringLastGet());
 		 	delete tex;
 			return;
 		}
@@ -1051,13 +1036,17 @@ namespace mnemosy::systems {
 
 		// find filename of the texture then remove it form disk and reset the path to "notAssigned" in the material meta data file.
 		{
-
+			// this is the key too lookup the path not the path itself
 			std::string jsonMatKey_path_ofTextureType = graphics::TexUtil::get_JsonMatKey_path_from_PBRTextureType(textureType);
 
-
-			fs::path textureFilePath = materialDir / fs::path(matFile.ReadString(success,jsonMatKey_path_ofTextureType,jsonKey_pathNotAssigned,false));
-			try { fs::remove(textureFilePath); }
-			catch (fs::filesystem_error e) { MNEMOSY_ERROR("MaterialLibraryRegistry::DeleteTextureOfActiveMaterial: System error deleting file.\nError message: {}", e.what()); }
+			std::string textureFileName = matFile.ReadString(success, jsonMatKey_path_ofTextureType, jsonKey_pathNotAssigned, false);
+			fs::path textureFilePath = materialDir / fs::u8path(textureFileName);
+			try { 
+				fs::remove(textureFilePath); 
+			}
+			catch (fs::filesystem_error e) { 
+				MNEMOSY_ERROR("System error deleting file.\nError message: {}", e.what()); 
+			}
 
 			std::string jsonMatKey_assigned_ofTextureType = graphics::TexUtil::get_JsonMatKey_assigned_from_PBRTextureType(textureType);
 
@@ -1132,7 +1121,7 @@ namespace mnemosy::systems {
 
 			dataFile.FileOpen(success, dataFilePath, jsonKey_header, jsonKey_unlit_description);
 			if (!success) {
-				MNEMOSY_ERROR("MaterialLibraryRegistry::LoadTextureForActiveUnlitMaterial: Error Opening Data File. Message: {}", dataFile.ErrorStringLastGet());
+				MNEMOSY_ERROR("Error Opening Data File. Message: {}", dataFile.ErrorStringLastGet());
 				delete tex;
 				return;
 			}
@@ -1238,7 +1227,7 @@ namespace mnemosy::systems {
 
 		// export or copy equirectangular to new location as hdr
 		{
-			fs::path equirectangularFilePath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_equirectangular);
+			fs::path equirectangularFilePath = entryFolder / fs::u8path(entryName + texture_skybox_fileSuffix_equirectangular);
 
 			//if its an hdr we are loading we might aswell just copy the file, this is a common case and improves performance significantly for bigger files
 			graphics::ImageFileFormat fileFormat = graphics::TexUtil::get_imageFileFormat_from_fileExtentionString(filepath.extension().generic_string());
@@ -1271,7 +1260,7 @@ namespace mnemosy::systems {
 		{
 			// cube irradiance
 			{
-				fs::path cubeIrradiancePath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubeIrradiance);
+				fs::path cubeIrradiancePath = entryFolder / fs::u8path(entryName + texture_skybox_fileSuffix_cubeIrradiance);
 
 				graphics::Cubemap* irradCube = new graphics::Cubemap();
 				irradCube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE,false,0);
@@ -1285,7 +1274,7 @@ namespace mnemosy::systems {
 
 			// cube prefilter
 			{
-				fs::path cubePrefilterPath = entryFolder / fs::path(entryName + texture_skybox_fileSuffix_cubePrefilter);
+				fs::path cubePrefilterPath = entryFolder / fs::u8path(entryName + texture_skybox_fileSuffix_cubePrefilter);
 
 				graphics::Cubemap* cube = new graphics::Cubemap();
 				cube->GenerateOpenGlCubemap_FromEquirecangularTexture(*equirectangularTex, graphics::CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER, false, 0);
@@ -1344,7 +1333,7 @@ namespace mnemosy::systems {
 
 			// equirectangular file
 			{
-				fs::path equirectangularFile = entryFolder / fs::path(m_activeLibEntry->name + texture_skybox_fileSuffix_equirectangular);
+				fs::path equirectangularFile = entryFolder / fs::u8path(m_activeLibEntry->name + texture_skybox_fileSuffix_equirectangular);
 
 				if (fs::exists(equirectangularFile)) {
 					try {
@@ -1356,23 +1345,9 @@ namespace mnemosy::systems {
 				}
 			}
 
-			// cubeColor file
-			{
-				fs::path cubeColorFile = entryFolder / fs::path(m_activeLibEntry->name + texture_skybox_fileSuffix_cubeColor);
-
-				if (fs::exists(cubeColorFile)) {
-					try {
-						fs::remove(cubeColorFile);
-					}
-					catch (fs::filesystem_error e) {
-						MNEMOSY_ERROR("System error deleting texture file.\nError message: {}", e.what());
-					}
-				}
-			}
-
 			// cubePrefilter file
 			{
-				fs::path cubePrefilterFile = entryFolder / fs::path(m_activeLibEntry->name + texture_skybox_fileSuffix_cubePrefilter);
+				fs::path cubePrefilterFile = entryFolder / fs::u8path(m_activeLibEntry->name + texture_skybox_fileSuffix_cubePrefilter);
 
 				if (fs::exists(cubePrefilterFile)) {
 					try {
@@ -1386,7 +1361,7 @@ namespace mnemosy::systems {
 
 			// cubeIrradiance file
 			{
-				fs::path cubeIrradianceFile = entryFolder / fs::path(m_activeLibEntry->name + texture_skybox_fileSuffix_cubeIrradiance);
+				fs::path cubeIrradianceFile = entryFolder / fs::u8path(m_activeLibEntry->name + texture_skybox_fileSuffix_cubeIrradiance);
 
 				if (fs::exists(cubeIrradianceFile)) {
 					try {
@@ -1481,7 +1456,7 @@ namespace mnemosy::systems {
 		std::vector<std::string> paths;
 
 		if (!UserEntrySelected()) {
-			MNEMOSY_ERROR("MaterialLibraryRegistry::GetFilepathsOfActiveMat: No active material");
+			MNEMOSY_ERROR("No active material");
 			return paths;
 		}
 
@@ -1499,49 +1474,49 @@ namespace mnemosy::systems {
 
 			// include each txture that is assigned to this material
 			if (activeMat.isAlbedoAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_albedo);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_albedo);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isNormalAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_normal);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_normal);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isRoughnessAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_roughness);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_roughness);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isMetallicAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_metallic);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_metallic);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isAoAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_ambientOcclusion);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_ambientOcclusion);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isEmissiveAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_emissive);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_emissive);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isHeightAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_height);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_height);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
 			}
 			if (activeMat.isOpacityAssigned()) {
-				fs::path p = entryFolder / fs::path(entryName + texture_fileSuffix_opacity);
+				fs::path p = entryFolder / fs::u8path(entryName + texture_fileSuffix_opacity);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
@@ -1556,7 +1531,7 @@ namespace mnemosy::systems {
 					for (int i = 0; i < activeMat.PackedTexturesSuffixes.size(); i++) {
 
 						std::string filename = entryName + activeMat.PackedTexturesSuffixes[i] + texture_fileExtentionTiff;
-						fs::path p = entryFolder / fs::path(filename);
+						fs::path p = entryFolder / fs::u8path(filename);
 
 						if (fs::exists(p)) {
 							paths.push_back(p.generic_string());
@@ -1574,7 +1549,7 @@ namespace mnemosy::systems {
 			if (mat->TextureIsAssigned()) {
 
 				std::string filename = m_activeLibEntry->name + texture_unlit_fileSuffix;
-				fs::path p = entryFolder / fs::path(filename);
+				fs::path p = entryFolder / fs::u8path(filename);
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
 				}
@@ -1589,7 +1564,7 @@ namespace mnemosy::systems {
 
 				std::string filename = m_activeLibEntry->name + texture_skybox_fileSuffix_equirectangular;
 
-				fs::path p = entryFolder / fs::path(filename);
+				fs::path p = entryFolder / fs::u8path(filename);
 				
 				if (fs::exists(p)) {
 					paths.push_back(p.generic_string());
@@ -1634,9 +1609,7 @@ namespace mnemosy::systems {
 
 		return false;
 	}
-	
-	
-	
+		
 	void MaterialLibraryRegistry::LibCollections_CreateNewEntry(const std::string& name, const std::filesystem::path& folderPath)
 	{
 		namespace fs = std::filesystem;
@@ -1908,7 +1881,6 @@ namespace mnemosy::systems {
 			MNEMOSY_ERROR("Faild to load library because data file does not exist anymore: {}", dataFilePath.generic_string());
 			return;
 		}
-
 
 		unsigned int current = m_libCollection_currentSlected_id;
 
@@ -2243,11 +2215,6 @@ namespace mnemosy::systems {
 		dataFile.FileClose(success, dataFilePath);
 
 	}
-
-
-
-
-
 
 
 } // !mnemosy::systems

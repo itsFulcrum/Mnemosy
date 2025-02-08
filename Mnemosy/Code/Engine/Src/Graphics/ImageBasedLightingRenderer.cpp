@@ -225,7 +225,7 @@ namespace mnemosy::graphics
 	{
 		if (m_brdfLutTexture_isGenerated)
 		{
-			MNEMOSY_INFO("ImageBasedLightingRenderer::RenderBrdfLutTextureAndSafeKtx - BrdfLutTexture is already genereated")
+			MNEMOSY_INFO("BrdfLutTexture is already genereated");
 			return;
 		}
 

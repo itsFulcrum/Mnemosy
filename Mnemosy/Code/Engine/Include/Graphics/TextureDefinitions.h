@@ -7,6 +7,7 @@
 
 #include <cctype>
 #include <clocale>
+#include <algorithm>
 
 namespace mnemosy::graphics {
 
@@ -131,14 +132,15 @@ namespace mnemosy::graphics {
 // skybox material
 
 #define texture_skybox_fileSuffix_equirectangular	"_equirectangular" + texture_fileExtentionHdr
-#define texture_skybox_fileSuffix_cubeColor			"_cubeColor"		+ texture_fileExtentionKtx2
+//#define texture_skybox_fileSuffix_cubeColor			"_cubeColor"		+ texture_fileExtentionKtx2
 #define texture_skybox_fileSuffix_cubePrefilter		"_cubePrefilter"	+ texture_fileExtentionKtx2
 #define texture_skybox_fileSuffix_cubeIrradiance	"_cubeIrradiance"	+ texture_fileExtentionKtx2
 
 
 
 	namespace TexDefinitions {
-		const static char* ImageFileFormats_string[6]	= { ".tif",".png",".jpg",".hdr",".exr",".ktx2 (experimental)" }; // must be ordered the same as enum 'ImageFileFormat'
+		const static char* ImageFileFormats_string[6]	= { "tiff","png","jpg","hdr","exr","ktx2 (experimental)" }; //  used in gui display // must be ordered the same as enum 'ImageFileFormat'
+		const static char* ImageFileFormats_extention_string[6]	= { ".tif",".png",".jpg",".hdr",".exr",".ktx2" }; // must be ordered the same as enum 'ImageFileFormat'
 		const static char* NormalMapFormats_string[2]	= { "OpenGl", "DirectX" }; // must be ordered the same as enum 'NormalMapFormat'
 		const static char* ChannelPackTypes_string[2]	= { "R+G+B", "R+G+B+A" }; // must be ordered the same as enum 'ChannelPackType'
 		const static char* BitDepthTypes_string[3]		= { "8","16","32" };
@@ -565,7 +567,7 @@ namespace mnemosy::graphics {
 
 		// returns string representation of a file format like ImageFileFormat::MNSY_FILE_FORMAT_PNG -> ".png"
 		static std::string get_string_from_imageFileFormat(const graphics::ImageFileFormat fileFormat) {
-			return std::string(graphics::TexDefinitions::ImageFileFormats_string[(int)fileFormat]);
+			return std::string(graphics::TexDefinitions::ImageFileFormats_extention_string[(int)fileFormat]);
 		}
 
 

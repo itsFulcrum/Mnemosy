@@ -42,8 +42,8 @@ namespace mnemosy
 	{ }
 
 	MnemosyEngine& MnemosyEngine::GetInstance() {
-		if (!m_sInstance)
-		{
+		
+		if (!m_sInstance) {
 			m_sInstance = new MnemosyEngine();
 		}
 
@@ -51,30 +51,18 @@ namespace mnemosy
 	}
 
 	void MnemosyEngine::Initialize(const char* WindowTitle) {
-		//double timeBegin = glfwGetTime();
+		
 
-		MNEMOSY_ASSERT(!m_isInitialized, "Engine::Initialize() has already been called");
-
-		if (m_isInitialized)
-			return;
-
-
-		//mnemosy::core::MNSY_log_console_format_info.add_time = true;
-		//mnemosy::core::MNSY_log_console_format_info.add_year = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_month = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_day = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_hour = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_minute = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_second = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_milisecond = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_log_level = true;
-		//mnemosy::core::MNSY_log_console_format_info.add_source_file = false;
-		//mnemosy::core::MNSY_log_console_format_info.add_source_function_name = true;
-		//mnemosy::core::MNSY_log_console_format_info.add_source_line = true;
-
-		m_pLogger = std::make_unique<core::Logger>();
+		flcrm_log_assert(!m_isInitialized, "Engine is already initialized");
+		
+		
+		m_logger.Init();
 
 		MNEMOSY_INFO("Starting Mnemosy v{}.{}-{}", MNEMOSY_VERSION_MAJOR, MNEMOSY_VERSION_MINOR,MNEMOSY_VERSION_SUFFIX);
+
+
+		m_arena_persistent.arena_init_allocate_buffer(1648); //1024000 = 1 mb memory block
+
 
 
 		#ifdef MNEMOSY_CONFIG_DEBUG
@@ -89,7 +77,6 @@ namespace mnemosy
 		#endif // MNEMOSY_PLATFORM_WINDOWS
 
 		
-		m_arena_persistent.arena_init_allocate_buffer(1648); //1024000 = 1 mb memory block
 
 
 		//MNEMOSY_TRACE("Initializing Subsystems");
@@ -257,6 +244,8 @@ namespace mnemosy
 		m_arena_persistent.arena_free_all();
 
 		MNEMOSY_INFO("Mnemosy Application Closed");
+
+		m_logger.Shutdown();
 
 		delete m_sInstance;
 	}

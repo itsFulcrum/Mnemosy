@@ -145,6 +145,7 @@ namespace mnemosy::systems {
 	}
 
 	bool FolderTree::IsNodeWithinHierarchy(FolderNode* hierarchyRoot, FolderNode* node) {
+
 		MNEMOSY_ASSERT(hierarchyRoot && node, "They cannot be null!");
 		
 		// walk up parents of node until root node is reached and check if parent is equal to the hierarchy root		

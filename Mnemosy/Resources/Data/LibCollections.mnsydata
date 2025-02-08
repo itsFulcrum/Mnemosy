@@ -2,15 +2,13 @@
     "1_Header": "Mnemosy Data File",
     "2_Description": "This File stores the location and names of user created libraries",
     "AnyLibCollectionsSaved": true,
-    "LastLoadedCollectionId": 2,
+    "LastLoadedCollectionId": 0,
     "LibCollectionNames": [
         "BöüüèkenFolderòmeè_",
-        "TestLib",
-        "Skyboxes"
+        "TestLib"
     ],
     "LibCollectionPaths": [
         "D:/MnemLibTests/BöüüèkenFolderòme",
-        "D:/MnemosyLib",
-        "D:/MyMnemosyLibs/Skyboxes"
+        "D:/MnemosyLib"
     ]
 }
