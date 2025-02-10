@@ -11,6 +11,7 @@
 #include "Include/Graphics/Shader.h"
 #include "Include/Graphics/ImageBasedLightingRenderer.h"
 #include "Include/Graphics/Camera.h"
+#include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Material.h"
 #include "Include/Graphics/ModelData.h"
 #include "Include/Graphics/RenderMesh.h"
@@ -678,6 +679,44 @@ namespace mnemosy::graphics
 
 		m_pUnlitMaterialShader->SetUniformInt("_pixelWidth", thumbRes);
 		m_pUnlitMaterialShader->SetUniformInt("_pixelHeight", thumbRes);
+
+
+		/// calculate uv tiling and offset based on width and height of the texture.
+		// this is to ensure non square images are correctly visible
+		// x 1024  y 512
+
+		if (unlitMaterial->TextureIsAssigned()) {
+
+
+			float x = (float)unlitMaterial->GetTexture().GetWidth(); // e.g. 1024
+			float y = (float)unlitMaterial->GetTexture().GetHeight(); // e.g. 512
+
+			float uv_tile_x = 1.0f;
+			float uv_tile_y = 1.0f;
+			float uv_offset_x = 0.0f;
+			float uv_offset_y = 0.0f;
+
+			if (x != y) {
+
+				float aspect_y = x / y;  // 1024 / 512 = 2
+				float aspect_x = y / x;  // 512 / 1024 = 0.5f
+
+				if (aspect_y > 1.00000000f) {
+					uv_tile_y = aspect_y;
+					uv_offset_y = aspect_x;
+				}
+
+				if (aspect_x > 1.00000000f) {
+					uv_tile_x = aspect_x;
+					uv_offset_x = aspect_y;
+				}
+
+			}
+			m_pUnlitMaterialShader->SetUniformFloat2("_uvTiling", uv_tile_x, uv_tile_y);
+			m_pUnlitMaterialShader->SetUniformFloat2("_uvOffset", uv_offset_x, uv_offset_y);
+		}
+
+
 
 
 		// Draw call with screen quad

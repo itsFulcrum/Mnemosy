@@ -1,6 +1,7 @@
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 
 #include "Include/ApplicationConfig.h"
+#include "Include/GuiPanels/GuiPanelsCommon.h"
 
 #include "Include/MnemosyEngine.h"
 
@@ -21,16 +22,6 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
-
-
-#define TextColor_default	ImVec4(0.68f, 0.68f, 0.68f, 1.00f)
-#define TextColor_pbr		ImVec4(0.65f, 0.56f, 0.50f, 1.00f)
-#define TextColor_skybox	ImVec4(0.51f, 0.67f, 0.68f, 1.0f)
-#define TextColor_unlit		ImVec4(0.51f, 0.60f, 0.51f, 1.00f)
-
-
-
-
 
 
 namespace mnemosy::gui
@@ -137,7 +128,7 @@ namespace mnemosy::gui
 				if (m_materialRegistry.LibCollections_IsAnyActive()) {
 
 					RecursivDrawSubfolders(m_materialRegistry.GetRootFolder());
-					HandleDeleteHierarchyModal();
+					PopupModal_Folder_DeleteHierarchy();
 				}
 			}
 			else {
@@ -223,29 +214,7 @@ namespace mnemosy::gui
 				bool renamed = ImGui::InputText("##RenameFolderInputField", &m_renameFolderText, m_textInputFlags);
 				if (renamed) {
 
-					// create the string with utf8
-					//std::string su8 = std::filesystem::u8path(m_renameFolderText).generic_string();
-
-					/*MNEMOSY_TRACE("Ut8 test print with loglib: ÖöÄäÜü");
-
-					std::cout << "Ut8 test print with cout: ÖöÄäÜü" << std::endl;
-
-					printf("Ut8 test print with printf: ÖöÄäÜü \n");
-
-
-
-					MNEMOSY_TRACE("Ut8 test print u8string with loglib: {}", su8);
-
-					std::cout << "Ut8 test print with cout: " << su8 << std::endl;
-
-					printf("Ut8 test print with printf: %s \n", su8);
-
-
-					MNEMOSY_TRACE("Folder Name: {}", m_renameFolderText);*/
-					RenameFolder(node, m_renameFolderText);
-
-
-
+					gui::GuiProcedures::folder_rename(node,m_renameFolderText);
 
 				}
 			}
@@ -277,29 +246,43 @@ namespace mnemosy::gui
 
 					
 					if (i == 0) { // Add Subfolder
+						
+						gui::GuiProcedures::folder_create_new(node,true);
 
-						AddSubfolder(node);
+						m_setFolderOpenNextFrame = true;
+						m_folderIdToOpenNextFrame = node->runtime_ID;
+
 					}
 					else if (i == 1) { // Add PBR material 
 
-						AddMaterialEntry(node, "New Material", systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT);
+						gui::GuiProcedures::libEntry_create_new(node,"New Material",systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT,true);
+
+						m_setFolderOpenNextFrame = true;
+						m_folderIdToOpenNextFrame = node->runtime_ID;
+
+						//AddMaterialEntry(node, "New Material", systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT);
 					}
 					else if (i == 2) { // Add Unlit Texture
 					
-						AddMaterialEntry(node, "New Texture", systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT);
-												
+						gui::GuiProcedures::libEntry_create_new(node,"New Texture",systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT,true);
+						//AddMaterialEntry(node, "New Texture", systems::LibEntryType::MNSY_ENTRY_TYPE_UNLITMAT);
+						m_setFolderOpenNextFrame = true;
+						m_folderIdToOpenNextFrame = node->runtime_ID;
 					}
 					else if (i == 3) { // Add skybox
-						AddMaterialEntry(node, "New Skybox", systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX);
+						gui::GuiProcedures::libEntry_create_new(node,"New Skybox",systems::LibEntryType::MNSY_ENTRY_TYPE_SKYBOX,true);
+						
+						m_setFolderOpenNextFrame = true;
+						m_folderIdToOpenNextFrame = node->runtime_ID;
 					
 					}
 					else if (i == 4) { // delete but keep children
-						DeleteButKeepChildren(node);
+
+						gui::GuiProcedures::folder_delete_move_children_to_parent(node);
 					}
 					else if (i == 5) { // delete hierarchy
 						
-						m_nodeDeleteHierarchy = node;
-						showDeleteHierarchyModel = true;
+						PopupModal_Folder_DeleteHierarchy_Open(node);
 					}
 					else if (i == 6) { // open in explorer
 						
@@ -403,7 +386,7 @@ namespace mnemosy::gui
 			}
 			
 			// === Draw Material Entries
-			DrawMaterialEntries(node);
+			Draw_LibEntries(node);
 
 		
 			ImGui::TreePop();
@@ -411,22 +394,15 @@ namespace mnemosy::gui
 		
 	}
 
-	void MaterialLibraryGuiPanel::DrawMaterialEntries(systems::FolderNode* node) {
+	void MaterialLibraryGuiPanel::Draw_LibEntries(systems::FolderNode* node) {
 
 		if (node->subEntries.empty())
 			return;
 
 		for (unsigned int i = 0; i < node->subEntries.size(); i++) {
 				
-#ifdef mnemosy_gui_showDebugInfo
-			std::string materialText = node->subMaterials[i]->name + " -MatID: " + std::to_string(node->subMaterials[i]->runtime_ID);
-#else
 			std::string materialText = node->subEntries[i]->name;
-#endif // !mnemosy_gui_showDebugInfo
 
-
-			//bool matIsOpen = ImGui::TreeNodeEx(materialText.c_str(), m_materialTreeFlags);
-			bool matIsOpen = true;
 
 
 			// make entry types use different text colors
@@ -510,19 +486,10 @@ namespace mnemosy::gui
 
 
 
+			// === Right Click Options
+			// right click on open folder to open options
+			{
 
-
-
-			if (matIsOpen) {
-
-#ifdef mnemosy_gui_showDebugInfo
-				if (ImGui::IsItemClicked()) {
-					MNEMOSY_DEBUG("Clicked Material: {}, MatID: {}", node->subMaterials[i]->name, node->subMaterials[i]->runtime_ID);
-				}
-#endif // mnemosy_gui_showDebugInfo
-
-				// === Right Click Options
-				// right click on open folder to open options
 
 
 
@@ -536,16 +503,23 @@ namespace mnemosy::gui
 
 					bool renamed = ImGui::InputText("##RenameMaterialInputField", &m_renameMaterialText,m_textInputFlags);
 					if (renamed) {
-						RenameMaterial(node, node->subEntries[i], m_renameMaterialText, i);
+
+						gui::GuiProcedures::libEntry_rename(node->subEntries[i],m_renameMaterialText);
 					}
 
 					for (unsigned int option = 0; option < IM_ARRAYSIZE(m_rightClickMaterialOptions); option++) {
 
 						if (ImGui::Selectable(m_rightClickMaterialOptions[option])) {
 							
-							if (option == 0) { // delete
-								
+							if (option == 0) { // load
+							
 
+								m_materialRegistry.LibEntry_Load(node->subEntries[i]);
+							
+							}
+							else if (option == 1) { // delete
+								
+								// dude what the hell is going on here.. maybe i should just delay this to next frame..
 								std::vector<systems::LibEntry*> subMatsCopy = node->subEntries;
 
 								for (unsigned int a = 0; a < subMatsCopy.size(); a++) {
@@ -567,8 +541,7 @@ namespace mnemosy::gui
 
 										MNEMOSY_ASSERT(posInList > -1, "Should always find the correct list entry");
 
-										DeleteMaterial(node, subMatsCopy[a], posInList);
-
+										gui::GuiProcedures::libEntry_delete(subMatsCopy[a],posInList);
 									}
 
 								}
@@ -576,7 +549,7 @@ namespace mnemosy::gui
 								subMatsCopy.clear();
 							} 
 							
-							else if (option == 1) { // open in FileExplorer
+							else if (option == 2) { // open in FileExplorer
 
 								// opens folder of the material in system explorer
 								mnemosy::core::FileDialogs::OpenFolderAt(m_materialRegistry.LibEntry_GetFolderPath(node->subEntries[i]));
@@ -604,36 +577,44 @@ namespace mnemosy::gui
 
 
 
-	void MaterialLibraryGuiPanel::HandleDeleteHierarchyModal() {
+	void MaterialLibraryGuiPanel::PopupModal_Folder_DeleteHierarchy_Open(systems::FolderNode* folder) {
 
-		static bool popModal = false;
-		if (showDeleteHierarchyModel) {
+		m_popupModal_folder_deleteHierarchy_triggered = true;
+		m_popupModal_folder_deleteHierarchy_ptr = folder;
+	}
 
-			popModal = true;
-			showDeleteHierarchyModel = false; // to make sure its only called once
-			ImGui::OpenPopup("Delete Hierarchy");
+	void MaterialLibraryGuiPanel::PopupModal_Folder_DeleteHierarchy() {
+
+		static bool popModal_deleteHierarchy_show = false;
+		if (m_popupModal_folder_deleteHierarchy_triggered) {
+
+			popModal_deleteHierarchy_show = true;
+			m_popupModal_folder_deleteHierarchy_triggered = false; // to make sure its only called once
+			ImGui::OpenPopup("Delete Folder Hierarchy");
 		}
 
-		if (ImGui::BeginPopupModal("Delete Hierarchy", &popModal, ImGuiWindowFlags_AlwaysAutoResize)) {
+		if (ImGui::BeginPopupModal("Delete Folder Hierarchy", &popModal_deleteHierarchy_show, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-			ImGui::Text("Are you sure? \nAll files underneith will be deleted permanently!");
+			ImGui::Text("Are you sure? \nAll files in this folder will be Deleted permanently!");
 
 			if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-				m_nodeDeleteHierarchy = nullptr;
-				popModal = false;
+				m_popupModal_folder_deleteHierarchy_ptr = nullptr;
+				popModal_deleteHierarchy_show = false;
 				ImGui::CloseCurrentPopup();
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::Button("Delete..")) {
+			if (ImGui::Button("Delete Permanently")) {
 
-				if(m_nodeDeleteHierarchy)
-					DeleteHierarchy(m_nodeDeleteHierarchy);
+				if (m_popupModal_folder_deleteHierarchy_ptr) {
+
+					gui::GuiProcedures::folder_delete_hierarchy(m_popupModal_folder_deleteHierarchy_ptr);
+				}
 				
 				
-				popModal = false;
-				m_nodeDeleteHierarchy = nullptr;
+				popModal_deleteHierarchy_show = false;
+				m_popupModal_folder_deleteHierarchy_ptr = nullptr;
 				ImGui::CloseCurrentPopup();
 			}
 
@@ -875,62 +856,4 @@ namespace mnemosy::gui
 
 	}
 
-
-
-
-
-
-	void MaterialLibraryGuiPanel::AddSubfolder(systems::FolderNode* node) {
-
-		std::string newName = "New Folder";
-		systems::FolderNode* newFolder = m_materialRegistry.AddNewFolder(node, newName);
-
-		m_materialRegistry.OpenFolderNode(newFolder);
-
-		m_setFolderOpenNextFrame = true;
-		m_folderIdToOpenNextFrame = node->runtime_ID;
-		
-	}
-
-
-	void MaterialLibraryGuiPanel::DeleteButKeepChildren(systems::FolderNode* node) {
-
-		m_materialRegistry.DeleteAndKeepChildren(node);
-	}
-
-	void MaterialLibraryGuiPanel::DeleteHierarchy(systems::FolderNode* node) {
-		m_materialRegistry.DeleteFolderHierarchy(node);
-	}
-
-	void MaterialLibraryGuiPanel::RenameFolder(systems::FolderNode* node, std::string newName) {
-
-		if (newName != node->name) {
-			m_materialRegistry.RenameFolder(node, newName);
-		}
-	}
-	
-	
-	void MaterialLibraryGuiPanel::AddMaterialEntry(systems::FolderNode* parent, std::string name, systems::LibEntryType type) {
-
-		std::string matName = name;
-
-		m_materialRegistry.LibEntry_CreateNew(parent, type, matName);
-
-		m_materialRegistry.OpenFolderNode(parent);
-		m_setFolderOpenNextFrame = true;
-		m_folderIdToOpenNextFrame = parent->runtime_ID;
-
-	}
-
-	void MaterialLibraryGuiPanel::RenameMaterial(systems::FolderNode* node, systems::LibEntry* libEntry, std::string& newName, int positionInVector) {
-
-		if (newName != libEntry->name) {
-			m_materialRegistry.LibEntry_Rename(libEntry, newName);
-		}
-	}
-
-	void MaterialLibraryGuiPanel::DeleteMaterial(systems::FolderNode* node, systems::LibEntry* libEntry, int positionInVector) {
-
-		m_materialRegistry.LibEntry_Delete(libEntry, positionInVector);
-	}
 } // !mnemosy::gui

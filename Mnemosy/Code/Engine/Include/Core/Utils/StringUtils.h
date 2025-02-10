@@ -90,13 +90,27 @@ namespace mnemosy::core
 		}
 
 
+		// wchar to utf8 string.  null terminator is added by this function
+		static std::string wChar_to_utf8String(wchar_t w_char)
+		{
+			//const wchar_t arr[2]{ w_char,'\0' };
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+			return utf8_conv.to_bytes({ w_char,'\0' });
+		}
+
+		static std::string wChar_to_utf8String_appendable(wchar_t w_char)
+		{
+			//const wchar_t arr[2]{ w_char,'\0' };
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+			return utf8_conv.to_bytes({ w_char});
+		}
+
 		// wide string to utf8 encoded string
 		static std::string wideString_to_utf8String(std::wstring& wide_string)
 		{
 			std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
 			return utf8_conv.to_bytes(wide_string);
 		}
-
 
 		// utf8 endcoded string to wide string
 		static std::wstring utf8String_to_wString(std::string& narrow_utf8_source_string)
@@ -105,6 +119,7 @@ namespace mnemosy::core
 			return converter.from_bytes(narrow_utf8_source_string);
 		}
 
+		// utf8 encoded or not this will return a wide string if standart convert fails by just dropping the raw bytes to the string one by one.
 		static std::wstring string_to_wString(const std::string& input)
 		{
 			try

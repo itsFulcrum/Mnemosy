@@ -38,4 +38,7 @@ ${APP_SOURCE_PATH}/Src/GuiPanels/DocumentationGuiPanel.cpp
 
 ${APP_SOURCE_PATH}/Include/GuiPanels/ContentsGuiPanel.h
 ${APP_SOURCE_PATH}/Src/GuiPanels/ContentsGuiPanel.cpp
+
+${APP_SOURCE_PATH}/Include/GuiPanels/GuiPanelsCommon.h
+${APP_SOURCE_PATH}/Src/GuiPanels/GuiPanelsCommon.cpp
 )

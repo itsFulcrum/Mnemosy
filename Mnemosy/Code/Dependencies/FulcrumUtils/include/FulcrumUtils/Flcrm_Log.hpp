@@ -26,11 +26,10 @@
 // - create your own macros or wrappers around flcrm::log::log();
 
 
+// define this macro before including this file to disable default console logging capabilites
+// #define FLCRM_LOG_DISABLE_DEFAULT_CONSOLE_LOGGING
 
-// define this macro to disable default console logging capabilites
-//#define FLCRM_LOG_DISABLE_DEFAULT_CONSOLE_LOGGING
-
-// you may define any of these macros before this include to configure the default logging formatting
+// you may also define any of these macros before this include to configure the default logging formatting
 
 // #define flcrm_default_log_format_timeFormat				"%Y-%m-%d %H:%M:%S"		// timestamp format using std::strftime()
 // #define flcrm_default_log_format_logTimestap				true					// if to add timestamp

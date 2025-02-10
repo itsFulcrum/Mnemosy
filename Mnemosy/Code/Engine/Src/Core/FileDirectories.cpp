@@ -127,6 +127,29 @@ namespace mnemosy::core {
 
 		return m_internalUserSettingsFolderPath;
 	}
+
+	const std::filesystem::path FileDirectories::GetFontsPath()
+	{
+		namespace fs = std::filesystem;
+
+
+		fs::path fontsPath = GetResourcesPath() / fs::path("Fonts");
+
+		if (fs::exists(fontsPath)) {
+
+			return fontsPath;
+		}
+		else {
+
+			MNEMOSY_ERROR("Filepath does not exist.. Did you delete it?  Creating New {} ", fontsPath.generic_string());
+
+			fs::create_directories(fontsPath);
+			return fontsPath;
+		}
+
+
+		return fontsPath;
+	}
 	
 	const std::filesystem::path FileDirectories::GetTexturesPath() {
 

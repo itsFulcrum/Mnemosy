@@ -18,7 +18,7 @@ uniform int _pixelHeight;
 
 // material uniforms
 uniform vec2 _uvTiling;
-
+uniform vec2 _uvOffset; // needed for thumbnail rendering to center non square images.
 
 
 // outputs to fragment shader
@@ -56,7 +56,7 @@ void main()
 
 	// outputs to fragment shader
 	//vertexAO = aColor.r; // ao is supposed to be baked into vertex color
-	uv.xy = aTexCoord.xy * _uvTiling.xy;
+	uv.xy = aTexCoord.xy * _uvTiling.xy + _uvOffset.xy;
 	
 	screenUV = fragPos.xy / fragPos.w * 0.5f + 0.5f;
 	pixelSize = vec2(_pixelWidth,_pixelHeight);

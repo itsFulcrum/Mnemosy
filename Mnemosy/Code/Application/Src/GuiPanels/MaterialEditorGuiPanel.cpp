@@ -12,6 +12,7 @@
 #include "Include/Core/Utils/DropHandler_Windows.h"
 #endif // MNEMOSY_PLATFORM_WINDOWS
 
+#include "Include/Gui/UserInterface.h"
 #include "Include/Core/Utils/StringUtils.h"
 
 #include "Include/Systems/Input/InputSystem.h"
@@ -422,7 +423,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Albedo", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Albedo", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_ALBEDO);
 					textureAssigned = false;
 					SaveMaterial();
@@ -481,7 +482,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Roughness", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Roughness", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_ROUGHNESS);
 					textureAssigned = false;
 					SaveMaterial();
@@ -594,7 +595,7 @@ namespace mnemosy::gui
 			// Remove Texture
 			if (textureAssigned) {
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Normal", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Normal", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_NORMAL);
 					textureAssigned = false;
 					SaveMaterial();
@@ -699,7 +700,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Metallic", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Metallic", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_METALLIC);
 					textureAssigned = false;
 					SaveMaterial();
@@ -752,7 +753,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##AO", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##AO", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_AMBIENTOCCLUSION);
 					textureAssigned = false;
 					SaveMaterial();
@@ -793,7 +794,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Emissive", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Emissive", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_EMISSION);
 					textureAssigned = false;
 					SaveMaterial();
@@ -878,7 +879,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Height", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Height", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_HEIGHT);
 					textureAssigned = false;
 					SaveMaterial();
@@ -953,7 +954,7 @@ namespace mnemosy::gui
 			if (textureAssigned) {
 				// Remove Texture
 				ImGui::SameLine();
-				if (ImGui::Button("Remove ##Opacity", m_buttonSizeDelete)) {
+				if (ImGui::Button("Delete ##Opacity", m_buttonSizeDelete)) {
 					m_materialRegistry.ActiveLibEntry_PbrMat_DeleteTexture(graphics::MNSY_TEXTURE_OPACITY);
 					textureAssigned = false;
 					SaveMaterial();
@@ -1215,7 +1216,21 @@ namespace mnemosy::gui
 		if (textureAssigned) {
 			// Remove Texture
 			ImGui::SameLine();
-			if (ImGui::Button("Remove ##UnlitTex", m_buttonSizeDelete)) {
+
+			/*ImGui::PushID("Remove ##UnlitTex");
+
+			ImGui::PushFont(MnemosyEngine::GetInstance().GetUserInterface().Font_Icon_Get());
+
+			static const std::string removeTxt = core::StringUtils::wChar_to_utf8String_appendable(0xE92B) + " Delete";
+
+			bool removePressed = ImGui::Button(removeTxt.c_str(), m_buttonSizeDelete);
+			
+			ImGui::PopFont();
+
+			ImGui::PopID();*/
+
+
+			if (ImGui::Button("Delete ##UnlitTex", m_buttonSizeDelete)) {
 
 				m_materialRegistry.ActiveLibEntry_UnlitMat_DeleteTexture();
 				textureAssigned = false;
@@ -1311,7 +1326,7 @@ namespace mnemosy::gui
 		if (textureAssigned) {
 			// Remove Texture
 			ImGui::SameLine();
-			if (ImGui::Button("Remove ##Skymat", m_buttonSizeDelete)) {
+			if (ImGui::Button("Delete ##Skymat", m_buttonSizeDelete)) {
 
 				m_materialRegistry.ActiveLibEntry_Skybox_DeleteTexture();
 				textureAssigned = false;

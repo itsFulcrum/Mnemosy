@@ -5,8 +5,8 @@
 #define MNEMOSY_VERSION_MINOR 0
 #define MNEMOSY_VERSION_SUFFIX "beta"
 
-#define MNEMOSY_CONFIG_DEBUG
-//#define MNEMOSY_CONFIG_RELEASE
+//#define MNEMOSY_CONFIG_DEBUG
+#define MNEMOSY_CONFIG_RELEASE
 
 
 // works only on windows atm // mostly because of file dialogs, default library folder location & drag and drop

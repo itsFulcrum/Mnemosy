@@ -29,6 +29,7 @@ namespace mnemosy::core
 		const std::filesystem::path GetPreviewMeshesPath();
 		const std::filesystem::path& GetDataPath();
 		const std::filesystem::path GetUserSettingsPath();
+		const std::filesystem::path GetFontsPath();
 
 		const std::filesystem::path GetTexturesPath();
 		const std::filesystem::path GetCubemapsPath();

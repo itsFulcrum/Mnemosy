@@ -39,8 +39,8 @@ namespace mnemosy::graphics
 		unsigned int GetWidth() { return m_width; }
 		unsigned int GetHeight() { return m_height; }
 
-	private:
 		unsigned int m_ID = 0;
+	private:
 		TextureFormat m_textureFormat;
 
 		uint16_t m_width = 0; 

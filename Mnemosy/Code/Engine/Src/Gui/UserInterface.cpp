@@ -1,11 +1,13 @@
 #include "Include/Gui/UserInterface.h"
 #include "Include/MnemosyEngine.h"
 #include "Include/MnemosyConfig.h"
-
+#include "Include/Core/FileDirectories.h"
 
 
 #include "Include/Core/Log.h"
 #include "Include/Core/Window.h"
+
+#include <filesystem>
 
 namespace mnemosy::gui
 {
@@ -50,6 +52,19 @@ namespace mnemosy::gui
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+
+		m_font_text_glyph_ranges.clear();
+		m_font_icons_glyph_ranges.clear();
+
+		if (m_font_text) {
+			//delete m_font_text;
+			m_font_text = nullptr;
+		}
+
+		if (m_font_icon) {
+			//delete m_font_icon;
+			m_font_icon = nullptr;
+		}
 	}
 
 	void UserInterface::Render() {
@@ -65,6 +80,8 @@ namespace mnemosy::gui
 		}
 
 #ifdef MNEMOSY_CONFIG_DEBUG
+		//show_demo_window = true;
+
 		if (show_demo_window) {
 			ImGui::ShowDemoWindow(&show_demo_window);
 		}
@@ -196,8 +213,94 @@ namespace mnemosy::gui
 	{
 		ImGui::StyleColorsDark();
 		ImGuiIO& io = ImGui::GetIO();
+		
 
-		ImFont* font = io.Fonts->AddFontFromFileTTF("../Resources/Fonts/RobotoRegular.ttf", 20.0f);
+		namespace fs = std::filesystem;
+
+		fs::path fontsPath = MnemosyEngine::GetInstance().GetFileDirectories().GetFontsPath();
+
+		fs::path textFont_path = fontsPath / fs::path("RobotoRegular.ttf");
+		fs::path iconFont_path = fontsPath / fs::path("MaterialSymbolsRounded_Filled_28pt-Regular.ttf");
+
+		// ===== Load Text Font
+		
+		{
+
+			// setup glyph ranges. by default not all glypths within a font are actually rendert to an altas which makes sense.
+			// robot supports quite a bunch of languages but sady not symbols like cool arrows and stuff...
+			ImFontGlyphRangesBuilder builder;
+			builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
+			builder.AddRanges(io.Fonts->GetGlyphRangesCyrillic());
+			builder.AddRanges(io.Fonts->GetGlyphRangesGreek());
+		
+			static const ImWchar ranges_turkischSpanishFrenchStuff[] = {
+				0x0100, 0x03D6, 
+				0,
+			};
+
+			builder.AddRanges(ranges_turkischSpanishFrenchStuff);
+			builder.BuildRanges(&m_font_text_glyph_ranges);
+
+			m_font_text = io.Fonts->AddFontFromFileTTF(textFont_path.generic_string().c_str(), 20.0f, nullptr, m_font_text_glyph_ranges.Data);
+		
+			if (!m_font_text) {
+				MNEMOSY_ERROR("Failed to load text font");
+			}
+
+		}
+
+		// ===== Load Icons Font
+		{
+
+			ImFontGlyphRangesBuilder builder;
+			builder.AddText("abcdefghijklmnopqrstufvxyz0123456789 _ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+			builder.AddChar(0xE92B); // Icon: Delete Forever
+			builder.AddChar(0xE88E); // Icon: Info
+			builder.AddChar(0xE000); // Icon: Error
+			builder.AddChar(0xE887); // Icon: Help
+			builder.AddChar(0xE8B9); // Icon: Settings
+			builder.AddChar(0xE14c); // Icon: Close (x)
+			builder.AddChar(0xE580); // Icon: Close small (x)
+			builder.AddChar(0xE5F2); // Icon: Arrow Up Bold
+			builder.AddChar(0xE984); // Icon: Arrow Downward alt
+			builder.AddChar(0xE986); // Icon: Arrow Upward alt
+			builder.AddChar(0xEF7D); // Icon: Arrow Left alt
+			builder.AddChar(0xE251); // Icon: Image
+			builder.AddChar(0xE2C7); // Icon: Folder
+			builder.AddChar(0xE2C8); // Icon: Folder Open
+			builder.AddChar(0xE2CC); // Icon: Create New Folder
+
+
+
+			builder.BuildRanges(&m_font_icons_glyph_ranges);
+
+
+			m_font_icon = io.Fonts->AddFontFromFileTTF(iconFont_path.generic_string().c_str(), 20.0f, nullptr, m_font_icons_glyph_ranges.Data);
+
+
+			if (!m_font_icon) {
+				MNEMOSY_ERROR("Failed to load icons font");
+			}
+		}
+
+
+		
+
+		// "MaterialSymbolsRounded_Filled_28pt-Regular.ttf"
+
+		
+			
+		io.Fonts->Build(); // force building the font atlas
+
+		// Test if specific glypth exsits
+		// may use a tool like this to check a font: https://fontdrop.info/?darkmode=true
+		//ImWchar w = 0x02C6;
+		//const ImFontGlyph* glyph = font->FindGlyphNoFallback(w);
+		//if (glyph) {
+		//	MNEMOSY_WARN("Found glypth ");
+		//}
+
+		// ===== Setup Syle
 
 		ImGuiStyle& style = ImGui::GetStyle();
 
@@ -210,41 +313,39 @@ namespace mnemosy::gui
 		//ImVec4* colors = ImGui::GetStyle().Colors;
 		//colors[ImGuiCol_WindowBg] = ImVec4(0.44f, 0.26f, 0.26f, 0.94f);
 		ImVec4* colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_Text] = ImVec4(0.68f, 0.68f, 0.68f, 1.00f);
-		colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
-		colors[ImGuiCol_PopupBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
-		colors[ImGuiCol_Border] = ImVec4(0.20f, 0.20f, 0.19f, 1.00f);
-		colors[ImGuiCol_FrameBg] = ImVec4(0.17f, 0.19f, 0.19f, 1.00f);
-		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.23f, 0.27f, 0.28f, 1.00f);
-		colors[ImGuiCol_FrameBgActive] = ImVec4(0.23f, 0.33f, 0.36f, 1.00f);
-		colors[ImGuiCol_TitleBg] = ImVec4(0.10f, 0.12f, 0.12f, 1.00f);
-		colors[ImGuiCol_TitleBgActive] = ImVec4(0.25f, 0.13f, 0.11f, 1.00f);
-		colors[ImGuiCol_MenuBarBg] = ImVec4(0.19f, 0.21f, 0.22f, 1.00f);
-		colors[ImGuiCol_ScrollbarBg] = ImVec4(0.11f, 0.11f, 0.11f, 0.00f);
-		colors[ImGuiCol_CheckMark] = ImVec4(0.61f, 0.54f, 0.49f, 1.00f);
-		colors[ImGuiCol_SliderGrab] = ImVec4(0.61f, 0.54f, 0.49f, 1.00f);
-		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.35f, 0.19f, 0.16f, 1.00f);
-		colors[ImGuiCol_Button] = ImVec4(0.18f, 0.21f, 0.25f, 1.00f);
-		colors[ImGuiCol_ButtonHovered] = ImVec4(0.31f, 0.38f, 0.47f, 1.00f);
-		colors[ImGuiCol_ButtonActive] = ImVec4(0.36f, 0.47f, 0.60f, 1.00f);
-		colors[ImGuiCol_Header] = ImVec4(0.18f, 0.21f, 0.25f, 1.00f);
-		colors[ImGuiCol_HeaderHovered] = ImVec4(0.31f, 0.38f, 0.47f, 1.00f);
-		colors[ImGuiCol_HeaderActive] = ImVec4(0.37f, 0.47f, 0.60f, 1.00f);
-		colors[ImGuiCol_Separator] = ImVec4(0.24f, 0.25f, 0.25f, 1.00f);
-		colors[ImGuiCol_ResizeGrip] = ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
-		colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.40f, 0.26f, 0.24f, 1.00f);
-		colors[ImGuiCol_ResizeGripActive] = ImVec4(0.42f, 0.13f, 0.10f, 1.00f);
-		colors[ImGuiCol_Tab] = ImVec4(0.37f, 0.34f, 0.32f, 1.00f);
-		colors[ImGuiCol_TabHovered] = ImVec4(0.51f, 0.29f, 0.20f, 1.00f);
-		colors[ImGuiCol_TabActive] = ImVec4(0.36f, 0.13f, 0.11f, 1.00f);
-		colors[ImGuiCol_TabUnfocused] = ImVec4(0.24f, 0.24f, 0.23f, 1.00f);
+		colors[ImGuiCol_Text]				= ImVec4(0.68f, 0.68f, 0.68f, 1.00f);
+		colors[ImGuiCol_WindowBg]			= ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+		colors[ImGuiCol_PopupBg]			= ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+		colors[ImGuiCol_Border]				= ImVec4(0.20f, 0.20f, 0.19f, 1.00f);
+		colors[ImGuiCol_FrameBg]			= ImVec4(0.17f, 0.19f, 0.19f, 1.00f);
+		colors[ImGuiCol_FrameBgHovered]		= ImVec4(0.23f, 0.27f, 0.28f, 1.00f);
+		colors[ImGuiCol_FrameBgActive]		= ImVec4(0.23f, 0.33f, 0.36f, 1.00f);
+		colors[ImGuiCol_TitleBg]			= ImVec4(0.10f, 0.12f, 0.12f, 1.00f);
+		colors[ImGuiCol_TitleBgActive]		= ImVec4(0.25f, 0.13f, 0.11f, 1.00f);
+		colors[ImGuiCol_MenuBarBg]			= ImVec4(0.19f, 0.21f, 0.22f, 1.00f);
+		colors[ImGuiCol_ScrollbarBg]		= ImVec4(0.11f, 0.11f, 0.11f, 0.00f);
+		colors[ImGuiCol_CheckMark]			= ImVec4(0.61f, 0.54f, 0.49f, 1.00f);
+		colors[ImGuiCol_SliderGrab]			= ImVec4(0.61f, 0.54f, 0.49f, 1.00f);
+		colors[ImGuiCol_SliderGrabActive]	= ImVec4(0.35f, 0.19f, 0.16f, 1.00f);
+		colors[ImGuiCol_Button]				= ImVec4(0.18f, 0.21f, 0.25f, 1.00f);
+		colors[ImGuiCol_ButtonHovered]		= ImVec4(0.31f, 0.38f, 0.47f, 1.00f);
+		colors[ImGuiCol_ButtonActive]		= ImVec4(0.36f, 0.47f, 0.60f, 1.00f);
+		colors[ImGuiCol_Header]				= ImVec4(0.18f, 0.21f, 0.25f, 1.00f);
+		colors[ImGuiCol_HeaderHovered]		= ImVec4(0.31f, 0.38f, 0.47f, 1.00f);
+		colors[ImGuiCol_HeaderActive]		= ImVec4(0.37f, 0.47f, 0.60f, 1.00f);
+		colors[ImGuiCol_Separator]			= ImVec4(0.24f, 0.25f, 0.25f, 1.00f);
+		colors[ImGuiCol_ResizeGrip]			= ImVec4(0.33f, 0.33f, 0.33f, 1.00f);
+		colors[ImGuiCol_ResizeGripHovered]	= ImVec4(0.40f, 0.26f, 0.24f, 1.00f);
+		colors[ImGuiCol_ResizeGripActive]	= ImVec4(0.42f, 0.13f, 0.10f, 1.00f);
+		colors[ImGuiCol_Tab]				= ImVec4(0.37f, 0.34f, 0.32f, 1.00f);
+		colors[ImGuiCol_TabHovered]			= ImVec4(0.51f, 0.29f, 0.20f, 1.00f);
+		colors[ImGuiCol_TabActive]			= ImVec4(0.36f, 0.13f, 0.11f, 1.00f);
+		colors[ImGuiCol_TabUnfocused]		= ImVec4(0.24f, 0.24f, 0.23f, 1.00f);
 		colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.30f, 0.14f, 0.12f, 1.00f);
-		colors[ImGuiCol_DockingPreview] = ImVec4(0.44f, 0.31f, 0.27f, 0.70f);
-		colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
-		colors[ImGuiCol_NavHighlight] = ImVec4(0.77f, 0.30f, 0.09f, 1.00f);
-		colors[ImGuiCol_DragDropTarget] = ImVec4(0.88f, 0.63f, 0.08f, 1.00f);
-
-
+		colors[ImGuiCol_DockingPreview]		= ImVec4(0.44f, 0.31f, 0.27f, 0.70f);
+		colors[ImGuiCol_DockingEmptyBg]		= ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+		colors[ImGuiCol_NavHighlight]		= ImVec4(0.77f, 0.30f, 0.09f, 1.00f);
+		colors[ImGuiCol_DragDropTarget]		= ImVec4(0.88f, 0.63f, 0.08f, 1.00f);
 	}
 
 	void UserInterface::StartFrame()

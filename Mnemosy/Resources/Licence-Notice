@@ -5,11 +5,20 @@ Mnemosy includes dependencies that do not share the same but other open source l
 All dependecies with licenses are listed below
 
 
+
+===========================
+	Font Licences
+===========================
+
+Roboto Font: Apache 2.0
+
+license is included under Fonts/Roboto-Licence-NOTICE
+
 ============================
 
-Robot Font: Apache 2.0
+MaterialSymbols Font: Apache 2.0
 
-license is included under Fonts/Robot-Licence-NOTICE
+license is included under Fonts/MayterialSymbols_LICENSE-notice.txt
 
 ============================
 

@@ -34,6 +34,9 @@ namespace mnemosy::gui
 
 		bool IsGuiPanelVisible(GuiPanelType panelType);
 		GuiPanel& GetGuiPanel(GuiPanelType panelType);
+		
+		ImFont* Font_Text_Get() { return m_font_text; }
+		ImFont* Font_Icon_Get() { return m_font_icon; }
 
 		bool show_demo_window = false;
 	private:
@@ -46,6 +49,12 @@ namespace mnemosy::gui
 		GuiPanel* m_mainMenuBarGuiPanel = nullptr;
 		std::vector<GuiPanel*> m_guiPanels;
 		ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_NoScrollbar;
+
+		ImFont* m_font_text = nullptr;
+		ImFont* m_font_icon = nullptr;
+
+		ImVector<ImWchar> m_font_text_glyph_ranges;
+		ImVector<ImWchar> m_font_icons_glyph_ranges;
 	
 	};
 

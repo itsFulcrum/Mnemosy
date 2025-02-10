@@ -39,31 +39,23 @@ namespace mnemosy::gui
 		virtual void Draw() override;
 
 		void RecursivDrawSubfolders(systems::FolderNode* node);
-		void DrawMaterialEntries(systems::FolderNode* node);
+		void Draw_LibEntries(systems::FolderNode* node);
 
 
 
 	private:
-		void AddSubfolder(systems::FolderNode* node);
-		void RenameFolder(systems::FolderNode* node, std::string newName);
-		void DeleteButKeepChildren(systems::FolderNode* node);
-		void DeleteHierarchy(systems::FolderNode* node);
-		
-
-
-		void AddMaterialEntry(systems::FolderNode* parent, std::string name , systems::LibEntryType type );
-		void RenameMaterial(systems::FolderNode* node, systems::LibEntry* materialInfo, std::string& newName, int positionInVector);
-		void DeleteMaterial(systems::FolderNode* node, systems::LibEntry* materialInfo, int positionInVector);
-
-
-		void HandleDeleteHierarchyModal();
-
-
 		void DrawLibrarySelection();
 
 
+
+		void PopupModal_Folder_DeleteHierarchy_Open(systems::FolderNode* folder);
+		void PopupModal_Folder_DeleteHierarchy();
+
+
+
+
 	private:
-		systems::FolderNode* m_nodeDeleteHierarchy = nullptr;
+		systems::FolderNode* m_popupModal_folder_deleteHierarchy_ptr = nullptr;
 
 		ImGuiTreeNodeFlags m_directoryTreeFlags;
 		ImGuiTreeNodeFlags m_materialTreeFlags;
@@ -75,8 +67,8 @@ namespace mnemosy::gui
 
 
 		//systems::FolderNode* m_selectedNode = nullptr;
-		const char* m_rightClickFolderOptions[7] = {"Add Subfolder", "Add PBR Material", "Add Unlit Texture", "Add Skybox" , "Delete", "Delete Hierarchy", "Open Folder"};
-		const char* m_rightClickMaterialOptions[2] = { "Delete Selection", "Open Folder" };
+		const char* m_rightClickFolderOptions[7] = {"Add Subfolder", "Add PBR Material", "Add Unlit Texture", "Add Skybox" , "Delete", "Delete Hierarchy", "Open System Folder"};
+		const char* m_rightClickMaterialOptions[3] = { "Load", "Delete Selection", "Open System Folder" };
 		
 		ImGuiInputTextFlags m_textInputFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;
 		std::string m_renameMaterialText = "";
@@ -87,7 +79,9 @@ namespace mnemosy::gui
 		unsigned int m_folderIdToOpenNextFrame = 0;
 		bool m_setFolderOpenNextFrame = false;
 
-		bool showDeleteHierarchyModel = false;
+		bool m_popupModal_folder_deleteHierarchy_triggered = false;
+
+
 		bool m_matDragDropBegin = false;
 		MaterialDragDropPayload m_tempStoreMatPayload;
 

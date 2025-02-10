@@ -36,10 +36,13 @@ add_compile_options(
           $<$<CONFIG:Release>:/MT>
 )
 
+# hide console window for release builds
+#if(MSVC)
+#	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+#endif()
 
 # ==== Load External libraries
 # =============================================
-
 
 set(DEPENDENCIES_DIR ${CMAKE_CURRENT_LIST_DIR}/Code/Dependencies)
 
@@ -60,11 +63,6 @@ add_subdirectory(${glad_subDir})
 #GLM
 set(glm_subDir "Code/Dependencies/glm/")
 add_subdirectory(${glm_subDir})
-
-# SpdLog
-set(spdLog_subDir "Code/Dependencies/spdlog-1.x/")
-include(${CMAKE_CURRENT_LIST_DIR}/${spdLog_subDir}cmake-Mnemosy-SpdLogOptions.cmake)
-add_subdirectory(${spdLog_subDir})
 
 # FULCRUM Utils
 set(flcrm_subDir ${DEPENDENCIES_DIR}/FulcrumUtils/)
@@ -182,7 +180,6 @@ target_link_libraries(${ENGINE_PROJECT} PUBLIC
 glfw
 glm
 nlohmann_json
-spdlog::spdlog_header_only
 Fulcrum_Utils
 utf8cpp
 )

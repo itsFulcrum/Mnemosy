@@ -527,7 +527,7 @@ namespace mnemosy::systems {
 		ActiveLibCollection_SaveToFile();
 	}
 		
-	void MaterialLibraryRegistry::LibEntry_Delete(systems::LibEntry* libEntry, int positionInVector) {
+	void MaterialLibraryRegistry::LibEntry_Delete(systems::LibEntry* libEntry, unsigned int positionInVector) {
 
 		namespace fs = std::filesystem;
 
@@ -1138,6 +1138,34 @@ namespace mnemosy::systems {
 
 		// assign texture to material		
 		MnemosyEngine::GetInstance().GetScene().GetUnlitMaterial()->AssignTexture(tex);
+
+		// calculate uv tiling automatically based on width & height
+		{
+			// calculate uv tiling based on texture witdth & height
+
+			float x = (float)tex->GetWidth();  // e.g 1024
+			float y = (float)tex->GetHeight(); // e.g 512
+
+			float aspect_y = x / y; // e.g. 1024 /  512 = 2
+			float aspect_x = y / x; // e.g. 512  / 1024 = 0.5
+
+			float uv_tile_x = 1.0f;
+			float uv_tile_y = 1.0f;
+
+			if (aspect_y > 1.00000000f) {
+				uv_tile_y = aspect_y;
+			}
+			if (aspect_x > 1.00000000f) {
+				uv_tile_x = aspect_x;
+			}
+
+			MnemosyEngine::GetInstance().GetScene().GetUnlitMaterial()->UVTilingX = uv_tile_x;
+			MnemosyEngine::GetInstance().GetScene().GetUnlitMaterial()->UVTilingY = uv_tile_y;
+		}
+
+
+		
+
 	}
 
 	void MaterialLibraryRegistry::ActiveLibEntry_UnlitMat_DeleteTexture() {

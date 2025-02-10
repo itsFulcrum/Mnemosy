@@ -51,7 +51,7 @@ namespace mnemosy::systems
 
 		void LibEntry_CreateNew(FolderNode* node,  LibEntryType type, std::string& name);
 		void LibEntry_Rename(systems::LibEntry* libEntry, std::string& newName);
-		void LibEntry_Delete(systems::LibEntry* libEntry, int positionInVector);
+		void LibEntry_Delete(systems::LibEntry* libEntry, unsigned int positionInVector);
 		void LibEntry_Move(FolderNode* sourceNode, FolderNode* targetNode, systems::LibEntry* libEntry);
 
 		std::filesystem::path LibEntry_GetDataFilePath(LibEntry* libEntry);
