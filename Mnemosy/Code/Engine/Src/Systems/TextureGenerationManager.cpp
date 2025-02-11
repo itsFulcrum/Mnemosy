@@ -289,6 +289,7 @@ namespace mnemosy::systems
 
 				std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_R);
 				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+				MNEMOSY_POPUP("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 				channel_r_assignSampler = false;
 			}
 
@@ -326,6 +327,7 @@ namespace mnemosy::systems
 			if (channel_g_tex == nullptr) {
 				std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_G);
 				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+				MNEMOSY_POPUP("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 				channel_g_assignSampler = false;
 			}
 
@@ -363,6 +365,7 @@ namespace mnemosy::systems
 			if (channel_b_tex == nullptr) {
 				std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_B);
 				MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+				MNEMOSY_POPUP("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 				channel_b_assignSampler = false;
 			}
 
@@ -401,6 +404,7 @@ namespace mnemosy::systems
 				if (channel_a_tex == nullptr) {
 					std::string packComponentString = graphics::TexUtil::get_string_from_channelPackComponent(packComponent_A);
 					MNEMOSY_WARN("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
+					MNEMOSY_POPUP("ChannelPacking: Texture for pack type {} is not assigned, result may not be as expected", packComponentString);
 					channel_a_assignSampler = false;
 				}
 
@@ -506,27 +510,6 @@ namespace mnemosy::systems
 			fs::path fragPath = shadersPath / fs::path("textureGeneration.frag");
 			m_pTextureGenShader = new graphics::Shader(vertPath.generic_string().c_str(), fragPath.generic_string().c_str());
 		}
-
-		//// Init Mesh buffers
-		//if (m_VBO == 0) {
-		//	glGenBuffers(1, &m_VBO);
-		//	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		//}
-
-		//if (m_VAO == 0) {
-		//	glGenVertexArrays(1, &m_VAO);
-		//	glBindVertexArray(m_VAO);
-
-		//	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		//	glBufferData(GL_ARRAY_BUFFER, sizeof(m_screenQuadVertices), m_screenQuadVertices, GL_STATIC_DRAW);
-
-		//	// Setup Attributes
-		//	glEnableVertexAttribArray(0);
-		//	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-		//	glEnableVertexAttribArray(1);
-		//	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-		//	
-		//}
 
 		// Gen Framebuffer
 		if (m_FBO == 0) {

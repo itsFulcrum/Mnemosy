@@ -53,7 +53,7 @@ namespace mnemosy::core
 		case GL_DEBUG_SEVERITY_NOTIFICATION: MNEMOSY_INFO		("OpenGL Debug: ErrorCode: ({}) Message: {}, Source: {}, Type: {}", id, message, SourceString, TypeString); break;
 		}
 
-		//MNEMOSY_BREAK;
+		MNEMOSY_BREAK;
 	}
 
 

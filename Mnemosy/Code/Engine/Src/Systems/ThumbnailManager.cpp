@@ -71,7 +71,6 @@ namespace mnemosy::systems {
 
 	}
 
-	// TODO: handle entry types
 	void ThumbnailManager::RenderThumbnailForActiveLibEntry(LibEntry* libEntry) {
 
 		namespace fs = std::filesystem;

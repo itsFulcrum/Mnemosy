@@ -8,6 +8,7 @@
 #include "ImGui/imgui_impl_glfw.h"
 #include "ImGui/imgui_impl_opengl3.h"
 
+#include <string>
 #include <vector>
 #include <GLFW/glfw3.h>
 
@@ -44,8 +45,6 @@ namespace mnemosy::gui
 		void StartFrame();
 		void EndFrame();
 
-
-
 		GuiPanel* m_mainMenuBarGuiPanel = nullptr;
 		std::vector<GuiPanel*> m_guiPanels;
 		ImGuiWindowFlags m_window_flags = ImGuiWindowFlags_NoScrollbar;
@@ -54,8 +53,7 @@ namespace mnemosy::gui
 		ImFont* m_font_icon = nullptr;
 
 		ImVector<ImWchar> m_font_text_glyph_ranges;
-		ImVector<ImWchar> m_font_icons_glyph_ranges;
-	
+		ImVector<ImWchar> m_font_icons_glyph_ranges;	
 	};
 
 } // mnemosy::gui

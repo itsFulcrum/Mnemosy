@@ -32,6 +32,8 @@
 #include "Include/Graphics/Texture.h"
 #include "Include/Graphics/Utils/Picture.h"
 
+#include "Include/GuiPanels/GuiPanelsCommon.h"
+
 #include <glm/glm.hpp>
 
 namespace mnemosy::gui
@@ -122,6 +124,8 @@ namespace mnemosy::gui
 			}
 		}
 
+		ImGui::SetItemTooltip("Drag & Drop texture files into another program");
+
 		ImGui::Spacing();
 		ImGui::Spacing();
 
@@ -203,7 +207,7 @@ namespace mnemosy::gui
 				// Normal Map Format
 				int exportNormalFormat_current = (int)m_exportManager.GetNormalMapExportFormat();
 				ImGui::Combo("Normal Map Format ##Export", &exportNormalFormat_current, graphics::TexDefinitions::NormalMapFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::NormalMapFormats_string));
-				ImGui::SetItemTooltip("Specify the normal map format to export normal maps with");
+				ImGui::SetItemTooltip("Specify the format for exporting Normal Maps");
 
 				// if normal format changed
 				if ((int)m_exportManager.GetNormalMapExportFormat() != exportNormalFormat_current) {
@@ -212,7 +216,7 @@ namespace mnemosy::gui
 
 				bool exportRoughAsSmooth = m_exportManager.GetExportRoughnessAsSmoothness();
 				ImGui::Checkbox("Roughness as Smoothness", &exportRoughAsSmooth);
-
+				ImGui::SetItemTooltip("Export Roughness as Smoothness map");
 
 				if (exportRoughAsSmooth != m_exportManager.GetExportRoughnessAsSmoothness()) {
 					m_exportManager.SetExportRoughnessAsSmoothness(exportRoughAsSmooth);
@@ -274,8 +278,6 @@ namespace mnemosy::gui
 				}
 
 				ImGui::Checkbox("Export Channel Packed Textures", &m_pbrMat_exportChannelPackedTexture);
-
-
 
 				if (!pbrMat.HasPackedTextures) {
 
@@ -494,9 +496,6 @@ namespace mnemosy::gui
 
 				std::string resolution = "Resolution: " + std::to_string(activeMat.GetRoughnessTexture().GetWidth()) + "x" + std::to_string(activeMat.GetRoughnessTexture().GetHeight());
 				ImGui::Text(resolution.c_str());
-
-
-
 			}
 
 			// Disabled widgets if texture is assigned 
@@ -520,6 +519,8 @@ namespace mnemosy::gui
 				bool isSmoothness = activeMat.IsSmoothnessTexture;
 
 				ImGui::Checkbox("Is Smoothness", &isSmoothness);
+
+				gui::GuiProcedures::SamelineTooltip("Convert imported texture to roughness.\n Use this if you have imported a smoothness/gloss texture.");
 
 				if (isSmoothness != activeMat.IsSmoothnessTexture) {
 
@@ -625,7 +626,7 @@ namespace mnemosy::gui
 				int format_current = activeMat.GetNormalFormatAsInt();
 
 				ImGui::Combo("Normal Map Format", &format_current, graphics::TexDefinitions::NormalMapFormats_string, IM_ARRAYSIZE(graphics::TexDefinitions::NormalMapFormats_string));
-				ImGui::SetItemTooltip("Specify the normal map format of the source texture");
+				ImGui::SetItemTooltip("Specify the Normal Map format of the source texture");
 
 				// if format changed
 				if (activeMat.GetNormalFormatAsInt() != format_current) {
@@ -817,6 +818,7 @@ namespace mnemosy::gui
 
 				bool useEmitAsMask = activeMat.UseEmissiveAsMask;
 				ImGui::Checkbox("Use Emissive As Mask", &useEmitAsMask);
+				gui::GuiProcedures::SamelineTooltip("Use this if emission texture is a grayscale mask\nand you want to specify color seperatly.");
 
 				if (useEmitAsMask != activeMat.UseEmissiveAsMask) {
 					activeMat.UseEmissiveAsMask = useEmitAsMask;
@@ -914,7 +916,7 @@ namespace mnemosy::gui
 				if (ImGui::SliderFloat("Max Height", &activeMat.MaxHeight, 0.0f, 1.0f, "%.4f")) {
 					m_valuesChanged = true;
 				}
-
+				ImGui::SetItemTooltip("Specify how bright the brightes pixel in the source texture is.\nUsefull to offset the depth rendering.");
 
 			}
 			if (!textureAssigned)
@@ -970,6 +972,7 @@ namespace mnemosy::gui
 					m_materialRegistry.ActiveLibEntry_PbrMat_GenerateOpacityFromAlbedoAlpha(activeLibEntry, activeMat);
 					SaveMaterial();
 				}
+				gui::GuiProcedures::SamelineTooltip("Generate the Opacity map from Albedo map alpha channel");
 
 			}
 

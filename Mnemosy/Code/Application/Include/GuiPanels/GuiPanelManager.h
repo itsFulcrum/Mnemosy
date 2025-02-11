@@ -11,6 +11,7 @@ namespace mnemosy::gui
 	class MaterialLibraryGuiPanel;
 	class DocumentationGuiPanel;
 	class ContentsGuiPanel;
+	class LogGuiPanel;
 }
 
 namespace mnemosy::gui
@@ -34,6 +35,7 @@ namespace mnemosy::gui
 		MaterialLibraryGuiPanel&	GetMaterialLibraryPanel()	{ return *m_pMaterialLibraryPanel; }
 		DocumentationGuiPanel&		GetDocumentationPanel()		{ return *m_pDocumentationPanel; }
 		ContentsGuiPanel&			GetContentsPanel()			{ return *m_pContentsPanel; }
+		LogGuiPanel&				GetLogPanel()				{ return *m_pLogPanel; }
 
 	private:
 		MainMenuBarGuiPanel*		m_pMainMenuBarPanel		= nullptr;
@@ -43,6 +45,7 @@ namespace mnemosy::gui
 		MaterialLibraryGuiPanel*	m_pMaterialLibraryPanel	= nullptr;
 		DocumentationGuiPanel*		m_pDocumentationPanel	= nullptr;
 		ContentsGuiPanel*			m_pContentsPanel		= nullptr;
+		LogGuiPanel*				m_pLogPanel				= nullptr;
 	};
 
 }

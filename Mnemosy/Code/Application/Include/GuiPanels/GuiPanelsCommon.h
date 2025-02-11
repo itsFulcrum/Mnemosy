@@ -12,6 +12,15 @@
 #define TextColor_unlit		ImVec4(0.51f, 0.60f, 0.51f, 1.00f)
 
 
+
+#define Gui_Txt_Color_Trace ImVec4( 0.850f , 0.850f , 0.850f , 1.0f) // white
+#define Gui_Txt_Color_Debug ImVec4( 0.149f , 0.661f , 0.866f , 1.0f) // blue
+#define Gui_Txt_Color_Info  ImVec4( 0.203f , 0.741f , 0.243f , 1.0f) // green
+#define Gui_Txt_Color_Warn  ImVec4( 0.866f , 0.756f , 0.113f , 1.0f) // yellow
+#define Gui_Txt_Color_Error ImVec4( 0.874f , 0.200f , 0.200f , 1.0f) // red
+#define Gui_Txt_Color_Fatal ImVec4( 1.000f , 0.000f , 0.000f , 1.0f) // red 
+
+
 namespace mnemosy::systems {
 	struct FolderNode;
 	struct LibEntry;
@@ -52,6 +61,8 @@ namespace mnemosy::gui {
 		static void libEntry_rename(systems::LibEntry* libEntry, std::string& newName);
 
 		static void libEntry_delete(systems::LibEntry* libEntry, unsigned int vectorListIndex);
+
+		static void SamelineTooltip(const char* msg);
 	};
 }
 

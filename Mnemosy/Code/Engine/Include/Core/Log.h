@@ -3,7 +3,7 @@
 
 #include "Include/MnemosyConfig.h"
 
-
+#define FLCRM_LOG_CUSTOM_LOGLEVEL_PREFIX "[MESSAGE]"
 
 #include <FulcrumUtils/Flcrm_Log.hpp>
 
@@ -30,12 +30,13 @@
 #endif
 
 
-#define MNEMOSY_TRACE(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_TRACE, __FILE__, __LINE__, FUNCTION_NAME,__VA_ARGS__)
-#define MNEMOSY_DEBUG(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_DEBUG, __FILE__, __LINE__, FUNCTION_NAME,__VA_ARGS__)
-#define MNEMOSY_INFO(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_INFO , __FILE__, __LINE__, FUNCTION_NAME,__VA_ARGS__)
-#define MNEMOSY_WARN(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_WARN , __FILE__, __LINE__, FUNCTION_NAME,__VA_ARGS__)
-#define MNEMOSY_ERROR(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_ERROR, __FILE__, __LINE__, FUNCTION_NAME,__VA_ARGS__)
-#define MNEMOSY_CRITICAL(...)	flcrm::log::log(flcrm::log::LogLevel::LEVEL_FATAL, __FILE__, __LINE__, FUNCTION_NAME,__VA_ARGS__)
+#define MNEMOSY_TRACE(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_TRACE , __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
+#define MNEMOSY_DEBUG(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_DEBUG , __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
+#define MNEMOSY_INFO(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_INFO  , __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
+#define MNEMOSY_WARN(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_WARN  , __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
+#define MNEMOSY_ERROR(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_ERROR , __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
+#define MNEMOSY_CRITICAL(...)	flcrm::log::log(flcrm::log::LogLevel::LEVEL_FATAL , __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
+#define MNEMOSY_POPUP(...)		flcrm::log::log(flcrm::log::LogLevel::LEVEL_CUSTOM, __FILE__, __LINE__, FUNCTION_NAME, __VA_ARGS__)
 
 #define MNEMOSY_ASSERT(x, msg)	if((x)) {} else { MNEMOSY_CRITICAL("ASSERT - {}\n\t{}\n\tin file {}\n\ton line {}", #x, msg, __FILE__, __LINE__); MNEMOSY_BREAK}
 

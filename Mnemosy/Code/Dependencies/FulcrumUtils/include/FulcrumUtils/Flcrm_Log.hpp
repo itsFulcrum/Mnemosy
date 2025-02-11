@@ -44,6 +44,16 @@
 
 
 
+// Define this if using custom log level
+
+#ifndef FLCRM_LOG_CUSTOM_LOGLEVEL_PREFIX
+
+#define FLCRM_LOG_CUSTOM_LOGLEVEL_PREFIX "[CUSTOM]"
+
+#endif // !FLCRM_LOG_CUSTOM_LOGLEVEL_PREFIX
+
+
+
 namespace flcrm::log {
 
 	enum LogLevel {
@@ -52,7 +62,8 @@ namespace flcrm::log {
 		LEVEL_INFO	= 2,
 		LEVEL_WARN	= 3,
 		LEVEL_ERROR	= 4,
-		LEVEL_FATAL	= 5
+		LEVEL_FATAL	= 5,
+		LEVEL_CUSTOM = 6
 	};
 
 	enum OutputType {
@@ -81,7 +92,8 @@ namespace flcrm::log {
 	struct LogDevice {
 	public:
 		LogFormatInfo format_info;
-		LogLevel log_priority = LogLevel::LEVEL_TRACE;
+		LogLevel log_priority = LogLevel::LEVEL_TRACE; // anything below will not be submitted
+		LogLevel log_maxLevel = LogLevel::LEVEL_FATAL; // anything above will not be submitted
 		OutputType output_type = OutputType::CONSOLE_PRINT;
 		bool print_to_console_in_color = false;
 		std::function<void(LogMessage&)> function_callback = nullptr;
@@ -270,7 +282,7 @@ namespace flcrm::log {
 
 			base += "[" + std::string(buf) + "]";
 		}
-		
+
 		if (format_info.add_log_level) {
 
 			switch (log_level)
@@ -292,6 +304,9 @@ namespace flcrm::log {
 				break;
 			case flcrm::log::LEVEL_FATAL:
 				base += "[FATAL]";
+				break;
+			case flcrm::log::LEVEL_CUSTOM:
+				base += FLCRM_LOG_CUSTOM_LOGLEVEL_PREFIX;
 				break;
 			default:
 				break;
@@ -348,7 +363,7 @@ namespace flcrm::log {
 
 			LogDevice& device = flcrm_internal::DeviceRegister::device_get(deviceId);
 
-			if (log_level >= device.log_priority) {
+			if (log_level >= device.log_priority && log_level <= device.log_maxLevel) {
 				
 				LogMessage msg;
 

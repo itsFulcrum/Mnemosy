@@ -6,6 +6,7 @@
 #include "Include/MnemosyEngine.h"
 #include "Include/MnemosyConfig.h"
 #include "Include/Core/Log.h"
+#include "Include/Core/Logger.h"
 #include "Include/Core/FileDirectories.h"
 
 #ifdef MNEMOSY_PLATFORM_WINDOWS
@@ -19,10 +20,12 @@
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 #include "Include/GuiPanels/DocumentationGuiPanel.h"
 #include "Include/GuiPanels/ContentsGuiPanel.h"
+#include "Include/GuiPanels/LogGuiPanel.h"
 
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/SkyboxAssetRegistry.h"
 #include "Include/Systems/FolderTreeNode.h"
+#include "Include/Gui/UserInterface.h"
 
 #include "Include/Graphics/Skybox.h"
 #include "Include/Graphics/RenderMesh.h"
@@ -47,6 +50,8 @@ namespace mnemosy::gui
 	void MainMenuBarGuiPanel::Draw()
 	{
 		if (ImGui::BeginMainMenuBar()) {
+
+			PopupModal_UserMessage();
 
 			DataDropdown();
 			ViewsDropdown();
@@ -229,8 +234,47 @@ namespace mnemosy::gui
 				m_panelManager.GetContentsPanel().SetActive(true);
 			}
 
+			m_active_logPanel = m_panelManager.GetLogPanel().IsActive();
+			if (ImGui::MenuItem("Log", "", m_active_logPanel, !m_active_logPanel)) {
+				m_panelManager.GetLogPanel().SetActive(true);
+			}
 
 			ImGui::EndMenu();
 		} // End Menu Windows
+	}
+
+
+	void MainMenuBarGuiPanel::PopupModal_UserMessage() {
+
+		static bool popModal_userMessage_show = false;
+
+		core::Logger& logger = MnemosyEngine::GetInstance().GetLogger();
+		if (logger.IsPopupMessageTriggered()) {
+
+			popModal_userMessage_show = true;
+			logger.UntriggerPopupMessage(); // to make sure its only called once
+			ImGui::OpenPopup("Message Popup", ImGuiPopupFlags_::ImGuiPopupFlags_AnyPopup);
+		}
+
+		if (ImGui::BeginPopupModal("Message Popup", &popModal_userMessage_show, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+			ImGui::Spacing();
+			ImGui::Text("Warning - Something went wrong!");
+			ImGui::Spacing();
+
+			ImGui::Text(logger.GetPopupMessage().c_str());
+
+			ImGui::Spacing();
+			ImGui::Spacing();
+
+			if (ImGui::Button("OK")) {
+
+				popModal_userMessage_show = false;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+
 	}
 }

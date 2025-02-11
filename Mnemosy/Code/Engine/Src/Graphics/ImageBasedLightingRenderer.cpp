@@ -127,7 +127,7 @@ namespace mnemosy::graphics
 		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 
-		MNEMOSY_TRACE("Rendered Equirectangular to Irradiance..");
+		MNEMOSY_DEBUG("Rendered Equirectangular to Irradiance..");
 
 		EndCubemapRendering();
 	}
@@ -189,7 +189,7 @@ namespace mnemosy::graphics
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterCubemapID);
 
-		MNEMOSY_TRACE("Rendered Equirectangular to Prefilter..");
+		MNEMOSY_DEBUG("Rendered Equirectangular to Prefilter..");
 
 		EndCubemapRendering();
 	}
@@ -216,7 +216,7 @@ namespace mnemosy::graphics
 
 		}
 		else {
-			MNEMOSY_ERROR("ImageBaseLightingRenderer::BindBrdfLutTexture: brdf lut texture is not yet generated");
+			MNEMOSY_ERROR("Brdf lut texture is not yet generated");
 		}
 
 	}
@@ -225,7 +225,7 @@ namespace mnemosy::graphics
 	{
 		if (m_brdfLutTexture_isGenerated)
 		{
-			MNEMOSY_INFO("BrdfLutTexture is already genereated");
+			MNEMOSY_DEBUG("BrdfLutTexture is already genereated");
 			return;
 		}
 
@@ -269,7 +269,7 @@ namespace mnemosy::graphics
 			bool success = brdfLut.SaveBrdfLutKtx(exportpath, m_brdfLutTextureID, m_brdfLutResolution);
 			
 			if(success)
-				MNEMOSY_INFO("Generated brdf lut texture and safed to: {}", exportpath);
+				MNEMOSY_DEBUG("Generated brdf lut texture and safed to: {}", exportpath);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -291,7 +291,7 @@ namespace mnemosy::graphics
 		bool ktxFileExists = true;
 		if (!file.exists())
 		{
-			MNEMOSY_WARN("ImageBasedLightingRenderer::LoadBrdfLutTexture: brdf lut texture file does not exsist at:\n{} \nGenerating new file...", pathToFile.generic_string());
+			MNEMOSY_WARN("Brdf lut texture file does not exsist at:\n{} \nGenerating new file...", pathToFile.generic_string());
 			ktxFileExists = false;
 		}
 

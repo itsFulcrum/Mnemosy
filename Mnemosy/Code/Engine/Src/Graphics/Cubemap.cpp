@@ -36,33 +36,12 @@ namespace mnemosy::graphics
 		// set resolution of the cubemap type
 		unsigned int resolution = 1024;
 
-		//if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_COLOR) {
-
-		//	// we are assuming her that a standard equirectangular texture provided will aspect ration of 
-		//	// 2:1 where width has double the pixels of height,
-		//	// therefore we will use height as skybox resolution because higher values will not contain more information than that.
-
-		//	if (overrideTexResolution && _resolution > 0) {
-		//		resolution = _resolution;
-		//	}
-		//	else {
-		//		resolution = equirectangularTex.GetHeight();
-		//	}
-
-		//}
 		if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE) {
 			resolution = 64;
 		}
 		else if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER) {
 
 			resolution = 1024;
-			
-			///if (overrideTexResolution && _resolution > 0) {
-			///	resolution = _resolution;
-			///}
-			///else {
-			///	resolution = equirectangularTex.GetHeight();
-			///}
 
 		}
 		m_resolution = resolution;
@@ -98,25 +77,17 @@ namespace mnemosy::graphics
 		// Generate Convolution maps
 		ImageBasedLightingRenderer& ibl_Renderer = MnemosyEngine::GetInstance().GetIblRenderer();
 		
-		/*if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_COLOR) {
-
-			MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToCubemapTexture(m_gl_ID, equirectangularTex.GetID(), resolution,true);
-		}*/
 		if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_IRRADIANCE) {
 			
 			MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToIrradianceCubemapTexture( m_gl_ID, equirectangularTex.GetID(), resolution,true);		
 		}
 		else if (cubeType == CubemapType::MNSY_CUBEMAP_TYPE_PREFILTER) {
-
 			
 			MnemosyEngine::GetInstance().GetIblRenderer().RenderEquirectangularToPrefilteredCubemapTexture(m_gl_ID, equirectangularTex.GetID(), resolution);
-
 		}
 
 		m_isInitialized = true;
 	}
-
-
 
 	void Cubemap::GenerateOpenGlCubemap_FromKtx2File(std::filesystem::path& path, bool loadStoredMips)
 	{
@@ -138,7 +109,7 @@ namespace mnemosy::graphics
 		m_resolution = ktxImg.width;
 
 		if (!success) {
-			MNEMOSY_ERROR("Cubemap:LoadFromKtx2File: faild to load. Path: {} ", path.generic_string());
+			MNEMOSY_ERROR("Faild to load. Path: {} ", path.generic_string());
 			Clear();
 		}
 
@@ -166,7 +137,7 @@ namespace mnemosy::graphics
 
 		if (location > 16 || location < 0) {
 
-			MNEMOSY_ERROR("Cubemap::Bind: Cannot bind to location {}, only range 0 - 16 are allowed ");
+			MNEMOSY_ERROR("Cannot bind to location {}, only range 0 - 16 are allowed ");
 			return;
 		}
 

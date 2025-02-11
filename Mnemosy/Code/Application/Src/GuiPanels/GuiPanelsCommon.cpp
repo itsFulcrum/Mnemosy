@@ -2,8 +2,11 @@
 
 #include "Include/MnemosyEngine.h"
 #include "Include/Core/Log.h"
+#include "Include/Gui/UserInterface.h"
+#include "Include/Core/Utils/StringUtils.h"
 #include "Include/Systems/MaterialLibraryRegistry.h"
 #include "Include/Systems/FolderTreeNode.h"
+
 
 namespace mnemosy::gui {
 
@@ -55,6 +58,24 @@ namespace mnemosy::gui {
 	void GuiProcedures::libEntry_delete(systems::LibEntry* libEntry, unsigned int vectorListIndex) {
 
 		MnemosyEngine::GetInstance().GetMaterialLibraryRegistry().LibEntry_Delete(libEntry,static_cast<int>(vectorListIndex));
+	}
+
+	void GuiProcedures::SamelineTooltip(const char* msg) {
+
+		//const static std::string help = core::StringUtils::wChar_to_utf8String(0xE88E);
+		
+		ImGui::SameLine();
+
+		//ImGui::PushFont(MnemosyEngine::GetInstance().GetUserInterface().Font_Icon_Get());
+		
+
+		ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(?)");
+		//ImGui::Text(help.c_str());
+		
+		//ImGui::PopFont();
+		
+		ImGui::SetItemTooltip(msg);
+
 	}
 
 

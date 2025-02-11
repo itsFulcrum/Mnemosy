@@ -94,7 +94,6 @@ namespace mnemosy::systems {
 		fs::path dataFilePath = folderPath / fs::path("MnemosyMaterialLibraryData.mnsydata");
 
 		if (!LibProcedures::CheckDataFile(dataFilePath)) {
-
 			MNEMOSY_ERROR("Data file is invalid or not existing: {}", dataFilePath.generic_string());
 			return false;
 		}		
@@ -520,6 +519,7 @@ namespace mnemosy::systems {
 			}
 			catch (fs::filesystem_error error) {
 				MNEMOSY_ERROR("System error renaming directory. \nError message: {}", error.what());
+				MNEMOSY_POPUP("System error renaming directory. \nFilesystem Error message: {}", error.what());
 			}
 		}
 
@@ -623,9 +623,7 @@ namespace mnemosy::systems {
 		systems::LibEntryType type = libEntry->type;
 
 
-		if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {
-
-			
+		if (type == systems::LibEntryType::MNSY_ENTRY_TYPE_PBRMAT) {			
 
 			graphics::PbrMaterial* mat = LibProcedures::LibEntry_PbrMaterial_LoadFromFile_Multithreaded(libEntry,prettyPrintMaterialFiles);
 			MNEMOSY_ASSERT(mat != nullptr, "This should not happen");
@@ -772,13 +770,15 @@ namespace mnemosy::systems {
 			|| suffix == fileSuffix_height
 			|| suffix == fileSuffix_opacity )
 		{
-			MNEMOSY_WARN("The suffix {} is already taken by another texture. You must choose a different suffix", suffix);
+			MNEMOSY_WARN("The suffix '{}' is already taken by another texture. You must choose a different suffix", suffix);
+			MNEMOSY_POPUP("The suffix '{}' is already taken by another texture. You must choose a different suffix", suffix);
 			return;
 		}
 
 		// check against suffiexes that already exist in other channel packed textures of the material
 		if (activeMat.SuffixExistsInPackedTexturesList(suffix)) {
-			MNEMOSY_WARN("The suffix {} is already taken by another texture. You must choose a different suffix", suffix);
+			MNEMOSY_WARN("The suffix '{}' is already taken by another texture. You must choose a different suffix", suffix);
+			MNEMOSY_POPUP("The suffix '{}' is already taken by an existing channel packed texture. You must choose a different suffix", suffix);
 			return;
 		}
 
@@ -1643,24 +1643,22 @@ namespace mnemosy::systems {
 		namespace fs = std::filesystem;
 		// Make sure the folder is valid.
 		
-		//fs::path folderPathWide = core::StringUtils::u8path_from_path(folderPath);
-
-
 		if (!fs::exists(folderPath)) {
-			MNEMOSY_ERROR("Failed to create new library because path doesn't exsist, Path: {}", folderPath.generic_string());
+			MNEMOSY_ERROR("Failed to create new library because the path doesn't exsist, Path: {}", folderPath.generic_string());
+			MNEMOSY_POPUP("Failed to create new library because the path doesn't exsist\nPath: {}", folderPath.generic_string());
 			return;
 		}
-
 
 		if (!fs::is_directory(folderPath)) {
 			MNEMOSY_ERROR("Failed to create new library entry because path is not a directory, Path: {}", folderPath.generic_string());
+			MNEMOSY_POPUP("Failed to create new library entry because path is not a directory\nPath: {}", folderPath.generic_string());
 			return;
-		}
-			
+		}			
 
 		// folder should be empty and not contain other files.
 		if (!fs::is_empty(folderPath)) {
-			MNEMOSY_ERROR("Failed to create new library entry because folder contains files. Make sure to select an empty folder location. Path: {}", folderPath.generic_string());
+			MNEMOSY_ERROR("Failed to create new library because the selected folder contains files. Make sure to select an empty folder. Path: {}", folderPath.generic_string());
+			MNEMOSY_POPUP("Failed to create new library because the selected folder contains files.\nMake sure to select an empty folder.\nPath: {}", folderPath.generic_string());
 			return;
 		}
 
@@ -1669,12 +1667,6 @@ namespace mnemosy::systems {
 
 		// First Save Current
 		ActiveLibCollection_SaveToFile();
-
-		//std::string strFolderPathWide = folderPath.generic_string();
-		//std::string strFolderPathutf8 = core::StringUtils::string_fix_u8Encoding(strFolderPathWide);
-
-		//fs::path folderPathUtf8 = fs::path(strFolderPathutf8);
-
 
 		std::string uniqueCollectionName = LibCollections_MakeNameUnique(name);
 
@@ -1714,22 +1706,26 @@ namespace mnemosy::systems {
 		// first see if the folder alongside the data file also exsists.
 		fs::path libFolderPath = dataFilePath.parent_path() / fs::path("MnemosyMaterialLibrary");
 		if (!fs::exists(libFolderPath)) {
-			MNEMOSY_ERROR("Failed to create new library because next to the data file there exists no LibraryPathFolder called: MnemosyMaterialLibrary.");
+			MNEMOSY_ERROR("Failed to create new library because next to the data file there exists no Folder called: MnemosyMaterialLibrary. - This is Invalid");
+			MNEMOSY_POPUP("Failed to create new library because next to the data file there exists no Folder called: MnemosyMaterialLibrary. \n- This is Invalid");
 			return;
 		}
 
 		if (!fs::exists(dataFilePath)) {
-			MNEMOSY_ERROR("Failed to create new library because path doesn't exsist, Path: {}", dataFilePath.generic_string());
+			MNEMOSY_ERROR("Failed to create new library because the path doesn't exsist, \nPath: {}", dataFilePath.generic_string());
+			MNEMOSY_POPUP("Failed to create new library because the path doesn't exsist, \nPath: {}", dataFilePath.generic_string());
 			return;
 		}
 
 		if (!fs::is_regular_file(dataFilePath)) {
-			MNEMOSY_ERROR("Failed to create new library entry because path does not point to a mnemosy data file, Path: {}", dataFilePath.generic_string());
+			MNEMOSY_ERROR("Failed to create new library because the path does not point to a file, \nPath: {}", dataFilePath.generic_string());
+			MNEMOSY_POPUP("Failed to create new library because the path does not point to a file, \nPath: {}", dataFilePath.generic_string());
 			return;
 		}
 
 		if (dataFilePath.extension() != ".mnsydata") {
-			MNEMOSY_ERROR("Failed to create new library entry because path does not point to a mnemosy data file, Path: {}", dataFilePath.generic_string());
+			MNEMOSY_ERROR("Failed to create new library because path does not point to a mnemosy data file, \nPath: {}", dataFilePath.generic_string());
+			MNEMOSY_POPUP("Failed to create new library because path does not point to a mnemosy data file, \nPath: {}", dataFilePath.generic_string());
 			return;
 		}
 
@@ -1780,7 +1776,8 @@ namespace mnemosy::systems {
 
 			if (!validDataFile) {
 			
-				MNEMOSY_ERROR("Failed to create new library entry because path does not point to a mnemosy data file, Path: {}", dataFilePath.generic_string());
+				MNEMOSY_ERROR("Failed to create new library entry because path does not point to a valid mnemosy data file, \nPath: {}", dataFilePath.generic_string());
+				MNEMOSY_POPUP("Failed to create new library entry because path does not point to a valid mnemosy data file, \nPath: {}", dataFilePath.generic_string());
 				return;
 			}
 		}
@@ -1835,9 +1832,7 @@ namespace mnemosy::systems {
 		std::string nameOfSelected = m_libCollectionsList[m_libCollection_currentSlected_id].name;
 
 		if (currSelected == index) {
-
 			ActiveLibCollection_Unload();
-
 		}
 
 		m_libCollectionsList.erase(m_libCollectionsList.begin() + index);
@@ -2205,7 +2200,8 @@ namespace mnemosy::systems {
 
 					if (failedToLoad) {
 
-						MNEMOSY_ERROR("Failed to Load Material Library with Name {}: MaterialLibraryDataFile.mnsydata my be corrupted or missing \npath: {}",l.name, dataFile.generic_string());
+						MNEMOSY_ERROR("Failed to Load Material Library with Name {}: MaterialLibraryDataFile.mnsydata may be corrupted or missing \npath: {}",l.name, dataFile.generic_string());
+						MNEMOSY_POPUP("Failed to Load Material Library with Name {}:\n The 'MaterialLibraryDataFile.mnsydata' file may be corrupted or missing \npath: {}",l.name, dataFile.generic_string());
 
 						if (i == lastLoadedId) {
 							// if the last loaded id is the one we cant load..

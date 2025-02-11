@@ -116,6 +116,8 @@ namespace mnemosy::gui
 
 			}
 
+			gui::GuiProcedures::SamelineTooltip("Search for 'Exact' substrings. lower/uppercase is ignored.");
+
 			ImGui::Spacing();
 			ImGui::Spacing();
 
@@ -627,13 +629,6 @@ namespace mnemosy::gui
 	void MaterialLibraryGuiPanel::DrawLibrarySelection() {
 
 
-
-		//if (ImGui::Button("Add Library##Btn")) {
-
-		//	m_openAddLibrary_popup = true;
-		//}
-
-
 		ImGui::SameLine();
 
 
@@ -693,7 +688,7 @@ namespace mnemosy::gui
 							//popupOptionSelected = true;
 							popupEntryIndex = n;
 						}
-
+						ImGui::SetItemTooltip("Remove Library from the loading list.\nThis does Not delete them on the filesystem");
 
 						ImGui::EndPopup();
 					}
@@ -759,7 +754,7 @@ namespace mnemosy::gui
 			ImGui::Text("Add Existing Mnemosy Library: ");
 			ImGui::SameLine();
 			ImGui::Checkbox("##AddExisting", &addExisting);
-			ImGui::SetItemTooltip("Wheather to add the new library from an existing mnemosy library directory or create a new empty one.");
+			ImGui::SetItemTooltip("Wheather to load an existing Mnemosy Library or a new empty one.");
 
 			ImGui::Spacing();
 
@@ -783,7 +778,7 @@ namespace mnemosy::gui
 
 
 			if (addExisting) {
-				ImGui::Text("Select the 'MnemosyMaterialLibraryData.mnsydata' file of an existing Mnemosy Libray");
+				ImGui::Text("Select the 'MnemosyMaterialLibraryData.mnsydata' file of an existing Mnemosy Library");
 				
 				ImGui::Text("Path: %s", filepath.generic_string().c_str());
 
@@ -798,7 +793,7 @@ namespace mnemosy::gui
 			
 			}
 			else {
-				ImGui::Text("Select an empty folder for the new Mnemosy Libray");
+				ImGui::Text("Select an empty folder for the new Mnemosy Library");
 
 				ImGui::Text("Path: %s", filepath.generic_string().c_str());
 
@@ -834,10 +829,6 @@ namespace mnemosy::gui
 				else {
 					m_materialRegistry.LibCollections_CreateNewEntry(addLib_newNameInput,filepath);
 				}
-
-
-
-
 
 				m_addLib_popup_isActive = false;
 				ImGui::CloseCurrentPopup();

@@ -254,21 +254,21 @@ namespace mnemosy::gui
 
 			ImFontGlyphRangesBuilder builder;
 			builder.AddText("abcdefghijklmnopqrstufvxyz0123456789 _ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-			builder.AddChar(0xE92B); // Icon: Delete Forever
+			//builder.AddChar(0xE92B); // Icon: Delete Forever
 			builder.AddChar(0xE88E); // Icon: Info
-			builder.AddChar(0xE000); // Icon: Error
+			//builder.AddChar(0xE000); // Icon: Error
 			builder.AddChar(0xE887); // Icon: Help
-			builder.AddChar(0xE8B9); // Icon: Settings
-			builder.AddChar(0xE14c); // Icon: Close (x)
-			builder.AddChar(0xE580); // Icon: Close small (x)
+			//builder.AddChar(0xE8B9); // Icon: Settings
+			//builder.AddChar(0xE14c); // Icon: Close (x)
+			//builder.AddChar(0xE580); // Icon: Close small (x)
 			builder.AddChar(0xE5F2); // Icon: Arrow Up Bold
-			builder.AddChar(0xE984); // Icon: Arrow Downward alt
-			builder.AddChar(0xE986); // Icon: Arrow Upward alt
-			builder.AddChar(0xEF7D); // Icon: Arrow Left alt
-			builder.AddChar(0xE251); // Icon: Image
-			builder.AddChar(0xE2C7); // Icon: Folder
-			builder.AddChar(0xE2C8); // Icon: Folder Open
-			builder.AddChar(0xE2CC); // Icon: Create New Folder
+			//builder.AddChar(0xE984); // Icon: Arrow Downward alt
+			//builder.AddChar(0xE986); // Icon: Arrow Upward alt
+			//builder.AddChar(0xEF7D); // Icon: Arrow Left alt
+			//builder.AddChar(0xE251); // Icon: Image
+			//builder.AddChar(0xE2C7); // Icon: Folder
+			//builder.AddChar(0xE2C8); // Icon: Folder Open
+			//builder.AddChar(0xE2CC); // Icon: Create New Folder
 
 
 

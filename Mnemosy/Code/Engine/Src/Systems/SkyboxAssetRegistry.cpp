@@ -36,12 +36,13 @@ namespace mnemosy::systems
 		namespace fs = std::filesystem;
 
 		if (m_entryNames.empty()) {
-			MNEMOSY_ERROR("Skybox Registry faild to load preview skybox, list is empty");
+			MNEMOSY_ERROR("Faild to load preview skybox. List is empty");
+			MNEMOSY_POPUP("Faild to load preview skybox. List is empty");
 			return new graphics::Skybox();
 		}
 
 		if (id >= m_entryNames.size()) {
-			MNEMOSY_ERROR("Skybox Registry faild to load preview skybox, Id does not exist");
+			MNEMOSY_ERROR("Faild to load preview skybox, Id does not exist");
 			return new graphics::Skybox();
 		}
 
@@ -69,7 +70,8 @@ namespace mnemosy::systems
 			for (int i = 0; i < m_entryNames.size(); i++) {
 
 				if (name == m_entryNames[i]) {
-					MNEMOSY_ERROR("Cannot add entry with name {}, to preview skyboxes because the name already exists.", name);
+					MNEMOSY_ERROR("Cannot add entry '{}' to preview skyboxes because the name already exists.", name);
+					MNEMOSY_POPUP("Cannot add entry '{}' to preview skyboxes because the name already exists.", name);
 					return;
 				}
 			}
@@ -80,6 +82,7 @@ namespace mnemosy::systems
 		fs::path entryDataFile = systems::LibProcedures::LibEntry_GetDataFilePath(libEntry);
 		if (!fs::exists(entryDataFile)) {
 			MNEMOSY_ERROR("Cannot add entry to preview skyboxes because the data file is missing. Path: {} ", entryDataFile.generic_string());
+			MNEMOSY_POPUP("Cannot add entry to preview skyboxes because the data file is missing.\nPath: {} ", entryDataFile.generic_string());
 			return;
 		}
 				
@@ -100,6 +103,7 @@ namespace mnemosy::systems
 			fs::path equirectangularPath = entryFolder / fs::u8path(libEntry->name + texture_skybox_fileSuffix_equirectangular);
 			if (!fs::exists(equirectangularPath)) {
 				MNEMOSY_ERROR("Cannot add entry to preview skyboxes because the equirectangular file is missing. Path: {} ", equirectangularPath.generic_string());
+				MNEMOSY_POPUP("Cannot add entry to preview skyboxes because the equirectangular file is missing.\nPath: {} ", equirectangularPath.generic_string());
 				return;
 			}
 
@@ -112,6 +116,7 @@ namespace mnemosy::systems
 			graphics::PictureInfo picInfo = graphics::Picture::ReadHdr(picError, equirectangularPath.generic_string().c_str(), true, false);
 			if (!picError.wasSuccessfull) {
 				MNEMOSY_ERROR("Cannot add entry to preview skyboxes. Failed to load hdr equirectangular image.");
+				MNEMOSY_POPUP("Cannot add entry to preview skyboxes. Failed to load hdr equirectangular image.");
 				return;
 			}
 
@@ -194,8 +199,9 @@ namespace mnemosy::systems
 
 	void SkyboxAssetRegistry::RemoveEntry(const uint16_t id) {
 
-		if (id == 0) {
-			MNEMOSY_ERROR("You may not delete entry 0, this entry is supposed to persist.");
+		if (m_entryNames.size() == 1) {
+			MNEMOSY_POPUP("You can't delete the last skybox preview entry \nbecause one should always persist.");
+			MNEMOSY_POPUP("You can't delete the last skybox preview entry \nbecause one should always persist.");
 			return;
 		}
 
@@ -257,7 +263,7 @@ namespace mnemosy::systems
 
 		dataFile.FileOpen(success, dataFilePath, "Mnemosy Data File", "This contains list of skyboxes for the quick selection menu");
 		if (!success) {
-			MNEMOSY_WARN("Failed to find skyboxQuickselect registry file. Creating new.");
+			MNEMOSY_WARN("Failed to find SkyboxQuickselect registry file. Creating new.");
 		}
 
 		dataFile.WriteVectorString(success, "entries",m_entryNames);

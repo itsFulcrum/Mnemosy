@@ -20,6 +20,9 @@ namespace mnemosy::gui
 	private:
 		void DataDropdown();
 		void ViewsDropdown();
+
+		void PopupModal_UserMessage();
+
 	private:
 
 		const char* m_dataDropdown_ImGuiLabel = "Data";
@@ -34,6 +37,11 @@ namespace mnemosy::gui
 		bool m_active_materialLibraryPanel = false;
 		bool m_active_documentationPanel = false;
 		bool m_active_contentsPanel = false;
+		bool m_active_logPanel = false;
+
+
+		bool m_popupModal_userMessage_triggered = false;
+
 	};
 }
 #endif // !MAIN_MENU_BAR_GUI_PANEL_H

@@ -1,0 +1,27 @@
+[2025-02-11 17:32:16][INFO][Func: mnemosy::MnemosyEngine::Initialize] Starting Mnemosy v1.0-beta
+[2025-02-11 17:32:16][INFO][Func: mnemosy::MnemosyEngine::Initialize] Configuration Release
+[2025-02-11 17:32:16][INFO][Func: mnemosy::MnemosyEngine::Initialize] Platform Windows
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::ModelLoader::M_LoadModel] Loaded model from file: ../Resources/Meshes/mnemosy_skybox_render_mesh.fbx
+[2025-02-11 17:32:17][TRACE][Func: mnemosy::systems::MeshRegistry::LoadMesh] Loaded New Mesh in 0.006257500000000027, seconds
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Renderer::Init] Compiling Shaders
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Shader::CreateShaderProgram] Compiled Shader Program: 
+ - VertexShader: ../Resources/Shaders/pbrVertex.vert - FragmentShader: ../Resources/Shaders/pbrFragment.frag
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Shader::CreateShaderProgram] Compiled Shader Program: 
+ - VertexShader: ../Resources/Shaders/pbrVertex.vert - FragmentShader: ../Resources/Shaders/unlitTexView.frag
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Shader::CreateShaderProgram] Compiled Shader Program: 
+ - VertexShader: ../Resources/Shaders/unlitMaterial.vert - FragmentShader: ../Resources/Shaders/unlitMaterial.frag
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Shader::CreateShaderProgram] Compiled Shader Program: 
+ - VertexShader: ../Resources/Shaders/light.vert - FragmentShader: ../Resources/Shaders/light.frag
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Shader::CreateShaderProgram] Compiled Shader Program: 
+ - VertexShader: ../Resources/Shaders/skybox.vert - FragmentShader: ../Resources/Shaders/skybox.frag
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::Renderer::CreateRenderingFramebuffer] Renderer: Framebuffer created
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::ModelLoader::M_LoadModel] Loaded model from file: ../Resources/Meshes/mnemosy_directional_light_mesh.fbx
+[2025-02-11 17:32:17][TRACE][Func: mnemosy::systems::MeshRegistry::LoadMesh] Loaded New Mesh in 0.002307300000000012, seconds
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::ModelLoader::M_LoadModel] Loaded model from file: ../Resources/Meshes/mnemosy_point_light_mesh.fbx
+[2025-02-11 17:32:17][TRACE][Func: mnemosy::systems::MeshRegistry::LoadMesh] Loaded New Mesh in 0.0011191999999999869, seconds
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::ModelLoader::M_LoadModel] Loaded model from file: ../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_mnemosy.fbx
+[2025-02-11 17:32:17][TRACE][Func: mnemosy::systems::MeshRegistry::LoadMesh] Loaded New Mesh in 0.03723180000000004, seconds
+[2025-02-11 17:32:17][DEBUG][Func: mnemosy::graphics::ModelLoader::M_LoadModel] Loaded model from file: ../Resources/Meshes/PreviewMeshes/mnemosy_previewMesh_cylinder.fbx
+[2025-02-11 17:32:17][TRACE][Func: mnemosy::systems::MeshRegistry::LoadMesh] Loaded New Mesh in 0.028149499999999994, seconds
+[2025-02-11 17:32:17][INFO][Func: mnemosy::Application::Initialize] Mnemosy Application Initialized: 0.6099486 Seconds
+[2025-02-11 17:32:21][INFO][Func: mnemosy::MnemosyEngine::Shutdown] Mnemosy Application Closed

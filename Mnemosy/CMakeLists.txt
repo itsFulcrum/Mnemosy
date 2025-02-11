@@ -20,12 +20,12 @@ set(mnemosy_build_dir ${CMAKE_BINARY_DIR}/MnemosyBuild/)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${mnemosy_build_dir})
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${mnemosy_build_dir})
 
+
+# static everything please_build_dir})
+
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${mnemosy_build_dir}/)
 
 include(GNUInstallDirs)
-
-
-# static everything please
 set(BUILD_SHARED_LIBS             	OFF CACHE BOOL "" FORCE)
 set(USE_MSVC_RUNTIME_LIBRARY_DLL	OFF CACHE BOOL "" FORCE)
 set(USE_STATIC_CRT             	 	 ON CACHE BOOL "" FORCE)
@@ -37,9 +37,9 @@ add_compile_options(
 )
 
 # hide console window for release builds
-#if(MSVC)
-#	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-#endif()
+if(MSVC)
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif()
 
 # ==== Load External libraries
 # =============================================

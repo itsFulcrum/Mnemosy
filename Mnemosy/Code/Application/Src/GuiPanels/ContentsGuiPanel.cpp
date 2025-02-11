@@ -146,11 +146,13 @@ namespace mnemosy::gui {
 
 			ImGui::PushFont(MnemosyEngine::GetInstance().GetUserInterface().Font_Icon_Get());
 
-			if (ImGui::Button(btn_arrow_up.c_str())) {
+			if (ImGui::Button(btn_arrow_up.c_str(), ImVec2(60.0f,30.0f) )) {
 
 				m_materialRegistry.OpenFolderNode(selectedNode->parent);
 			}
+
 			ImGui::PopFont();
+			ImGui::SetItemTooltip("parent folder");			
 		}
 
 

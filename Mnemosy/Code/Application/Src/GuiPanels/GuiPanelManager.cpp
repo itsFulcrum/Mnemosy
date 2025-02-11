@@ -14,6 +14,7 @@
 #include "Include/GuiPanels/MaterialLibraryGuiPanel.h"
 #include "Include/GuiPanels/DocumentationGuiPanel.h"
 #include "Include/GuiPanels/ContentsGuiPanel.h"
+#include "Include/GuiPanels/LogGuiPanel.h"
 
 
 #include <filesystem>
@@ -36,6 +37,7 @@ namespace mnemosy::gui
 		m_pMaterialLibraryPanel = new MaterialLibraryGuiPanel();
 		m_pDocumentationPanel	= new DocumentationGuiPanel();
 		m_pContentsPanel		= new ContentsGuiPanel();
+		m_pLogPanel				= new LogGuiPanel();
 
 		userInterface.RegisterMainMenuBarGuiPanel(*m_pMainMenuBarPanel);
 		userInterface.RegisterGuiPanel(m_pViewportPanel);	
@@ -44,7 +46,8 @@ namespace mnemosy::gui
 		userInterface.RegisterGuiPanel(m_pMaterialLibraryPanel);
 		userInterface.RegisterGuiPanel(m_pDocumentationPanel);
 		userInterface.RegisterGuiPanel(m_pContentsPanel);
-		
+		userInterface.RegisterGuiPanel(m_pLogPanel);
+
 		UserSettingsLoad(false);
 
 #ifdef mnemosy_gui_showImGuiDemoWindow
@@ -68,7 +71,7 @@ namespace mnemosy::gui
 		userInterface.UnregisterGuiPanel(m_pMaterialLibraryPanel);
 		userInterface.UnregisterGuiPanel(m_pDocumentationPanel);
 		userInterface.UnregisterGuiPanel(m_pContentsPanel);
-
+		userInterface.UnregisterGuiPanel(m_pLogPanel);
 
 		delete m_pMainMenuBarPanel;
 		delete m_pViewportPanel;
@@ -77,6 +80,7 @@ namespace mnemosy::gui
 		delete m_pMaterialLibraryPanel;
 		delete m_pDocumentationPanel;
 		delete m_pContentsPanel;
+		delete m_pLogPanel;
 	}
 
 
@@ -113,7 +117,7 @@ namespace mnemosy::gui
 		bool gp_materialEditor_Open		= user.ReadBool(success,"guiPanel_materialEditor_isOpen", true,true);
 		bool gp_viewport_Open			= user.ReadBool(success,"guiPanel_viewport_isOpen", true,true);
 		bool gp_contents_Open			= user.ReadBool(success,"guiPanel_contents_isOpen", true,true);
-
+		bool gp_log_Open				= user.ReadBool(success,"guiPanel_log_isOpen", true, true);
 		
 		// set gui panel states
 		gui::UserInterface& userInterface = MnemosyEngine::GetInstance().GetUserInterface();
@@ -124,7 +128,7 @@ namespace mnemosy::gui
 		userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR).SetActive(gp_materialEditor_Open);
 		userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_VIEWPORT).SetActive(gp_viewport_Open);
 		userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_CONTENTS).SetActive(gp_contents_Open);
-
+		userInterface.GetGuiPanel(gui::MNSY_GUI_PANEL_LOG).SetActive(gp_log_Open);
 		
 
 		float guiPanel_contents_buttonSize = user.ReadFloat(success,"guiPanel_contents_buttonSize", 128.0f,true);
@@ -158,6 +162,7 @@ namespace mnemosy::gui
 		user.WriteBool(success,"guiPanel_materialEditor_isOpen", userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_MATERIAL_EDITOR));
 		user.WriteBool(success,"guiPanel_viewport_isOpen", userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_VIEWPORT));
 		user.WriteBool(success,"guiPanel_contents_isOpen", userInterface.IsGuiPanelVisible(gui::MNSY_GUI_PANEL_CONTENTS));
+		user.WriteBool(success, "guiPanel_log_isOpen", userInterface.IsGuiPanelVisible(gui::GuiPanelType::MNSY_GUI_PANEL_LOG));
 
 		// TODO add more settings
 		float guiPanel_contents_buttonSize = GetContentsPanel().ImageButtonSizeGet();

@@ -15,8 +15,6 @@ namespace mnemosy::graphics
 {
 	Texture::Texture() {
 		m_textureFormat = TextureFormat::MNSY_NONE;
-		//cv::utils::logging::setLogLevel(cv::utils::logging::LogLevel::LOG_LEVEL_SILENT);
-		//MNEMOSY_INFO("Texture object created")
 	}
 
 	Texture::~Texture() {

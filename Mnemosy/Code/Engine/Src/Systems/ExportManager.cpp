@@ -59,12 +59,6 @@ namespace mnemosy::systems
 
 		SetExportRoughnessAsSmoothness(exportRoughnessAsSmoothness);
 
-
-		//graphics::ImageFileFormat imageFormat = graphics::TexUtil::get_imageFileFormat_from_fileExtentionString(exportImageFormat);
-		//SetExportImageFormat(imageFormat);
-
-
-
 	}
 
 	void ExportManager::Shutdown()
@@ -83,8 +77,6 @@ namespace mnemosy::systems
 		}
 
 		bool exportRoughnessAsSmoothness = m_exportRoughnessAsSmoothness;
-
-		//std::string exportFormatExtention = graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat);
 
 		int exportFileImageFormat = (int)m_exportFileFormat;
 
@@ -107,7 +99,6 @@ namespace mnemosy::systems
 		namespace fs = std::filesystem;
 
 		MNEMOSY_INFO("Exporting Material: {}, as {} using {} normal map format \nExport Path: {}", libEntry->name, graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat),  graphics::TexUtil::get_string_from_normalMapFormat(m_exportNormalFormat), exportFolderPath.generic_string());
-
 
 		std::string fileExtention = graphics::TexUtil::get_string_from_imageFileFormat(m_exportFileFormat);
 
@@ -281,7 +272,7 @@ namespace mnemosy::systems
 						}
 						catch (fs::filesystem_error error) {
 
-							MNEMOSY_WARN("ExportManager::ExportMaterialTextures: System error copying files. \nError Message: {}", error.what());
+							MNEMOSY_ERROR("System error copying files. \nError Message: {}", error.what());
 						}
 					}
 					// otherwise we must generate a gl textuere first
@@ -350,7 +341,8 @@ namespace mnemosy::systems
 			fs::path equirectangularPath = systems::LibProcedures::LibEntry_GetFolderPath(libEntry) / fs::u8path(libEntry->name + texture_skybox_fileSuffix_equirectangular);
 
 			if (!fs::exists(equirectangularPath)) {
-				MNEMOSY_WARN("Export Failed, Equirectangular texture is missing for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
+				MNEMOSY_ERROR("Export Failed, Equirectangular texture is missing for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
+				MNEMOSY_POPUP("Export Failed!\nEquirectangular texture is missing for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
 				return;
 			}
 			
@@ -358,7 +350,8 @@ namespace mnemosy::systems
 			graphics::PictureError picErr;
 			graphics::PictureInfo picInfo = graphics::Picture::ReadPicture(picErr,equirectangularPath.generic_string().c_str(),true,true,true);
 			if (!picErr.wasSuccessfull) {
-				MNEMOSY_WARN("Export Failed, Faild to load Equirectangular texture from file for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
+				MNEMOSY_ERROR("Export Failed, Faild to load Equirectangular texture from file for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
+				MNEMOSY_POPUP("Export Failed!\nFaild to load Equirectangular texture from file for Skybox Material: {}, Path: {}", libEntry->name, equirectangularPath.generic_string());
 				return;
 			}
 
@@ -392,6 +385,7 @@ namespace mnemosy::systems
 		else {
 
 			MNEMOSY_WARN("Export Failed, no texture is assigned for Skybox Material: {}", libEntry->name);
+			MNEMOSY_POPUP("No texture is assigned for Skybox Material: {}", libEntry->name);
 		}
 
 
@@ -405,7 +399,7 @@ namespace mnemosy::systems
 		graphics::ImageFileFormat fileFormat = graphics::TexUtil::get_imageFileFormat_from_fileExtentionString(exportInfo.path.extension().generic_string());
 
 		if (fileFormat == graphics::ImageFileFormat::MNSY_FILE_FORMAT_NONE) {
-			MNEMOSY_ERROR("ExportManager::GLTextureExport: file format {} is not supported",exportInfo.path.extension().generic_string());
+			MNEMOSY_ERROR("File format {} is not supported",exportInfo.path.extension().generic_string());
 			return;
 		}
 
@@ -511,6 +505,7 @@ namespace mnemosy::systems
 
 			std::string exportFormatTxt = graphics::TexUtil::get_string_from_textureFormat(format);
 			MNEMOSY_ERROR("An error occured while exporting. Format: {} {}x{}  to: {} \n Error Message: {}", exportFormatTxt, width, height, exportInfo.path.generic_string(), errorCheck.what);
+			MNEMOSY_POPUP("An error occured while exporting.\nFormat: {} {}x{}  to: {} \n Error Message: {}", exportFormatTxt, width, height, exportInfo.path.generic_string(), errorCheck.what);
 		}
 		
 		if (pixelBuffer) {

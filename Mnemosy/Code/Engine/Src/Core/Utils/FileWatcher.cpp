@@ -22,22 +22,18 @@ namespace mnemosy::core {
 
 	void FileWatcher::RegisterFile(fs::path filePath) {
 
-
-		fs::directory_entry file = fs::directory_entry(filePath);
-
-		if (!file.exists()) {
-			MNEMOSY_ERROR("FileWatcher::RegisterFile: Filepath does not exist. {}", filePath.generic_string());
+		if (!fs::exists(filePath)) {
+			MNEMOSY_ERROR("Filepath does not exist. {}", filePath.generic_string());
 			return;
 		}
 
-		if (!file.is_regular_file()) {
-			MNEMOSY_ERROR("FileWatcher::RegisterFile: Filepath is not a file. {}", filePath.generic_string());
+		if (!fs::is_regular_file(filePath)) {
+			MNEMOSY_ERROR("Filepath is not a file. {}", filePath.generic_string());
 			return;
 		}
 
 		//MNEMOSY_DEBUG("FileWatcher::RegisterFile: {}", filePath.generic_string());
-
-
+		fs::directory_entry file = fs::directory_entry(filePath);
 
 		m_paths.push_back(filePath);
 		m_fileTimeTypes.push_back(file.last_write_time());

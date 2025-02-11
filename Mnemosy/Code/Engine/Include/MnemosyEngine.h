@@ -67,6 +67,8 @@ namespace mnemosy
 		core::Clock& GetClock()												{ return *m_pClock; }
 		core::DropHandler& GetDropHandler()									{ return *m_pDropHandler; }
 		
+		core::Logger& GetLogger() { return m_logger; }
+
 		systems::InputSystem& GetInputSystem()								{ return *m_pInputSystem; }
 		systems::SkyboxAssetRegistry& GetSkyboxAssetRegistry()				{ return *m_pSkyboxAssetRegistry; }
 		systems::MaterialLibraryRegistry& GetMaterialLibraryRegistry()		{ return *m_pMaterialLibraryRegistry; }

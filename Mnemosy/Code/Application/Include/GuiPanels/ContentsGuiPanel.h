@@ -36,7 +36,10 @@ namespace mnemosy::gui {
 
 		virtual void Draw() override;
 
-		void ImageButtonSizeSet(float buttonSize) {m_imgButtonSize = buttonSize;}
+		void ImageButtonSizeSet(float buttonSize) {
+			m_imgButtonSize = buttonSize;
+			m_image_button_size = ImVec2(m_imgButtonSize, m_imgButtonSize);
+		}
 		float ImageButtonSizeGet() {return m_imgButtonSize;}
 
 	private:
